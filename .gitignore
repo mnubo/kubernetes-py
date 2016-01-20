@@ -59,5 +59,3 @@ docs/_build/
 # PyBuilder
 target/
 
-# My own test files
-test-*.py
