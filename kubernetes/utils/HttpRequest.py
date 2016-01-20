@@ -32,6 +32,7 @@ class HttpRequest:
             resp_data = response.read().decode('utf-8')
             if len(resp_data) > 0:
                 state['data'] = json.loads(resp_data)
+            state['success'] = True
         else:
             state['data'] = response.read().decode('utf-8')
 

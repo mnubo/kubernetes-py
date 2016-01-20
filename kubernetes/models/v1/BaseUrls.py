@@ -1,4 +1,4 @@
-class BaseUrls:
+class BaseUrls(object):
     def __init__(self, namespace='default'):
         self.version = 'v1'
         self.namespace = namespace

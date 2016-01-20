@@ -1,1 +1,1 @@
-# k8s-python
+# kubernetes-python
