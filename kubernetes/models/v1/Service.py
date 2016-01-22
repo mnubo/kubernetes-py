@@ -9,6 +9,8 @@ class Service(BaseModel):
         if model is not None:
             assert isinstance(model, dict)
             self.model = model
+            if 'status' in self.model.keys():
+                self.model.pop('status', None)
             self.svc_metadata = ObjectMeta(model=self.model['metadata'])
         else:
             self.model = dict(kind='Service', apiVersion='v1')
@@ -28,7 +30,12 @@ class Service(BaseModel):
         assert isinstance(k, str)
         assert isinstance(v, str)
         self.svc_metadata.add_label(k=k, v=v)
-        self._update_model()
+        return self
+
+    def add_annotation(self, k, v):
+        assert isinstance(k, str)
+        assert isinstance(v, str)
+        self.svc_metadata.add_annotation(k=k, v=v)
         return self
 
     def add_port(self, name=None, port=None, target_port=None, protocol='TCP'):
@@ -52,6 +59,41 @@ class Service(BaseModel):
         self.model['spec']['selector'].update(selector)
         return self
 
+    def del_annotation(self, k):
+        assert isinstance(k, str)
+        self.svc_metadata.del_annotation(k=k)
+        return self
+
+    def del_label(self, k):
+        assert isinstance(k, str)
+        self.svc_metadata.del_label(k=k)
+        return self
+
+    def get_annotation(self, k):
+        assert isinstance(k, str)
+        return self.svc_metadata.get_annotation(k=k)
+
+    def get_annotations(self):
+        return self.svc_metadata.get_annotations()
+
+    def get_label(self, k):
+        assert isinstance(k, str)
+        return self.svc_metadata.get_label(k=k)
+
+    def get_labels(self):
+        return self.svc_metadata.get_annotations()
+
+    def get_name(self):
+        return self.svc_metadata.get_name()
+
+    def get_namespace(self):
+        return self.svc_metadata.get_namespace()
+
+    def set_annotations(self, new_dict):
+        assert isinstance(new_dict, dict)
+        self.svc_metadata.set_annotations(new_dict=new_dict)
+        return self
+
     def set_cluster_ip(self, ip=None):
         if ip is not None:
             self.model['spec']['clusterIP'] = ip
@@ -63,6 +105,11 @@ class Service(BaseModel):
         self.model['spec']['externalIPs'] = ips
         return self
 
+    def set_labels(self, new_dict):
+        assert isinstance(new_dict, dict)
+        self.svc_metadata.set_labels(new_dict=new_dict)
+        return self
+
     def set_load_balancer_ip(self, ip=None):
         if ip is None:
             raise SyntaxError('Service: ip should be an ip address.')
@@ -72,13 +119,11 @@ class Service(BaseModel):
     def set_name(self, name):
         assert isinstance(name, str)
         self.svc_metadata.set_name(name=name)
-        self._update_model()
         return self
 
     def set_namespace(self, name):
         assert isinstance(name, str)
         self.svc_metadata.set_namespace(name=name)
-        self._update_model()
         return self
 
     def set_session_affinity(self, affinity_type=None):

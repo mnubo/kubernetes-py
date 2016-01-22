@@ -8,6 +8,8 @@ class Pod(PodBasedModel):
         PodBasedModel.__init__(self)
         if model is not None:
             self.model = model
+            if 'status' in self.model.keys():
+                self.model.pop('status', None)
             self.pod_spec = PodSpec(model=self.model['spec'])
             self.pod_metadata = ObjectMeta(model=self.model['metadata'])
         else:

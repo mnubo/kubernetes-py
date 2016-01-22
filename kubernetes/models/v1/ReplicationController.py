@@ -9,6 +9,8 @@ class ReplicationController(PodBasedModel):
         if model is not None:
             assert isinstance(model, dict)
             self.model = model
+            if 'status' in self.model.keys():
+                self.model.pop('status', None)
             if 'metadata' in self.model.keys():
                 self.rc_metadata = ObjectMeta(model=self.model['metadata'])
             if 'template' in self.model['spec'].keys():
@@ -44,24 +46,71 @@ class ReplicationController(PodBasedModel):
             self.model['spec']['template']['spec'] = self.pod_spec.get()
         return self
 
-    def add_label(self, k=None, v=None):
+    def add_label(self, k, v):
         assert isinstance(k, str)
         assert isinstance(v, str)
         self.rc_metadata.add_label(k=k, v=v)
-        self._update_model()
+        return self
+
+    def add_annotation(self, k, v):
+        assert isinstance(k, str)
+        assert isinstance(v, str)
+        self.rc_metadata.add_annotation(k=k, v=v)
+        return self
+
+    def del_annotation(self, k):
+        assert isinstance(k, str)
+        self.rc_metadata.del_annotation(k=k)
+        return self
+
+    def del_label(self, k):
+        assert isinstance(k, str)
+        self.rc_metadata.del_label(k=k)
+        return self
+
+    def get_annotation(self, k):
+        assert isinstance(k, str)
+        return self.rc_metadata.get_annotation(k=k)
+
+    def get_annotations(self):
+        return self.rc_metadata.get_annotations()
+
+    def get_label(self, k):
+        assert isinstance(k, str)
+        return self.rc_metadata.get_label(k=k)
+
+    def get_labels(self):
+        return self.rc_metadata.get_annotations()
+
+    def get_name(self):
+        return self.rc_metadata.get_name()
+
+    def get_namespace(self):
+        return self.rc_metadata.get_namespace()
+
+    def get_replicas(self):
+        my_replicas = self.model['spec']['replicas']
+        return my_replicas
+
+    def set_annotations(self, new_dict):
+        assert isinstance(new_dict, dict)
+        self.rc_metadata.set_annotations(new_dict=new_dict)
+        return self
+
+    def set_labels(self, new_dict):
+        assert isinstance(new_dict, dict)
+        self.rc_metadata.set_labels(new_dict=new_dict)
         return self
 
     def set_name(self, name):
         assert isinstance(name, str)
         self.rc_metadata.set_name(name=name)
-        self._update_model()
         return self
 
     def set_namespace(self, name):
         assert isinstance(name, str)
         self.rc_metadata.set_namespace(name=name)
         self.pod_metadata.set_namespace(name=name)
-        self._update_model()
         return self
 
     def set_replicas(self, replicas=None):

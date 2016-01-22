@@ -8,6 +8,12 @@ class K8sSecret(K8sObject):
         K8sObject.__init__(self, config=config, obj_type='Secret', name=name)
         self.model = Secret(name=name, namespace=self.config.get_namespace())
 
+    def add_annotation(self, k, v):
+        assert isinstance(k, str)
+        assert isinstance(v, str)
+        self.model.add_annotation(k=k, v=v)
+        return self
+
     def add_label(self, k, v):
         assert isinstance(k, str)
         assert isinstance(v, str)

@@ -8,6 +8,8 @@ class Secret(BaseModel):
         BaseModel.__init__(self)
         if model is not None:
             assert isinstance(model, dict)
+            if 'status' in self.model.keys():
+                self.model.pop('status', None)
             self.model = model
             self.secret_metadata = ObjectMeta(model=self.model['metadata'])
         else:
@@ -25,14 +27,31 @@ class Secret(BaseModel):
         assert isinstance(k, str)
         assert isinstance(v, str)
         self.secret_metadata.add_label(k=k, v=v)
-        self._update_model()
         return self
 
     def add_annotation(self, k=None, v=None):
         assert isinstance(k, str)
         assert isinstance(v, str)
         self.secret_metadata.add_annotation(k=k, v=v)
-        self._update_model()
+        return self
+
+    def get_annotation(self, k):
+        assert isinstance(k, str)
+        return self.secret_metadata.get_annotation(k=k)
+
+    def get_annotations(self):
+        return self.secret_metadata.get_annotations()
+
+    def get_label(self, k):
+        assert isinstance(k, str)
+        return self.secret_metadata.get_label(k=k)
+
+    def get_labels(self):
+        return self.secret_metadata.get_annotations()
+
+    def set_annotations(self, new_dict):
+        assert isinstance(new_dict, dict)
+        self.secret_metadata.set_annotations(new_dict=new_dict)
         return self
 
     def set_data(self, data_key=None, data_value=None):
@@ -58,6 +77,11 @@ class Secret(BaseModel):
         self.set_data(data_key='.dockerconfigjson', data_value=data)
         return self
 
+    def set_labels(self, new_dict):
+        assert isinstance(new_dict, dict)
+        self.secret_metadata.set_labels(new_dict=new_dict)
+        return self
+
     def set_service_account_token(self, account_name=None, account_uid=None, token=None,
                                   kubecfg_data=None, cacert=None):
         if account_name is None or account_uid is None or token is None \
@@ -72,7 +96,6 @@ class Secret(BaseModel):
             self.set_data(data_key='kubernetes.kubeconfig', data_value=kubecfg_data)
         if cacert is not None:
             self.set_data(data_key='ca.crt', data_value=cacert)
-        self._update_model()
         return self
 
     def set_type(self, secret_type=None):

@@ -1,12 +1,21 @@
 from kubernetes.models.v1.BaseModel import BaseModel
+from kubernetes.models.v1.Probe import Probe
 
 
 class Container(BaseModel):
     def __init__(self, name=None, image=None, model=None):
         BaseModel.__init__(self)
+        self.readiness_probe = None
+        self.liveness_probe = None
         if model is not None:
             assert isinstance(model, dict)
             self.model = model
+            if 'status' in self.model.keys():
+                self.model.pop('status', None)
+            if 'livenessProbe' in self.model.keys():
+                self.liveness_probe = Probe(model=self.model['livenessProbe'])
+            if 'readinessProbe' in self.model.keys():
+                self.readiness_probe = Probe(model=self.model['readinessProbe'])
         else:
             if name is None or image is None:
                 raise SyntaxError
@@ -23,6 +32,13 @@ class Container(BaseModel):
                     }
                 }
             }
+
+    def _update_model(self):
+        if self.liveness_probe is not None:
+            self.model['livenessProbe'] = self.liveness_probe.get()
+        if self.readiness_probe is not None:
+            self.model['readinessProbe'] = self.readiness_probe.get()
+        return self
 
     def add_port(self, container_port, host_port, protocol='TCP', name=None):
         if container_port > 0 and host_port > 0:
@@ -62,6 +78,15 @@ class Container(BaseModel):
             })
         return self
 
+    def get_liveness_probe(self):
+        return self.liveness_probe
+
+    def get_name(self):
+        return self.model['name']
+
+    def get_readiness_probe(self):
+        return self.readiness_probe
+
     def set_arguments(self, args=None):
         if args is None:
             args = []
@@ -97,6 +122,10 @@ class Container(BaseModel):
             self.model['image'] = image
         return self
 
+    def set_liveness_probe(self, **kwargs):
+        self.liveness_probe = Probe(**kwargs)
+        return self
+
     def set_name(self, name=None):
         if name is None:
             raise SyntaxError('name should be a string.')
@@ -117,6 +146,10 @@ class Container(BaseModel):
         if not isinstance(mode, bool):
             raise SyntaxError('mode should be True or False')
         self.model['privileged'] = mode
+        return self
+
+    def set_readiness_probe(self, **kwargs):
+        self.readiness_probe = Probe(**kwargs)
         return self
 
     def set_requested_resources(self, cpu=0.1, mem='32M'):
