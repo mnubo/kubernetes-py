@@ -5,6 +5,7 @@ from ObjectMeta import ObjectMeta
 from Pod import Pod
 from PodBasedModel import PodBasedModel
 from PodSpec import PodSpec
+from Probe import Probe
 from ReplicationController import ReplicationController
 from Secret import Secret
 from Service import Service

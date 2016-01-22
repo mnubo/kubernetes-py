@@ -1,5 +1,6 @@
 from kubernetes.K8sObject import K8sObject
 from kubernetes.K8sContainer import K8sContainer
+from kubernetes.K8sConfig import K8sConfig
 
 
 class K8sPodBasedObject(K8sObject):
@@ -15,6 +16,10 @@ class K8sPodBasedObject(K8sObject):
         self.model.add_host_volume(name=name, path=path)
         return self
 
+    def add_image_pull_secrets(self, name):
+        self.model.add_image_pull_secrets(name=name)
+        return self
+
     def set_active_deadline(self, seconds):
         self.model.set_active_deadline(seconds=seconds)
         return self
@@ -23,8 +28,12 @@ class K8sPodBasedObject(K8sObject):
         self.model.set_dns_policy(policy=policy)
         return self
 
-    def set_image_pull_secrets(self, name):
-        self.model.set_image_pull_secrets(name=name)
+    def set_image(self, name, image):
+        self.model.set_pod_image(name=name, image=image)
+        return self
+
+    def set_pod_generate_name(self, mode, name=None):
+        self.model.set_pod_generate_name(mode=mode, name=name)
         return self
 
     def set_restart_policy(self, policy):

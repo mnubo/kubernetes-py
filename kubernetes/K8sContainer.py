@@ -7,7 +7,7 @@ class K8sContainer(object):
             self.model = Container(model=model)
         else:
             if name is None or image is None:
-                raise SyntaxError('You must providate a name and image')
+                raise SyntaxError('You must provide a name and image')
             else:
                 self.model = Container(name=name, image=image)
 
@@ -35,8 +35,14 @@ class K8sContainer(object):
     def get(self):
         return self
 
+    def get_liveness_probe(self):
+        return self.model.get_liveness_probe()
+
     def get_model(self):
         return self.model
+
+    def get_readiness_probe(self):
+        return self.model.get_readiness_probe()
 
     def set_arguments(self, args):
         assert isinstance(args, list)
@@ -55,7 +61,11 @@ class K8sContainer(object):
 
     def set_image(self, image):
         assert isinstance(image, str)
-        self.set_image(image=image)
+        self.model.set_image(image=image)
+        return self
+
+    def set_liveness_probe(self, **kwargs):
+        self.model.set_liveness_probe(**kwargs)
         return self
 
     def set_name(self, name):
@@ -71,6 +81,10 @@ class K8sContainer(object):
     def set_pull_policy(self, policy):
         assert isinstance(policy, str)
         self.model.set_pull_policy(policy=policy)
+        return self
+
+    def set_readiness_probe(self, **kwargs):
+        self.model.set_readiness_probe(**kwargs)
         return self
 
     def set_requested_resources(self, cpu, mem):
