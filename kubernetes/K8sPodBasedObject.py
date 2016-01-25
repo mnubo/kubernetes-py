@@ -21,7 +21,7 @@ class K8sPodBasedObject(K8sObject):
         return self
 
     def get_pod_containers(self):
-        return self.get_pod_containers()
+        return self.model.get_pod_containers()
 
     def set_active_deadline(self, seconds):
         self.model.set_active_deadline(seconds=seconds)
