@@ -6,6 +6,7 @@ import uuid
 import copy
 import time
 
+
 class K8sReplicationController(K8sPodBasedObject):
 
     def __init__(self, config=None, name=None, image=None, replicas=0):
@@ -137,83 +138,86 @@ class K8sReplicationController(K8sPodBasedObject):
     @staticmethod
     def resize(config, name, replicas):
         try:
-            this_rc = K8sReplicationController(config=config, name=name).get()
-            this_rc.set_replicas(replicas)
-            this_rc.update()
+            current_rc = K8sReplicationController(config=config, name=name).get()
+            current_rc.set_replicas(replicas)
+            current_rc.update()
         except:
             raise
-        return this_rc
+        return current_rc
 
     @staticmethod
-    def rolling_update(config, name, image, wait_seconds=10):
+    def rolling_update(config, name, image, container_name=None, wait_seconds=10):
         next_rc_suffix = '-next'
         partner_annotation = 'update-partner'
         replicas_annotation = 'desired-replicas'
         next_name = name + next_rc_suffix
         phase = 'init'
-        that_exist = False
-        that_rc = None
+        next_exists = False
+        next_rc = None
 
         try:
-            this_rc = K8sReplicationController(config=config, name=name).get()
-            this_exist = True
+            current_rc = K8sReplicationController(config=config, name=name).get()
+            current_exists = True
         except NotFoundException:
             raise NotFoundException('RollingUpdate: Current replication controller does not exist.')
         except:
             raise
 
         try:
-            that_rc = K8sReplicationController(config=config, name=next_name).get()
-            that_exist = True
+            next_rc = K8sReplicationController(config=config, name=next_name).get()
+            next_exists = True
         except NotFoundException:
             pass
         except:
             raise
 
-        if this_exist and not that_exist:
+        if current_exists and not next_exists:
             try:
-                that_rc = copy.deepcopy(this_rc)
-                that_rc.set_name(name=next_name)
-                that_rc.add_pod_label(k='name', v=name)
+                next_rc = copy.deepcopy(current_rc)
+                next_rc.set_name(name=next_name)
+                next_rc.add_pod_label(k='name', v=name)
                 my_version = str(uuid.uuid4())
-                that_rc.add_pod_label(k='rc_version', v=my_version)
-                that_rc.set_selector(selector=dict(name=name, rc_version=my_version))
-                that_rc.add_annotation(k=replicas_annotation, v=this_rc.get_replicas())
-                that_rc.set_replicas(replicas=0)
-                that_rc.set_image(name=name, image=image)
-                that_rc.set_pod_generate_name(mode=True, name=name)
-                that_rc.create()
+                next_rc.add_pod_label(k='rc_version', v=my_version)
+                next_rc.set_selector(selector=dict(name=name, rc_version=my_version))
+                next_rc.add_annotation(k=replicas_annotation, v=current_rc.get_replicas())
+                next_rc.set_replicas(replicas=0)
+                if container_name is not None:
+                    next_rc.set_image(name=container_name, image=image)
+                else:
+                    next_rc.set_image(name=name, image=image)
+                next_rc.set_pod_generate_name(mode=True, name=name)
+                next_rc.create()
             except:
                 raise
             try:
-                this_rc.add_annotation(k=partner_annotation, v=next_name)
-                this_rc.update()
+                current_rc.add_annotation(k=partner_annotation, v=next_name)
+                current_rc.update()
             except:
                 raise
             phase = 'rollout'
-        elif that_exist and not this_exist:
+        elif next_exists and not current_exists:
             phase = 'rename'
-        elif this_exist and that_exist:
-            if not that_rc.get_annotation(k=replicas_annotation):
+        elif current_exists and next_exists:
+            if not next_rc.get_annotation(k=replicas_annotation):
                 try:
-                    that_rc.add_annotation(k=replicas_annotation, v=this_rc.get_replicas())
-                    that_rc.update()
+                    next_rc.add_annotation(k=replicas_annotation, v=current_rc.get_replicas())
+                    next_rc.update()
                 except:
                     raise
             phase = 'rollout'
 
         if phase == 'rollout':
-            desired_replicas = that_rc.get_annotation(k=replicas_annotation)
-            while that_rc.get_replicas() < int(desired_replicas):
+            desired_replicas = next_rc.get_annotation(k=replicas_annotation)
+            while next_rc.get_replicas() < int(desired_replicas):
                 try:
-                    that_next_replicas = that_rc.get_replicas() + 1
-                    that_rc.set_replicas(replicas=that_next_replicas)
-                    that_rc.update()
+                    next_replicas = next_rc.get_replicas() + 1
+                    next_rc.set_replicas(replicas=next_replicas)
+                    next_rc.update()
                     time.sleep(wait_seconds)
-                    if this_rc.get_replicas() > 0:
-                        this_next_replicas = this_rc.get_replicas() - 1
-                        this_rc.set_replicas(replicas=this_next_replicas)
-                        this_rc.update()
+                    if current_rc.get_replicas() > 0:
+                        current_replicas = current_rc.get_replicas() - 1
+                        current_rc.set_replicas(replicas=current_replicas)
+                        current_rc.update()
 
                 except:
                     raise
@@ -221,14 +225,14 @@ class K8sReplicationController(K8sPodBasedObject):
 
         if phase == 'rename':
             try:
-                this_rc.delete()
-                this_rc = copy.deepcopy(that_rc)
-                this_rc.set_name(name=name)
-                this_rc.del_annotation(k=partner_annotation)
-                this_rc.del_annotation(k=replicas_annotation)
-                this_rc.create()
-                that_rc.delete()
+                current_rc.delete()
+                current_rc = copy.deepcopy(next_rc)
+                current_rc.set_name(name=name)
+                current_rc.del_annotation(k=partner_annotation)
+                current_rc.del_annotation(k=replicas_annotation)
+                current_rc.create()
+                next_rc.delete()
             except:
                 raise
 
-        return this_rc
+        return current_rc

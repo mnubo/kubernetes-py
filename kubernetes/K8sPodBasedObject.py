@@ -20,6 +20,9 @@ class K8sPodBasedObject(K8sObject):
         self.model.add_image_pull_secrets(name=name)
         return self
 
+    def get_pod_containers(self):
+        return self.get_pod_containers()
+
     def set_active_deadline(self, seconds):
         self.model.set_active_deadline(seconds=seconds)
         return self

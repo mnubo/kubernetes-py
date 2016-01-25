@@ -72,6 +72,13 @@ class PodBasedModel(BaseModel):
     def get_pod_annotations(self):
         return self.pod_metadata.get_annotations()
 
+    def get_pod_containers(self):
+        my_list = list()
+        for c in self.pod_spec.get_containers():
+            assert isinstance(c, Container)
+            my_list.append(c.get())
+        return my_list
+
     def get_pod_label(self, k):
         assert isinstance(k, str)
         return self.pod_metadata.get_label(k=k)

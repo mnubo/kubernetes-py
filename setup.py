@@ -7,6 +7,7 @@ except ImportError:
 # See https://github.com/pybuilder/pybuilder/issues/56
 del os.link
 
+
 def version():
     with open(os.path.abspath(__file__).replace('setup.py', 'version.meta'), 'r') as v:
         return v.read()
