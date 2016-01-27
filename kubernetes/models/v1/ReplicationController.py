@@ -93,6 +93,9 @@ class ReplicationController(PodBasedModel):
         my_replicas = self.model['spec']['replicas']
         return my_replicas
 
+    def get_selector(self):
+        return self.model['spec']['selector']
+
     def set_annotations(self, new_dict):
         assert isinstance(new_dict, dict)
         self.rc_metadata.set_annotations(new_dict=new_dict)

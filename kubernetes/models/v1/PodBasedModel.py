@@ -84,7 +84,7 @@ class PodBasedModel(BaseModel):
         return self.pod_metadata.get_label(k=k)
 
     def get_pod_labels(self):
-        return self.pod_metadata.get_annotations()
+        return self.pod_metadata.get_labels()
 
     def get_pod_name(self):
         return self.pod_metadata.get_name()

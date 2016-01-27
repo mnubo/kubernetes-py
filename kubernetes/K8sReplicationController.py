@@ -102,6 +102,9 @@ class K8sReplicationController(K8sPodBasedObject):
     def get_replicas(self):
         return self.model.get_replicas()
 
+    def get_selector(self):
+        return self.model.get_selector()
+
     def set_annotations(self, new_dict):
         assert isinstance(new_dict, dict)
         self.model.set_annotations(new_dict=new_dict)
