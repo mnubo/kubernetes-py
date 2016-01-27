@@ -146,7 +146,7 @@ class K8sReplicationController(K8sPodBasedObject):
         return current_rc
 
     @staticmethod
-    def rolling_update(config, name, image, container_name=None, wait_seconds=10):
+    def rolling_update(config, name, image=None, container_name=None, new_rc=None, wait_seconds=10):
         next_rc_suffix = '-next'
         partner_annotation = 'update-partner'
         replicas_annotation = 'desired-replicas'
@@ -173,18 +173,22 @@ class K8sReplicationController(K8sPodBasedObject):
 
         if current_exists and not next_exists:
             try:
-                next_rc = copy.deepcopy(current_rc)
+                if new_rc is not None:
+                    next_rc = new_rc
+                    next_rc.add_annotation(k=replicas_annotation, v=next_rc.get_replicas())
+                else:
+                    next_rc = copy.deepcopy(current_rc)
+                    next_rc.add_annotation(k=replicas_annotation, v=current_rc.get_replicas())
+                    if container_name is not None:
+                        next_rc.set_image(name=container_name, image=image)
+                    else:
+                        next_rc.set_image(name=name, image=image)
                 next_rc.set_name(name=next_name)
                 next_rc.add_pod_label(k='name', v=name)
                 my_version = str(uuid.uuid4())
                 next_rc.add_pod_label(k='rc_version', v=my_version)
                 next_rc.set_selector(selector=dict(name=name, rc_version=my_version))
-                next_rc.add_annotation(k=replicas_annotation, v=current_rc.get_replicas())
                 next_rc.set_replicas(replicas=0)
-                if container_name is not None:
-                    next_rc.set_image(name=container_name, image=image)
-                else:
-                    next_rc.set_image(name=name, image=image)
                 next_rc.set_pod_generate_name(mode=True, name=name)
                 next_rc.create()
             except:
@@ -208,8 +212,8 @@ class K8sReplicationController(K8sPodBasedObject):
 
         if phase == 'rollout':
             desired_replicas = next_rc.get_annotation(k=replicas_annotation)
-            while next_rc.get_replicas() < int(desired_replicas):
-                try:
+            try:
+                while next_rc.get_replicas() < int(desired_replicas):
                     next_replicas = next_rc.get_replicas() + 1
                     next_rc.set_replicas(replicas=next_replicas)
                     next_rc.update()
@@ -218,9 +222,11 @@ class K8sReplicationController(K8sPodBasedObject):
                         current_replicas = current_rc.get_replicas() - 1
                         current_rc.set_replicas(replicas=current_replicas)
                         current_rc.update()
-
-                except:
-                    raise
+                if current_rc.get_replicas() > 0:
+                    current_rc.set_replicas(replicas=0)
+                    current_rc.update()
+            except:
+                raise
             phase = 'rename'
 
         if phase == 'rename':

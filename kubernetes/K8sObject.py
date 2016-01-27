@@ -4,7 +4,7 @@ from kubernetes.models.v1.BaseModel import BaseModel
 from kubernetes.models.v1.DeleteOptions import DeleteOptions
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.exceptions.NotFoundException import NotFoundException
-
+import json
 
 class K8sObject(object):
     def __init__(self, config=None, obj_type=None, name=None):
@@ -37,6 +37,12 @@ class K8sObject(object):
     def __str__(self):
         return "Kubernetes {obj_type} named {name}. Definition: {model}"\
             .format(obj_type=self.obj_type, name=self.name, model=self.model.get())
+
+    def as_dict(self):
+        return self.model.get()
+
+    def as_json(self):
+        return json.dumps(self.model.get())
 
     def get_name(self):
         return self.name
