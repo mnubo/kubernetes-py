@@ -19,9 +19,9 @@ class PodSpec(BaseModel):
                 "dnsPolicy": "Default",
                 "volumes": []
             }
-            if name is not None and image is not None:
-                if not isinstance(name, str) or not isinstance(image, str):
-                    raise SyntaxError('PodSpec: Name and image should be strings.')
+            if name is not None and not isinstance(name, str):
+                raise SyntaxError('PodSpec: Name should be a string.')
+            if image is not None and not isinstance(image, str):
                 self.containers.append(Container(name=name, image=image))
             if pull_secret is not None:
                 assert isinstance(pull_secret, str)

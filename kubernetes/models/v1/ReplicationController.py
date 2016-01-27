@@ -27,11 +27,12 @@ class ReplicationController(PodBasedModel):
                 "selector": dict(name=name)
             }
 
+            self.model['spec']['template'] = dict()
             if image is not None:
-                self.model['spec']['template'] = dict()
                 self.pod_spec = PodSpec(name=name, image=image)
-                self.pod_metadata = ObjectMeta(name=name, namespace=namespace)
-
+            else:
+                self.pod_spec = PodSpec(name=name)
+            self.pod_metadata = ObjectMeta(name=name, namespace=namespace)
             self._update_model()
 
     def _update_model(self):
