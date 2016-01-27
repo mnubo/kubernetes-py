@@ -13,13 +13,12 @@ class K8sReplicationController(K8sPodBasedObject):
         K8sPodBasedObject.__init__(self, config=config, obj_type='ReplicationController', name=name)
         self.model = ReplicationController(name=name, namespace=self.config.get_namespace())
         self.set_replicas(replicas)
-        self.set_selector(selector=dict(name=name))
+        my_version = str(uuid.uuid4())
+        self.model.add_pod_label(k='rc_version', v=my_version)
+        self.set_selector(selector=dict(name=name, rc_version=my_version))
         if image is not None:
             self.model.add_container(K8sContainer(name=name, image=image).get_model())
             self.model.set_pod_name(name=name)
-            my_version = str(uuid.uuid4())
-            self.model.add_pod_label(k='rc_version', v=my_version)
-            self.set_selector(selector=dict(name=name, rc_version=my_version))
         if self.config.get_pull_secret() is not None:
             self.add_image_pull_secrets(name=self.config.get_pull_secret())
 
