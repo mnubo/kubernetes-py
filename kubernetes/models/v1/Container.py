@@ -32,7 +32,7 @@ class Container(BaseModel):
                 "terminationMessagePath": "/dev/termination-log",
                 "resources": {
                     "requests": {
-                        "cpu": 0.1,
+                        "cpu": "100m",
                         "memory": "32M"
                     }
                 }
@@ -157,16 +157,16 @@ class Container(BaseModel):
         self.readiness_probe = Probe(**kwargs)
         return self
 
-    def set_requested_resources(self, cpu=0.1, mem='32M'):
-        if not isinstance(cpu, float) or not isinstance(mem, str):
-            raise SyntaxError('cpu should be a positive float and mem should be a string like 32M, 1G')
+    def set_requested_resources(self, cpu='100m', mem='32M'):
+        if not isinstance(cpu, str) or not isinstance(mem, str):
+            raise SyntaxError('cpu should be a string like 100m for 0.1 CPU and mem should be a string like 32M, 1G')
         self.model['resources']['requests']['cpu'] = cpu
         self.model['resources']['requests']['memory'] = mem
         return self
 
-    def set_limit_resources(self, cpu=0.1, mem='32M'):
+    def set_limit_resources(self, cpu='100m', mem='32M'):
         if not isinstance(cpu, float) or not isinstance(mem, str):
-            raise SyntaxError('cpu should be a positive float and mem should be a string like 32M, 1G')
+            raise SyntaxError('cpu should be a string like 100m for 0.1 CPU and mem should be a string like 32M, 1G')
         assert isinstance(self.model['resources'], dict)
         if 'limits' not in self.model['resources'].keys():
             self.model['resources']['limits'] = dict()

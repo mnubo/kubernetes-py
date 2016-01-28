@@ -88,13 +88,13 @@ class K8sContainer(object):
         return self
 
     def set_requested_resources(self, cpu, mem):
-        assert isinstance(cpu, float)
+        assert isinstance(cpu, str)
         assert isinstance(mem, str)
         self.model.set_requested_resources(cpu=cpu, mem=mem)
         return self
 
     def set_limit_resources(self, cpu, mem):
-        assert isinstance(cpu, float)
+        assert isinstance(cpu, str)
         assert isinstance(mem, str)
         self.model.set_limit_resources(cpu=cpu, mem=mem)
         return self
