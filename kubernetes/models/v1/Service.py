@@ -83,6 +83,9 @@ class Service(BaseModel):
     def get_annotations(self):
         return self.svc_metadata.get_annotations()
 
+    def get_cluster_ip(self):
+        return self.model['spec']['clusterIP']
+
     def get_label(self, k):
         assert isinstance(k, str)
         return self.svc_metadata.get_label(k=k)

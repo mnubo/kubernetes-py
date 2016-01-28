@@ -42,6 +42,15 @@ class K8sService(K8sObject):
     def get_annotations(self):
         return self.model.get_annotations()
 
+    def get_cluster_ip(self):
+        return self.model.get_cluster_ip()
+
+    def get_label(self, k):
+        return self.model.get_label(k=k)
+
+    def get_labels(self):
+        return self.model.get_labels()
+
     def set_annotations(self, new_dict):
         assert isinstance(new_dict, dict())
         self.model.set_annotations(new_dict=new_dict)
