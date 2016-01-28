@@ -29,7 +29,7 @@ class K8sContainer(object):
         assert isinstance(name, str)
         assert isinstance(mount_path, str)
         assert isinstance(read_only, bool)
-        self.add_volume_mount(name=name, mount_path=mount_path, read_only=read_only)
+        self.model.add_volume_mount(name=name, mount_path=mount_path, read_only=read_only)
         return self
 
     def get(self):
@@ -70,7 +70,7 @@ class K8sContainer(object):
 
     def set_name(self, name):
         assert isinstance(name, str)
-        self.set_name(name=name)
+        self.model.set_name(name=name)
         return self
 
     def set_privileged(self, mode):

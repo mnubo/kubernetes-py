@@ -47,7 +47,7 @@ class K8sService(K8sObject):
 
     def set_namespace(self, name):
         assert isinstance(name, str)
-        self.set_namespace(name=name)
+        self.model.set_namespace(name=name)
         return self
 
     def set_session_affinity(self, affinity_type):
