@@ -38,17 +38,24 @@ class Service(BaseModel):
         self.svc_metadata.add_annotation(k=k, v=v)
         return self
 
-    def add_port(self, name=None, port=None, target_port=None, protocol='TCP'):
+    def add_port(self, name=None, port=None, target_port=None, protocol='TCP', node_port=None):
         if (port is None or target_port is None or name is None) or (not isinstance(port, int)):
             raise SyntaxError('port and target_port should be positive integers')
         if protocol not in ['TCP', 'UDP']:
             raise SyntaxError('protocol should be TCP or UDP.')
+        my_port = dict(name=name, protocol=protocol, port=int(port))
+
         if isinstance(target_port, int):
-            self.model['spec']['ports'].append(dict(name=name, protocol=protocol,
-                                                    port=int(port), target_port=int(target_port)))
+            my_port['targetPort'] = int(target_port)
         else:
-            self.model['spec']['ports'].append(dict(name=name, protocol=protocol,
-                                                    port=int(port), target_port=target_port))
+            my_port['targetPort'] = target_port
+
+        if node_port is not None:
+            if isinstance(node_port, str):
+                my_port['nodePort'] = int(node_port)
+            else:
+                my_port['nodePort'] = node_port
+        self.model['spec']['ports'].append(my_port)
         return self
 
     def add_selector(self, selector=None):

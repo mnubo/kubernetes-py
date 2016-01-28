@@ -8,17 +8,23 @@ class K8sService(K8sObject):
         K8sObject.__init__(self, config=config, obj_type='Service', name=name)
         self.model = Service(name=name, namespace=self.config.get_namespace())
 
+    def add_annotation(self, k, v):
+        assert isinstance(k, str)
+        assert isinstance(v, str)
+        self.model.add_annotation(k=k, v=v)
+        return self
+
     def add_label(self, k, v):
         assert isinstance(k, str)
         assert isinstance(v, str)
         self.model.add_label(k=k, v=v)
         return self
 
-    def add_port(self, name, port, target_port, protocol='TCP'):
+    def add_port(self, name, port, target_port, protocol='TCP', node_port=None):
         assert isinstance(name, str)
         assert isinstance(port, int)
         assert isinstance(protocol, str)
-        self.model.add_port(name=name, port=port, target_port=target_port, protocol=protocol)
+        self.model.add_port(name=name, port=port, target_port=target_port, protocol=protocol, node_port=node_port)
         return self
 
     def add_selector(self, selector):
@@ -30,6 +36,17 @@ class K8sService(K8sObject):
         self.model = Service(model=self.get_model())
         return self
 
+    def get_annotation(self, k):
+        return self.model.get_annotation(k=k)
+
+    def get_annotations(self):
+        return self.model.get_annotations()
+
+    def set_annotations(self, new_dict):
+        assert isinstance(new_dict, dict())
+        self.model.set_annotations(new_dict=new_dict)
+        return self
+
     def set_cluster_ip(self, ip):
         assert isinstance(ip, str)
         self.model.set_cluster_ip(ip=ip)
@@ -38,6 +55,11 @@ class K8sService(K8sObject):
     def set_external_ip(self, ips):
         assert isinstance(ips, list)
         self.model.set_external_ip(ips=ips)
+        return self
+
+    def set_labels(self, new_dict):
+        assert isinstance(new_dict, dict)
+        self.model.set_labels(new_dict=new_dict)
         return self
 
     def set_load_balancer_ip(self, ip):
