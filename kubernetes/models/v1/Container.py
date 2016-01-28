@@ -76,11 +76,10 @@ class Container(BaseModel):
         else:
             if 'volumeMounts' not in self.model.keys():
                 self.model['volumeMounts'] = []
-            self.model['volumeMounts'].append({
-                "name": name,
-                "readOnly": read_only,
-                "mountPath": mount_path
-            })
+            my_vm = dict(name=name, mountPath=mount_path)
+            if read_only:
+                my_vm['readOnly'] = read_only
+            self.model['volumeMounts'].append(my_vm)
         return self
 
     def get_liveness_probe(self):
