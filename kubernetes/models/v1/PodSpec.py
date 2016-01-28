@@ -49,10 +49,8 @@ class PodSpec(BaseModel):
         else:
             self.model['volumes'].append({
                 "name": name,
-                "source": {
-                    "hostPath": {
-                        "path": path
-                    }
+                "hostPath": {
+                    "path": path
                 }
             })
         return self
