@@ -109,7 +109,7 @@ class ObjectMeta(BaseModel):
                 self.model['generateName'] = name
         else:
             if 'generateName' in self.model.keys():
-                self.model.pop('generatedName', None)
+                self.model.pop('generateName', None)
         return self
 
     def set_labels(self, new_dict):

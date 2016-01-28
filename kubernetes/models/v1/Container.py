@@ -16,6 +16,10 @@ class Container(BaseModel):
                 self.liveness_probe = Probe(model=self.model['livenessProbe'])
             if 'readinessProbe' in self.model.keys():
                 self.readiness_probe = Probe(model=self.model['readinessProbe'])
+            if 'privileged' not in self.model.keys():
+                self.model['privileged'] = False
+            if 'hostNetwork' not in self.model.keys():
+                self.model['hostNetwork'] = False
         else:
             if name is None or image is None:
                 raise SyntaxError
@@ -25,6 +29,7 @@ class Container(BaseModel):
                 "imagePullPolicy": 'IfNotPresent',
                 "privileged": False,
                 "hostNetwork": False,
+                "terminationMessagePath": "/dev/termination-log",
                 "resources": {
                     "requests": {
                         "cpu": 0.1,

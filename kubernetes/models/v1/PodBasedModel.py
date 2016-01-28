@@ -112,8 +112,10 @@ class PodBasedModel(BaseModel):
         return self
 
     def set_pod_generate_name(self, mode, name):
-        assert isinstance(name, str)
-        self.pod_metadata.set_generate_name(mode=True, name=name)
+        assert isinstance(mode, bool)
+        if name is not None:
+            assert isinstance(name, str)
+        self.pod_metadata.set_generate_name(mode=mode, name=name)
         return self
 
     def set_pod_labels(self, new_dict):

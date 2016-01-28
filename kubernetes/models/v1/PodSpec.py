@@ -13,6 +13,8 @@ class PodSpec(BaseModel):
             self.model = model
             for c in self.model['containers']:
                 self.containers.append(Container(model=c))
+            if 'volumes' not in self.model.keys():
+                self.model['volumes'] = []
         else:
             self.model = {
                 "containers": [],
