@@ -32,6 +32,7 @@ class ReplicationController(PodBasedModel):
                 self.pod_spec = PodSpec(name=name, image=image)
             else:
                 self.pod_spec = PodSpec(name=name)
+            self.pod_spec.set_restart_policy('Always')
             self.pod_metadata = ObjectMeta(name=name, namespace=namespace)
             self._update_model()
 
