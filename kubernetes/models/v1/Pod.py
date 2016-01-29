@@ -19,4 +19,5 @@ class Pod(PodBasedModel):
             if name is not None:
                 self.pod_metadata = ObjectMeta(name=name, namespace=namespace)
                 self.pod_spec = PodSpec(name=name, image=image)
+                self.pod_spec.set_restart_policy('Always')
                 self._update_model()

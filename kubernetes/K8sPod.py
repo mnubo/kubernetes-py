@@ -29,6 +29,26 @@ class K8sPod(K8sPodBasedObject):
         self.model = Pod(model=self.get_model())
         return self
 
+    def get_annotation(self, k):
+        return self.model.get_pod_annotation(k=k)
+
+    def get_annotations(self):
+        return self.model.get_pod_annotations()
+
+    def get_label(self, k):
+        return self.model.get_pod_label(k=k)
+
+    def get_labels(self):
+        return self.model.get_pod_labels()
+
+    def set_annotations(self, new_dict):
+        self.model.set_pod_annotations(new_dict=new_dict)
+        return self
+
+    def set_labels(self, new_dict):
+        self.model.set_pod_labels(new_dict=new_dict)
+        return self
+
     def set_namespace(self, name):
         self.model.set_pod_namespace(name=name)
         return self

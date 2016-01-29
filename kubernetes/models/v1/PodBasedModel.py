@@ -65,6 +65,10 @@ class PodBasedModel(BaseModel):
         self.pod_metadata.del_label(k=k)
         return self
 
+    def del_pod_node_name(self):
+        self.pod_spec.del_node_name()
+        return self
+
     def get_pod_annotation(self, k):
         assert isinstance(k, str)
         return self.pod_metadata.get_annotation(k=k)
@@ -91,6 +95,12 @@ class PodBasedModel(BaseModel):
 
     def get_pod_namespace(self):
         return self.pod_metadata.get_namespace()
+
+    def get_pod_node_name(self):
+        return self.pod_spec.get_node_name()
+
+    def get_pod_node_selector(self):
+        return self.pod_spec.get_node_selector()
 
     def set_active_deadline(self, seconds):
         try:
@@ -142,6 +152,16 @@ class PodBasedModel(BaseModel):
             self.pod_metadata.set_namespace(name=name)
         except:
             raise
+        return self
+
+    def set_pod_node_name(self, name):
+        assert isinstance(name, str)
+        self.pod_spec.set_node_name(name=name)
+        return self
+
+    def set_pod_node_selector(self, new_dict):
+        assert isinstance(new_dict, dict)
+        self.pod_spec.set_node_selector(new_dict=new_dict)
         return self
 
     def set_restart_policy(self, policy):

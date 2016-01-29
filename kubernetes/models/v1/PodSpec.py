@@ -63,8 +63,18 @@ class PodSpec(BaseModel):
         self.model['imagePullSecrets'].append(dict(name=name))
         return self
 
+    def del_node_name(self):
+        self.model.pop('nodeName', None)
+        return self
+
     def get_containers(self):
         return self.containers
+
+    def get_node_name(self):
+        return self.model.get('nodeName', None)
+
+    def get_node_selector(self):
+        return self.model.get('nodeSelector', None)
 
     def set_active_deadline(self, seconds=None):
         if seconds is None or not isinstance(seconds, int):
@@ -91,6 +101,12 @@ class PodSpec(BaseModel):
                 break
         return self
 
+    def set_node_selector(self, new_dict=None):
+        if new_dict is None or not isinstance(new_dict, dict):
+            raise SyntaxError('PodSpec: Node selector must be a dict.')
+        self.model['nodeSelector'] = new_dict
+        return self
+
     def set_restart_policy(self, policy='Never'):
         if policy in ['Always', 'OnFailure', 'Never']:
             self.model['restartPolicy'] = policy
@@ -102,6 +118,12 @@ class PodSpec(BaseModel):
         if name is None or not isinstance(name, str):
             raise SyntaxError('PodSpec: name should be a string.')
         self.model['serviceAccountName'] = name
+        return self
+
+    def set_node_name(self, name=None):
+        if name is None or not isinstance(name, str):
+            raise SyntaxError('PodSpec: name should be a string.')
+        self.model['nodeName'] = name
         return self
 
     def set_termination_grace_period(self, seconds=None):
