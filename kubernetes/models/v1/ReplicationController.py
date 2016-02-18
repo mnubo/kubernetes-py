@@ -82,7 +82,7 @@ class ReplicationController(PodBasedModel):
         return self.rc_metadata.get_label(k=k)
 
     def get_labels(self):
-        return self.rc_metadata.get_annotations()
+        return self.rc_metadata.get_labels()
 
     def get_name(self):
         return self.rc_metadata.get_name()
