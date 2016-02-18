@@ -1,4 +1,5 @@
 import httplib
+import urllib
 import json
 from kubernetes.utils.ConvertData import convert
 
@@ -17,6 +18,10 @@ class HttpRequest:
             http_headers['Content-type'] = 'application/json'
 
         conn = httplib.HTTPConnection(self.http_host)
+
+        if self.data is not None and self.http_method in ['GET']:
+            url = "{orig_url}?{encoded_params}".format(orig_url=self.url, encoded_params=urllib.urlencode(self.data))
+            self.url = url
 
         if self.data is None:
             conn.request(method=self.http_method, url=self.url)

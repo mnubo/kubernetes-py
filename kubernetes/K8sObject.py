@@ -73,6 +73,13 @@ class K8sObject(object):
                                     .format(name=self.name, resource_type=self.obj_type))
         return model
 
+    def get_with_params(self, data):
+        if not isinstance(data, dict):
+            raise SyntaxError('data must be a dict of parameters to be encoded in the URL.')
+        this_url = '{base}'.format(base=self.base_url)
+        state = HttpRequest(method='GET', host=self.config.get_api_host(), url=this_url, data=data).send()
+        return state.get('data', None)
+
     def create(self):
         if self.name is None:
             raise Exception('Cannot create object without name set first.')

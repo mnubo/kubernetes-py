@@ -52,3 +52,23 @@ class K8sPod(K8sPodBasedObject):
     def set_namespace(self, name):
         self.model.set_pod_namespace(name=name)
         return self
+
+    @staticmethod
+    def get_by_name(config, name):
+        try:
+            data = dict(labelSelector="name={pod_name}".format(pod_name=name))
+            pod_list = K8sPod(config=config, name=name).get_with_params(data=data).get('items', None)
+        except:
+            raise
+        return pod_list
+
+    @staticmethod
+    def get_by_labels(config, labels):
+        assert isinstance(labels, dict)
+        try:
+            my_labels = ",".join(['%s=%s' % (key, value) for (key, value) in labels.items()])
+            data = dict(labelSelector="{labels}".format(labels=my_labels))
+            pod_list = K8sPod(config=config, name=labels.get('name')).get_with_params(data=data).get('items', None)
+        except:
+            raise
+        return pod_list

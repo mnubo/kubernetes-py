@@ -1,4 +1,5 @@
 from kubernetes.K8sPodBasedObject import K8sPodBasedObject
+from kubernetes.K8sPod import K8sPod
 from kubernetes.K8sContainer import K8sContainer
 from kubernetes.models.v1.ReplicationController import ReplicationController
 from kubernetes.exceptions.NotFoundException import NotFoundException
@@ -137,12 +138,45 @@ class K8sReplicationController(K8sPodBasedObject):
         self.model.set_selector(selector=selector)
         return self
 
+    def wait_for_replicas(self, replicas, labels=None):
+        labels = self.get_pod_labels()
+        name = labels.get('name', None)
+        pod_list = list()
+
+        if name is not None:
+            if labels is None:
+                pod_list = K8sPod.get_by_name(config=self.config, name=name)
+            else:
+                pod_list = K8sPod.get_by_labels(config=self.config, labels=labels)
+            assert isinstance(pod_list, list)
+
+        pods_ready = 0
+        for pod in pod_list:
+            assert isinstance(pod, dict)
+            if pod.get('status', dict()).get('phase', "") == "Running":
+                pods_ready += 1
+
+        while len(pod_list) != replicas and pods_ready != len(pod_list):
+            time.sleep(0.5)
+            if labels is None:
+                pod_list = K8sPod.get_by_name(config=self.config, name=name)
+            else:
+                pod_list = K8sPod.get_by_labels(config=self.config, labels=labels)
+            pods_ready = 0
+            for pod in pod_list:
+                assert isinstance(pod, dict)
+                if pod.get('status', dict()).get('phase', "") == "Running":
+                    pods_ready += 1
+
+        return self
+
     @staticmethod
     def resize(config, name, replicas):
         try:
             current_rc = K8sReplicationController(config=config, name=name).get()
             current_rc.set_replicas(replicas)
             current_rc.update()
+            current_rc.wait_for_replicas(replicas=replicas)
         except:
             raise
         return current_rc
@@ -219,14 +253,17 @@ class K8sReplicationController(K8sPodBasedObject):
                     next_replicas = next_rc.get_replicas() + 1
                     next_rc.set_replicas(replicas=next_replicas)
                     next_rc.update()
+                    next_rc.wait_for_replicas(replicas=next_replicas, labels=next_rc.get_pod_labels())
                     time.sleep(wait_seconds)
                     if current_rc.get_replicas() > 0:
                         current_replicas = current_rc.get_replicas() - 1
                         current_rc.set_replicas(replicas=current_replicas)
                         current_rc.update()
+                        current_rc.wait_for_replicas(replicas=current_replicas, labels=current_rc.get_pod_labels())
                 if current_rc.get_replicas() > 0:
                     current_rc.set_replicas(replicas=0)
                     current_rc.update()
+                    current_rc.wait_for_replicas(replicas=0, labels=current_rc.get_pod_labels())
             except:
                 raise
             phase = 'rename'
