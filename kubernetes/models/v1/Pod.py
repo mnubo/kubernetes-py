@@ -1,6 +1,7 @@
+from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.models.v1.PodBasedModel import PodBasedModel
 from kubernetes.models.v1.PodSpec import PodSpec
-from kubernetes.models.v1.ObjectMeta import ObjectMeta
+from kubernetes.models.v1.PodStatus import PodStatus
 
 
 class Pod(PodBasedModel):
@@ -9,7 +10,7 @@ class Pod(PodBasedModel):
         if model is not None:
             self.model = model
             if 'status' in self.model.keys():
-                self.model.pop('status', None)
+                self.pod_status = PodStatus(model=self.model['status'])
             self.pod_spec = PodSpec(model=self.model['spec'])
             self.pod_metadata = ObjectMeta(model=self.model['metadata'])
         else:

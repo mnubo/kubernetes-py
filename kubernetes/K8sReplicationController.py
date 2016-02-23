@@ -139,35 +139,32 @@ class K8sReplicationController(K8sPodBasedObject):
         return self
 
     def wait_for_replicas(self, replicas, labels=None):
-        labels = self.get_pod_labels()
+        if labels is None:
+            labels = self.get_pod_labels()
         name = labels.get('name', None)
         pod_list = list()
+        ready_check = False
 
-        if name is not None:
+        print('Will wait for replicas to be equal to {replicas} and labels are: {labels}'.format(replicas=str(replicas),
+                                                                                                 labels=labels))
+        pod_qty = len(pod_list)
+        while not ((pod_qty == replicas) and ready_check):
             if labels is None:
                 pod_list = K8sPod.get_by_name(config=self.config, name=name)
             else:
                 pod_list = K8sPod.get_by_labels(config=self.config, labels=labels)
-            assert isinstance(pod_list, list)
-
-        pods_ready = 0
-        for pod in pod_list:
-            assert isinstance(pod, dict)
-            if pod.get('status', dict()).get('phase', "") == "Running":
-                pods_ready += 1
-
-        while len(pod_list) != replicas and pods_ready != len(pod_list):
+            pod_qty = len(pod_list)
+            if replicas > 0:
+                pods_ready = 0
+                for pod in pod_list:
+                    assert isinstance(pod, K8sPod)
+                    if pod.is_ready():
+                        pods_ready += 1
+                if pods_ready == len(pod_list):
+                    ready_check = True
+            else:
+                ready_check = True
             time.sleep(0.5)
-            if labels is None:
-                pod_list = K8sPod.get_by_name(config=self.config, name=name)
-            else:
-                pod_list = K8sPod.get_by_labels(config=self.config, labels=labels)
-            pods_ready = 0
-            for pod in pod_list:
-                assert isinstance(pod, dict)
-                if pod.get('status', dict()).get('phase', "") == "Running":
-                    pods_ready += 1
-
         return self
 
     @staticmethod

@@ -9,10 +9,13 @@ class PodBasedModel(BaseModel):
         BaseModel.__init__(self)
         self.pod_spec = PodSpec()
         self.pod_metadata = ObjectMeta()
+        self.pod_status = None
 
     def _update_model(self):
         self.model['metadata'] = self.pod_metadata.get()
         self.model['spec'] = self.pod_spec.get()
+        if self.pod_status is not None:
+            self.model['status'] = self.pod_status.get()
         return self
 
     def add_container(self, container):
@@ -101,6 +104,9 @@ class PodBasedModel(BaseModel):
 
     def get_pod_node_selector(self):
         return self.pod_spec.get_node_selector()
+
+    def get_pod_status(self):
+        return self.pod_status
 
     def set_active_deadline(self, seconds):
         try:
