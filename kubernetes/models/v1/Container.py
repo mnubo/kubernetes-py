@@ -164,7 +164,7 @@ class Container(BaseModel):
         return self
 
     def set_limit_resources(self, cpu='100m', mem='32M'):
-        if not isinstance(cpu, float) or not isinstance(mem, str):
+        if not isinstance(cpu, str) or not isinstance(mem, str):
             raise SyntaxError('cpu should be a string like 100m for 0.1 CPU and mem should be a string like 32M, 1G')
         assert isinstance(self.model['resources'], dict)
         if 'limits' not in self.model['resources'].keys():
