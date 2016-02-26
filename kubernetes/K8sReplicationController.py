@@ -167,7 +167,7 @@ class K8sReplicationController(K8sPodBasedObject):
                     ready_check = True
             except NotFoundException:
                 pass
-            except Exception:
+            except:
                 raise
             time.sleep(0.3)
         return self
