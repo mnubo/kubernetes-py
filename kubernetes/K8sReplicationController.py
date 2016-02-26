@@ -149,23 +149,41 @@ class K8sReplicationController(K8sPodBasedObject):
                                                                                                  labels=labels))
         pod_qty = len(pod_list)
         while not ((pod_qty == replicas) and ready_check):
-            if labels is None:
-                pod_list = K8sPod.get_by_name(config=self.config, name=name)
-            else:
-                pod_list = K8sPod.get_by_labels(config=self.config, labels=labels)
-            pod_qty = len(pod_list)
-            if replicas > 0:
-                pods_ready = 0
-                for pod in pod_list:
-                    assert isinstance(pod, K8sPod)
-                    if pod.is_ready():
-                        pods_ready += 1
-                if pods_ready == len(pod_list):
+            try:
+                if labels is None:
+                    pod_list = K8sPod.get_by_name(config=self.config, name=name)
+                else:
+                    pod_list = K8sPod.get_by_labels(config=self.config, labels=labels)
+                pod_qty = len(pod_list)
+                if replicas > 0:
+                    pods_ready = 0
+                    for pod in pod_list:
+                        assert isinstance(pod, K8sPod)
+                        if pod.is_ready():
+                            pods_ready += 1
+                    if pods_ready == len(pod_list):
+                        ready_check = True
+                else:
                     ready_check = True
-            else:
-                ready_check = True
-            time.sleep(0.5)
+            except NotFoundException:
+                pass
+            except Exception:
+                raise
+            time.sleep(0.3)
         return self
+
+    @staticmethod
+    def get_by_name(config, name):
+        try:
+            rc_list = list()
+            data = dict(labelSelector="name={pod_name}".format(pod_name=name))
+            rcs = K8sReplicationController(config=config, name=name).get_with_params(data=data).get('items', list())
+            for rc in rcs:
+                rc_name = ReplicationController(model=rc).get_name()
+                rc_list.append(K8sReplicationController(config=config, name=rc_name).get())
+        except:
+            raise
+        return rc_list
 
     @staticmethod
     def resize(config, name, replicas):

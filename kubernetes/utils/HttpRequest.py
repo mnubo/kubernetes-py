@@ -3,6 +3,7 @@ import urllib
 import json
 from kubernetes.utils.ConvertData import convert
 
+
 class HttpRequest:
     def __init__(self, method='GET', host='localhost:80', url='/', data=None):
         self.http_method = method
@@ -32,14 +33,13 @@ class HttpRequest:
         response = conn.getresponse()
         state['status'] = response.status
         state['reason'] = response.reason
+        resp_data = response.read().decode('utf-8')
+
+        if len(resp_data) > 0:
+            state['data'] = convert(data=json.loads(resp_data))
 
         if state['status'] in [200, 201]:
-            resp_data = response.read().decode('utf-8')
-            if len(resp_data) > 0:
-                state['data'] = convert(data=json.loads(resp_data))
             state['success'] = True
-        else:
-            state['data'] = response.read().decode('utf-8')
 
         conn.close()
 

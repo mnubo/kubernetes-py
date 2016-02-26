@@ -4,6 +4,7 @@ from kubernetes.models.v1.BaseModel import BaseModel
 from kubernetes.models.v1.DeleteOptions import DeleteOptions
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.exceptions.NotFoundException import NotFoundException
+from kubernetes.exceptions.UnprocessableEntityException import UnprocessableEntityException
 import json
 
 class K8sObject(object):
@@ -69,8 +70,9 @@ class K8sObject(object):
         if state.get('success'):
             model = state.get('data')
         else:
-            raise NotFoundException('Failed to fetch object definition for {resource_type} {name}.'
-                                    .format(name=self.name, resource_type=self.obj_type))
+            message = 'Failed to fetch object definition for {resource_type} {name}. HTTP-{code}'\
+                .format(name=self.name, resource_type=self.obj_type, code=state.get('status', ''))
+            raise NotFoundException(message)
         return model
 
     def get_with_params(self, data):
@@ -86,7 +88,13 @@ class K8sObject(object):
         this_url = '{base}'.format(base=self.base_url)
         state = HttpRequest(method='POST', host=self.config.get_api_host(), url=this_url, data=self.model.get()).send()
         if not state.get('success'):
-            raise Exception('Failed to create object.')
+            message = 'Failed to create object: HTTP-{code} {http_data}'\
+                .format(code=state.get('status', ''), http_data=state.get('data', dict()).get('message', None))
+            if int(state.get('status', 0)) == 422:
+                raise UnprocessableEntityException(message)
+            else:
+
+                raise Exception(message)
         return self
 
     def update(self):
@@ -95,7 +103,9 @@ class K8sObject(object):
         this_url = '{base}/{name}'.format(base=self.base_url, name=self.name)
         state = HttpRequest(method='PUT', host=self.config.get_api_host(), url=this_url, data=self.model.get()).send()
         if not state.get('success'):
-            raise Exception('Failed to update object.')
+            message = 'Failed to update object: {http_data}'\
+                .format(http_data=state.get('data', dict()).get('message', None))
+            raise Exception(message)
         return self
 
     def delete(self):
@@ -106,5 +116,7 @@ class K8sObject(object):
         state = HttpRequest(method='DELETE', host=self.config.get_api_host(),
                             url=this_url, data=self.model.get()).send()
         if not state.get('success'):
-            raise Exception('Failed to delete object.')
+            message = 'Failed to delete object: {http_data}'\
+                .format(http_data=state.get('data', dict()).get('message', None))
+            raise Exception(message)
         return self

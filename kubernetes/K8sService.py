@@ -90,3 +90,16 @@ class K8sService(K8sObject):
         assert isinstance(service_type, str)
         self.model.set_service_type(service_type=service_type)
         return self
+
+    @staticmethod
+    def get_by_name(config, name):
+        try:
+            service_list = list()
+            data = dict(labelSelector="name={svc_name}".format(svc_name=name))
+            services = K8sService(config=config, name=name).get_with_params(data=data).get('items', list())
+            for svc in services:
+                service_name = Service(model=svc).get_name()
+                service_list.append(K8sService(config=config, name=service_name).get())
+        except:
+            raise
+        return service_list
