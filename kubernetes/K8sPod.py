@@ -88,8 +88,10 @@ class K8sPod(K8sPodBasedObject):
                     pod_list.append(K8sPod(config=config, name=pod_name).get())
                 except NotFoundException:
                     pass
-        except:
-            raise
+        except Exception as e:
+            message = "Got an exception of type {my_type} with message {my_msg}"\
+                .format(my_type=type(e), my_msg=e.message)
+            raise Exception(message)
         return pod_list
 
     @staticmethod
@@ -106,6 +108,8 @@ class K8sPod(K8sPodBasedObject):
                     pod_list.append(K8sPod(config=config, name=pod_name).get())
                 except NotFoundException:
                     pass
-        except:
-            raise
+        except Exception as e:
+            message = "Got an exception of type {my_type} with message {my_msg}"\
+                .format(my_type=type(e), my_msg=e.message)
+            raise Exception(message)
         return pod_list

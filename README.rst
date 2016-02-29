@@ -172,3 +172,4 @@ Deleting a secret:
     that_secret = K8sSecret(config=that_cfg, name='myregistry')
     that_secret.get()
     that_secret.delete()
+

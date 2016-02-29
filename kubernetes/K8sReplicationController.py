@@ -165,8 +165,10 @@ class K8sReplicationController(K8sPodBasedObject):
                         ready_check = True
                 else:
                     ready_check = True
-            except:
-                raise
+            except Exception as e:
+                message = "Got an exception of type {my_type} with message {my_msg}"\
+                    .format(my_type=type(e), my_msg=e.message)
+                raise Exception(message)
             time.sleep(0.2)
         return self
 
@@ -182,8 +184,10 @@ class K8sReplicationController(K8sPodBasedObject):
                     rc_list.append(K8sReplicationController(config=config, name=rc_name).get())
                 except NotFoundException:
                     pass
-        except:
-            raise
+        except Exception as e:
+            message = "Got an exception of type {my_type} with message {my_msg}"\
+                .format(my_type=type(e), my_msg=e.message)
+            raise Exception(message)
         return rc_list
 
     @staticmethod
@@ -193,8 +197,10 @@ class K8sReplicationController(K8sPodBasedObject):
             current_rc.set_replicas(replicas)
             current_rc.update()
             current_rc.wait_for_replicas(replicas=replicas)
-        except:
-            raise
+        except Exception as e:
+            message = "Got an exception of type {my_type} with message {my_msg}"\
+                .format(my_type=type(e), my_msg=e.message)
+            raise Exception(message)
         return current_rc
 
     @staticmethod
@@ -212,16 +218,20 @@ class K8sReplicationController(K8sPodBasedObject):
             current_exists = True
         except NotFoundException:
             raise NotFoundException('RollingUpdate: Current replication controller does not exist.')
-        except:
-            raise
+        except Exception as e:
+            message = "Got an exception of type {my_type} with message {my_msg}"\
+                .format(my_type=type(e), my_msg=e.message)
+            raise Exception(message)
 
         try:
             next_rc = K8sReplicationController(config=config, name=next_name).get()
             next_exists = True
         except NotFoundException:
             pass
-        except:
-            raise
+        except Exception as e:
+            message = "Got an exception of type {my_type} with message {my_msg}"\
+                .format(my_type=type(e), my_msg=e.message)
+            raise Exception(message)
 
         if current_exists and not next_exists:
             try:
@@ -243,13 +253,17 @@ class K8sReplicationController(K8sPodBasedObject):
                 next_rc.set_replicas(replicas=0)
                 next_rc.set_pod_generate_name(mode=True, name=name)
                 next_rc.create()
-            except:
-                raise
+            except Exception as e:
+                message = "Got an exception of type {my_type} with message {my_msg}"\
+                    .format(my_type=type(e), my_msg=e.message)
+                raise Exception(message)
             try:
                 current_rc.add_annotation(k=partner_annotation, v=next_name)
                 current_rc.update()
-            except:
-                raise
+            except Exception as e:
+                message = "Got an exception of type {my_type} with message {my_msg}"\
+                    .format(my_type=type(e), my_msg=e.message)
+                raise Exception(message)
             phase = 'rollout'
         elif next_exists and not current_exists:
             phase = 'rename'
@@ -258,8 +272,10 @@ class K8sReplicationController(K8sPodBasedObject):
                 try:
                     next_rc.add_annotation(k=replicas_annotation, v=current_rc.get_replicas())
                     next_rc.update()
-                except:
-                    raise
+                except Exception as e:
+                    message = "Got an exception of type {my_type} with message {my_msg}"\
+                        .format(my_type=type(e), my_msg=e.message)
+                    raise Exception(message)
             phase = 'rollout'
 
         if phase == 'rollout':
@@ -280,8 +296,10 @@ class K8sReplicationController(K8sPodBasedObject):
                     current_rc.set_replicas(replicas=0)
                     current_rc.update()
                     current_rc.wait_for_replicas(replicas=0, labels=current_rc.get_pod_labels())
-            except:
-                raise
+            except Exception as e:
+                message = "Got an exception of type {my_type} with message {my_msg}"\
+                    .format(my_type=type(e), my_msg=e.message)
+                raise Exception(message)
             phase = 'rename'
 
         if phase == 'rename':
@@ -293,7 +311,9 @@ class K8sReplicationController(K8sPodBasedObject):
                 current_rc.del_annotation(k=replicas_annotation)
                 current_rc.create()
                 next_rc.delete()
-            except:
-                raise
+            except Exception as e:
+                message = "Got an exception of type {my_type} with message {my_msg}"\
+                    .format(my_type=type(e), my_msg=e.message)
+                raise Exception(message)
 
         return current_rc
