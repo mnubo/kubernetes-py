@@ -1,5 +1,6 @@
 from kubernetes.K8sObject import K8sObject
 from kubernetes.models.v1.Service import Service
+from kubernetes.exceptions.NotFoundException import NotFoundException
 
 
 class K8sService(K8sObject):
@@ -96,10 +97,13 @@ class K8sService(K8sObject):
         try:
             service_list = list()
             data = dict(labelSelector="name={svc_name}".format(svc_name=name))
-            services = K8sService(config=config, name=name).get_with_params(data=data).get('items', list())
+            services = K8sService(config=config, name=name).get_with_params(data=data)
             for svc in services:
-                service_name = Service(model=svc).get_name()
-                service_list.append(K8sService(config=config, name=service_name).get())
+                try:
+                    service_name = Service(model=svc).get_name()
+                    service_list.append(K8sService(config=config, name=service_name).get())
+                except NotFoundException:
+                    pass
         except:
             raise
         return service_list
