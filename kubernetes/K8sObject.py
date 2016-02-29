@@ -7,6 +7,7 @@ from kubernetes.exceptions.NotFoundException import NotFoundException
 from kubernetes.exceptions.UnprocessableEntityException import UnprocessableEntityException
 import json
 
+
 class K8sObject(object):
     def __init__(self, config=None, obj_type=None, name=None):
         valid_objects = ['Pod', 'ReplicationController', 'Secret', 'Service']
@@ -60,7 +61,7 @@ class K8sObject(object):
         state = HttpRequest(method='GET', host=self.config.get_api_host(), url=self.base_url).send()
         if not state.get('status'):
             raise Exception('Could not fetch list of objects of type: {this_type}.'.format(this_type=self.obj_type))
-        return state.data
+        return state.get('data', dict()).get('items',list())
 
     def get_model(self):
         if self.name is None:
@@ -80,7 +81,7 @@ class K8sObject(object):
             raise SyntaxError('data must be a dict of parameters to be encoded in the URL.')
         this_url = '{base}'.format(base=self.base_url)
         state = HttpRequest(method='GET', host=self.config.get_api_host(), url=this_url, data=data).send()
-        return state.get('data', None)
+        return state.get('data', None).get('items', list())
 
     def create(self):
         if self.name is None:
@@ -93,7 +94,6 @@ class K8sObject(object):
             if int(state.get('status', 0)) == 422:
                 raise UnprocessableEntityException(message)
             else:
-
                 raise Exception(message)
         return self
 

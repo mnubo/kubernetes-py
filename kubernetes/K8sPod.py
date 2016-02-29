@@ -1,6 +1,7 @@
 from kubernetes.K8sPodBasedObject import K8sPodBasedObject
 from kubernetes.models.v1.Pod import Pod
 from kubernetes.models.v1.PodStatus import PodStatus
+from kubernetes.exceptions.NotFoundException import NotFoundException
 
 
 class K8sPod(K8sPodBasedObject):
@@ -80,10 +81,13 @@ class K8sPod(K8sPodBasedObject):
         try:
             pod_list = list()
             data = dict(labelSelector="name={pod_name}".format(pod_name=name))
-            pods = K8sPod(config=config, name=name).get_with_params(data=data).get('items', list())
+            pods = K8sPod(config=config, name=name).get_with_params(data=data)
             for pod in pods:
-                pod_name = Pod(model=pod).get_pod_name()
-                pod_list.append(K8sPod(config=config, name=pod_name).get())
+                try:
+                    pod_name = Pod(model=pod).get_pod_name()
+                    pod_list.append(K8sPod(config=config, name=pod_name).get())
+                except NotFoundException:
+                    pass
         except:
             raise
         return pod_list
@@ -95,10 +99,13 @@ class K8sPod(K8sPodBasedObject):
             pod_list = list()
             my_labels = ",".join(['%s=%s' % (key, value) for (key, value) in labels.items()])
             data = dict(labelSelector="{labels}".format(labels=my_labels))
-            pods = K8sPod(config=config, name=labels.get('name')).get_with_params(data=data).get('items', list())
+            pods = K8sPod(config=config, name=labels.get('name')).get_with_params(data=data)
             for pod in pods:
-                pod_name = Pod(model=pod).get_pod_name()
-                pod_list.append(K8sPod(config=config, name=pod_name).get())
+                try:
+                    pod_name = Pod(model=pod).get_pod_name()
+                    pod_list.append(K8sPod(config=config, name=pod_name).get())
+                except NotFoundException:
+                    pass
         except:
             raise
         return pod_list

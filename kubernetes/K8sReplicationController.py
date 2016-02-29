@@ -165,11 +165,9 @@ class K8sReplicationController(K8sPodBasedObject):
                         ready_check = True
                 else:
                     ready_check = True
-            except NotFoundException:
-                pass
             except:
                 raise
-            time.sleep(0.3)
+            time.sleep(0.2)
         return self
 
     @staticmethod
@@ -177,10 +175,13 @@ class K8sReplicationController(K8sPodBasedObject):
         try:
             rc_list = list()
             data = dict(labelSelector="name={pod_name}".format(pod_name=name))
-            rcs = K8sReplicationController(config=config, name=name).get_with_params(data=data).get('items', list())
+            rcs = K8sReplicationController(config=config, name=name).get_with_params(data=data)
             for rc in rcs:
-                rc_name = ReplicationController(model=rc).get_name()
-                rc_list.append(K8sReplicationController(config=config, name=rc_name).get())
+                try:
+                    rc_name = ReplicationController(model=rc).get_name()
+                    rc_list.append(K8sReplicationController(config=config, name=rc_name).get())
+                except NotFoundException:
+                    pass
         except:
             raise
         return rc_list
