@@ -21,10 +21,8 @@ class K8sService(K8sObject):
         self.model.add_label(k=k, v=v)
         return self
 
-    def add_port(self, name, port, target_port, protocol='TCP', node_port=None):
-        assert isinstance(name, str)
+    def add_port(self, name, port, target_port=None, protocol=None, node_port=None):
         assert isinstance(port, int)
-        assert isinstance(protocol, str)
         self.model.add_port(name=name, port=port, target_port=target_port, protocol=protocol, node_port=node_port)
         return self
 

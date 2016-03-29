@@ -11,12 +11,18 @@ class K8sContainer(object):
             else:
                 self.model = Container(name=name, image=image)
 
-    def add_port(self, container_port, host_port, name, protocol='TCP'):
+    def add_port(self, container_port, host_port=None, protocol=None, name=None, host_ip=None):
         assert isinstance(container_port, int)
-        assert isinstance(host_port, int)
-        assert isinstance(name, str)
-        assert isinstance(protocol, str)
-        self.model.add_port(container_port=container_port, host_port=host_port, name=name, protocol=protocol)
+        if host_port is not None:
+            assert isinstance(host_port, int)
+        if protocol is not None:
+            assert isinstance(protocol, str)
+        if name is not None:
+            assert isinstance(name, str)
+        if host_ip is not None:
+            assert isinstance(host_ip, str)
+        self.model.add_port(container_port=container_port, host_port=host_port, name=name, protocol=protocol,
+                            host_ip=host_ip)
         return self
 
     def add_env(self, k, v):

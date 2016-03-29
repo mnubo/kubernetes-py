@@ -45,20 +45,24 @@ class Container(BaseModel):
             self.model['readinessProbe'] = self.readiness_probe.get()
         return self
 
-    def add_port(self, container_port, host_port, protocol='TCP', name=None):
-        if container_port > 0 and host_port > 0:
-            if name is None:
-                name = 'port{portnum}'.format(portnum=str(host_port))
+    def add_port(self, container_port, host_port=None, protocol=None, name=None, host_ip=None):
+        portdef = dict()
+        if container_port > 0 and container_port < 65536:
+            portdef['containerPort'] = int(container_port)
+            if name is not None:
+                portdef['name'] = name
+            if host_port is not None and (host_port > 0 and host_port < 65536):
+                portdef['hostPort'] = int(host_port)
+            if host_ip is not None:
+                portdef['hostIP'] = host_ip
+            if protocol is not None and protocol in ['TCP', 'UDP']:
+                portdef['protocol'] = protocol
+            # Now assign the newly defined port.
             if 'ports' not in self.model.keys():
                 self.model['ports'] = []
-            self.model['ports'].append({
-                "containerPort": int(container_port),
-                "hostPort": int(host_port),
-                "protocol": protocol,
-                "name": name
-            })
+            self.model['ports'].append(portdef)
         else:
-            raise SyntaxError('container_port and host_port should be integers.')
+            raise SyntaxError('container_port should be: 0 < container_port < 65536.')
         return self
 
     def add_env(self, name=None, value=None):

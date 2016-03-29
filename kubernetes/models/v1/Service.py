@@ -38,23 +38,40 @@ class Service(BaseModel):
         self.svc_metadata.add_annotation(k=k, v=v)
         return self
 
-    def add_port(self, name=None, port=None, target_port=None, protocol='TCP', node_port=None):
-        if (port is None or target_port is None or name is None) or (not isinstance(port, int)):
-            raise SyntaxError('port and target_port should be positive integers')
-        if protocol not in ['TCP', 'UDP']:
-            raise SyntaxError('protocol should be TCP or UDP.')
-        my_port = dict(name=name, protocol=protocol, port=int(port))
+    def add_port(self, port, name=None, target_port=None, protocol=None, node_port=None):
+        my_port = dict()
 
-        if isinstance(target_port, int):
-            my_port['targetPort'] = int(target_port)
+        if port is not None and isinstance(port, int):
+            my_port['port'] = port
         else:
-            my_port['targetPort'] = target_port
+            raise SyntaxError('port should be an integer.')
+
+        if name is not None:
+            if isinstance(name, str):
+                my_port['name'] = name
+            else:
+                raise SyntaxError('name should be a string.')
+
+        if protocol is not None:
+            if protocol in ['TCP', 'UDP']:
+                my_port['protocol'] = protocol
+            else:
+                raise SyntaxError('protocol should be TCP or UDP')
+
+        if target_port is not None:
+            if isinstance(target_port, int):
+                my_port['targetPort'] = target_port
+            elif isinstance(target_port, str):
+                my_port['targetPort'] = target_port
+            else:
+                raise SyntaxError('target_port should either be a string or an integer')
 
         if node_port is not None:
-            if isinstance(node_port, str):
-                my_port['nodePort'] = int(node_port)
-            else:
+            if isinstance(node_port, int):
                 my_port['nodePort'] = node_port
+            else:
+                raise SyntaxError('node_port should be an integer.')
+
         self.model['spec']['ports'].append(my_port)
         return self
 
