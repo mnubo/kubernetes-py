@@ -32,22 +32,22 @@ class K8sService(K8sObject):
         return self
 
     def del_meta_creation_timestamp(self):
-        return self.del_meta_creation_timestamp()
+        return self.model.del_meta_creation_timestamp()
 
     def del_meta_generation(self):
-        return self.del_meta_generation()
+        return self.model.del_meta_generation()
 
     def del_meta_resource_version(self):
-        return self.del_meta_resource_version()
+        return self.model.del_meta_resource_version()
 
     def del_meta_self_link(self):
-        return self.del_meta_self_link()
+        return self.model.del_meta_self_link()
 
     def del_meta_uid(self):
-        return self.del_meta_uid()
+        return self.model.del_meta_uid()
 
     def del_server_generated_meta_attr(self):
-        return self.del_server_generated_meta_attr()
+        return self.model.del_server_generated_meta_attr()
 
     def get(self):
         self.model = Service(model=self.get_model())
@@ -69,19 +69,19 @@ class K8sService(K8sObject):
         return self.model.get_labels()
 
     def get_meta_creation_timestamp(self):
-        return self.get_meta_creation_timestamp()
+        return self.model.get_meta_creation_timestamp()
 
     def get_meta_generation(self):
-        return self.get_meta_generation()
+        return self.model.get_meta_generation()
 
     def get_meta_resource_version(self):
-        return self.get_meta_resource_version()
+        return self.model.get_meta_resource_version()
 
     def get_meta_self_link(self):
-        return self.get_meta_self_link()
+        return self.model.get_meta_self_link()
 
     def get_meta_uid(self):
-        return self.get_meta_uid()
+        return self.model.get_meta_uid()
 
     def set_annotations(self, new_dict):
         assert isinstance(new_dict, dict())
@@ -115,23 +115,23 @@ class K8sService(K8sObject):
 
     def set_meta_creation_timestamp(self, ts):
         assert isinstance(ts, str)
-        return self.set_meta_creation_timestamp(ts=ts)
+        return self.model.set_meta_creation_timestamp(ts=ts)
 
     def set_meta_generation(self, gen):
         assert isinstance(gen, int)
-        return self.set_meta_generation(gen=gen)
+        return self.model.set_meta_generation(gen=gen)
 
     def set_meta_resource_version(self, ver):
         assert isinstance(ver, str)
-        return self.set_meta_resource_version(ver=ver)
+        return self.model.set_meta_resource_version(ver=ver)
 
     def set_meta_self_link(self, link):
         assert isinstance(link, str)
-        return self.set_meta_self_link(link=link)
+        return self.model.set_meta_self_link(link=link)
 
     def set_meta_uid(self, uid):
         assert isinstance(uid, str)
-        return self.set_meta_uid(uid=uid)
+        return self.model.set_meta_uid(uid=uid)
 
     def set_session_affinity(self, affinity_type):
         assert isinstance(affinity_type, str)
