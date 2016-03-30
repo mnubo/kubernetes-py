@@ -55,6 +55,16 @@ class PodSpec(BaseModel):
             })
         return self
 
+    def add_emptydir_volume(self, name=None):
+        if name is None:
+            raise SyntaxError('PodSpec: name should be a string')
+        else:
+            self.model['volumes'].append({
+                "name": name,
+                "emptyDir": {}
+            })
+        return self
+
     def add_image_pull_secrets(self, name=None):
         if name is None or not isinstance(name, str):
             raise SyntaxError('PodSpec: name should be a string.')

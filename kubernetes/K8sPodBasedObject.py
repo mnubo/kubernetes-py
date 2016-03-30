@@ -15,6 +15,10 @@ class K8sPodBasedObject(K8sObject):
         self.model.add_host_volume(name=name, path=path)
         return self
 
+    def add_emptydir_volume(self, name):
+        self.model.add_emptydir_volume(name=name)
+        return self
+
     def add_image_pull_secrets(self, name):
         self.model.add_image_pull_secrets(name=name)
         return self

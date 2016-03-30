@@ -11,7 +11,7 @@ class Service(BaseModel):
             self.model = model
             if 'status' in self.model.keys():
                 self.model.pop('status', None)
-            self.svc_metadata = ObjectMeta(model=self.model['metadata'])
+            self.svc_metadata = ObjectMeta(model=self.model['metadata'], del_server_attr=False)
         else:
             self.model = dict(kind='Service', apiVersion='v1')
             self.svc_metadata = ObjectMeta(name=name, namespace=namespace)
@@ -93,6 +93,29 @@ class Service(BaseModel):
         self.svc_metadata.del_label(k=k)
         return self
 
+    def del_meta_creation_timestamp(self):
+        self.svc_metadata.del_creation_timestamp()
+        return self
+
+    def del_meta_generation(self):
+        self.svc_metadata.del_generation()
+        return self
+
+    def del_meta_resource_version(self):
+        self.svc_metadata.del_resource_version()
+        return self
+
+    def del_meta_self_link(self):
+        self.svc_metadata.del_self_link()
+        return self
+
+    def del_meta_uid(self):
+        self.svc_metadata.del_uid()
+        return self
+
+    def del_server_generated_meta_attr(self):
+        return self.svc_metadata.del_server_generated_meta_attr()
+
     def get_annotation(self, k):
         assert isinstance(k, str)
         return self.svc_metadata.get_annotation(k=k)
@@ -115,6 +138,21 @@ class Service(BaseModel):
 
     def get_namespace(self):
         return self.svc_metadata.get_namespace()
+
+    def get_meta_creation_timestamp(self):
+        return self.svc_metadata.get_creation_timestamp()
+
+    def get_meta_generation(self):
+        return self.svc_metadata.get_generation()
+
+    def get_meta_resource_version(self):
+        return self.svc_metadata.get_resource_version()
+
+    def get_meta_self_link(self):
+        return self.svc_metadata.get_self_link()
+
+    def get_meta_uid(self):
+        return self.svc_metadata.get_uid()
 
     def set_annotations(self, new_dict):
         assert isinstance(new_dict, dict)
@@ -142,6 +180,21 @@ class Service(BaseModel):
             raise SyntaxError('Service: ip should be an ip address.')
         self.model['spec']['loadBalancerIP'] = ip
         return self
+
+    def set_meta_creation_timestamp(self, ts):
+        return self.svc_metadata.set_creation_timestamp(ts=ts)
+
+    def set_meta_generation(self, gen):
+        return self.svc_metadata.set_generation(gen=gen)
+
+    def set_meta_resource_version(self, ver):
+        return self.svc_metadata.set_resource_version(ver=ver)
+
+    def set_meta_self_link(self, link):
+        return self.svc_metadata.set_self_link(link=link)
+
+    def set_meta_uid(self, uid):
+        return self.svc_metadata.set_uid(uid=uid)
 
     def set_name(self, name):
         assert isinstance(name, str)

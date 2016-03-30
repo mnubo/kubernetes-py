@@ -31,6 +31,24 @@ class K8sService(K8sObject):
         self.model.add_selector(selector=selector)
         return self
 
+    def del_meta_creation_timestamp(self):
+        return self.del_meta_creation_timestamp()
+
+    def del_meta_generation(self):
+        return self.del_meta_generation()
+
+    def del_meta_resource_version(self):
+        return self.del_meta_resource_version()
+
+    def del_meta_self_link(self):
+        return self.del_meta_self_link()
+
+    def del_meta_uid(self):
+        return self.del_meta_uid()
+
+    def del_server_generated_meta_attr(self):
+        return self.del_server_generated_meta_attr()
+
     def get(self):
         self.model = Service(model=self.get_model())
         return self
@@ -49,6 +67,21 @@ class K8sService(K8sObject):
 
     def get_labels(self):
         return self.model.get_labels()
+
+    def get_meta_creation_timestamp(self):
+        return self.get_meta_creation_timestamp()
+
+    def get_meta_generation(self):
+        return self.get_meta_generation()
+
+    def get_meta_resource_version(self):
+        return self.get_meta_resource_version()
+
+    def get_meta_self_link(self):
+        return self.get_meta_self_link()
+
+    def get_meta_uid(self):
+        return self.get_meta_uid()
 
     def set_annotations(self, new_dict):
         assert isinstance(new_dict, dict())
@@ -79,6 +112,26 @@ class K8sService(K8sObject):
         assert isinstance(name, str)
         self.model.set_namespace(name=name)
         return self
+
+    def set_meta_creation_timestamp(self, ts):
+        assert isinstance(ts, str)
+        return self.set_meta_creation_timestamp(ts=ts)
+
+    def set_meta_generation(self, gen):
+        assert isinstance(gen, int)
+        return self.set_meta_generation(gen=gen)
+
+    def set_meta_resource_version(self, ver):
+        assert isinstance(ver, str)
+        return self.set_meta_resource_version(ver=ver)
+
+    def set_meta_self_link(self, link):
+        assert isinstance(link, str)
+        return self.set_meta_self_link(link=link)
+
+    def set_meta_uid(self, uid):
+        assert isinstance(uid, str)
+        return self.set_meta_uid(uid=uid)
 
     def set_session_affinity(self, affinity_type):
         assert isinstance(affinity_type, str)

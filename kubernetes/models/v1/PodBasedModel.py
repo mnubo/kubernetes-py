@@ -33,6 +33,13 @@ class PodBasedModel(BaseModel):
             raise
         return self
 
+    def add_emptydir_volume(self, name):
+        try:
+            self.pod_spec.add_emptydir_volume(name=name)
+        except:
+            raise
+        return self
+
     def add_image_pull_secrets(self, name):
         try:
             self.pod_spec.add_image_pull_secrets(name=name)
