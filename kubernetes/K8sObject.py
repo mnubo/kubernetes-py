@@ -57,8 +57,17 @@ class K8sObject(object):
                 my_method(name=name)
         return self
 
+    def request(self, method='GET', host=None, url=None, auth=None, data=None, token=None):
+        # default parameters
+        host = self.config.get_api_host() if host is None else host
+        url = self.base_url if url is None else url
+        auth = self.config.auth if auth is None else auth
+        token = self.config.token if token is None else token
+
+        return HttpRequest(host=host, url=url, auth=auth, data=data, token=token).send()
+
     def list(self):
-        state = HttpRequest(method='GET', host=self.config.get_api_host(), url=self.base_url).send()
+        state = self.request(method='GET')
         if not state.get('status'):
             raise Exception('Could not fetch list of objects of type: {this_type}.'.format(this_type=self.obj_type))
         return state.get('data', dict()).get('items', list())
@@ -67,7 +76,7 @@ class K8sObject(object):
         if self.name is None:
             raise Exception('Cannot fetch object without name set first.')
         this_url = '{base}/{name}'.format(base=self.base_url, name=self.name)
-        state = HttpRequest(method='GET', host=self.config.get_api_host(), url=this_url).send()
+        state = self.request(method='GET', url=this_url)
         if state.get('success'):
             model = state.get('data')
         else:
@@ -80,14 +89,14 @@ class K8sObject(object):
         if not isinstance(data, dict):
             raise SyntaxError('data must be a dict of parameters to be encoded in the URL.')
         this_url = '{base}'.format(base=self.base_url)
-        state = HttpRequest(method='GET', host=self.config.get_api_host(), url=this_url, data=data).send()
+        state = self.request(method='GET', url=this_url, data=data)
         return state.get('data', None).get('items', list())
 
     def create(self):
         if self.name is None:
             raise Exception('Cannot create object without name set first.')
         this_url = '{base}'.format(base=self.base_url)
-        state = HttpRequest(method='POST', host=self.config.get_api_host(), url=this_url, data=self.model.get()).send()
+        state = self.request(method='POST', url=this_url, data=self.model.get())
         if not state.get('success'):
             message = 'Failed to create object: HTTP-{code} {http_data}'\
                 .format(code=state.get('status', ''), http_data=state.get('data', dict()).get('message', None))
@@ -101,7 +110,7 @@ class K8sObject(object):
         if self.name is None:
             raise Exception('Cannot create object without name set first.')
         this_url = '{base}/{name}'.format(base=self.base_url, name=self.name)
-        state = HttpRequest(method='PUT', host=self.config.get_api_host(), url=this_url, data=self.model.get()).send()
+        state = self.request(method='PUT', url=this_url, data=self.model.get())
         if not state.get('success'):
             message = 'Failed to update object: {http_data}'\
                 .format(http_data=state.get('data', dict()).get('message', None))
@@ -113,8 +122,7 @@ class K8sObject(object):
             raise Exception('Cannot create object without name set first.')
         this_url = '{base}/{name}'.format(base=self.base_url, name=self.name)
         self.model = DeleteOptions(kind='DeleteOptions')
-        state = HttpRequest(method='DELETE', host=self.config.get_api_host(),
-                            url=this_url, data=self.model.get()).send()
+        state = self.request(method='DELETE', url=this_url, data=self.model.get())
         if not state.get('success'):
             message = 'Failed to delete object: {http_data}'\
                 .format(http_data=state.get('data', dict()).get('message', None))

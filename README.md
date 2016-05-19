@@ -21,7 +21,7 @@ Creating a pod:
     from kubernetes import K8sPod
     from kubernetes import K8sContainer
     
-    that_cfg = K8sConfig(api_host='somehost:8888')
+    that_cfg = K8sConfig(api_host='somehost:8888', auth=('basic_username', 'basic_passwd'))
     that_pod = K8sPod(config=that_cfg, name='redis')
     that_pod.add_container(container=K8sContainer(name='redis', image='library/redis:2')
                           .add_port(container_port=6379, host_port=31010, name='redismasterport'))
@@ -32,7 +32,7 @@ Fetching a pod:
     from kubernetes import K8sConfig
     from kubernetes import K8sPod
     
-    that_cfg = K8sConfig(api_host='somehost:8888')
+    that_cfg = K8sConfig(api_host='somehost:8888', token='50a2fabfdd276f573ff97ace8b11c5f4')
     that_pod = K8sPod(config=that_cfg, name='redis')
     that_pod.get()
 
