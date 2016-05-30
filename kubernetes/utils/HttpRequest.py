@@ -34,7 +34,8 @@ class HttpRequest:
         else:
             json_encoded = json.dumps(self.data)
             # @todo: Add certificate verification !
-            response = requests.request(method=self.http_method, url=self.url, auth=self.auth, headers=http_headers, body=json_encoded, verify=False)
+            response = requests.request(method=self.http_method, url=self.url, auth=self.auth, headers=http_headers,
+                                        data=json_encoded, verify=False)
 
         state['status'] = response.status_code
         state['reason'] = response.reason

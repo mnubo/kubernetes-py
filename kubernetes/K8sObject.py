@@ -64,7 +64,7 @@ class K8sObject(object):
         auth = self.config.auth if auth is None else auth
         token = self.config.token if token is None else token
 
-        return HttpRequest(host=host, url=url, auth=auth, data=data, token=token).send()
+        return HttpRequest(method=method, host=host, url=url, auth=auth, data=data, token=token).send()
 
     def list(self):
         state = self.request(method='GET')

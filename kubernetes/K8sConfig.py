@@ -1,5 +1,9 @@
+import re
+
+
 class K8sConfig:
-    def __init__(self, api_host='localhost:8888', version='v1', namespace='default', pull_secret=None, auth=None, token=None):
+    def __init__(self, api_host='localhost:8888', version='v1', namespace='default', pull_secret=None,
+                 auth=None, token=None):
         valid_versions = ['v1']
         if not isinstance(api_host, str) or not isinstance(version, str):
             raise SyntaxError('Please make sure api_host and version are strings.')
@@ -7,10 +11,15 @@ class K8sConfig:
             raise SyntaxError('Please provide a valid version in: {str}'.format(str=', '.join(valid_versions)))
         if not isinstance(namespace, str):
             raise SyntaxError('Please make sure namespace is a string.')
-        if not isinstance(auth, tuple):
+        if auth is not None and not isinstance(auth, tuple):
             raise SyntaxError('Please make sure auth is a tuple.')
-        if not isinstance(namespace, str):
+        if token is not None and not isinstance(token, str):
             raise SyntaxError('Please make sure token is a string.')
+
+        http_https_re = re.compile(r"^http[s]*")
+        if not http_https_re.search(api_host):
+            api_host = "http://{host}".format(host=api_host)
+
         self.api_host = api_host
         self.version = version
         self.namespace = namespace
