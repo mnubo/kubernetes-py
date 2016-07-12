@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+#
+# This file is subject to the terms and conditions defined in
+# file 'LICENSE.md', which is part of this source code package.
+#
+
 from kubernetes.utils import HttpRequest
 from kubernetes.models.v1.BaseUrls import BaseUrls
 from kubernetes.models.v1.BaseModel import BaseModel
@@ -7,38 +15,42 @@ from kubernetes.exceptions.NotFoundException import NotFoundException
 from kubernetes.exceptions.UnprocessableEntityException import UnprocessableEntityException
 import json
 
+VALID_K8s_OBJS = ['Pod', 'ReplicationController', 'Secret', 'Service']
+
 
 class K8sObject(object):
-    def __init__(self, config=None, obj_type=None, name=None):
-        valid_objects = ['Pod', 'ReplicationController', 'Secret', 'Service']
-        if config is None:
-            self.config = K8sConfig()
-        else:
+
+    def __init__(self, config=None, name=None, obj_type=None):
+
+        if config is not None:
             try:
                 assert isinstance(config, K8sConfig)
-                self.config = config
             except:
                 raise SyntaxError('Please define config as a K8sConfig object.')
+        else:
+            config = K8sConfig()
+
+        self.config = config
+
         if obj_type is None or not isinstance(obj_type, str):
             raise SyntaxError('Please define obj_type as a string.')
-        if obj_type not in valid_objects:
-            raise SyntaxError('Please make sure object type is in: {my_type}'.format(my_type=', '.join(valid_objects)))
-        else:
-            self.obj_type = obj_type
 
+        if obj_type not in VALID_K8s_OBJS:
+            valid = ", ".join(VALID_K8s_OBJS)
+            raise SyntaxError('Please make sure object type: [ {0} ] is in: [ {1} ]'.format(obj_type, valid))
+
+        self.obj_type = obj_type
         self.name = name
-
         self.model = BaseModel()
-        assert isinstance(self.model, BaseModel)
 
         try:
-            self.base_url = BaseUrls(namespace=self.config.namespace).get_base_url(object_type=obj_type)
+            urls = BaseUrls(version=self.config.version, namespace=self.config.namespace)
+            self.base_url = urls.get_base_url(object_type=obj_type)
         except:
-            raise Exception('Cannot import version specific classes')
+            raise Exception('Could not set BaseUrl for type: [ {0} ]'.format(obj_type))
 
     def __str__(self):
-        return "Kubernetes {obj_type} named {name}. Definition: {model}"\
-            .format(obj_type=self.obj_type, name=self.name, model=self.model.get())
+        return "K8sObject [ {0} ] named [ {1} ]. Model: [ {2} ]".format(self.obj_type, self.name, self.model.get())
 
     def as_dict(self):
         return self.model.get()
