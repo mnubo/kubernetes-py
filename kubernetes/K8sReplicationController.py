@@ -12,7 +12,7 @@ class K8sReplicationController(K8sPodBasedObject):
 
     def __init__(self, config=None, name=None, image=None, replicas=0):
         K8sPodBasedObject.__init__(self, config=config, obj_type='ReplicationController', name=name)
-        self.model = ReplicationController(name=name, namespace=self.config.get_namespace())
+        self.model = ReplicationController(name=name, namespace=self.config.namespace)
         self.set_replicas(replicas)
         my_version = str(uuid.uuid4())
         self.model.add_pod_label(k='rc_version', v=my_version)
@@ -20,8 +20,8 @@ class K8sReplicationController(K8sPodBasedObject):
         if image is not None:
             self.model.add_container(K8sContainer(name=name, image=image).get_model())
             self.model.set_pod_name(name=name)
-        if self.config.get_pull_secret() is not None:
-            self.add_image_pull_secrets(name=self.config.get_pull_secret())
+        if self.config.pull_secret is not None:
+            self.add_image_pull_secrets(name=self.config.pull_secret)
 
     def add_annotation(self, k, v):
         assert isinstance(k, str)

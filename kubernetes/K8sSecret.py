@@ -6,7 +6,7 @@ class K8sSecret(K8sObject):
 
     def __init__(self, config=None, name=None):
         K8sObject.__init__(self, config=config, obj_type='Secret', name=name)
-        self.model = Secret(name=name, namespace=self.config.get_namespace())
+        self.model = Secret(name=name, namespace=self.config.namespace)
 
     def add_annotation(self, k, v):
         assert isinstance(k, str)

@@ -32,7 +32,7 @@ class K8sObject(object):
         assert isinstance(self.model, BaseModel)
 
         try:
-            self.base_url = BaseUrls(namespace=self.config.get_namespace()).get_base_url(object_type=obj_type)
+            self.base_url = BaseUrls(namespace=self.config.namespace).get_base_url(object_type=obj_type)
         except:
             raise Exception('Cannot import version specific classes')
 
@@ -59,7 +59,7 @@ class K8sObject(object):
 
     def request(self, method='GET', host=None, url=None, auth=None, data=None, token=None):
         # default parameters
-        host = self.config.get_api_host() if host is None else host
+        host = self.config.api_host if host is None else host
         url = self.base_url if url is None else url
         auth = self.config.auth if auth is None else auth
         token = self.config.token if token is None else token
