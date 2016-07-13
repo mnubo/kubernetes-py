@@ -19,29 +19,29 @@ class K8sObjectTest(unittest.TestCase):
     def tearDown(self):
         pass
 
-    # ------------------------------------------------------------------------------------- instantiation
+    # ------------------------------------------------------------------------------------- init
 
-    def test_instantiate_no_args(self):
+    def test_init_no_args(self):
         try:
             K8sObject()
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
-    def test_instantiate_invalid_object_type(self):
+    def test_init_invalid_object_type(self):
         ot = 666
         try:
             K8sObject(obj_type=ot)
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
-    def test_instantiate_unknown_object_type(self):
+    def test_init_unknown_object_type(self):
         ot = "yomama"
         try:
             K8sObject(obj_type=ot)
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
-    def test_instantiate_object_type_pod(self):
+    def test_init_object_type_pod(self):
         ot = "Pod"
         name = "yomama"
         obj = K8sObject(name=name, obj_type=ot)
@@ -49,7 +49,7 @@ class K8sObjectTest(unittest.TestCase):
         self.assertEqual(ot, obj.obj_type)
         self.assertEqual(name, obj.name)
 
-    def test_instantiate_object_type_rc(self):
+    def test_init_object_type_rc(self):
         ot = "ReplicationController"
         name = "yomama"
         obj = K8sObject(name=name, obj_type=ot)
@@ -57,7 +57,7 @@ class K8sObjectTest(unittest.TestCase):
         self.assertEqual(ot, obj.obj_type)
         self.assertEqual(name, obj.name)
 
-    def test_instantiate_object_type_secret(self):
+    def test_init_object_type_secret(self):
         ot = "Secret"
         name = "yomama"
         obj = K8sObject(name=name, obj_type=ot)
@@ -65,7 +65,7 @@ class K8sObjectTest(unittest.TestCase):
         self.assertEqual(ot, obj.obj_type)
         self.assertEqual(name, obj.name)
 
-    def test_instantiate_object_type_service(self):
+    def test_init_object_type_service(self):
         ot = "Service"
         name = "yomama"
         obj = K8sObject(name=name, obj_type=ot)
