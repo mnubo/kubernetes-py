@@ -7,7 +7,8 @@
 #
 
 import unittest
-from kubernetes import K8sObject
+import json
+from kubernetes import K8sObject, K8sConfig
 
 
 class K8sObjectTest(unittest.TestCase):
@@ -69,3 +70,30 @@ class K8sObjectTest(unittest.TestCase):
         self.assertIsInstance(obj, K8sObject)
         self.assertEqual(ot, obj.obj_type)
         self.assertEqual(name, obj.name)
+
+    def test_object_as_dict(self):
+        ot = "Service"
+        name = "yomama"
+        obj = K8sObject(name=name, obj_type=ot)
+        dico = obj.as_dict()
+        self.assertIsInstance(dico, dict)
+
+    def test_object_as_json(self):
+        ot = "Service"
+        name = "yomama"
+        obj = K8sObject(name=name, obj_type=ot)
+        s = obj.as_json()
+        self.assertIsInstance(s, str)
+        valid = json.loads(s)
+        self.assertIsInstance(valid, dict)
+
+    def test_object_set_name(self):
+        ot = "Pod"
+        name1 = "yomama"
+        obj = K8sObject(name=name1, obj_type=ot)
+        self.assertEqual(name1, obj.name)
+        name2 = "sofat"
+        obj.set_name(name2)
+        self.assertNotEqual(obj.name, name1)
+        self.assertEqual(obj.name, name2)
+

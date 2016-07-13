@@ -50,16 +50,13 @@ class K8sObject(object):
             raise Exception('Could not set BaseUrl for type: [ {0} ]'.format(obj_type))
 
     def __str__(self):
-        return "K8sObject [ {0} ] named [ {1} ]. Model: [ {2} ]".format(self.obj_type, self.name, self.model.get())
+        return "[ {0} ] named [ {1} ]. Model: [ {2} ]".format(self.obj_type, self.name, self.model.get())
 
     def as_dict(self):
         return self.model.get()
 
     def as_json(self):
         return json.dumps(self.model.get())
-
-    def get_name(self):
-        return self.name
 
     def set_name(self, name):
         self.name = name
@@ -69,13 +66,13 @@ class K8sObject(object):
                 my_method(name=name)
         return self
 
+    # ------------------------------------------------------------------------------------- remote API calls
+
     def request(self, method='GET', host=None, url=None, auth=None, data=None, token=None):
-        # default parameters
         host = self.config.api_host if host is None else host
         url = self.base_url if url is None else url
         auth = self.config.auth if auth is None else auth
         token = self.config.token if token is None else token
-
         return HttpRequest(method=method, host=host, url=url, auth=auth, data=data, token=token).send()
 
     def list(self):
