@@ -19,6 +19,8 @@ class K8sObjectTest(unittest.TestCase):
     def tearDown(self):
         pass
 
+    # ------------------------------------------------------------------------------------- instantiation
+
     def test_instantiate_no_args(self):
         try:
             K8sObject()
@@ -71,6 +73,8 @@ class K8sObjectTest(unittest.TestCase):
         self.assertEqual(ot, obj.obj_type)
         self.assertEqual(name, obj.name)
 
+    # ------------------------------------------------------------------------------------- conversions
+
     def test_object_as_dict(self):
         ot = "Service"
         name = "yomama"
@@ -86,6 +90,8 @@ class K8sObjectTest(unittest.TestCase):
         self.assertIsInstance(s, str)
         valid = json.loads(s)
         self.assertIsInstance(valid, dict)
+
+    # ------------------------------------------------------------------------------------- set
 
     def test_object_set_name(self):
         ot = "Pod"
