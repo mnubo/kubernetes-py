@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+#
+# This file is subject to the terms and conditions defined in
+# file 'LICENSE.md', which is part of this source code package.
+#
+
 from kubernetes.K8sPodBasedObject import K8sPodBasedObject
 from kubernetes.models.v1.Pod import Pod
 from kubernetes.models.v1.PodStatus import PodStatus
@@ -5,11 +13,15 @@ from kubernetes.exceptions.NotFoundException import NotFoundException
 
 
 class K8sPod(K8sPodBasedObject):
+
     def __init__(self, config=None, name=None):
         K8sPodBasedObject.__init__(self, config=config, obj_type='Pod', name=name)
         self.model = Pod(name=name, namespace=self.config.namespace)
+
         if self.config.pull_secret is not None:
             self.model.add_image_pull_secrets(name=self.config.pull_secret)
+
+    # ------------------------------------------------------------------------------------- model add
 
     def add_annotation(self, k, v):
         self.model.add_pod_annotation(k=k, v=v)
@@ -19,6 +31,8 @@ class K8sPod(K8sPodBasedObject):
         self.model.add_pod_label(k=k, v=v)
         return self
 
+    # ------------------------------------------------------------------------------------- model delete
+
     def del_annotation(self, k):
         self.model.del_pod_annotation(k=k)
         return self
@@ -26,6 +40,8 @@ class K8sPod(K8sPodBasedObject):
     def del_label(self, k):
         self.model.del_pod_label(k=k)
         return self
+
+    # ------------------------------------------------------------------------------------- model get
 
     def get(self):
         self.model = Pod(model=self.get_model())
@@ -46,6 +62,8 @@ class K8sPod(K8sPodBasedObject):
     def get_status(self):
         return self.model.get_pod_status()
 
+    # ------------------------------------------------------------------------------------- polling readiness
+
     def is_ready(self):
         ready = False
         status = self.get_status()
@@ -64,6 +82,8 @@ class K8sPod(K8sPodBasedObject):
                 ready = True
         return ready
 
+    # ------------------------------------------------------------------------------------- model set
+
     def set_annotations(self, new_dict):
         self.model.set_pod_annotations(new_dict=new_dict)
         return self
@@ -75,6 +95,8 @@ class K8sPod(K8sPodBasedObject):
     def set_namespace(self, name):
         self.model.set_pod_namespace(name=name)
         return self
+
+    # ------------------------------------------------------------------------------------- filtering
 
     @staticmethod
     def get_by_name(config, name):
