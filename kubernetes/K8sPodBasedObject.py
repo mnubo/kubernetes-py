@@ -1,10 +1,21 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+#
+# This file is subject to the terms and conditions defined in
+# file 'LICENSE.md', which is part of this source code package.
+#
+
 from kubernetes.K8sObject import K8sObject
 from kubernetes.K8sContainer import K8sContainer
 
 
 class K8sPodBasedObject(K8sObject):
-    def __init__(self, name, obj_type, config=None):
+
+    def __init__(self, name=None, obj_type=None, config=None):
         K8sObject.__init__(self, config=config, obj_type=obj_type, name=name)
+
+    # ------------------------------------------------------------------------------------- add
 
     def add_container(self, container):
         assert isinstance(container, K8sContainer)
@@ -23,9 +34,13 @@ class K8sPodBasedObject(K8sObject):
         self.model.add_image_pull_secrets(name=name)
         return self
 
+    # ------------------------------------------------------------------------------------- delete
+
     def del_pod_node_name(self):
         self.model.del_pod_node_name()
         return self
+
+    # ------------------------------------------------------------------------------------- get
 
     def get_pod_containers(self):
         return self.model.get_pod_containers()
@@ -39,6 +54,8 @@ class K8sPodBasedObject(K8sObject):
     def set_active_deadline(self, seconds):
         self.model.set_active_deadline(seconds=seconds)
         return self
+
+    # ------------------------------------------------------------------------------------- set
 
     def set_dns_policy(self, policy):
         self.model.set_dns_policy(policy=policy)
