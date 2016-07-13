@@ -8,7 +8,6 @@
 
 import unittest
 from kubernetes import K8sPodBasedObject
-from kubernetes.models.v1 import BaseModel
 
 
 class K8sPodBasedObjectTest(unittest.TestCase):
