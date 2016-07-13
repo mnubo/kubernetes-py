@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+#
+# This file is subject to the terms and conditions defined in
+# file 'LICENSE.md', which is part of this source code package.
+#
+
 from kubernetes.models.v1.BaseModel import BaseModel
 from kubernetes.models.v1.Container import Container
 
@@ -6,28 +14,38 @@ class PodSpec(BaseModel):
     def __init__(self, name=None, image=None, model=None, pull_secret=None):
         BaseModel.__init__(self)
         self.containers = list()
+
         if model is not None:
             assert isinstance(model, dict)
+
             if 'status' in self.model.keys():
                 self.model.pop('status', None)
+
             self.model = model
+
             for c in self.model['containers']:
                 self.containers.append(Container(model=c))
+
             if 'volumes' not in self.model.keys():
                 self.model['volumes'] = []
+
         else:
             self.model = {
                 "containers": [],
                 "dnsPolicy": "Default",
                 "volumes": []
             }
+
             if name is not None and not isinstance(name, str):
                 raise SyntaxError('PodSpec: Name should be a string.')
+
             if image is not None and not isinstance(image, str):
                 self.containers.append(Container(name=name, image=image))
+
             if pull_secret is not None:
                 assert isinstance(pull_secret, str)
                 self.add_image_pull_secrets(name=pull_secret)
+
             self._update_model()
 
     def _update_model(self):
