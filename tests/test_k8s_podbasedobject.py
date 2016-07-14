@@ -178,8 +178,42 @@ class K8sPodBasedObjectTest(unittest.TestCase):
 
     # ------------------------------------------------------------------------------------- pod - add
 
+    def test_pod_add_container_invalid(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        c = object()
+        try:
+            obj.add_container(c)
+            self.fail("Should not fail.")
+        except Exception as err:
+            self.assertIsInstance(err, AssertionError)
+
     def test_pod_add_container(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        podspec = obj.model.model['spec']
+        self.assertEqual(0, len(podspec['containers']))
+
+        podspec = obj.model.pod_spec
+        self.assertEqual(0, len(podspec.containers))
+        self.assertEqual(0, len(podspec.model['containers']))
+
         name = "yomama"
         image = "busybox"
         c = K8sContainer(name=name, image=image)
+        obj.add_container(c)
 
+        podspec = obj.model.model['spec']
+        self.assertEqual(1, len(podspec['containers']))
+
+        podspec = obj.model.pod_spec
+        self.assertEqual(1, len(podspec.containers))
+        self.assertEqual(1, len(podspec.model['containers']))

@@ -59,6 +59,7 @@ class PodSpec(BaseModel):
             raise SyntaxError('PodSpec: container should be a container object.')
         else:
             self.containers.append(container)
+            self._update_model()
         return self
 
     def add_host_volume(self, name=None, path=None):
