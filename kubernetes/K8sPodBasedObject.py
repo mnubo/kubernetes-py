@@ -51,11 +51,11 @@ class K8sPodBasedObject(K8sObject):
     def get_pod_node_selector(self):
         return self.model.get_pod_node_selector()
 
+    # ------------------------------------------------------------------------------------- set
+
     def set_active_deadline(self, seconds):
         self.model.set_active_deadline(seconds=seconds)
         return self
-
-    # ------------------------------------------------------------------------------------- set
 
     def set_dns_policy(self, policy):
         self.model.set_dns_policy(policy=policy)

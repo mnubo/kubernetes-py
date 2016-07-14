@@ -396,6 +396,38 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         podspec = obj.model.pod_spec
         self.assertNotIn('nodeName', podspec.model)
 
+    # ------------------------------------------------------------------------------------- pod - get pod containers
+
+    def test_pod_get_pod_containers_empty(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        containers = obj.get_pod_containers()
+        self.assertIsNotNone(containers)
+        self.assertEqual(0, len(containers))
+
+    def test_pod_get_pod_containers(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        count = 3
+        for i in range(0, 3):
+            name = "yocontainer_{0}".format(i)
+            image = "busybox"
+            c = K8sContainer(name=name, image=image)
+            obj.add_container(c)
+
+        containers = obj.get_pod_containers()
+        self.assertIsNotNone(containers)
+        self.assertEqual(count, len(containers))
+        [self.assertIsInstance(x, dict) for x in containers]
+
     # ------------------------------------------------------------------------------------- pod - set pod node name
 
     def test_pod_set_pod_node_name_none_arg(self):
@@ -443,3 +475,4 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         self.assertIn('nodeName', podspec.model)
         self.assertIsInstance(podspec.model['nodeName'], str)
         self.assertEqual(nodename, podspec.model['nodeName'])
+
