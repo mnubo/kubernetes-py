@@ -428,6 +428,30 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         self.assertEqual(count, len(containers))
         [self.assertIsInstance(x, dict) for x in containers]
 
+    # ------------------------------------------------------------------------------------- pod - get pod node name
+
+    def test_get_pod_node_name_none(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        name = obj.get_pod_node_name()
+        self.assertIsNone(name)
+
+    def test_get_pod_node_name(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        nodename = "yonodename"
+        obj.set_pod_node_name(name=nodename)
+        name = obj.get_pod_node_name()
+        self.assertEqual(name, nodename)
+
     # ------------------------------------------------------------------------------------- pod - set pod node name
 
     def test_pod_set_pod_node_name_none_arg(self):
