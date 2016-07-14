@@ -154,8 +154,10 @@ class PodSpec(BaseModel):
         return self
 
     def set_node_name(self, name=None):
-        if name is None or not isinstance(name, str):
-            raise SyntaxError('PodSpec: name should be a string.')
+        if name is None:
+            raise SyntaxError('PodSpec: name: [ {0} ] cannot be None.')
+        if not isinstance(name, str):
+            raise SyntaxError('PodSpec: name: [ {0} ] must be a string.')
         self.model['nodeName'] = name
         return self
 

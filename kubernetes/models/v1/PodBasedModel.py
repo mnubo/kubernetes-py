@@ -176,7 +176,6 @@ class PodBasedModel(BaseModel):
         return self
 
     def set_pod_node_name(self, name):
-        assert isinstance(name, str)
         self.pod_spec.set_node_name(name=name)
         return self
 

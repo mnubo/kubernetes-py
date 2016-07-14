@@ -365,3 +365,81 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         self.assertIn('imagePullSecrets', podspec.model)
         self.assertEqual(1, len(podspec.model['imagePullSecrets']))
         self.assertEqual(secretname, podspec.model['imagePullSecrets'][0]['name'])
+
+    # ------------------------------------------------------------------------------------- pod - del pod node name
+
+    def test_pod_del_pod_node_name(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        nodename = "yonodename"
+        obj.set_pod_node_name(name=nodename)
+
+        podspec = obj.model.model['spec']
+        self.assertIn('nodeName', podspec)
+        self.assertIsInstance(podspec['nodeName'], str)
+        self.assertEqual(nodename, podspec['nodeName'])
+
+        podspec = obj.model.pod_spec
+        self.assertIn('nodeName', podspec.model)
+        self.assertIsInstance(podspec.model['nodeName'], str)
+        self.assertEqual(nodename, podspec.model['nodeName'])
+
+        obj.del_pod_node_name()
+
+        podspec = obj.model.model['spec']
+        self.assertNotIn('nodeName', podspec)
+
+        podspec = obj.model.pod_spec
+        self.assertNotIn('nodeName', podspec.model)
+
+    # ------------------------------------------------------------------------------------- pod - set pod node name
+
+    def test_pod_set_pod_node_name_none_arg(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        nodename = None
+        try:
+            obj.set_pod_node_name(name=nodename)
+        except Exception as err:
+            self.assertIsInstance(err, SyntaxError)
+
+    def test_pod_set_pod_node_name_invalid_arg(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        nodename = 666
+        try:
+            obj.set_pod_node_name(name=nodename)
+        except Exception as err:
+            self.assertIsInstance(err, SyntaxError)
+
+    def test_pod_set_pod_node_name(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        nodename = "yonodename"
+        obj.set_pod_node_name(name=nodename)
+
+        podspec = obj.model.model['spec']
+        self.assertIn('nodeName', podspec)
+        self.assertIsInstance(podspec['nodeName'], str)
+        self.assertEqual(nodename, podspec['nodeName'])
+
+        podspec = obj.model.pod_spec
+        self.assertIn('nodeName', podspec.model)
+        self.assertIsInstance(podspec.model['nodeName'], str)
+        self.assertEqual(nodename, podspec.model['nodeName'])
