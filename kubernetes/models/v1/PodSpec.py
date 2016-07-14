@@ -110,8 +110,10 @@ class PodSpec(BaseModel):
         return self.model.get('nodeSelector', None)
 
     def set_active_deadline(self, seconds=None):
-        if seconds is None or not isinstance(seconds, int):
-            raise SyntaxError('PodSpec: seconds should be a positive integer.')
+        if seconds is None:
+            raise SyntaxError('PodSpec: seconds: [ {0} ] cannot be None.'.format(seconds))
+        if not isinstance(seconds, int) or seconds < 0:
+            raise SyntaxError('PodSpec: seconds: [ {0} ] should be a positive integer.'.format(seconds))
         self.model['activeDeadlineSeconds'] = seconds
         return self
 

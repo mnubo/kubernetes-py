@@ -7,7 +7,7 @@
 #
 
 import unittest
-from kubernetes import K8sPodBasedObject, K8sConfig, K8sContainer
+from kubernetes import K8sPodBasedObject, K8sContainer
 from kubernetes.models.v1 import Pod, ReplicationController, ObjectMeta, PodSpec
 
 
@@ -430,7 +430,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
 
     # ------------------------------------------------------------------------------------- pod - get pod node name
 
-    def test_get_pod_node_name_none(self):
+    def test_pod_get_pod_node_name_none(self):
         name = "yomama"
         obj = K8sPodBasedObject(obj_type='Pod', name=name)
         self.assertIsNotNone(obj)
@@ -440,7 +440,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         name = obj.get_pod_node_name()
         self.assertIsNone(name)
 
-    def test_get_pod_node_name(self):
+    def test_pod_get_pod_node_name(self):
         name = "yomama"
         obj = K8sPodBasedObject(obj_type='Pod', name=name)
         self.assertIsNotNone(obj)
@@ -454,7 +454,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
 
     # ------------------------------------------------------------------------------------- pod - get pod node selector
 
-    def test_get_pod_node_selector_none(self):
+    def test_pod_get_pod_node_selector_none(self):
         name = "yomama"
         obj = K8sPodBasedObject(obj_type='Pod', name=name)
         self.assertIsNotNone(obj)
@@ -464,7 +464,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         s = obj.get_pod_node_selector()
         self.assertIsNone(s)
 
-    def test_get_pod_node_selector(self):
+    def test_pod_get_pod_node_selector(self):
         name = "yomama"
         obj = K8sPodBasedObject(obj_type='Pod', name=name)
         self.assertIsNotNone(obj)
@@ -476,6 +476,55 @@ class K8sPodBasedObjectTest(unittest.TestCase):
 
         s_out = obj.get_pod_node_selector()
         self.assertEqual(s_in, s_out)
+
+    # ------------------------------------------------------------------------------------- pod - set active deadline
+
+    def test_pod_set_active_deadline_none_arg(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        d = None
+        try:
+            obj.set_active_deadline(d)
+        except Exception as err:
+            self.assertIsInstance(err, SyntaxError)
+
+    def test_pod_set_active_deadline_invalid_arg(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        d = "yodeadline"
+        try:
+            obj.set_active_deadline(d)
+        except Exception as err:
+            self.assertIsInstance(err, SyntaxError)
+
+    def test_pod_set_active_deadline(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        d = 600
+        obj.set_active_deadline(d)
+
+        podspec = obj.model.model['spec']
+        self.assertIn('activeDeadlineSeconds', podspec)
+        self.assertIsInstance(podspec['activeDeadlineSeconds'], int)
+        self.assertEqual(d, podspec['activeDeadlineSeconds'])
+
+        podspec = obj.model.pod_spec
+        self.assertNotIn('nodeName', podspec.model)
+        self.assertIn('activeDeadlineSeconds', podspec.model)
+        self.assertIsInstance(podspec.model['activeDeadlineSeconds'], int)
+        self.assertEqual(d, podspec.model['activeDeadlineSeconds'])
 
     # ------------------------------------------------------------------------------------- pod - set pod node name
 
