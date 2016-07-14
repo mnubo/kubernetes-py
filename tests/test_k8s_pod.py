@@ -65,9 +65,9 @@ class K8sPodTest(unittest.TestCase):
     def test_struct_pod_model(self):
         name = "yomama"
         pod = K8sPod(name=name)
-        model = pod.model
-        self.assertIsInstance(model, Pod)
+        model = pod.model.model
         self.assertIsNotNone(model)
+        self.assertIsInstance(model, dict)
         self.assertIn('apiVersion', model)
         self.assertIsInstance(model['apiVersion'], str)
         self.assertIn('kind', model)
