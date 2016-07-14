@@ -135,8 +135,10 @@ class PodSpec(BaseModel):
         return self
 
     def set_node_selector(self, new_dict=None):
-        if new_dict is None or not isinstance(new_dict, dict):
-            raise SyntaxError('PodSpec: Node selector must be a dict.')
+        if new_dict is None:
+            raise SyntaxError('PodSpec: Node selector: [ {0} ] cannot be None.')
+        if not isinstance(new_dict, dict):
+            raise SyntaxError('PodSpec: Node selector: [ {0} ] must be a dict.'.format(new_dict))
         self.model['nodeSelector'] = new_dict
         return self
 

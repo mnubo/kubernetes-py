@@ -452,6 +452,31 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         name = obj.get_pod_node_name()
         self.assertEqual(name, nodename)
 
+    # ------------------------------------------------------------------------------------- pod - get pod node selector
+
+    def test_get_pod_node_selector_none(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        s = obj.get_pod_node_selector()
+        self.assertIsNone(s)
+
+    def test_get_pod_node_selector(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        s_in = {"disktype": "ssd"}
+        obj.set_pod_node_selector(new_dict=s_in)
+
+        s_out = obj.get_pod_node_selector()
+        self.assertEqual(s_in, s_out)
+
     # ------------------------------------------------------------------------------------- pod - set pod node name
 
     def test_pod_set_pod_node_name_none_arg(self):
@@ -500,3 +525,50 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         self.assertIsInstance(podspec.model['nodeName'], str)
         self.assertEqual(nodename, podspec.model['nodeName'])
 
+    # ------------------------------------------------------------------------------------- pod - set pod node selector
+
+    def test_pod_set_pod_node_selector_none_arg(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        s_in = None
+        try:
+            obj.set_pod_node_selector(new_dict=s_in)
+        except Exception as err:
+            self.assertIsInstance(err, SyntaxError)
+
+    def test_pod_set_pod_node_selector_invalid_arg(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        s_in = "yoselector"
+        try:
+            obj.set_pod_node_selector(new_dict=s_in)
+        except Exception as err:
+            self.assertIsInstance(err, SyntaxError)
+
+    def test_pod_set_pod_node_selector(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        s = {"disktype": "ssd"}
+        obj.set_pod_node_selector(new_dict=s)
+
+        podspec = obj.model.model['spec']
+        self.assertIn('nodeSelector', podspec)
+        self.assertIsInstance(podspec['nodeSelector'], dict)
+        self.assertEqual(s, podspec['nodeSelector'])
+
+        podspec = obj.model.pod_spec
+        self.assertIn('nodeSelector', podspec.model)
+        self.assertIsInstance(podspec.model['nodeSelector'], dict)
+        self.assertEqual(s, podspec.model['nodeSelector'])

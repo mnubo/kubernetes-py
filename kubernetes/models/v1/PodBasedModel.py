@@ -180,7 +180,6 @@ class PodBasedModel(BaseModel):
         return self
 
     def set_pod_node_selector(self, new_dict):
-        assert isinstance(new_dict, dict)
         self.pod_spec.set_node_selector(new_dict=new_dict)
         return self
 
