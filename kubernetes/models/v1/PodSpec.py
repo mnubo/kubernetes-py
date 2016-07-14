@@ -63,15 +63,16 @@ class PodSpec(BaseModel):
         return self
 
     def add_host_volume(self, name=None, path=None):
-        if (name is None or path is None) or (not isinstance(name, str) or not isinstance(path, str)):
-            raise SyntaxError('PodSpec: name and path should be strings.')
-        else:
-            self.model['volumes'].append({
-                "name": name,
-                "hostPath": {
-                    "path": path
-                }
-            })
+        if name is None or path is None:
+            raise SyntaxError('PodSpec: name and path cannot be None.')
+        if not isinstance(name, str) or not isinstance(path, str):
+            raise SyntaxError('PodSpec: name and path must be strings.')
+        self.model['volumes'].append({
+            "name": name,
+            "hostPath": {
+                "path": path
+            }
+        })
         return self
 
     def add_emptydir_volume(self, name=None):

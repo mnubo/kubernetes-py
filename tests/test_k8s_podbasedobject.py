@@ -176,7 +176,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         self.assertIn('namespace', meta.model)
         self.assertIsInstance(meta.model['namespace'], str)
 
-    # ------------------------------------------------------------------------------------- pod - add
+    # ------------------------------------------------------------------------------------- pod - add container
 
     def test_pod_add_container_invalid(self):
         name = "yomama"
@@ -217,3 +217,50 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         podspec = obj.model.pod_spec
         self.assertEqual(1, len(podspec.containers))
         self.assertEqual(1, len(podspec.model['containers']))
+
+    # ------------------------------------------------------------------------------------- pod - add host volume
+
+    def test_pod_add_host_volume_none_args(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        volname = None
+        volpath = None
+        try:
+            obj.add_host_volume(name=volname, path=volpath)
+        except Exception as err:
+            self.assertIsInstance(err, SyntaxError)
+
+    def test_pod_add_host_volume_invalid_args(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        volname = 666
+        volpath = 999
+        try:
+            obj.add_host_volume(name=volname, path=volpath)
+        except Exception as err:
+            self.assertIsInstance(err, SyntaxError)
+
+    def test_pod_add_host_volume(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        volname = "devnull"
+        volpath = "/dev/null"
+        obj.add_host_volume(name=volname, path=volpath)
+
+        podspec = obj.model.model['spec']
+        self.assertEqual(1, len(podspec['volumes']))
+
+        podspec = obj.model.pod_spec
+        self.assertEqual(1, len(podspec.model['volumes']))
