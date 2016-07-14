@@ -231,6 +231,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         volpath = None
         try:
             obj.add_host_volume(name=volname, path=volpath)
+            self.fail("Should not fail.")
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
@@ -245,6 +246,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         volpath = 999
         try:
             obj.add_host_volume(name=volname, path=volpath)
+            self.fail("Should not fail.")
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
@@ -279,6 +281,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         volname = None
         try:
             obj.add_emptydir_volume(name=volname)
+            self.fail("Should not fail.")
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
@@ -292,6 +295,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         volname = 666
         try:
             obj.add_emptydir_volume(name=volname)
+            self.fail("Should not fail.")
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
@@ -314,4 +318,50 @@ class K8sPodBasedObjectTest(unittest.TestCase):
 
     # ------------------------------------------------------------------------------------- pod - add pull secret
 
-    
+    def test_pod_add_image_pull_secrets_none_arg(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        secretname = None
+        try:
+            obj.add_image_pull_secrets(name=secretname)
+            self.fail("Should not fail.")
+        except Exception as err:
+            self.assertIsInstance(err, SyntaxError)
+
+    def test_pod_add_image_pull_secrets_invalid_arg(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        secretname = 666
+        try:
+            obj.add_image_pull_secrets(name=secretname)
+            self.fail("Should not fail.")
+        except Exception as err:
+            self.assertIsInstance(err, SyntaxError)
+
+    def test_pod_add_image_pull_secrets(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        secretname = "yosecret"
+        obj.add_image_pull_secrets(name=secretname)
+
+        podspec = obj.model.model['spec']
+        self.assertIn('imagePullSecrets', podspec)
+        self.assertEqual(1, len(podspec['imagePullSecrets']))
+        self.assertEqual(secretname, podspec['imagePullSecrets'][0]['name'])
+
+        podspec = obj.model.pod_spec
+        self.assertIn('imagePullSecrets', podspec.model)
+        self.assertEqual(1, len(podspec.model['imagePullSecrets']))
+        self.assertEqual(secretname, podspec.model['imagePullSecrets'][0]['name'])

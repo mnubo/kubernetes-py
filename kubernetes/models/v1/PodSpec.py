@@ -87,8 +87,10 @@ class PodSpec(BaseModel):
         return self
 
     def add_image_pull_secrets(self, name=None):
+        if name is None:
+            raise SyntaxError('PodSpec: name: [ {0} ] cannot be None.'.format(name))
         if name is None or not isinstance(name, str):
-            raise SyntaxError('PodSpec: name should be a string.')
+            raise SyntaxError('PodSpec: name: [ {0} ] should be a string.'.format(name))
         if 'imagePullSecrets' not in self.model:
             self.model['imagePullSecrets'] = list()
         self.model['imagePullSecrets'].append(dict(name=name))
