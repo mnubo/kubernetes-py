@@ -64,9 +64,9 @@ class PodSpec(BaseModel):
 
     def add_host_volume(self, name=None, path=None):
         if name is None or path is None:
-            raise SyntaxError('PodSpec: name and path cannot be None.')
+            raise SyntaxError('PodSpec: name: [ {0} ] and path: [ {1} ] cannot be None.'.format(name, path))
         if not isinstance(name, str) or not isinstance(path, str):
-            raise SyntaxError('PodSpec: name and path must be strings.')
+            raise SyntaxError('PodSpec: name: [ {0} ] and path: [ {1} ] must be strings.'.format(name, path))
         self.model['volumes'].append({
             "name": name,
             "hostPath": {
@@ -77,12 +77,13 @@ class PodSpec(BaseModel):
 
     def add_emptydir_volume(self, name=None):
         if name is None:
-            raise SyntaxError('PodSpec: name should be a string')
-        else:
-            self.model['volumes'].append({
-                "name": name,
-                "emptyDir": {}
-            })
+            raise SyntaxError('PodSpec: name: [ {0} ] cannot be None.'.format(name))
+        if not isinstance(name, str):
+            raise SyntaxError('PodSpec: name: [ {0} ] must be a string.'.format(name))
+        self.model['volumes'].append({
+            "name": name,
+            "emptyDir": {}
+        })
         return self
 
     def add_image_pull_secrets(self, name=None):

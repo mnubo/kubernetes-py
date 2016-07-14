@@ -261,6 +261,57 @@ class K8sPodBasedObjectTest(unittest.TestCase):
 
         podspec = obj.model.model['spec']
         self.assertEqual(1, len(podspec['volumes']))
+        self.assertEqual(volname, podspec['volumes'][0]['name'])
 
         podspec = obj.model.pod_spec
         self.assertEqual(1, len(podspec.model['volumes']))
+        self.assertEqual(volname, podspec.model['volumes'][0]['name'])
+
+    # ------------------------------------------------------------------------------------- pod - add emptydir volume
+
+    def test_pod_add_emptydir_volume_none_arg(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        volname = None
+        try:
+            obj.add_emptydir_volume(name=volname)
+        except Exception as err:
+            self.assertIsInstance(err, SyntaxError)
+
+    def test_pod_add_emptydir_volume_invalid_arg(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        volname = 666
+        try:
+            obj.add_emptydir_volume(name=volname)
+        except Exception as err:
+            self.assertIsInstance(err, SyntaxError)
+
+    def test_pod_add_emptydir_volume(self):
+        name = "yomama"
+        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        self.assertIsNotNone(obj)
+        obj.model = Pod(name=name)
+        self.assertIsInstance(obj.model, Pod)
+
+        volname = "emptydir"
+        obj.add_emptydir_volume(name=volname)
+
+        podspec = obj.model.model['spec']
+        self.assertEqual(1, len(podspec['volumes']))
+        self.assertEqual(volname, podspec['volumes'][0]['name'])
+
+        podspec = obj.model.pod_spec
+        self.assertEqual(volname, podspec.model['volumes'][0]['name'])
+
+    # ------------------------------------------------------------------------------------- pod - add pull secret
+
+    
