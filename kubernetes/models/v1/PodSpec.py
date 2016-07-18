@@ -109,6 +109,15 @@ class PodSpec(BaseModel):
     def get_node_selector(self):
         return self.model.get('nodeSelector', None)
 
+    def get_restart_policy(self):
+        return self.model.get('restartPolicy', None)
+
+    def get_service_account(self):
+        return self.model.get('serviceAccountName', None)
+
+    def get_termination_grace_period(self):
+        return self.model.get('terminationGracePeriodSeconds', None)
+
     def set_active_deadline(self, seconds=None):
         if seconds is None:
             raise SyntaxError('PodSpec: seconds: [ {0} ] cannot be None.'.format(seconds))
@@ -136,37 +145,44 @@ class PodSpec(BaseModel):
                 break
         return self
 
-    def set_node_selector(self, new_dict=None):
-        if new_dict is None:
-            raise SyntaxError('PodSpec: Node selector: [ {0} ] cannot be None.')
-        if not isinstance(new_dict, dict):
-            raise SyntaxError('PodSpec: Node selector: [ {0} ] must be a dict.'.format(new_dict))
-        self.model['nodeSelector'] = new_dict
+    def set_node_selector(self, dico=None):
+        if dico is None:
+            raise SyntaxError('PodSpec: Node selector: [ {0} ] cannot be None.'.format(dico))
+        if not isinstance(dico, dict):
+            raise SyntaxError('PodSpec: Node selector: [ {0} ] must be a dict.'.format(dico))
+        self.model['nodeSelector'] = dico
         return self
 
-    def set_restart_policy(self, policy='Never'):
-        if policy in ['Always', 'OnFailure', 'Never']:
-            self.model['restartPolicy'] = policy
-        else:
-            raise SyntaxError('PodSpec: policy should be one of: Always, OnFailure, Never')
+    def set_restart_policy(self, policy=None):
+        if policy is None:
+            raise SyntaxError('PodSpec: policy: [ {0} ] cannot be None.'.format(policy))
+        if not isinstance(policy, str):
+            raise SyntaxError('PodSpec: policy: [ {0} ] must be a string.'.format(policy))
+        if policy not in ['Always', 'OnFailure', 'Never']:
+            raise SyntaxError('PodSpec: policy: [ {0} ] must be in: [ \'Always\', \'OnFailure\', \'Never\' ]')
+        self.model['restartPolicy'] = policy
         return self
 
     def set_service_account(self, name=None):
         if name is None or not isinstance(name, str):
-            raise SyntaxError('PodSpec: name should be a string.')
+            raise SyntaxError('PodSpec: name: [ {0} ] cannot be None.'.format(name))
+        if not isinstance(name, str):
+            raise SyntaxError('PodSpec: name: [ {0} ] must be a string.'.format(name))
         self.model['serviceAccountName'] = name
         return self
 
     def set_node_name(self, name=None):
         if name is None:
-            raise SyntaxError('PodSpec: name: [ {0} ] cannot be None.')
+            raise SyntaxError('PodSpec: name: [ {0} ] cannot be None.'.format(name))
         if not isinstance(name, str):
-            raise SyntaxError('PodSpec: name: [ {0} ] must be a string.')
+            raise SyntaxError('PodSpec: name: [ {0} ] must be a string.'.format(name))
         self.model['nodeName'] = name
         return self
 
     def set_termination_grace_period(self, seconds=None):
-        if seconds is None or not isinstance(seconds, int):
-            raise SyntaxError('PodSpec: seconds should be a positive integer.')
+        if seconds is None:
+            raise SyntaxError('PodSpec: seconds: [ {0} ] cannot be None.'.format(seconds))
+        if not isinstance(seconds, int) or not seconds > 0:
+            raise SyntaxError('PodSpec: seconds: [ {0} ] must be a positive integer.'.format(seconds))
         self.model['terminationGracePeriodSeconds'] = seconds
         return self

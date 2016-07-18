@@ -120,8 +120,17 @@ class PodBasedModel(BaseModel):
     def get_pod_node_selector(self):
         return self.pod_spec.get_node_selector()
 
+    def get_pod_restart_policy(self):
+        return self.pod_spec.get_restart_policy()
+
     def get_pod_status(self):
         return self.pod_status
+
+    def get_service_account(self):
+        return self.pod_spec.get_service_account()
+
+    def get_termination_grace_period(self):
+        return self.pod_spec.get_termination_grace_period()
 
     def set_active_deadline(self, seconds):
         try:
@@ -180,10 +189,10 @@ class PodBasedModel(BaseModel):
         return self
 
     def set_pod_node_selector(self, new_dict):
-        self.pod_spec.set_node_selector(new_dict=new_dict)
+        self.pod_spec.set_node_selector(dico=new_dict)
         return self
 
-    def set_restart_policy(self, policy):
+    def set_pod_restart_policy(self, policy):
         try:
             self.pod_spec.set_restart_policy(policy=policy)
         except:
