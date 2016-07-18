@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+#
+# This file is subject to the terms and conditions defined in
+# file 'LICENSE.md', which is part of this source code package.
+#
+
 from kubernetes.models.v1.PodBasedModel import PodBasedModel
 from kubernetes.models.v1.PodSpec import PodSpec
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
@@ -9,16 +17,19 @@ class ReplicationController(PodBasedModel):
         if model is not None:
             assert isinstance(model, dict)
             self.model = model
-            if 'status' in self.model.keys():
+            if 'status' in self.model:
                 self.model.pop('status', None)
-            if 'metadata' in self.model.keys():
+            if 'metadata' in self.model:
                 self.rc_metadata = ObjectMeta(model=self.model['metadata'])
-            if 'template' in self.model['spec'].keys():
+            if 'template' in self.model['spec']:
                 self.pod_spec = PodSpec(model=self.model['spec']['template']['spec'])
                 self.pod_metadata = ObjectMeta(model=self.model['spec']['template']['metadata'])
         else:
-            if name is None or not isinstance(name, str):
-                raise SyntaxError('ReplicationController: name should be a string.')
+            if name is None:
+                raise SyntaxError('ReplicationController: name: [ {0} ] cannot be None.'.format(name))
+            if not isinstance(name, str):
+                raise SyntaxError('ReplicationController: name: [ {0} ] must be a string.'.format(name))
+
             self.model = dict(kind='ReplicationController', apiVersion='v1')
             self.rc_metadata = ObjectMeta(name=name, namespace=namespace)
 
@@ -39,11 +50,11 @@ class ReplicationController(PodBasedModel):
     def _update_model(self):
         self.model['metadata'] = self.rc_metadata.get()
         if self.pod_metadata is not None:
-            if 'template' not in self.model['spec'].keys():
+            if 'template' not in self.model['spec']:
                 self.model['spec']['template'] = dict()
             self.model['spec']['template']['metadata'] = self.pod_metadata.get()
         if self.pod_spec is not None:
-            if 'template' not in self.model['spec'].keys():
+            if 'template' not in self.model['spec']:
                 self.model['spec']['template'] = dict()
             self.model['spec']['template']['spec'] = self.pod_spec.get()
         return self

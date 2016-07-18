@@ -1,11 +1,19 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+#
+# This file is subject to the terms and conditions defined in
+# file 'LICENSE.md', which is part of this source code package.
+#
+
+import uuid
+import copy
+import time
 from kubernetes.K8sPodBasedObject import K8sPodBasedObject
 from kubernetes.K8sPod import K8sPod
 from kubernetes.K8sContainer import K8sContainer
 from kubernetes.models.v1.ReplicationController import ReplicationController
 from kubernetes.exceptions.NotFoundException import NotFoundException
-import uuid
-import copy
-import time
 
 
 class K8sReplicationController(K8sPodBasedObject):
@@ -14,14 +22,21 @@ class K8sReplicationController(K8sPodBasedObject):
         K8sPodBasedObject.__init__(self, config=config, obj_type='ReplicationController', name=name)
         self.model = ReplicationController(name=name, namespace=self.config.namespace)
         self.set_replicas(replicas)
-        my_version = str(uuid.uuid4())
-        self.model.add_pod_label(k='rc_version', v=my_version)
-        self.set_selector(selector=dict(name=name, rc_version=my_version))
+
+        rc_version = str(uuid.uuid4())
+        self.model.add_pod_label(k='rc_version', v=rc_version)
+        selector = {'name': name, 'rc_version': rc_version}
+        self.set_selector(selector)
+
         if image is not None:
-            self.model.add_container(K8sContainer(name=name, image=image).get_model())
+            container = K8sContainer(name=name, image=image)
+            self.add_container(container)
             self.model.set_pod_name(name=name)
+
         if self.config.pull_secret is not None:
             self.add_image_pull_secrets(name=self.config.pull_secret)
+
+    # -------------------------------------------------------------------------------------  add
 
     def add_annotation(self, k, v):
         assert isinstance(k, str)
@@ -48,6 +63,8 @@ class K8sReplicationController(K8sPodBasedObject):
         self.model.add_pod_label(k=k, v=v)
         return self
 
+    # -------------------------------------------------------------------------------------  del
+
     def del_annotation(self, k):
         assert isinstance(k, str)
         self.model.del_annotation(k=k)
@@ -67,6 +84,8 @@ class K8sReplicationController(K8sPodBasedObject):
         assert isinstance(k, str)
         self.model.del_pod_label(k=k)
         return self
+
+    # -------------------------------------------------------------------------------------  get
 
     def get(self):
         self.model = ReplicationController(model=self.get_model())
@@ -106,6 +125,8 @@ class K8sReplicationController(K8sPodBasedObject):
     def get_selector(self):
         return self.model.get_selector()
 
+    # -------------------------------------------------------------------------------------  set
+
     def set_annotations(self, new_dict):
         assert isinstance(new_dict, dict)
         self.model.set_annotations(new_dict=new_dict)
@@ -137,6 +158,8 @@ class K8sReplicationController(K8sPodBasedObject):
     def set_selector(self, selector):
         self.model.set_selector(selector=selector)
         return self
+
+    # -------------------------------------------------------------------------------------  wait for replicas
 
     def wait_for_replicas(self, replicas, labels=None):
         if labels is None:
@@ -172,6 +195,8 @@ class K8sReplicationController(K8sPodBasedObject):
             time.sleep(0.2)
         return self
 
+    # -------------------------------------------------------------------------------------  get by name
+
     @staticmethod
     def get_by_name(config, name):
         try:
@@ -190,6 +215,8 @@ class K8sReplicationController(K8sPodBasedObject):
             raise Exception(message)
         return rc_list
 
+    # -------------------------------------------------------------------------------------  resize
+
     @staticmethod
     def resize(config, name, replicas):
         try:
@@ -202,6 +229,8 @@ class K8sReplicationController(K8sPodBasedObject):
                 .format(my_type=type(e), my_msg=e.message)
             raise Exception(message)
         return current_rc
+
+    # -------------------------------------------------------------------------------------  rolling update
 
     @staticmethod
     def rolling_update(config, name, image=None, container_name=None, new_rc=None, wait_seconds=10):
