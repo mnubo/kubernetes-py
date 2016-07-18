@@ -51,7 +51,7 @@ class Secret(BaseModel):
 
     def set_annotations(self, new_dict):
         assert isinstance(new_dict, dict)
-        self.secret_metadata.set_annotations(new_dict=new_dict)
+        self.secret_metadata.set_annotations(dico=new_dict)
         return self
 
     def set_data(self, data_key=None, data_value=None):
@@ -79,7 +79,7 @@ class Secret(BaseModel):
 
     def set_labels(self, new_dict):
         assert isinstance(new_dict, dict)
-        self.secret_metadata.set_labels(new_dict=new_dict)
+        self.secret_metadata.set_labels(dico=new_dict)
         return self
 
     def set_service_account_token(self, account_name=None, account_uid=None, token=None,

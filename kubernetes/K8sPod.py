@@ -21,43 +21,46 @@ class K8sPod(K8sPodBasedObject):
         if self.config.pull_secret is not None:
             self.model.add_image_pull_secrets(name=self.config.pull_secret)
 
-    # ------------------------------------------------------------------------------------- model add
+    # -------------------------------------------------------------------------------------  add
 
-    def add_annotation(self, k, v):
+    def add_annotation(self, k=None, v=None):
         self.model.add_pod_annotation(k=k, v=v)
         return self
 
-    def add_label(self, k, v):
+    def add_label(self, k=None, v=None):
         self.model.add_pod_label(k=k, v=v)
         return self
 
-    # ------------------------------------------------------------------------------------- model delete
+    # ------------------------------------------------------------------------------------- delete
 
-    def del_annotation(self, k):
+    def del_annotation(self, k=None):
         self.model.del_pod_annotation(k=k)
         return self
 
-    def del_label(self, k):
+    def del_label(self, k=None):
         self.model.del_pod_label(k=k)
         return self
 
-    # ------------------------------------------------------------------------------------- model get
+    # ------------------------------------------------------------------------------------- get
 
     def get(self):
         self.model = Pod(model=self.get_model())
         return self
 
-    def get_annotation(self, k):
+    def get_annotation(self, k=None):
         return self.model.get_pod_annotation(k=k)
 
     def get_annotations(self):
         return self.model.get_pod_annotations()
 
-    def get_label(self, k):
+    def get_label(self, k=None):
         return self.model.get_pod_label(k=k)
 
     def get_labels(self):
         return self.model.get_pod_labels()
+
+    def get_namespace(self):
+        return self.model.get_pod_namespace()
 
     def get_status(self):
         return self.model.get_pod_status()
@@ -82,56 +85,71 @@ class K8sPod(K8sPodBasedObject):
                 ready = True
         return ready
 
-    # ------------------------------------------------------------------------------------- model set
+    # ------------------------------------------------------------------------------------- set
 
-    def set_annotations(self, new_dict):
-        self.model.set_pod_annotations(new_dict=new_dict)
+    def set_annotations(self, dico=None):
+        self.model.set_pod_annotations(new_dict=dico)
         return self
 
-    def set_labels(self, new_dict):
-        self.model.set_pod_labels(new_dict=new_dict)
+    def set_labels(self, dico=None):
+        self.model.set_pod_labels(dico=dico)
         return self
 
-    def set_namespace(self, name):
+    def set_namespace(self, name=None):
         self.model.set_pod_namespace(name=name)
         return self
 
     # ------------------------------------------------------------------------------------- filtering
 
     @staticmethod
-    def get_by_name(config, name):
+    def get_by_name(config=None, name=None):
+        if name is None:
+            raise SyntaxError('K8sPod: name: [ {0} ] cannot be None.'.format(name))
+        if not isinstance(name, str):
+            raise SyntaxError('K8sPod: name: [ {0} ] must be a string.'.format(name))
+
         try:
             pod_list = list()
-            data = dict(labelSelector="name={pod_name}".format(pod_name=name))
+            data = {'labelSelector': 'name={0}'.format(name)}
             pods = K8sPod(config=config, name=name).get_with_params(data=data)
+
             for pod in pods:
                 try:
                     pod_name = Pod(model=pod).get_pod_name()
                     pod_list.append(K8sPod(config=config, name=pod_name).get())
                 except NotFoundException:
                     pass
+
         except Exception as e:
             message = "Got an exception of type {my_type} with message {my_msg}"\
                 .format(my_type=type(e), my_msg=e.message)
             raise Exception(message)
+
         return pod_list
 
     @staticmethod
-    def get_by_labels(config, labels):
-        assert isinstance(labels, dict)
+    def get_by_labels(config=None, labels=None):
+        if labels is None:
+            raise SyntaxError('K8sPod: labels: [ {0} ] cannot be None.'.format(labels))
+        if not isinstance(labels, dict):
+            raise SyntaxError('K8sPod: labels: [ {0} ] must be a dict.'.format(labels))
+
         try:
             pod_list = list()
             my_labels = ",".join(['%s=%s' % (key, value) for (key, value) in labels.items()])
             data = dict(labelSelector="{labels}".format(labels=my_labels))
             pods = K8sPod(config=config, name=labels.get('name')).get_with_params(data=data)
+
             for pod in pods:
                 try:
                     pod_name = Pod(model=pod).get_pod_name()
                     pod_list.append(K8sPod(config=config, name=pod_name).get())
                 except NotFoundException:
                     pass
+
         except Exception as e:
             message = "Got an exception of type {my_type} with message {my_msg}"\
                 .format(my_type=type(e), my_msg=e.message)
             raise Exception(message)
+
         return pod_list

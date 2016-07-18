@@ -127,7 +127,7 @@ class K8sReplicationController(K8sPodBasedObject):
 
     def set_pod_labels(self, new_dict):
         assert isinstance(new_dict, dict)
-        self.model.set_pod_labels(new_dict=new_dict)
+        self.model.set_pod_labels(dico=new_dict)
         return self
 
     def set_replicas(self, replicas):
