@@ -69,69 +69,67 @@ class K8sReplicationControllerTest(unittest.TestCase):
         model = rc.model.model
         self.assertIsNotNone(model)
         self.assertIsInstance(model, dict)
+
         self.assertEqual(4, len(model))
-        self.assertIn('apiVersion', model)
+        for i in ['apiVersion', 'kind', 'metadata', 'spec']:
+            self.assertIn(i, model)
         self.assertIsInstance(model['apiVersion'], str)
-        self.assertIn('kind', model)
         self.assertIsInstance(model['kind'], str)
-        self.assertIn('metadata', model)
         self.assertIsInstance(model['metadata'], dict)
+        self.assertIsInstance(model['spec'], dict)
+
         self.assertEqual(3, len(model['metadata']))
-        self.assertIn('labels', model['metadata'])
-        self.assertIn('name', model['metadata']['labels'])
-        self.assertIn('namespace', model['metadata'])
+        for i in ['labels', 'name', 'namespace']:
+            self.assertIn(i, model['metadata'])
+        self.assertIsInstance(model['metadata']['name'], str)
+        self.assertEqual(model['metadata']['name'], name)
+        self.assertIsInstance(model['metadata']['namespace'], str)
         self.assertIsInstance(model['metadata']['labels'], dict)
+
         self.assertEqual(1, len(model['metadata']['labels']))
         self.assertIn('name', model['metadata']['labels'])
+        self.assertIsInstance(model['metadata']['labels']['name'], str)
         self.assertEqual(model['metadata']['labels']['name'], name)
-        self.assertIsInstance(model['metadata']['name'], str)
-        self.assertIsInstance(model['metadata']['namespace'], str)
-        self.assertIn('name', model['metadata'])
-        self.assertEqual(model['metadata']['name'], name)
-        self.assertIn('spec', model)
-        self.assertIsInstance(model['spec'], dict)
+
         self.assertEqual(3, len(model['spec']))
-        self.assertIn('replicas', model['spec'])
-        self.assertIn('selector', model['spec'])
-        self.assertIn('template', model['spec'])
+        for i in ['replicas', 'selector', 'template']:
+            self.assertIn(i, model['spec'])
         self.assertIsInstance(model['spec']['replicas'], int)
         self.assertIsInstance(model['spec']['selector'], dict)
-        self.assertEqual(2, len(model['spec']['selector']))
-        self.assertIn('name', model['spec']['selector'])
-        self.assertIn('rc_version', model['spec']['selector'])
-        self.assertIsInstance(model['spec']['selector']['name'], str)
-        self.assertIsInstance(model['spec']['selector']['rc_version'], str)
         self.assertIsInstance(model['spec']['template'], dict)
+
+        self.assertEqual(2, len(model['spec']['selector']))
+        for i in ['name', 'rc_version']:
+            self.assertIn(i, model['spec']['selector'])
+            self.assertIsInstance(model['spec']['selector'][i], str)
+
         self.assertEqual(2, len(model['spec']['template']))
-        self.assertIn('metadata', model['spec']['template'])
-        self.assertIn('spec', model['spec']['template'])
-        self.assertIsInstance(model['spec']['template']['metadata'], dict)
+        for i in ['metadata', 'spec']:
+            self.assertIn(i, model['spec']['template'])
+            self.assertIsInstance(model['spec']['template'][i], dict)
+
         self.assertEqual(3, len(model['spec']['template']['metadata']))
-        self.assertIn('labels', model['spec']['template']['metadata'])
-        self.assertIn('name', model['spec']['template']['metadata'])
-        self.assertIn('namespace', model['spec']['template']['metadata'])
+        for i in ['labels', 'name', 'namespace']:
+            self.assertIn(i, model['spec']['template']['metadata'])
         self.assertIsInstance(model['spec']['template']['metadata']['labels'], dict)
-        self.assertEqual(2, len(model['spec']['template']['metadata']['labels']))
-        self.assertIn('name', model['spec']['template']['metadata']['labels'])
-        self.assertIn('rc_version', model['spec']['template']['metadata']['labels'])
-        self.assertIsInstance(model['spec']['template']['metadata']['labels']['name'], str)
-        self.assertIsInstance(model['spec']['template']['metadata']['labels']['rc_version'], str)
         self.assertIsInstance(model['spec']['template']['metadata']['name'], str)
         self.assertIsInstance(model['spec']['template']['metadata']['namespace'], str)
-        self.assertIsInstance(model['spec']['template']['spec'], dict)
+
+        self.assertEqual(2, len(model['spec']['template']['metadata']['labels']))
+        for i in ['name', 'rc_version']:
+            self.assertIn(i, model['spec']['template']['metadata']['labels'])
+            self.assertIsInstance(model['spec']['template']['metadata']['labels'][i], str)
+
         self.assertEqual(4, len(model['spec']['template']['spec']))
-        self.assertIn('containers', model['spec']['template']['spec'])
-        self.assertIn('dnsPolicy', model['spec']['template']['spec'])
-        self.assertIn('restartPolicy', model['spec']['template']['spec'])
-        self.assertIn('volumes', model['spec']['template']['spec'])
-        self.assertIsInstance(model['spec']['template']['spec']['containers'], list)
-        self.assertIsInstance(model['spec']['template']['spec']['dnsPolicy'], str)
-        self.assertIsInstance(model['spec']['template']['spec']['restartPolicy'], str)
-        self.assertIsInstance(model['spec']['template']['spec']['volumes'], list)
-        self.assertEqual(0, len(model['spec']['template']['spec']['containers']))
+        for i in ['containers', 'dnsPolicy', 'restartPolicy', 'volumes']:
+            self.assertIn(i, model['spec']['template']['spec'])
+        for i in ['containers', 'volumes']:
+            self.assertIsInstance(model['spec']['template']['spec'][i], list)
+            self.assertEqual(0, len(model['spec']['template']['spec'][i]))
+        for i in ['dnsPolicy', 'restartPolicy']:
+            self.assertIsInstance(model['spec']['template']['spec'][i], str)
         self.assertEqual('Default', model['spec']['template']['spec']['dnsPolicy'])
         self.assertEqual('Always', model['spec']['template']['spec']['restartPolicy'])
-        self.assertEqual(0, len(model['spec']['template']['spec']['volumes']))
 
     # --------------------------------------------------------------------------------- add annotation
 
