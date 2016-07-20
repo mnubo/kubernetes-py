@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+#
+# This file is subject to the terms and conditions defined in
+# file 'LICENSE.md', which is part of this source code package.
+#
+
 from kubernetes.models.v1.BaseModel import BaseModel
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.models.v1.PodSpec import PodSpec
@@ -17,6 +25,8 @@ class PodBasedModel(BaseModel):
         if self.pod_status is not None:
             self.model['status'] = self.pod_status.get()
         return self
+
+    # ------------------------------------------------------------------------------------- add
 
     def add_container(self, container):
         try:
@@ -49,8 +59,6 @@ class PodBasedModel(BaseModel):
 
     def add_pod_annotation(self, k=None, v=None):
         try:
-            assert isinstance(k, str)
-            assert isinstance(v, str)
             self.pod_metadata.add_annotation(k=k, v=v)
         except:
             raise
@@ -58,20 +66,18 @@ class PodBasedModel(BaseModel):
 
     def add_pod_label(self, k=None, v=None):
         try:
-            assert isinstance(k, str)
-            assert isinstance(v, str)
             self.pod_metadata.add_label(k=k, v=v)
         except:
             raise
         return self
 
+    # ------------------------------------------------------------------------------------- delete
+
     def del_pod_annotation(self, k):
-        assert isinstance(k, str)
         self.pod_metadata.del_annotation(k=k)
         return self
 
     def del_pod_label(self, k):
-        assert isinstance(k, str)
         self.pod_metadata.del_label(k=k)
         return self
 
@@ -79,8 +85,9 @@ class PodBasedModel(BaseModel):
         self.pod_spec.del_node_name()
         return self
 
+    # ------------------------------------------------------------------------------------- get
+
     def get_pod_annotation(self, k):
-        assert isinstance(k, str)
         return self.pod_metadata.get_annotation(k=k)
 
     def get_pod_annotations(self):
@@ -94,7 +101,6 @@ class PodBasedModel(BaseModel):
         return my_list
 
     def get_pod_label(self, k):
-        assert isinstance(k, str)
         return self.pod_metadata.get_label(k=k)
 
     def get_pod_labels(self):
@@ -112,8 +118,19 @@ class PodBasedModel(BaseModel):
     def get_pod_node_selector(self):
         return self.pod_spec.get_node_selector()
 
+    def get_pod_restart_policy(self):
+        return self.pod_spec.get_restart_policy()
+
     def get_pod_status(self):
         return self.pod_status
+
+    def get_service_account(self):
+        return self.pod_spec.get_service_account()
+
+    def get_termination_grace_period(self):
+        return self.pod_spec.get_termination_grace_period()
+
+    # ------------------------------------------------------------------------------------- set
 
     def set_active_deadline(self, seconds):
         try:
@@ -130,8 +147,7 @@ class PodBasedModel(BaseModel):
         return self
 
     def set_pod_annotations(self, new_dict):
-        assert isinstance(new_dict, dict)
-        self.pod_metadata.set_annotations(new_dict=new_dict)
+        self.pod_metadata.set_annotations(dico=new_dict)
         return self
 
     def set_pod_generate_name(self, mode, name):
@@ -141,9 +157,8 @@ class PodBasedModel(BaseModel):
         self.pod_metadata.set_generate_name(mode=mode, name=name)
         return self
 
-    def set_pod_labels(self, new_dict):
-        assert isinstance(new_dict, dict)
-        self.pod_metadata.set_labels(new_dict=new_dict)
+    def set_pod_labels(self, dico):
+        self.pod_metadata.set_labels(dico=dico)
         return self
 
     def set_pod_image(self, name, image):
@@ -161,23 +176,20 @@ class PodBasedModel(BaseModel):
 
     def set_pod_namespace(self, name=None):
         try:
-            assert isinstance(name, str)
             self.pod_metadata.set_namespace(name=name)
         except:
             raise
         return self
 
     def set_pod_node_name(self, name):
-        assert isinstance(name, str)
         self.pod_spec.set_node_name(name=name)
         return self
 
     def set_pod_node_selector(self, new_dict):
-        assert isinstance(new_dict, dict)
-        self.pod_spec.set_node_selector(new_dict=new_dict)
+        self.pod_spec.set_node_selector(dico=new_dict)
         return self
 
-    def set_restart_policy(self, policy):
+    def set_pod_restart_policy(self, policy):
         try:
             self.pod_spec.set_restart_policy(policy=policy)
         except:
