@@ -108,22 +108,16 @@ class K8sPod(K8sPodBasedObject):
         if not isinstance(name, str):
             raise SyntaxError('K8sPod: name: [ {0} ] must be a string.'.format(name))
 
-        try:
-            pod_list = list()
-            data = {'labelSelector': 'name={0}'.format(name)}
-            pods = K8sPod(config=config, name=name).get_with_params(data=data)
+        pod_list = list()
+        data = {'labelSelector': 'name={0}'.format(name)}
+        pods = K8sPod(config=config, name=name).get_with_params(data=data)
 
-            for pod in pods:
-                try:
-                    pod_name = Pod(model=pod).get_pod_name()
-                    pod_list.append(K8sPod(config=config, name=pod_name).get())
-                except NotFoundException:
-                    pass
-
-        except Exception as e:
-            message = "Got an exception of type {my_type} with message {my_msg}"\
-                .format(my_type=type(e), my_msg=e.message)
-            raise Exception(message)
+        for pod in pods:
+            try:
+                pod_name = Pod(model=pod).get_pod_name()
+                pod_list.append(K8sPod(config=config, name=pod_name).get())
+            except NotFoundException:
+                pass
 
         return pod_list
 
@@ -134,22 +128,16 @@ class K8sPod(K8sPodBasedObject):
         if not isinstance(labels, dict):
             raise SyntaxError('K8sPod: labels: [ {0} ] must be a dict.'.format(labels))
 
-        try:
-            pod_list = list()
-            my_labels = ",".join(['%s=%s' % (key, value) for (key, value) in labels.items()])
-            data = dict(labelSelector="{labels}".format(labels=my_labels))
-            pods = K8sPod(config=config, name=labels.get('name')).get_with_params(data=data)
+        pod_list = list()
+        my_labels = ",".join(['%s=%s' % (key, value) for (key, value) in labels.items()])
+        data = dict(labelSelector="{labels}".format(labels=my_labels))
+        pods = K8sPod(config=config, name=labels.get('name')).get_with_params(data=data)
 
-            for pod in pods:
-                try:
-                    pod_name = Pod(model=pod).get_pod_name()
-                    pod_list.append(K8sPod(config=config, name=pod_name).get())
-                except NotFoundException:
-                    pass
-
-        except Exception as e:
-            message = "Got an exception of type {my_type} with message {my_msg}"\
-                .format(my_type=type(e), my_msg=e.message)
-            raise Exception(message)
+        for pod in pods:
+            try:
+                pod_name = Pod(model=pod).get_pod_name()
+                pod_list.append(K8sPod(config=config, name=pod_name).get())
+            except NotFoundException:
+                pass
 
         return pod_list
