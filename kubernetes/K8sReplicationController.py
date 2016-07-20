@@ -9,6 +9,7 @@
 import uuid
 import copy
 import time
+from kubernetes import K8sConfig
 from kubernetes.K8sPodBasedObject import K8sPodBasedObject
 from kubernetes.K8sPod import K8sPod
 from kubernetes.K8sContainer import K8sContainer
@@ -38,50 +39,37 @@ class K8sReplicationController(K8sPodBasedObject):
 
     # -------------------------------------------------------------------------------------  add
 
-    def add_annotation(self, k, v):
-        assert isinstance(k, str)
-        if not isinstance(v, str):
-            v = str(v)
+    def add_annotation(self, k=None, v=None):
         self.model.add_annotation(k=k, v=v)
         return self
 
-    def add_label(self, k, v):
-        assert isinstance(k, str)
-        assert isinstance(v, str)
+    def add_label(self, k=None, v=None):
         self.model.add_label(k=k, v=v)
         return self
 
-    def add_pod_annotation(self, k, v):
-        assert isinstance(k, str)
-        assert isinstance(v, str)
+    def add_pod_annotation(self, k=None, v=None):
         self.model.add_pod_annotation(k=k, v=v)
         return self
 
-    def add_pod_label(self, k, v):
-        assert isinstance(k, str)
-        assert isinstance(v, str)
+    def add_pod_label(self, k=None, v=None):
         self.model.add_pod_label(k=k, v=v)
         return self
 
     # -------------------------------------------------------------------------------------  del
 
-    def del_annotation(self, k):
-        assert isinstance(k, str)
+    def del_annotation(self, k=None):
         self.model.del_annotation(k=k)
         return self
 
-    def del_label(self, k):
-        assert isinstance(k, str)
+    def del_label(self, k=None):
         self.model.del_label(k=k)
         return self
 
-    def del_pod_annotation(self, k):
-        assert isinstance(k, str)
+    def del_pod_annotation(self, k=None):
         self.model.del_pod_annotation(k=k)
         return self
 
-    def del_pod_label(self, k):
-        assert isinstance(k, str)
+    def del_pod_label(self, k=None):
         self.model.del_pod_label(k=k)
         return self
 
@@ -91,29 +79,28 @@ class K8sReplicationController(K8sPodBasedObject):
         self.model = ReplicationController(model=self.get_model())
         return self
 
-    def get_annotation(self, k):
-        assert isinstance(k, str)
+    def get_annotation(self, k=None):
         return self.model.get_annotation(k=k)
 
     def get_annotations(self):
         return self.model.get_annotations()
 
-    def get_label(self, k):
-        assert isinstance(k, str)
+    def get_label(self, k=None):
         return self.model.get_label(k=k)
 
     def get_labels(self):
         return self.model.get_labels()
 
-    def get_pod_annotation(self, k):
-        assert isinstance(k, str)
+    def get_namespace(self):
+        return self.model.get_namespace()
+
+    def get_pod_annotation(self, k=None):
         return self.model.get_pod_annotation(k=k)
 
     def get_pod_annotations(self):
         return self.model.get_pod_annotations()
 
-    def get_pod_label(self, k):
-        assert isinstance(k, str)
+    def get_pod_label(self, k=None):
         return self.model.get_pod_label(k=k)
 
     def get_pod_labels(self):
@@ -127,113 +114,127 @@ class K8sReplicationController(K8sPodBasedObject):
 
     # -------------------------------------------------------------------------------------  set
 
-    def set_annotations(self, new_dict):
-        assert isinstance(new_dict, dict)
-        self.model.set_annotations(new_dict=new_dict)
+    def set_annotations(self, dico=None):
+        self.model.set_annotations(dico=dico)
         return self
 
-    def set_labels(self, new_dict):
-        assert isinstance(new_dict, dict)
-        self.model.set_labels(new_dict=new_dict)
+    def set_labels(self, dico=None):
+        self.model.set_labels(dico=dico)
         return self
 
-    def set_namespace(self, name):
+    def set_namespace(self, name=None):
         self.model.set_namespace(name=name)
         return self
 
-    def set_pod_annotations(self, new_dict):
-        assert isinstance(new_dict, dict)
-        self.model.set_pod_annotations(new_dict=new_dict)
+    def set_pod_annotations(self, dico=None):
+        self.model.set_pod_annotations(new_dict=dico)
         return self
 
-    def set_pod_labels(self, new_dict):
-        assert isinstance(new_dict, dict)
-        self.model.set_pod_labels(dico=new_dict)
+    def set_pod_labels(self, dico=None):
+        self.model.set_pod_labels(dico=dico)
         return self
 
-    def set_replicas(self, replicas):
+    def set_replicas(self, replicas=None):
         self.model.set_replicas(replicas=replicas)
         return self
 
-    def set_selector(self, selector):
-        self.model.set_selector(selector=selector)
+    def set_selector(self, dico=None):
+        self.model.set_selector(dico=dico)
         return self
 
     # -------------------------------------------------------------------------------------  wait for replicas
 
-    def wait_for_replicas(self, replicas, labels=None):
+    def wait_for_replicas(self, replicas=None, labels=None):
+        if replicas is None:
+            raise SyntaxError('ReplicationController: replicas: [ {0} ] cannot be None.'.format(replicas))
+        if not isinstance(replicas, int) or replicas < 0:
+            raise SyntaxError('ReplicationController: replicas: [ {0} ] must be a positive integer.'.format(replicas))
+
         if labels is None:
             labels = self.get_pod_labels()
+
         name = labels.get('name', None)
         pod_list = list()
+        pod_qty = len(pod_list)
         ready_check = False
 
-        print('Will wait for replicas to be equal to {replicas} and labels are: {labels}'.format(replicas=str(replicas),
-                                                                                                 labels=labels))
-        pod_qty = len(pod_list)
+        print('Waiting for replicas to scale to: [ {0} ] with labels: [ {1} ]'.format(replicas, labels))
+
         while not ((pod_qty == replicas) and ready_check):
-            try:
-                if labels is None:
-                    pod_list = K8sPod.get_by_name(config=self.config, name=name)
-                else:
-                    pod_list = K8sPod.get_by_labels(config=self.config, labels=labels)
-                pod_qty = len(pod_list)
-                if replicas > 0:
-                    pods_ready = 0
-                    for pod in pod_list:
-                        assert isinstance(pod, K8sPod)
-                        if pod.is_ready():
-                            pods_ready += 1
-                    if pods_ready == len(pod_list):
-                        ready_check = True
-                else:
+            if labels is None:
+                pod_list = K8sPod.get_by_name(config=self.config, name=name)
+            else:
+                pod_list = K8sPod.get_by_labels(config=self.config, labels=labels)
+
+            pod_qty = len(pod_list)
+            if replicas > 0:
+                pods_ready = 0
+                for pod in pod_list:
+                    assert isinstance(pod, K8sPod)
+                    if pod.is_ready():
+                        pods_ready += 1
+                if pods_ready == len(pod_list):
                     ready_check = True
-            except Exception as e:
-                message = "Got an exception of type {my_type} with message {my_msg}"\
-                    .format(my_type=type(e), my_msg=e.message)
-                raise Exception(message)
+            else:
+                ready_check = True
+
             time.sleep(0.2)
         return self
 
     # -------------------------------------------------------------------------------------  get by name
 
     @staticmethod
-    def get_by_name(config, name):
-        try:
-            rc_list = list()
-            data = dict(labelSelector="name={pod_name}".format(pod_name=name))
-            rcs = K8sReplicationController(config=config, name=name).get_with_params(data=data)
-            for rc in rcs:
-                try:
-                    rc_name = ReplicationController(model=rc).get_name()
-                    rc_list.append(K8sReplicationController(config=config, name=rc_name).get())
-                except NotFoundException:
-                    pass
-        except Exception as e:
-            message = "Got an exception of type {my_type} with message {my_msg}"\
-                .format(my_type=type(e), my_msg=e.message)
-            raise Exception(message)
+    def get_by_name(config=None, name=None):
+        if name is None:
+            raise SyntaxError('ReplicationController: name: [ {0} ] cannot be None.'.format(name))
+        if not isinstance(name, str):
+            raise SyntaxError('ReplicationController: name: [ {0} ] must be a string.'.format(name))
+
+        if config is not None and not isinstance(config, K8sConfig):
+            raise SyntaxError('ReplicationController: config: [ {0} ] must be a K8sConfig'.format(config))
+
+        rc_list = list()
+        data = {'labelSelector': 'name={0}'.format(name)}
+        rcs = K8sReplicationController(config=config, name=name).get_with_params(data=data)
+
+        for rc in rcs:
+            try:
+                rc_name = ReplicationController(model=rc).get_name()
+                rc_list.append(K8sReplicationController(config=config, name=rc_name).get())
+            except NotFoundException:
+                pass
+
         return rc_list
 
     # -------------------------------------------------------------------------------------  resize
 
     @staticmethod
-    def resize(config, name, replicas):
-        try:
-            current_rc = K8sReplicationController(config=config, name=name).get()
-            current_rc.set_replicas(replicas)
-            current_rc.update()
-            current_rc.wait_for_replicas(replicas=replicas)
-        except Exception as e:
-            message = "Got an exception of type {my_type} with message {my_msg}"\
-                .format(my_type=type(e), my_msg=e.message)
-            raise Exception(message)
+    def resize(config=None, name=None, replicas=None):
+        if name is None:
+            raise SyntaxError('ReplicationController: name: [ {0} ] cannot be None.'.format(name))
+        if replicas is None:
+            raise SyntaxError('ReplicationController: replicas: [ {0} ] cannot be None.'.format(replicas))
+
+        if not isinstance(name, str):
+            raise SyntaxError('ReplicationController: name: [ {0} ] must be a string.'.format(name))
+
+        if not isinstance(replicas, int) or replicas < 0:
+            raise SyntaxError('ReplicationController: replicas: [ {0} ] must be a positive integer.'.format(replicas))
+
+        if config is not None and not isinstance(config, K8sConfig):
+            raise SyntaxError('ReplicationController: config: [ {0} ] must be a K8sConfig'.format(config))
+
+        current_rc = K8sReplicationController(config=config, name=name).get()
+        current_rc.set_replicas(replicas)
+        current_rc.update()
+        current_rc.wait_for_replicas(replicas=replicas)
+
         return current_rc
 
     # -------------------------------------------------------------------------------------  rolling update
 
     @staticmethod
-    def rolling_update(config, name, image=None, container_name=None, new_rc=None, wait_seconds=10):
+    def rolling_update(config=None, name=None, image=None, container_name=None, new_rc=None, wait_seconds=10):
         next_rc_suffix = '-next'
         partner_annotation = 'update-partner'
         replicas_annotation = 'desired-replicas'
@@ -247,20 +248,12 @@ class K8sReplicationController(K8sPodBasedObject):
             current_exists = True
         except NotFoundException:
             raise NotFoundException('RollingUpdate: Current replication controller does not exist.')
-        except Exception as e:
-            message = "Got an exception of type {my_type} with message {my_msg}"\
-                .format(my_type=type(e), my_msg=e.message)
-            raise Exception(message)
 
         try:
             next_rc = K8sReplicationController(config=config, name=next_name).get()
             next_exists = True
         except NotFoundException:
             pass
-        except Exception as e:
-            message = "Got an exception of type {my_type} with message {my_msg}"\
-                .format(my_type=type(e), my_msg=e.message)
-            raise Exception(message)
 
         if current_exists and not next_exists:
             try:
@@ -278,7 +271,7 @@ class K8sReplicationController(K8sPodBasedObject):
                 next_rc.add_pod_label(k='name', v=name)
                 my_version = str(uuid.uuid4())
                 next_rc.add_pod_label(k='rc_version', v=my_version)
-                next_rc.set_selector(selector=dict(name=name, rc_version=my_version))
+                next_rc.set_selector(dico=dict(name=name, rc_version=my_version))
                 next_rc.set_replicas(replicas=0)
                 next_rc.set_pod_generate_name(mode=True, name=name)
                 next_rc.create()
@@ -294,8 +287,10 @@ class K8sReplicationController(K8sPodBasedObject):
                     .format(my_type=type(e), my_msg=e.message)
                 raise Exception(message)
             phase = 'rollout'
+
         elif next_exists and not current_exists:
             phase = 'rename'
+
         elif current_exists and next_exists:
             if not next_rc.get_annotation(k=replicas_annotation):
                 try:
@@ -325,6 +320,7 @@ class K8sReplicationController(K8sPodBasedObject):
                     current_rc.set_replicas(replicas=0)
                     current_rc.update()
                     current_rc.wait_for_replicas(replicas=0, labels=current_rc.get_pod_labels())
+
             except Exception as e:
                 message = "Got an exception of type {my_type} with message {my_msg}"\
                     .format(my_type=type(e), my_msg=e.message)
