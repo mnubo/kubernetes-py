@@ -38,6 +38,14 @@ class K8sSecretTest(unittest.TestCase):
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
+    def test_init_with_invalid_name(self):
+        name = object()
+        try:
+            K8sSecret(name=name)
+            self.fail("Should not fail.")
+        except Exception as err:
+            self.assertIsInstance(err, SyntaxError)
+
     def test_init_with_name(self):
         name = "yoname"
         secret = K8sSecret(name=name)

@@ -28,6 +28,22 @@ class K8sPodTest(unittest.TestCase):
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
+    def test_init_with_invalid_config(self):
+        config = object()
+        try:
+            K8sPod(config=config)
+            self.fail("Should not fail.")
+        except Exception as err:
+            self.assertIsInstance(err, SyntaxError)
+
+    def test_init_with_invalid_name(self):
+        name = object()
+        try:
+            K8sPod(name=name)
+            self.fail("Should not fail.")
+        except Exception as err:
+            self.assertIsInstance(err, SyntaxError)
+
     def test_init_with_name(self):
         name = "yomama"
         pod = K8sPod(name=name)

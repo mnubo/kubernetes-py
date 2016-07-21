@@ -22,22 +22,23 @@ class K8sObject(object):
 
     def __init__(self, config=None, name=None, obj_type=None):
 
-        if config is not None:
-            try:
-                assert isinstance(config, K8sConfig)
-            except:
-                raise SyntaxError('Please define config as a K8sConfig object.')
-        else:
+        if config is not None and not isinstance(config, K8sConfig):
+            raise SyntaxError('K8sObject: config: [ {0} ] must be of type K8sConfig.'.format(config.__class__.__name__))
+        if config is None:
             config = K8sConfig()
-
         self.config = config
 
+        if name is None:
+            raise SyntaxError('K8sObject: name: [ {0} ] cannot be None.'.format(name))
+        if not isinstance(name, str):
+            raise SyntaxError('K8sObject: name: [ {0} ] must be a string.'.format(name.__class__.__name__))
+
         if obj_type is None or not isinstance(obj_type, str):
-            raise SyntaxError('Please define obj_type as a string.')
+            raise SyntaxError('K8sObject: obj_type: [ {0} ] must be a string.'.format(obj_type.__class__.__name__))
 
         if obj_type not in VALID_K8s_OBJS:
             valid = ", ".join(VALID_K8s_OBJS)
-            raise SyntaxError('Please make sure object type: [ {0} ] is in: [ {1} ]'.format(obj_type, valid))
+            raise SyntaxError('K8sObject: obj_type: [ {0} ] must be in: [ {1} ]'.format(obj_type, valid))
 
         self.obj_type = obj_type
         self.name = name
