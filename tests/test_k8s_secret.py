@@ -13,7 +13,7 @@ from kubernetes import K8sSecret, K8sConfig
 from kubernetes.models.v1 import Secret, ObjectMeta
 
 
-class K8sReplicationControllerTest(unittest.TestCase):
+class K8sSecretTest(unittest.TestCase):
 
     def setUp(self):
         pass
