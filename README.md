@@ -1,6 +1,7 @@
 # kubernetes-py
 
 [![Build Status](https://travis-ci.org/froch/kubernetes-py.svg?branch=master)](https://travis-ci.org/froch/kubernetes-py)
+[![Coverage Status](https://coveralls.io/repos/github/froch/kubernetes-py/badge.svg?branch=master)](https://coveralls.io/github/froch/kubernetes-py?branch=master)
 
 A python module to use Kubernetes. Currently based on the version 1 of the API.
 
