@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+#
+# This file is subject to the terms and conditions defined in
+# file 'LICENSE.md', which is part of this source code package.
+#
+
 from kubernetes.models.v1.BaseModel import BaseModel
 from kubernetes.models.v1.Probe import Probe
 
@@ -22,7 +30,7 @@ class Container(BaseModel):
                 self.model['hostNetwork'] = False
         else:
             if name is None or image is None:
-                raise SyntaxError
+                raise SyntaxError("name: [ {0} ] and image: [ {1} ] cannot be None.".format(name, image))
             self.model = {
                 "name": name,
                 "image": image,
@@ -91,6 +99,9 @@ class Container(BaseModel):
 
     def get_name(self):
         return self.model['name']
+
+    def get_image(self):
+        return self.model['image']
 
     def get_readiness_probe(self):
         return self.readiness_probe
