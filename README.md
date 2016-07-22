@@ -1,5 +1,7 @@
 # kubernetes-py
 
+[![Build Status](https://travis-ci.org/froch/kubernetes-py.svg?branch=master)](https://travis-ci.org/froch/kubernetes-py)
+
 A python module to use Kubernetes. Currently based on the version 1 of the API.
 
 Currently supported Kubernetes objects:
