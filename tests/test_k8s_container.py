@@ -23,7 +23,7 @@ class K8sContainerTest(unittest.TestCase):
 
     def test_init_no_args(self):
         try:
-            c = K8sContainer()
+            K8sContainer()
             self.fail("Should not fail.")
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)

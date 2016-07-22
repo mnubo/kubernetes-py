@@ -27,6 +27,22 @@ class K8sObjectTest(unittest.TestCase):
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
+    def test_init_with_invalid_config(self):
+        config = object()
+        try:
+            K8sObject(config=config)
+            self.fail("Should not fail.")
+        except Exception as err:
+            self.assertIsInstance(err, SyntaxError)
+
+    def test_init_with_invalid_name(self):
+        name = object()
+        try:
+            K8sObject(name=name)
+            self.fail("Should not fail.")
+        except Exception as err:
+            self.assertIsInstance(err, SyntaxError)
+
     def test_init_invalid_object_type(self):
         ot = 666
         try:

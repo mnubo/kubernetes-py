@@ -13,7 +13,7 @@ from kubernetes import K8sSecret, K8sConfig
 from kubernetes.models.v1 import Secret, ObjectMeta
 
 
-class K8sReplicationControllerTest(unittest.TestCase):
+class K8sSecretTest(unittest.TestCase):
 
     def setUp(self):
         pass
@@ -34,6 +34,14 @@ class K8sReplicationControllerTest(unittest.TestCase):
         config = object()
         try:
             K8sSecret(config=config)
+            self.fail("Should not fail.")
+        except Exception as err:
+            self.assertIsInstance(err, SyntaxError)
+
+    def test_init_with_invalid_name(self):
+        name = object()
+        try:
+            K8sSecret(name=name)
             self.fail("Should not fail.")
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)

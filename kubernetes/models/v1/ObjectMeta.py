@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+#
+# This file is subject to the terms and conditions defined in
+# file 'LICENSE.md', which is part of this source code package.
+#
+
 from kubernetes.models.v1.BaseModel import BaseModel
 
 
@@ -17,7 +25,9 @@ class ObjectMeta(BaseModel):
         if k is None or v is None:
             raise SyntaxError('ObjectMeta: annotation: [ {0}, {1} ] cannot be None.'.format(k, v))
         if not isinstance(k, str) or not isinstance(v, str):
-            raise SyntaxError('ObjectMeta: annotation: [ {0}, {1} ] must be strings.'.format(k, v))
+            kc = k.__class__.__name__
+            vc = v.__class__.__name__
+            raise SyntaxError('ObjectMeta: annotation: [ {0}, {1} ] must be strings.'.format(kc, vc))
 
         if 'annotations' not in self.model:
             self.model['annotations'] = dict()
@@ -33,7 +43,9 @@ class ObjectMeta(BaseModel):
         if k is None or v is None:
             raise SyntaxError('ObjectMeta: label: [ {0}, {1} ] cannot be None.'.format(k, v))
         if not isinstance(k, str) or not isinstance(v, str):
-            raise SyntaxError('ObjectMeta: label: [ {0}, {1} ] must be strings.'.format(k, v))
+            kc = k.__class__.__name__
+            vc = v.__class__.__name__
+            raise SyntaxError('ObjectMeta: label: [ {0}, {1} ] must be strings.'.format(kc, vc))
 
         if k not in self.model['labels']:
             self.model['labels'].update({k: v})
@@ -47,7 +59,7 @@ class ObjectMeta(BaseModel):
         if k is None:
             raise SyntaxError('ObjectMeta: k: [ {0} ] cannot be None.'.format(k))
         if not isinstance(k, str):
-            raise SyntaxError('ObjectMeta: k: [ {0} ] must be a string'.format(k))
+            raise SyntaxError('ObjectMeta: k: [ {0} ] must be a string'.format(k.__class__.__name__))
 
         if 'annotations' not in self.model:
             return self
@@ -82,7 +94,7 @@ class ObjectMeta(BaseModel):
         if k is None:
             raise SyntaxError('ObjectMeta: k: [ {0} ] cannot be None.'.format(k))
         if not isinstance(k, str):
-            raise SyntaxError('ObjectMeta: k: [ {0} ] must be a string.'.format(k))
+            raise SyntaxError('ObjectMeta: k: [ {0} ] must be a string.'.format(k.__class__.__name__))
 
         if 'labels' not in self.model:
             return self
@@ -130,15 +142,11 @@ class ObjectMeta(BaseModel):
         if k is None:
             raise SyntaxError('ObjectMeta: k: [ {0} ] cannot be None.'.format(k))
         if not isinstance(k, str):
-            raise SyntaxError('ObjectMeta: k: [ {0} ] must be a string.'.format(k))
-
-        my_value = None
-
+            raise SyntaxError('ObjectMeta: k: [ {0} ] must be a string.'.format(k.__class__.__name__))
         if 'annotations' in self.model:
             if k in self.model['annotations']:
-                my_value = self.model['annotations'][k]
-
-        return my_value
+                return self.model['annotations'][k]
+        return None
 
     def get_annotations(self):
         if 'annotations' in self.model:
@@ -146,49 +154,43 @@ class ObjectMeta(BaseModel):
         return None
 
     def get_creation_timestamp(self):
-        my_value = None
         if 'creationTimestamp' in self.model:
-            my_value = self.model['creationTimestamp']
-        return my_value
+            return self.model['creationTimestamp']
+        return None
 
     def get_deletion_timestamp(self):
-        my_value = None
         if 'deletionTimestamp' in self.model:
-            my_value = self.model['deletionTimestamp']
-        return my_value
+            return self.model['deletionTimestamp']
+        return None
 
     def get_deletion_grace_period_seconds(self):
-        my_value = None
         if 'deletionGracePeriodSeconds' in self.model:
-            my_value = self.model['deletionGracePeriodSeconds']
-        return my_value
+            return self.model['deletionGracePeriodSeconds']
+        return None
 
     def get_generate_name(self):
-        my_value = None
         if 'generateName' in self.model:
-            my_value = self.model['generateName']
-        return my_value
+            return self.model['generateName']
+        return None
 
     def get_generation(self):
-        my_value = None
         if 'generation' in self.model:
-            my_value = self.model['generation']
-        return my_value
+            return self.model['generation']
+        return None
 
     def get_label(self, k):
         if k is None:
             raise SyntaxError('ObjectMeta: k: [ {0} ] cannot be None.'.format(k))
         if not isinstance(k, str):
-            raise SyntaxError('ObjectMeta: k: [ {0} ] must be a string.'.format(k))
+            raise SyntaxError('ObjectMeta: k: [ {0} ] must be a string.'.format(k.__class__.__name__))
         if 'labels' in self.model and k in self.model['labels']:
             return self.model['labels'][k]
         return None
 
     def get_labels(self):
-        my_value = None
         if 'labels' in self.model:
-            my_value = self.model['labels']
-        return my_value
+            return self.model['labels']
+        return None
 
     def get_name(self):
         return self.model['name']
@@ -197,42 +199,43 @@ class ObjectMeta(BaseModel):
         return self.model['namespace']
 
     def get_resource_version(self):
-        my_value = None
         if 'resourceVersion' in self.model:
-            my_value = self.model['resourceVersion']
-        return my_value
+            return self.model['resourceVersion']
+        return None
 
     def get_status(self):
-        my_value = None
         if 'status' in self.model:
-            my_value = self.model['status']
-        return my_value
+            return self.model['status']
+        return None
 
     def get_self_link(self):
-        my_value = None
         if 'selfLink' in self.model:
-            my_value = self.model['selfLink']
-        return my_value
+            return self.model['selfLink']
+        return None
 
     def get_uid(self):
-        my_value = None
         if 'uid' in self.model:
-            my_value = self.model['uid']
-        return my_value
+            return self.model['uid']
+        return None
 
     def set_annotations(self, dico=None):
         if dico is None:
             raise SyntaxError('ObjectMeta: dico: [ {0} ] cannot be None.'.format(dico))
         if not isinstance(dico, dict):
-            raise SyntaxError('ObjectMeta: dico: [ {0} ] must be a dict.'.format(dico))
+            raise SyntaxError('ObjectMeta: dico: [ {0} ] must be a dict.'.format(dico.__class__.__name__))
+        for k, v in dico.iteritems():
+            if not isinstance(k, str) or not isinstance(v, str):
+                raise SyntaxError('ObjectMeta: dico: [ {0} ] must be a mapping of str -> str.'.format(dico))
         self.model['annotations'] = dico
         return self
 
     # ------------------------------------------------------------------------------------- set
 
     def set_creation_timestamp(self, ts=None):
-        if ts is None or not isinstance(ts, str):
-            raise SyntaxError('ObjectMeta: ts should be a string.')
+        if ts is None:
+            raise SyntaxError('ObjectMeta: ts: [ {0} ] cannot be None.'.format(ts))
+        if not isinstance(ts, str):
+            raise SyntaxError('ObjectMeta: ts: [ {0} ] must be a string.'.format(ts.__class__.__name__))
         self.model['creationTimestamp'] = ts
         return self
 
@@ -263,8 +266,10 @@ class ObjectMeta(BaseModel):
         return self
 
     def set_generation(self, gen=None):
-        if gen is None or not isinstance(gen, int):
-            raise SyntaxError('ObjectMeta: gen should be a int.')
+        if gen is None:
+            raise SyntaxError('ObjectMeta: gen: [ {0} ] cannot be None.'.format(gen))
+        if not isinstance(gen, int):
+            raise SyntaxError('ObjectMeta: gen: [ {0} ] must be an int.'.format(gen.__class__.__name__))
         self.model['generation'] = gen
         return self
 
@@ -272,7 +277,10 @@ class ObjectMeta(BaseModel):
         if dico is None:
             raise SyntaxError('ObjectMeta: dico: [ {0} ] cannot be None.'.format(dico))
         if not isinstance(dico, dict):
-            raise SyntaxError('ObjectMeta: dico: [ {0} ] must be a dict.'.format(dico))
+            raise SyntaxError('ObjectMeta: dico: [ {0} ] must be a dict.'.format(dico.__class__.__name__))
+        for k, v in dico.iteritems():
+            if not isinstance(k, str) or not isinstance(v, str):
+                raise SyntaxError('ObjectMeta: dico: [ {0} ] must be a mapping of str -> str.'.format(dico))
         self.model['labels'] = dico
         return self
 
@@ -288,25 +296,30 @@ class ObjectMeta(BaseModel):
         if name is None:
             raise SyntaxError('ObjectMeta: name: [ {0} ] cannot be None.'.format(name))
         if not isinstance(name, str):
-            raise SyntaxError('ObjectMeta: name: [ {0} ] must be a string.'.format(name))
+            raise SyntaxError('ObjectMeta: name: [ {0} ] must be a string.'.format(name.__class__.__name__))
         self.model['namespace'] = name
         return self
 
     def set_resource_version(self, ver=None):
-        if ver is None or not isinstance(ver, str):
-            raise SyntaxError('ObjectMeta: gen should be a string.')
+        if ver is None:
+            raise SyntaxError('ObjectMeta: ver: [ {0} ] cannot be None.'.format(ver))
+        if not isinstance(ver, str):
+            raise SyntaxError('ObjectMeta: ver: [ {0} ] must be a string.'.format(ver.__class__.__name__))
         self.model['resourceVersion'] = ver
         return self
 
     def set_self_link(self, link=None):
-        if link is None or not isinstance(link, str):
-            raise SyntaxError('ObjectMeta: link should be a string.')
+        if link is None:
+            raise SyntaxError('ObjectMeta: link: [ {0} ] cannot be None.'.format(link))
+        if not isinstance(link, str):
+            raise SyntaxError('ObjectMeta: link: [ {0} ] must be a string.'.format(link.__class__.__name__))
         self.model['selfLink'] = link
         return self
 
     def set_uid(self, uid=None):
-        if uid is None or not isinstance(uid, str):
-            raise SyntaxError('ObjectMeta: uid should be a string.')
+        if uid is None:
+            raise SyntaxError('ObjectMeta: uid: [ {0} ] cannot be None.'.format(uid))
+        if not isinstance(uid, str):
+            raise SyntaxError('ObjectMeta: uid: [ {0} ] must be a string.'.format(uid.__class__.__name__))
         self.model['uid'] = uid
         return self
-
