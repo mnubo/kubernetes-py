@@ -39,28 +39,19 @@ class K8sConfigTest(unittest.TestCase):
 
     # ------------------------------------------------------------------------------------- init with kubeconfig
 
-    def test_init_with_default_kubeconfig(self):
-        config = K8sConfig()
+    def test_init_with_test_kubeconfig(self):
+        config = K8sConfig(kubeconfig='.kube/config')
         self.assertIsNotNone(config)
         self.assertIsInstance(config, K8sConfig)
-        if hasattr(config, 'api_host'):
-            self.assertIsInstance(config.api_host, str)
-        if hasattr(config, 'client_certificate'):
-            self.assertIsInstance(config.client_certificate, str)
-        if hasattr(config, 'client_key'):
-            self.assertIsInstance(config.client_key, str)
-        if hasattr(config, 'clusters'):
-            self.assertIsInstance(config.clusters, list)
-        if hasattr(config, 'contexts'):
-            self.assertIsInstance(config.contexts, list)
-        if hasattr(config, 'current_context'):
-            self.assertIsInstance(config.current_context, str)
-        if hasattr(config, 'preferences'):
-            self.assertIsInstance(config.preferences, dict)
-        if hasattr(config, 'users'):
-            self.assertIsInstance(config.users, list)
-        if hasattr(config, 'version'):
-            self.assertIsInstance(config.version, str)
+        self.assertIsInstance(config.api_host, str)
+        self.assertIsInstance(config.client_certificate, str)
+        self.assertIsInstance(config.client_key, str)
+        self.assertIsInstance(config.clusters, list)
+        self.assertIsInstance(config.contexts, list)
+        self.assertIsInstance(config.current_context, str)
+        self.assertIsInstance(config.preferences, dict)
+        self.assertIsInstance(config.users, list)
+        self.assertIsInstance(config.version, str)
 
     # ------------------------------------------------------------------------------------- init with custom args
 
