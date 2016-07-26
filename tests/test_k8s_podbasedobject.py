@@ -7,8 +7,11 @@
 #
 
 import unittest
-from kubernetes import K8sPodBasedObject, K8sContainer
+import os
+from kubernetes import K8sPodBasedObject, K8sContainer, K8sConfig
 from kubernetes.models.v1 import Pod, ReplicationController, ObjectMeta, PodSpec
+
+kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
 
 
 class K8sPodBasedObjectTest(unittest.TestCase):
@@ -22,14 +25,16 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- util
 
     def _create_pod(self, name='yopod'):
-        obj = K8sPodBasedObject(obj_type='Pod', name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPodBasedObject(config=cfg, obj_type='Pod', name=name)
         self.assertIsNotNone(obj)
         obj.model = Pod(name=name)
         self.assertIsInstance(obj.model, Pod)
         return obj
 
     def _create_rc(self, name='yorc'):
-        obj = K8sPodBasedObject(obj_type='ReplicationController', name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPodBasedObject(config=cfg, obj_type='ReplicationController', name=name)
         self.assertIsNotNone(obj)
         obj.model = ReplicationController(name=name)
         self.assertIsInstance(obj.model, ReplicationController)
@@ -62,7 +67,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     def test_init_object_type_pod(self):
         ot = "Pod"
         name = "yopod"
-        obj = K8sPodBasedObject(name=name, obj_type=ot)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPodBasedObject(config=cfg, name=name, obj_type=ot)
         self.assertIsNotNone(obj)
         self.assertIsInstance(obj, K8sPodBasedObject)
         self.assertEqual(ot, obj.obj_type)
@@ -71,7 +77,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     def test_init_object_type_rc(self):
         ot = "ReplicationController"
         name = "yorc"
-        obj = K8sPodBasedObject(name=name, obj_type=ot)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPodBasedObject(config=cfg, name=name, obj_type=ot)
         self.assertIsNotNone(obj)
         self.assertIsInstance(obj, K8sPodBasedObject)
         self.assertEqual(ot, obj.obj_type)
