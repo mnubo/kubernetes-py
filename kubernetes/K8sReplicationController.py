@@ -14,7 +14,7 @@ from kubernetes.K8sPodBasedObject import K8sPodBasedObject
 from kubernetes.K8sPod import K8sPod
 from kubernetes.K8sContainer import K8sContainer
 from kubernetes.models.v1.ReplicationController import ReplicationController
-from kubernetes.exceptions.NotFoundException import NotFoundException
+from kubernetes.K8sExceptions import NotFoundException
 
 
 class K8sReplicationController(K8sPodBasedObject):

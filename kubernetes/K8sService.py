@@ -8,7 +8,7 @@
 
 from kubernetes.K8sObject import K8sObject
 from kubernetes.models.v1.Service import Service
-from kubernetes.exceptions.NotFoundException import NotFoundException
+from kubernetes.K8sExceptions import NotFoundException
 
 
 class K8sService(K8sObject):

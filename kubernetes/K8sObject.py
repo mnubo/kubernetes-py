@@ -11,8 +11,7 @@ from kubernetes.models.v1.BaseUrls import BaseUrls
 from kubernetes.models.v1.BaseModel import BaseModel
 from kubernetes.models.v1.DeleteOptions import DeleteOptions
 from kubernetes.K8sConfig import K8sConfig
-from kubernetes.exceptions.NotFoundException import NotFoundException
-from kubernetes.exceptions.UnprocessableEntityException import UnprocessableEntityException
+from kubernetes.K8sExceptions import NotFoundException, UnprocessableEntityException
 import json
 
 VALID_K8s_OBJS = ['Pod', 'ReplicationController', 'Secret', 'Service']

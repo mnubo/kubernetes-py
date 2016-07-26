@@ -10,6 +10,7 @@ import unittest
 import json
 import socket
 from kubernetes import K8sObject, K8sConfig
+from kubernetes.K8sExceptions import UnprocessableEntityException
 
 
 class K8sObjectTest(unittest.TestCase):
@@ -211,3 +212,17 @@ class K8sObjectTest(unittest.TestCase):
                 self.assertIsInstance(port[i], str)
             for i in ['port', 'targetPort']:
                 self.assertIsInstance(port[i], int)
+
+    # ------------------------------------------------------------------------------------- api - create
+
+    def test_object_pod_create(self):
+        config = K8sConfig()
+        if config.api_host is not None and self._is_reachable(config.api_host):
+            ot = "Pod"
+            name = "yomama"
+            obj = K8sObject(name=name, obj_type=ot, config=config)
+            try:
+                obj.create()
+            except Exception as err:
+                self.assertIsInstance(err, UnprocessableEntityException)
+    

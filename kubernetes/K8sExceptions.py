@@ -9,4 +9,9 @@
 
 class NotFoundException(Exception):
     def __init__(self, *args, **kwargs):
-        pass
+        super(NotFoundException, self).__init__(*args, **kwargs)
+
+
+class UnprocessableEntityException(Exception):
+    def __init__(self, *args, **kwargs):
+        super(UnprocessableEntityException, self).__init__(*args, **kwargs)
