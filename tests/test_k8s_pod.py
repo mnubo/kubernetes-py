@@ -7,8 +7,11 @@
 #
 
 import unittest
+import os
 from kubernetes import K8sPod, K8sConfig
 from kubernetes.models.v1 import Pod, ObjectMeta, PodSpec
+
+kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
 
 
 class K8sPodTest(unittest.TestCase):
@@ -46,7 +49,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_init_with_name(self):
         name = "yomama"
-        pod = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        pod = K8sPod(config=cfg, name=name)
         self.assertIsNotNone(pod)
         self.assertIsInstance(pod, K8sPod)
         self.assertEqual(pod.name, name)
@@ -54,7 +58,7 @@ class K8sPodTest(unittest.TestCase):
     def test_init_with_config_and_pull_secrets(self):
         ps = "yomama"
         name = "sofat"
-        config = K8sConfig(pull_secret=ps)
+        config = K8sConfig(kubeconfig=kubeconfig_fallback, pull_secret=ps)
         pod = K8sPod(config=config, name=name)
         self.assertIsNotNone(pod.config)
         self.assertEqual(ps, pod.config.pull_secret)
@@ -63,7 +67,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_struct_k8spod(self):
         name = "yomama"
-        pod = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        pod = K8sPod(config=cfg, name=name)
         self.assertIsNotNone(pod)
         self.assertIsInstance(pod, K8sPod)
         self.assertIsNotNone(pod.model)
@@ -71,7 +76,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_struct_pod(self):
         name = "yomama"
-        pod = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        pod = K8sPod(config=cfg, name=name)
         model = pod.model
         self.assertIsInstance(model.model, dict)
         self.assertIsInstance(model.pod_metadata, ObjectMeta)
@@ -80,7 +86,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_struct_pod_model(self):
         name = "yomama"
-        pod = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        pod = K8sPod(config=cfg, name=name)
         model = pod.model.model
         self.assertIsNotNone(model)
         self.assertIsInstance(model, dict)
@@ -114,7 +121,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_add_annotation_none_args(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
         try:
             obj.add_annotation()
         except Exception as err:
@@ -122,7 +130,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_add_annotation_invalid_args(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
         k = object()
         v = object()
         try:
@@ -132,7 +141,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_add_annotation(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
 
         k = "yokey"
         v = "yovalue"
@@ -149,7 +159,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_add_label_none_args(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
         try:
             obj.add_label()
         except Exception as err:
@@ -157,7 +168,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_add_label_invalid_args(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
         k = object()
         v = object()
         try:
@@ -167,7 +179,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_add_label(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
         k = "yokey"
         v_in = "yovalue"
         obj.add_label(k, v_in)
@@ -178,7 +191,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_del_annotation_none_arg(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
         try:
             obj.del_annotation()
         except Exception as err:
@@ -186,7 +200,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_del_annotation_invalid_arg(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
         k = object()
         try:
             obj.del_annotation(k)
@@ -195,7 +210,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_del_annotation_none_yet(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
 
         k = "yokey"
         obj.del_annotation(k)
@@ -207,7 +223,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_del_annotation(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
 
         k = "yokey"
         v = "yovalue"
@@ -231,7 +248,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_del_annotation_does_not_exist(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
 
         k_1 = "yokey"
         v_1 = "yovalue"
@@ -258,7 +276,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_del_label_none_arg(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
         try:
             obj.del_label()
         except Exception as err:
@@ -266,7 +285,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_del_label_invalid_arg(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
         k = object()
         try:
             obj.del_label(k)
@@ -275,7 +295,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_del_label_none_yet(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
 
         k = "yokey"
         obj.del_label(k)
@@ -287,7 +308,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_del_label(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
 
         k = "yokey"
         v = "yovalue"
@@ -311,7 +333,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_del_label_does_not_exist(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
 
         k_1 = "yokey"
         v_1 = "yovalue"
@@ -347,7 +370,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_annotation_none_args(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
 
         try:
             obj.get_annotation()
@@ -356,7 +380,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_annotation_invalid_args(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
 
         k = object()
         try:
@@ -366,7 +391,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_annotation_doesnt_exist(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
 
         k = "yonotexists"
         ann = obj.get_annotation(k)
@@ -374,7 +400,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_annotation(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
 
         k = "yokey"
         v_in = "yovalue"
@@ -387,13 +414,15 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_annotations_none(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
         anns = obj.get_annotations()
         self.assertIsNone(anns)
 
     def test_get_annotations(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
 
         count = 4
         for i in range(0, count):
@@ -413,7 +442,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_label_none_args(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
 
         try:
             obj.get_annotation()
@@ -422,7 +452,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_label_invalid_args(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
 
         k = object()
         try:
@@ -432,7 +463,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_label_doesnt_exist(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
 
         k = "yonotexists"
         l = obj.get_label(k)
@@ -440,7 +472,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_label(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
 
         k = "yokey"
         v_in = "yovalue"
@@ -453,14 +486,16 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_labels_none(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
         labels = obj.get_labels()
         self.assertIsNotNone(labels)
         self.assertIn('name', labels)
 
     def test_get_labels(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
 
         count = 4
         for i in range(0, count):
@@ -480,7 +515,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_pod_status_local(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
         status = obj.get_status()
         self.assertIsNone(status)
 
@@ -492,7 +528,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_is_ready_local(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
         is_ready = obj.is_ready()
         self.assertFalse(is_ready)
 
@@ -504,7 +541,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_set_annotations_none_args(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
         try:
             obj.set_annotations()
             self.fail("Should not fail.")
@@ -513,7 +551,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_set_annotations_invalid_args(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
         anns = object()
         try:
             obj.set_annotations(anns)
@@ -523,7 +562,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_set_annotations(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
         anns_in = {'key': 'value'}
         obj.set_annotations(anns_in)
         anns_out = obj.get_annotations()
@@ -533,7 +573,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_set_labels_none_args(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
         try:
             obj.set_labels()
             self.fail("Should not fail.")
@@ -542,7 +583,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_set_labels_invalid_args(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
         labels = object()
         try:
             obj.set_labels(labels)
@@ -552,7 +594,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_set_labels(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
         labels_in = {'key': 'value'}
         obj.set_labels(labels_in)
         labels_out = obj.get_labels()
@@ -562,7 +605,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_set_namespace_none_args(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
         try:
             obj.set_namespace()
             self.fail("Should not fail.")
@@ -571,7 +615,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_set_namespace_invalid_args(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
         nspace = object()
         try:
             obj.set_namespace(nspace)
@@ -581,7 +626,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_set_namespace(self):
         name = "yopod"
-        obj = K8sPod(name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=cfg, name=name)
         nspace_in = "yonamespace"
         obj.set_namespace(nspace_in)
         nspace_out = obj.get_namespace()
