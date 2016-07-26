@@ -54,30 +54,34 @@ class K8sObjectTest(unittest.TestCase):
 
     def test_init_with_invalid_name(self):
         name = object()
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
         try:
-            K8sObject(name=name)
+            K8sObject(config=cfg, name=name)
             self.fail("Should not fail.")
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_init_invalid_object_type(self):
         ot = 666
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
         try:
-            K8sObject(obj_type=ot)
+            K8sObject(config=cfg, obj_type=ot)
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_init_unknown_object_type(self):
         ot = "yomama"
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
         try:
-            K8sObject(obj_type=ot)
+            K8sObject(config=cfg, obj_type=ot)
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_init_object_type_pod(self):
         ot = "Pod"
         name = "yomama"
-        obj = K8sObject(name=name, obj_type=ot)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sObject(config=cfg, name=name, obj_type=ot)
         self.assertIsInstance(obj, K8sObject)
         self.assertEqual(ot, obj.obj_type)
         self.assertEqual(name, obj.name)
@@ -85,7 +89,8 @@ class K8sObjectTest(unittest.TestCase):
     def test_init_object_type_rc(self):
         ot = "ReplicationController"
         name = "yomama"
-        obj = K8sObject(name=name, obj_type=ot)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sObject(config=cfg, name=name, obj_type=ot)
         self.assertIsInstance(obj, K8sObject)
         self.assertEqual(ot, obj.obj_type)
         self.assertEqual(name, obj.name)
@@ -93,7 +98,8 @@ class K8sObjectTest(unittest.TestCase):
     def test_init_object_type_secret(self):
         ot = "Secret"
         name = "yomama"
-        obj = K8sObject(name=name, obj_type=ot)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sObject(config=cfg, name=name, obj_type=ot)
         self.assertIsInstance(obj, K8sObject)
         self.assertEqual(ot, obj.obj_type)
         self.assertEqual(name, obj.name)
@@ -101,7 +107,8 @@ class K8sObjectTest(unittest.TestCase):
     def test_init_object_type_service(self):
         ot = "Service"
         name = "yomama"
-        obj = K8sObject(name=name, obj_type=ot)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sObject(config=cfg, name=name, obj_type=ot)
         self.assertIsInstance(obj, K8sObject)
         self.assertEqual(ot, obj.obj_type)
         self.assertEqual(name, obj.name)
@@ -111,14 +118,16 @@ class K8sObjectTest(unittest.TestCase):
     def test_object_as_dict(self):
         ot = "Service"
         name = "yomama"
-        obj = K8sObject(name=name, obj_type=ot)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sObject(config=cfg, name=name, obj_type=ot)
         dico = obj.as_dict()
         self.assertIsInstance(dico, dict)
 
     def test_object_as_json(self):
         ot = "Service"
         name = "yomama"
-        obj = K8sObject(name=name, obj_type=ot)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sObject(config=cfg, name=name, obj_type=ot)
         s = obj.as_json()
         self.assertIsInstance(s, str)
         valid = json.loads(s)
@@ -129,7 +138,8 @@ class K8sObjectTest(unittest.TestCase):
     def test_object_set_name(self):
         ot = "Pod"
         name1 = "yomama"
-        obj = K8sObject(name=name1, obj_type=ot)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sObject(config=cfg, name=name1, obj_type=ot)
         self.assertEqual(name1, obj.name)
         name2 = "sofat"
         obj.set_name(name2)
@@ -221,7 +231,8 @@ class K8sObjectTest(unittest.TestCase):
     def test_object_get_model_name_unset(self):
         ot = "Pod"
         name = "yomama"
-        obj = K8sObject(name=name, obj_type=ot)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sObject(config=cfg, name=name, obj_type=ot)
         obj.name = None
         try:
             obj.get_model()
@@ -277,7 +288,8 @@ class K8sObjectTest(unittest.TestCase):
     def test_object_get_with_params_none_arg(self):
         ot = "Pod"
         name = "yomama"
-        obj = K8sObject(name=name, obj_type=ot)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sObject(config=cfg, name=name, obj_type=ot)
         try:
             obj.get_with_params()
         except Exception as err:
@@ -286,7 +298,8 @@ class K8sObjectTest(unittest.TestCase):
     def test_object_get_with_params_invalid_arg(self):
         ot = "Pod"
         name = "yomama"
-        obj = K8sObject(name=name, obj_type=ot)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sObject(config=cfg, name=name, obj_type=ot)
         data = object()
         try:
             obj.get_with_params(data)
@@ -309,7 +322,8 @@ class K8sObjectTest(unittest.TestCase):
     def test_object_create_name_unset(self):
         ot = "Pod"
         name = "yomama"
-        obj = K8sObject(name=name, obj_type=ot)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sObject(config=cfg, name=name, obj_type=ot)
         obj.name = None
         try:
             obj.create()
@@ -365,7 +379,8 @@ class K8sObjectTest(unittest.TestCase):
     def test_object_update_name_unset(self):
         ot = "Pod"
         name = "yomama"
-        obj = K8sObject(name=name, obj_type=ot)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sObject(config=cfg, name=name, obj_type=ot)
         obj.name = None
         try:
             obj.update()
@@ -421,7 +436,8 @@ class K8sObjectTest(unittest.TestCase):
     def test_object_delete_name_unset(self):
         ot = "Pod"
         name = "yomama"
-        obj = K8sObject(name=name, obj_type=ot)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sObject(config=cfg, name=name, obj_type=ot)
         obj.name = None
         try:
             obj.delete()
