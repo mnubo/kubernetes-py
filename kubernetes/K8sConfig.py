@@ -23,8 +23,8 @@ VALID_HOST_RE = re.compile(r'^(http[s]?\:\/\/)?([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-
 
 
 class K8sConfig:
-    def __init__(self, kubeconfig=DEFAULT_KUBECONFIG, api_host=DEFAULT_API_HOST, auth=None, namespace=DEFAULT_NAMESPACE,
-                 pull_secret=None, token=None, version=DEFAULT_API_VERSION):
+    def __init__(self, kubeconfig=DEFAULT_KUBECONFIG, api_host=DEFAULT_API_HOST, auth=None, cert=None,
+                 namespace=DEFAULT_NAMESPACE, pull_secret=None, token=None, version=DEFAULT_API_VERSION):
         """
         Pulls configuration from a kubeconfig file, if present, otherwise accepts user-defined parameters.s
         See http://kubernetes.io/docs/user-guide/kubeconfig-file/ for information on the kubeconfig file.
@@ -115,6 +115,7 @@ class K8sConfig:
 
             self.api_host = api_host
             self.auth = auth
+            self.cert = cert
             self.namespace = namespace
             self.pull_secret = pull_secret
             self.token = token
