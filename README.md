@@ -79,7 +79,6 @@ Deleting a pod:
     from kubernetes import K8sPod
     
     pod = K8sPod(config=cfg_cert, name='redis')
-    pod.get()
     pod.delete()
 
 ### ReplicationController
