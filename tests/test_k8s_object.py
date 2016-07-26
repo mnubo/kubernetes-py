@@ -119,3 +119,13 @@ class K8sObjectTest(unittest.TestCase):
         self.assertNotEqual(obj.name, name1)
         self.assertEqual(obj.name, name2)
 
+    # ------------------------------------------------------------------------------------- remote API calls
+
+    def test_object_pod_list_no_results(self):
+        config = K8sConfig()
+        ot = "Pod"
+        name = "yomama"
+        obj = K8sObject(name=name, obj_type=ot, config=config)
+        r = obj.list()
+        self.assertIsNotNone(r)
+        self.assertEqual(0, len(r))
