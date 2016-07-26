@@ -22,6 +22,15 @@ class K8sPodTest(unittest.TestCase):
     def tearDown(self):
         pass
 
+    # ------------------------------------------------------------------------------------- utils
+
+    @staticmethod
+    def _create_pod(config=None, name=None):
+        if config is None:
+            config = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPod(config=config, name=name)
+        return obj
+
     # ------------------------------------------------------------------------------------- init
 
     def test_init_no_args(self):
@@ -49,8 +58,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_init_with_name(self):
         name = "yomama"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        pod = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
         self.assertIsNotNone(pod)
         self.assertIsInstance(pod, K8sPod)
         self.assertEqual(pod.name, name)
@@ -58,8 +66,8 @@ class K8sPodTest(unittest.TestCase):
     def test_init_with_config_and_pull_secrets(self):
         ps = "yomama"
         name = "sofat"
-        config = K8sConfig(kubeconfig=kubeconfig_fallback, pull_secret=ps)
-        pod = K8sPod(config=config, name=name)
+        cfg = K8sConfig(kubeconfig=kubeconfig_fallback, pull_secret=ps)
+        pod = self._create_pod(config=cfg, name=name)
         self.assertIsNotNone(pod.config)
         self.assertEqual(ps, pod.config.pull_secret)
 
@@ -67,8 +75,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_struct_k8spod(self):
         name = "yomama"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        pod = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
         self.assertIsNotNone(pod)
         self.assertIsInstance(pod, K8sPod)
         self.assertIsNotNone(pod.model)
@@ -76,8 +83,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_struct_pod(self):
         name = "yomama"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        pod = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
         model = pod.model
         self.assertIsInstance(model.model, dict)
         self.assertIsInstance(model.pod_metadata, ObjectMeta)
@@ -86,8 +92,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_struct_pod_model(self):
         name = "yomama"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        pod = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
         model = pod.model.model
         self.assertIsNotNone(model)
         self.assertIsInstance(model, dict)
@@ -121,37 +126,34 @@ class K8sPodTest(unittest.TestCase):
 
     def test_add_annotation_none_args(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
         try:
-            obj.add_annotation()
+            pod.add_annotation()
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_add_annotation_invalid_args(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
         k = object()
         v = object()
         try:
-            obj.add_annotation(k, v)
+            pod.add_annotation(k, v)
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_add_annotation(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
 
         k = "yokey"
         v = "yovalue"
-        obj.add_annotation(k, v)
+        pod.add_annotation(k, v)
 
-        meta = obj.model.model['metadata']
+        meta = pod.model.model['metadata']
         self.assertIn('annotations', meta)
         self.assertIn(k, meta['annotations'])
-        meta = obj.model.pod_metadata.model
+        meta = pod.model.pod_metadata.model
         self.assertIn('annotations', meta)
         self.assertIn(k, meta['annotations'])
 
@@ -159,201 +161,188 @@ class K8sPodTest(unittest.TestCase):
 
     def test_add_label_none_args(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
         try:
-            obj.add_label()
+            pod.add_label()
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_add_label_invalid_args(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
         k = object()
         v = object()
         try:
-            obj.add_label(k, v)
+            pod.add_label(k, v)
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_add_label(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
         k = "yokey"
         v_in = "yovalue"
-        obj.add_label(k, v_in)
-        v_out = obj.get_label(k)
+        pod.add_label(k, v_in)
+        v_out = pod.get_label(k)
         self.assertEqual(v_in, v_out)
 
     # ------------------------------------------------------------------------------------- delete annotation
 
     def test_del_annotation_none_arg(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
         try:
-            obj.del_annotation()
+            pod.del_annotation()
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_del_annotation_invalid_arg(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
         k = object()
         try:
-            obj.del_annotation(k)
+            pod.del_annotation(k)
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_del_annotation_none_yet(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
 
         k = "yokey"
-        obj.del_annotation(k)
+        pod.del_annotation(k)
 
-        meta = obj.model.model['metadata']
+        meta = pod.model.model['metadata']
         self.assertNotIn('annotations', meta)
-        meta = obj.model.pod_metadata.model
+        meta = pod.model.pod_metadata.model
         self.assertNotIn('annotations', meta)
 
     def test_del_annotation(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
 
         k = "yokey"
         v = "yovalue"
-        obj.add_annotation(k, v)
+        pod.add_annotation(k, v)
 
-        meta = obj.model.model['metadata']
+        meta = pod.model.model['metadata']
         self.assertIn('annotations', meta)
         self.assertIn(k, meta['annotations'])
-        meta = obj.model.pod_metadata.model
+        meta = pod.model.pod_metadata.model
         self.assertIn('annotations', meta)
         self.assertIn(k, meta['annotations'])
 
-        obj.del_annotation(k)
+        pod.del_annotation(k)
 
-        meta = obj.model.model['metadata']
+        meta = pod.model.model['metadata']
         self.assertIn('annotations', meta)
         self.assertNotIn(k, meta['annotations'])
-        meta = obj.model.pod_metadata.model
+        meta = pod.model.pod_metadata.model
         self.assertIn('annotations', meta)
         self.assertNotIn(k, meta['annotations'])
 
     def test_del_annotation_does_not_exist(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
 
         k_1 = "yokey"
         v_1 = "yovalue"
         k_2 = "yonotexists"
-        obj.add_annotation(k_1, v_1)
+        pod.add_annotation(k_1, v_1)
 
-        meta = obj.model.model['metadata']
+        meta = pod.model.model['metadata']
         self.assertIn('annotations', meta)
         self.assertIn(k_1, meta['annotations'])
         self.assertNotIn(k_2, meta['annotations'])
-        meta = obj.model.pod_metadata.model
+        meta = pod.model.pod_metadata.model
         self.assertIn('annotations', meta)
         self.assertIn(k_1, meta['annotations'])
         self.assertNotIn(k_2, meta['annotations'])
 
-        obj.del_annotation(k_2)
+        pod.del_annotation(k_2)
 
-        meta = obj.model.model['metadata']
+        meta = pod.model.model['metadata']
         self.assertNotIn(k_2, meta)
-        meta = obj.model.pod_metadata.model
+        meta = pod.model.pod_metadata.model
         self.assertNotIn(k_2, meta)
 
     # ------------------------------------------------------------------------------------- delete label
 
     def test_del_label_none_arg(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
         try:
-            obj.del_label()
+            pod.del_label()
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_del_label_invalid_arg(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
         k = object()
         try:
-            obj.del_label(k)
+            pod.del_label(k)
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_del_label_none_yet(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
 
         k = "yokey"
-        obj.del_label(k)
+        pod.del_label(k)
 
-        meta = obj.model.model['metadata']
+        meta = pod.model.model['metadata']
         self.assertIn('labels', meta)
-        meta = obj.model.pod_metadata.model
+        meta = pod.model.pod_metadata.model
         self.assertIn('labels', meta)
 
     def test_del_label(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
 
         k = "yokey"
         v = "yovalue"
-        obj.add_label(k, v)
+        pod.add_label(k, v)
 
-        meta = obj.model.model['metadata']
+        meta = pod.model.model['metadata']
         self.assertIn('labels', meta)
         self.assertIn(k, meta['labels'])
-        meta = obj.model.pod_metadata.model
+        meta = pod.model.pod_metadata.model
         self.assertIn('labels', meta)
         self.assertIn(k, meta['labels'])
 
-        obj.del_label(k)
+        pod.del_label(k)
 
-        meta = obj.model.model['metadata']
+        meta = pod.model.model['metadata']
         self.assertIn('labels', meta)
         self.assertNotIn(k, meta['labels'])
-        meta = obj.model.pod_metadata.model
+        meta = pod.model.pod_metadata.model
         self.assertIn('labels', meta)
         self.assertNotIn(k, meta['labels'])
 
     def test_del_label_does_not_exist(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
 
         k_1 = "yokey"
         v_1 = "yovalue"
         k_2 = "yonotexists"
-        obj.add_label(k_1, v_1)
+        pod.add_label(k_1, v_1)
 
-        meta = obj.model.model['metadata']
+        meta = pod.model.model['metadata']
         self.assertIn('labels', meta)
         self.assertIn(k_1, meta['labels'])
         self.assertNotIn(k_2, meta['labels'])
-        meta = obj.model.pod_metadata.model
+        meta = pod.model.pod_metadata.model
         self.assertIn('labels', meta)
         self.assertIn(k_1, meta['labels'])
         self.assertNotIn(k_2, meta['labels'])
 
-        obj.del_label(k_2)
-        meta = obj.model.model['metadata']
+        pod.del_label(k_2)
+        meta = pod.model.model['metadata']
         self.assertNotIn(k_2, meta)
-        meta = obj.model.pod_metadata.model
+        meta = pod.model.pod_metadata.model
         self.assertNotIn(k_2, meta)
 
     # ------------------------------------------------------------------------------------- get
@@ -370,67 +359,61 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_annotation_none_args(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
 
         try:
-            obj.get_annotation()
+            pod.get_annotation()
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_get_annotation_invalid_args(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
 
         k = object()
         try:
-            obj.get_annotation(k)
+            pod.get_annotation(k)
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_get_annotation_doesnt_exist(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
 
         k = "yonotexists"
-        ann = obj.get_annotation(k)
+        ann = pod.get_annotation(k)
         self.assertIsNone(ann)
 
     def test_get_annotation(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
 
         k = "yokey"
         v_in = "yovalue"
-        obj.add_annotation(k, v_in)
+        pod.add_annotation(k, v_in)
 
-        v_out = obj.get_annotation(k)
+        v_out = pod.get_annotation(k)
         self.assertEqual(v_in, v_out)
 
     # ------------------------------------------------------------------------------------- get annotations
 
     def test_get_annotations_none(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
-        anns = obj.get_annotations()
+        pod = self._create_pod(name=name)
+        anns = pod.get_annotations()
         self.assertIsNone(anns)
 
     def test_get_annotations(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
 
         count = 4
         for i in range(0, count):
             k = "key_{0}".format(i)
             v = "value_{0}".format(i)
-            obj.add_annotation(k, v)
+            pod.add_annotation(k, v)
 
-        anns = obj.get_annotations()
+        anns = pod.get_annotations()
 
         self.assertIsNotNone(anns)
         self.assertIsInstance(anns, dict)
@@ -442,68 +425,62 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_label_none_args(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
 
         try:
-            obj.get_annotation()
+            pod.get_annotation()
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_get_label_invalid_args(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
 
         k = object()
         try:
-            obj.get_label(k)
+            pod.get_label(k)
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_get_label_doesnt_exist(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
 
         k = "yonotexists"
-        l = obj.get_label(k)
+        l = pod.get_label(k)
         self.assertIsNone(l)
 
     def test_get_label(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
 
         k = "yokey"
         v_in = "yovalue"
-        obj.add_label(k, v_in)
+        pod.add_label(k, v_in)
 
-        v_out = obj.get_label(k)
+        v_out = pod.get_label(k)
         self.assertEqual(v_in, v_out)
 
     # ------------------------------------------------------------------------------------- get labels
 
     def test_get_labels_none(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
-        labels = obj.get_labels()
+        pod = self._create_pod(name=name)
+        labels = pod.get_labels()
         self.assertIsNotNone(labels)
         self.assertIn('name', labels)
 
     def test_get_labels(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
 
         count = 4
         for i in range(0, count):
             k = "key_{0}".format(i)
             v = "value_{0}".format(i)
-            obj.add_label(k, v)
+            pod.add_label(k, v)
 
-        labels = obj.get_labels()
+        labels = pod.get_labels()
 
         self.assertIsNotNone(labels)
         self.assertIsInstance(labels, dict)
@@ -515,9 +492,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_pod_status_local(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
-        status = obj.get_status()
+        pod = self._create_pod(name=name)
+        status = pod.get_status()
         self.assertIsNone(status)
 
     # TODO: requires http call
@@ -528,9 +504,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_is_ready_local(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
-        is_ready = obj.is_ready()
+        pod = self._create_pod(name=name)
+        is_ready = pod.is_ready()
         self.assertFalse(is_ready)
 
     # TODO: requires http call
@@ -541,96 +516,87 @@ class K8sPodTest(unittest.TestCase):
 
     def test_set_annotations_none_args(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
         try:
-            obj.set_annotations()
+            pod.set_annotations()
             self.fail("Should not fail.")
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_set_annotations_invalid_args(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
         anns = object()
         try:
-            obj.set_annotations(anns)
+            pod.set_annotations(anns)
             self.fail("Should not fail.")
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_set_annotations(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
         anns_in = {'key': 'value'}
-        obj.set_annotations(anns_in)
-        anns_out = obj.get_annotations()
+        pod.set_annotations(anns_in)
+        anns_out = pod.get_annotations()
         self.assertEqual(anns_in, anns_out)
 
     # ------------------------------------------------------------------------------------- set labels
 
     def test_set_labels_none_args(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
         try:
-            obj.set_labels()
+            pod.set_labels()
             self.fail("Should not fail.")
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_set_labels_invalid_args(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
         labels = object()
         try:
-            obj.set_labels(labels)
+            pod.set_labels(labels)
             self.fail("Should not fail.")
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_set_labels(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
         labels_in = {'key': 'value'}
-        obj.set_labels(labels_in)
-        labels_out = obj.get_labels()
+        pod.set_labels(labels_in)
+        labels_out = pod.get_labels()
         self.assertEqual(labels_in, labels_out)
 
     # ------------------------------------------------------------------------------------- set namespace
 
     def test_set_namespace_none_args(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
         try:
-            obj.set_namespace()
+            pod.set_namespace()
             self.fail("Should not fail.")
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_set_namespace_invalid_args(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
         nspace = object()
         try:
-            obj.set_namespace(nspace)
+            pod.set_namespace(nspace)
             self.fail("Should not fail.")
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_set_namespace(self):
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPod(config=cfg, name=name)
+        pod = self._create_pod(name=name)
         nspace_in = "yonamespace"
-        obj.set_namespace(nspace_in)
-        nspace_out = obj.get_namespace()
+        pod.set_namespace(nspace_in)
+        nspace_out = pod.get_namespace()
         self.assertEqual(nspace_in, nspace_out)
 
     # ------------------------------------------------------------------------------------- get by name
