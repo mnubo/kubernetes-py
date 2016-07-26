@@ -15,3 +15,8 @@ class NotFoundException(Exception):
 class UnprocessableEntityException(Exception):
     def __init__(self, *args, **kwargs):
         super(UnprocessableEntityException, self).__init__(*args, **kwargs)
+
+
+class BadRequestException(Exception):
+    def __init__(self, *args, **kwargs):
+        super(BadRequestException, self).__init__(*args, **kwargs)
