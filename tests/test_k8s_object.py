@@ -9,8 +9,11 @@
 import unittest
 import json
 import socket
+import os
 from kubernetes import K8sObject, K8sConfig
 from kubernetes.K8sExceptions import UnprocessableEntityException, NotFoundException, BadRequestException
+
+kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
 
 
 class K8sObjectTest(unittest.TestCase):
@@ -136,7 +139,7 @@ class K8sObjectTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------- api - list
 
     def test_object_pod_list_from_scratch(self):
-        config = K8sConfig(kubeconfig='.kube/config')
+        config = K8sConfig(kubeconfig=kubeconfig_fallback)
         if config.api_host is not None and self._is_reachable(config.api_host):
             ot = "Pod"
             name = "yomama"
@@ -146,7 +149,7 @@ class K8sObjectTest(unittest.TestCase):
             self.assertEqual(0, len(r))
 
     def test_object_rc_list_from_scratch(self):
-        config = K8sConfig(kubeconfig='.kube/config')
+        config = K8sConfig(kubeconfig=kubeconfig_fallback)
         if config.api_host is not None and self._is_reachable(config.api_host):
             ot = "ReplicationController"
             name = "yomama"
@@ -156,7 +159,7 @@ class K8sObjectTest(unittest.TestCase):
             self.assertEqual(0, len(r))
 
     def test_object_secret_list_from_scratch(self):
-        config = K8sConfig(kubeconfig='.kube/config')
+        config = K8sConfig(kubeconfig=kubeconfig_fallback)
         if config.api_host is not None and self._is_reachable(config.api_host):
             ot = "Secret"
             name = "yomama"
@@ -174,7 +177,7 @@ class K8sObjectTest(unittest.TestCase):
             self.assertIsInstance(secret['type'], str)
 
     def test_object_service_list_from_scratch(self):
-        config = K8sConfig(kubeconfig='.kube/config')
+        config = K8sConfig(kubeconfig=kubeconfig_fallback)
         if config.api_host is not None and self._is_reachable(config.api_host):
             ot = "Service"
             name = "yomama"
@@ -226,7 +229,7 @@ class K8sObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_object_pod_get_model_doesnt_exist(self):
-        config = K8sConfig(kubeconfig='.kube/config')
+        config = K8sConfig(kubeconfig=kubeconfig_fallback)
         if config.api_host is not None and self._is_reachable(config.api_host):
             ot = "Pod"
             name = "yomama"
@@ -237,7 +240,7 @@ class K8sObjectTest(unittest.TestCase):
                 self.assertIsInstance(err, NotFoundException)
 
     def test_object_rc_get_model_doesnt_exist(self):
-        config = K8sConfig(kubeconfig='.kube/config')
+        config = K8sConfig(kubeconfig=kubeconfig_fallback)
         if config.api_host is not None and self._is_reachable(config.api_host):
             ot = "ReplicationController"
             name = "yomama"
@@ -248,7 +251,7 @@ class K8sObjectTest(unittest.TestCase):
                 self.assertIsInstance(err, NotFoundException)
 
     def test_object_secret_get_model_doesnt_exist(self):
-        config = K8sConfig(kubeconfig='.kube/config')
+        config = K8sConfig(kubeconfig=kubeconfig_fallback)
         if config.api_host is not None and self._is_reachable(config.api_host):
             ot = "Secret"
             name = "yomama"
@@ -259,7 +262,7 @@ class K8sObjectTest(unittest.TestCase):
                 self.assertIsInstance(err, NotFoundException)
 
     def test_object_service_get_model_doesnt_exist(self):
-        config = K8sConfig(kubeconfig='.kube/config')
+        config = K8sConfig(kubeconfig=kubeconfig_fallback)
         if config.api_host is not None and self._is_reachable(config.api_host):
             ot = "Service"
             name = "yomama"
@@ -291,7 +294,7 @@ class K8sObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_object_get_with_params_nonexistent(self):
-        config = K8sConfig(kubeconfig='.kube/config')
+        config = K8sConfig(kubeconfig=kubeconfig_fallback)
         if config.api_host is not None and self._is_reachable(config.api_host):
             ot = "Pod"
             name = "yomama"
@@ -314,7 +317,7 @@ class K8sObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_object_pod_create_unprocessable(self):
-        config = K8sConfig(kubeconfig='.kube/config')
+        config = K8sConfig(kubeconfig=kubeconfig_fallback)
         if config.api_host is not None and self._is_reachable(config.api_host):
             ot = "Pod"
             name = "yomama"
@@ -325,7 +328,7 @@ class K8sObjectTest(unittest.TestCase):
                 self.assertIsInstance(err, UnprocessableEntityException)
 
     def test_object_rc_create_unprocessable(self):
-        config = K8sConfig(kubeconfig='.kube/config')
+        config = K8sConfig(kubeconfig=kubeconfig_fallback)
         if config.api_host is not None and self._is_reachable(config.api_host):
             ot = "ReplicationController"
             name = "yomama"
@@ -336,7 +339,7 @@ class K8sObjectTest(unittest.TestCase):
                 self.assertIsInstance(err, UnprocessableEntityException)
 
     def test_object_secret_create_unprocessable(self):
-        config = K8sConfig(kubeconfig='.kube/config')
+        config = K8sConfig(kubeconfig=kubeconfig_fallback)
         if config.api_host is not None and self._is_reachable(config.api_host):
             ot = "Secret"
             name = "yomama"
@@ -347,7 +350,7 @@ class K8sObjectTest(unittest.TestCase):
                 self.assertIsInstance(err, UnprocessableEntityException)
 
     def test_object_service_create_unprocessable(self):
-        config = K8sConfig(kubeconfig='.kube/config')
+        config = K8sConfig(kubeconfig=kubeconfig_fallback)
         if config.api_host is not None and self._is_reachable(config.api_host):
             ot = "Service"
             name = "yomama"
@@ -370,7 +373,7 @@ class K8sObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_object_pod_update_bad_request(self):
-        config = K8sConfig(kubeconfig='.kube/config')
+        config = K8sConfig(kubeconfig=kubeconfig_fallback)
         if config.api_host is not None and self._is_reachable(config.api_host):
             ot = "Pod"
             name = "yomama"
@@ -381,7 +384,7 @@ class K8sObjectTest(unittest.TestCase):
                 self.assertIsInstance(err, BadRequestException)
 
     def test_object_rc_update_bad_request(self):
-        config = K8sConfig(kubeconfig='.kube/config')
+        config = K8sConfig(kubeconfig=kubeconfig_fallback)
         if config.api_host is not None and self._is_reachable(config.api_host):
             ot = "ReplicationController"
             name = "yomama"
@@ -392,7 +395,7 @@ class K8sObjectTest(unittest.TestCase):
                 self.assertIsInstance(err, BadRequestException)
 
     def test_object_secret_update_bad_request(self):
-        config = K8sConfig(kubeconfig='.kube/config')
+        config = K8sConfig(kubeconfig=kubeconfig_fallback)
         if config.api_host is not None and self._is_reachable(config.api_host):
             ot = "Secret"
             name = "yomama"
@@ -403,7 +406,7 @@ class K8sObjectTest(unittest.TestCase):
                 self.assertIsInstance(err, BadRequestException)
 
     def test_object_service_update_bad_request(self):
-        config = K8sConfig(kubeconfig='.kube/config')
+        config = K8sConfig(kubeconfig=kubeconfig_fallback)
         if config.api_host is not None and self._is_reachable(config.api_host):
             ot = "Service"
             name = "yomama"
@@ -426,7 +429,7 @@ class K8sObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_object_pod_delete_not_found(self):
-        config = K8sConfig(kubeconfig='.kube/config')
+        config = K8sConfig(kubeconfig=kubeconfig_fallback)
         if config.api_host is not None and self._is_reachable(config.api_host):
             ot = "Pod"
             name = "yomama"
@@ -437,7 +440,7 @@ class K8sObjectTest(unittest.TestCase):
                 self.assertIsInstance(err, NotFoundException)
 
     def test_object_rc_delete_not_found(self):
-        config = K8sConfig(kubeconfig='.kube/config')
+        config = K8sConfig(kubeconfig=kubeconfig_fallback)
         if config.api_host is not None and self._is_reachable(config.api_host):
             ot = "ReplicationController"
             name = "yomama"
@@ -448,7 +451,7 @@ class K8sObjectTest(unittest.TestCase):
                 self.assertIsInstance(err, NotFoundException)
 
     def test_object_secret_delete_not_found(self):
-        config = K8sConfig(kubeconfig='.kube/config')
+        config = K8sConfig(kubeconfig=kubeconfig_fallback)
         if config.api_host is not None and self._is_reachable(config.api_host):
             ot = "Secret"
             name = "yomama"
@@ -459,7 +462,7 @@ class K8sObjectTest(unittest.TestCase):
                 self.assertIsInstance(err, NotFoundException)
 
     def test_object_service_delete_not_found(self):
-        config = K8sConfig(kubeconfig='.kube/config')
+        config = K8sConfig(kubeconfig=kubeconfig_fallback)
         if config.api_host is not None and self._is_reachable(config.api_host):
             ot = "Service"
             name = "yomama"
