@@ -8,6 +8,7 @@
 
 import unittest
 import json
+import socket
 from kubernetes import K8sObject, K8sConfig
 
 
@@ -18,6 +19,18 @@ class K8sObjectTest(unittest.TestCase):
 
     def tearDown(self):
         pass
+
+    # ------------------------------------------------------------------------------------- utils
+
+    @staticmethod
+    def _is_reachable(api_host):
+        scheme, host, port = api_host.replace("//", "").split(':')
+        try:
+            s = socket.create_connection((host, port), timeout=1)
+            s.close()
+            return True
+        except socket.timeout:
+            return False
 
     # ------------------------------------------------------------------------------------- init
 
@@ -119,13 +132,82 @@ class K8sObjectTest(unittest.TestCase):
         self.assertNotEqual(obj.name, name1)
         self.assertEqual(obj.name, name2)
 
-    # ------------------------------------------------------------------------------------- remote API calls
+    # ------------------------------------------------------------------------------------- api - list
 
-    def test_object_pod_list_no_results(self):
+    def test_object_pod_list_from_scratch(self):
         config = K8sConfig()
-        ot = "Pod"
-        name = "yomama"
-        obj = K8sObject(name=name, obj_type=ot, config=config)
-        r = obj.list()
-        self.assertIsNotNone(r)
-        self.assertEqual(0, len(r))
+        if config.api_host is not None and self._is_reachable(config.api_host):
+            ot = "Pod"
+            name = "yomama"
+            obj = K8sObject(name=name, obj_type=ot, config=config)
+            r = obj.list()
+            self.assertIsNotNone(r)
+            self.assertEqual(0, len(r))
+
+    def test_object_rc_list_from_scratch(self):
+        config = K8sConfig()
+        if config.api_host is not None and self._is_reachable(config.api_host):
+            ot = "ReplicationController"
+            name = "yomama"
+            obj = K8sObject(name=name, obj_type=ot, config=config)
+            r = obj.list()
+            self.assertIsNotNone(r)
+            self.assertEqual(0, len(r))
+
+    def test_object_secret_list_from_scratch(self):
+        config = K8sConfig()
+        if config.api_host is not None and self._is_reachable(config.api_host):
+            ot = "Secret"
+            name = "yomama"
+            obj = K8sObject(name=name, obj_type=ot, config=config)
+            r = obj.list()
+            self.assertIsNotNone(r)
+            self.assertEqual(1, len(r))
+            secret = r[0]
+            self.assertIsInstance(secret, dict)
+            self.assertEqual(3, len(secret))
+            for i in ['data', 'metadata', 'type']:
+                self.assertIn(i, secret)
+            self.assertIsInstance(secret['data'], dict)
+            self.assertIsInstance(secret['metadata'], dict)
+            self.assertIsInstance(secret['type'], str)
+
+    def test_object_service_list_from_scratch(self):
+        config = K8sConfig()
+        if config.api_host is not None and self._is_reachable(config.api_host):
+            ot = "Service"
+            name = "yomama"
+            obj = K8sObject(name=name, obj_type=ot, config=config)
+            r = obj.list()
+            self.assertIsNotNone(r)
+            self.assertEqual(1, len(r))
+            service = r[0]
+            self.assertIsInstance(service, dict)
+            self.assertEqual(3, len(service))
+            for i in ['metadata', 'spec', 'status']:
+                self.assertIn(i, service)
+                self.assertIsInstance(service[i], dict)
+            for i in ['creationTimestamp', 'labels', 'name', 'namespace', 'resourceVersion', 'selfLink', 'uid']:
+                self.assertIn(i, service['metadata'])
+            for i in ['creationTimestamp', 'name', 'namespace', 'resourceVersion', 'selfLink', 'uid']:
+                self.assertIsInstance(service['metadata'][i], str)
+            self.assertIsInstance(service['metadata']['labels'], dict)
+            self.assertEqual(2, len(service['metadata']['labels']))
+            for i in ['component', 'provider']:
+                self.assertIn(i, service['metadata']['labels'])
+                self.assertIsInstance(service['metadata']['labels'][i], str)
+            for i in ['clusterIP', 'ports', 'sessionAffinity', 'type']:
+                self.assertIn(i, service['spec'])
+            for i in ['clusterIP', 'sessionAffinity', 'type']:
+                self.assertIsInstance(service['spec'][i], str)
+            self.assertIsInstance(service['spec']['ports'], list)
+            self.assertEqual(1, len(service['spec']['ports']))
+            port = service['spec']['ports'][0]
+            self.assertIsInstance(port, dict)
+            self.assertEqual(4, len(port))
+            for i in ['name', 'port', 'protocol', 'targetPort']:
+                self.assertIn(i, port)
+            for i in ['name', 'protocol']:
+                self.assertIsInstance(port[i], str)
+            for i in ['port', 'targetPort']:
+                self.assertIsInstance(port[i], int)
