@@ -29,7 +29,10 @@ class K8sSecretTest(unittest.TestCase):
     @staticmethod
     def _create_secret(config=None, name=None):
         if config is None:
-            config = K8sConfig(kubeconfig=kubeconfig_fallback)
+            try:
+                config = K8sConfig()
+            except SyntaxError:
+                config = K8sConfig(kubeconfig=kubeconfig_fallback)
         obj = K8sSecret(config=config, name=name)
         return obj
 

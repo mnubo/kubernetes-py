@@ -39,7 +39,10 @@ class K8sObjectTest(unittest.TestCase):
     @staticmethod
     def _create_object(config=None, name=None, obj_type=None):
         if config is None:
-            config = K8sConfig(kubeconfig=kubeconfig_fallback)
+            try:
+                config = K8sConfig()
+            except SyntaxError:
+                config = K8sConfig(kubeconfig=kubeconfig_fallback)
         obj = K8sObject(config=config, name=name, obj_type=obj_type)
         return obj
 

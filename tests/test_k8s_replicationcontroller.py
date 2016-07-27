@@ -27,7 +27,10 @@ class K8sReplicationControllerTest(unittest.TestCase):
     @staticmethod
     def _create_rc(config=None, name=None, replicas=0):
         if config is None:
-            config = K8sConfig(kubeconfig=kubeconfig_fallback)
+            try:
+                config = K8sConfig()
+            except SyntaxError:
+                config = K8sConfig(kubeconfig=kubeconfig_fallback)
         obj = K8sReplicationController(config=config, name=name, replicas=replicas)
         return obj
 
