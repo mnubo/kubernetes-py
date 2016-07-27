@@ -7,11 +7,14 @@
 #
 
 import unittest
+import os
 from kubernetes import K8sConfig
 
 DEFAULT_API_HOST = "localhost:8888"
 DEFAULT_API_VERSION = "v1"
 DEFAULT_NAMESPACE = "default"
+
+kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
 
 
 class K8sConfigTest(unittest.TestCase):
@@ -40,7 +43,7 @@ class K8sConfigTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------- init with kubeconfig
 
     def test_init_with_test_kubeconfig(self):
-        config = K8sConfig(kubeconfig='.kube/config')
+        config = K8sConfig(kubeconfig=kubeconfig_fallback)
         self.assertIsNotNone(config)
         self.assertIsInstance(config, K8sConfig)
         self.assertIsInstance(config.api_host, str)
