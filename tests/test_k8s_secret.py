@@ -9,8 +9,11 @@
 import unittest
 import json
 import base64
+import os
 from kubernetes import K8sSecret, K8sConfig
 from kubernetes.models.v1 import Secret, ObjectMeta
+
+kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
 
 
 class K8sSecretTest(unittest.TestCase):
@@ -20,6 +23,15 @@ class K8sSecretTest(unittest.TestCase):
 
     def tearDown(self):
         pass
+
+    # ------------------------------------------------------------------------------------- utils
+
+    @staticmethod
+    def _create_secret(config=None, name=None):
+        if config is None:
+            config = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sSecret(config=config, name=name)
+        return obj
 
     # --------------------------------------------------------------------------------- init
 
@@ -41,14 +53,14 @@ class K8sSecretTest(unittest.TestCase):
     def test_init_with_invalid_name(self):
         name = object()
         try:
-            K8sSecret(name=name)
+            self._create_secret(name=name)
             self.fail("Should not fail.")
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_init_with_name(self):
         name = "yoname"
-        secret = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         self.assertIsNotNone(secret)
         self.assertIsInstance(secret, K8sSecret)
         self.assertEqual(secret.name, name)
@@ -58,8 +70,8 @@ class K8sSecretTest(unittest.TestCase):
     def test_init_with_name_and_config(self):
         name = "yoname"
         nspace = "yomama"
-        config = K8sConfig(namespace=nspace)
-        secret = K8sSecret(config=config, name=name)
+        config = K8sConfig(kubeconfig=kubeconfig_fallback, namespace=nspace)
+        secret = self._create_secret(config=config, name=name)
         self.assertIsNotNone(secret)
         self.assertIsInstance(secret, K8sSecret)
         self.assertEqual(secret.name, name)
@@ -70,7 +82,7 @@ class K8sSecretTest(unittest.TestCase):
 
     def test_struct_k8s_secret(self):
         name = "yoname"
-        secret = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         self.assertIsNotNone(secret)
         self.assertIsInstance(secret.base_url, str)
         self.assertIsInstance(secret.config, K8sConfig)
@@ -80,7 +92,7 @@ class K8sSecretTest(unittest.TestCase):
 
     def test_struct_secret(self):
         name = "yoname"
-        secret = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         model = secret.model
         self.assertIsInstance(model, Secret)
         self.assertIsInstance(model.model, dict)
@@ -88,7 +100,7 @@ class K8sSecretTest(unittest.TestCase):
 
     def test_struct_secret_model(self):
         name = "yoname"
-        secret = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         model = secret.model.model
         self.assertIsInstance(model, dict)
         self.assertIn('apiVersion', model)
@@ -107,7 +119,7 @@ class K8sSecretTest(unittest.TestCase):
 
     def test_add_annotation_none_args(self):
         name = "yosecret"
-        secret = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         try:
             secret.add_annotation()
             self.fail("Should not fail.")
@@ -116,7 +128,7 @@ class K8sSecretTest(unittest.TestCase):
 
     def test_add_annotation_invalid_args(self):
         name = "yosecret"
-        secret = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         k = object()
         v = object()
         try:
@@ -127,7 +139,7 @@ class K8sSecretTest(unittest.TestCase):
 
     def test_add_annotation(self):
         name = "yosecret"
-        secret = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         k = "yokey"
         v = "yovalue"
         secret.add_annotation(k, v)
@@ -142,7 +154,7 @@ class K8sSecretTest(unittest.TestCase):
 
     def test_add_label_none_args(self):
         name = "yosecret"
-        secret = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         try:
             secret.add_label()
             self.fail("Should not fail.")
@@ -151,18 +163,18 @@ class K8sSecretTest(unittest.TestCase):
 
     def test_add_label_invalid_args(self):
         name = "yosecret"
-        rc = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         k = object()
         v = object()
         try:
-            rc.add_label(k, v)
+            secret.add_label(k, v)
             self.fail("Should not fail.")
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_add_label(self):
         name = "yosecret"
-        secret = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         k = "yokey"
         v = "yovalue"
         secret.add_label(k, v)
@@ -185,7 +197,7 @@ class K8sSecretTest(unittest.TestCase):
 
     def test_set_data_none_args(self):
         name = "yosecret"
-        secret = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         try:
             secret.set_data()
             self.fail("Should not fail.")
@@ -194,7 +206,7 @@ class K8sSecretTest(unittest.TestCase):
 
     def test_set_data_invalid_key(self):
         name = "yosecret"
-        secret = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         k = object()
         v = {'key1': 'value1', 'key2': 'value2'}
         try:
@@ -205,7 +217,7 @@ class K8sSecretTest(unittest.TestCase):
 
     def test_set_data_invalid_value(self):
         name = "yosecret"
-        secret = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         k = "yokey"
         v = {'key1': 'value1', 'key2': 'value2'}
         try:
@@ -215,7 +227,7 @@ class K8sSecretTest(unittest.TestCase):
 
     def test_set_data(self):
         name = "yosecret"
-        secret = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         k = "yokey"
         v = {'key1': 'value1', 'key2': 'value2'}
         secret.set_data(k, json.dumps(v))
@@ -227,7 +239,7 @@ class K8sSecretTest(unittest.TestCase):
 
     def test_set_type_none_arg(self):
         name = "yosecret"
-        secret = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         try:
             secret.set_type()
             self.fail("Should not fail.")
@@ -236,7 +248,7 @@ class K8sSecretTest(unittest.TestCase):
 
     def test_set_type_invalid_arg(self):
         name = "yosecret"
-        secret = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         secret_type = object()
         try:
             secret.set_type(secret_type=secret_type)
@@ -246,7 +258,7 @@ class K8sSecretTest(unittest.TestCase):
 
     def test_set_type(self):
         name = "yosecret"
-        secret = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         secret_type = "yosecrettype"
         secret.set_type(secret_type=secret_type)
         self.assertIn('type', secret.model.model)
@@ -256,7 +268,7 @@ class K8sSecretTest(unittest.TestCase):
 
     def test_set_dockercfg_secret_none_arg(self):
         name = "yosecret"
-        secret = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         try:
             secret.set_dockercfg_secret()
             self.fail("Should not fail.")
@@ -265,7 +277,7 @@ class K8sSecretTest(unittest.TestCase):
 
     def test_set_dockercfg_secret_invalid_arg(self):
         name = "yosecret"
-        secret = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         data = object()
         try:
             secret.set_dockercfg_secret(data)
@@ -275,7 +287,7 @@ class K8sSecretTest(unittest.TestCase):
 
     def test_set_dockercfg_secret(self):
         name = "yosecret"
-        secret = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         data = "yodockercfg"
         secret.set_dockercfg_secret(data)
         self.assertIn('data', secret.model.model)
@@ -290,7 +302,7 @@ class K8sSecretTest(unittest.TestCase):
 
     def test_set_dockercfg_json_secret_none_arg(self):
         name = "yosecret"
-        secret = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         try:
             secret.set_dockercfg_json_secret()
             self.fail("Should not fail.")
@@ -299,7 +311,7 @@ class K8sSecretTest(unittest.TestCase):
 
     def test_set_dockercfg_json_secret_invalid_arg(self):
         name = "yosecret"
-        secret = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         data = object()
         try:
             secret.set_dockercfg_json_secret(data)
@@ -309,7 +321,7 @@ class K8sSecretTest(unittest.TestCase):
 
     def test_set_dockercfg_json_secret(self):
         name = "yosecret"
-        secret = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         data = "yodockercfgjson"
         secret.set_dockercfg_json_secret(data)
         self.assertIn('data', secret.model.model)
@@ -324,7 +336,7 @@ class K8sSecretTest(unittest.TestCase):
 
     def test_set_service_account_token_none_args(self):
         name = "yosecret"
-        secret = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         try:
             secret.set_service_account_token()
         except Exception as err:
@@ -338,7 +350,7 @@ class K8sSecretTest(unittest.TestCase):
         kubecfg_data = object()
         cacert = object()
 
-        secret = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         try:
             secret.set_service_account_token(
                 account_name=account_name,
@@ -358,7 +370,7 @@ class K8sSecretTest(unittest.TestCase):
         kubecfg_data = "yokubecfgdata"
         cacert = "yocacert"
 
-        secret = K8sSecret(name=name)
+        secret = self._create_secret(name=name)
         secret.set_service_account_token(
             account_name=account_name,
             account_uid=account_uid,
