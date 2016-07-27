@@ -67,8 +67,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     def test_init_object_type_pod(self):
         ot = "Pod"
         name = "yopod"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPodBasedObject(config=cfg, name=name, obj_type=ot)
+        obj = self._create_pod(name)
         self.assertIsNotNone(obj)
         self.assertIsInstance(obj, K8sPodBasedObject)
         self.assertEqual(ot, obj.obj_type)
@@ -77,8 +76,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     def test_init_object_type_rc(self):
         ot = "ReplicationController"
         name = "yorc"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sPodBasedObject(config=cfg, name=name, obj_type=ot)
+        obj = self._create_rc(name)
         self.assertIsNotNone(obj)
         self.assertIsInstance(obj, K8sPodBasedObject)
         self.assertEqual(ot, obj.obj_type)
