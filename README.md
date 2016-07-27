@@ -14,40 +14,72 @@ Currently supported Kubernetes objects:
 
 ## Usage
 
-Until proper documentation is made, please find some code snippets to help understand how to use this module.
+Documentation is currently work in progress. Please find some code snippets to help understand how to use this module.
 
-### Pod
+### Configuration
+
+By default, the module attempts to load existing configuration from `~/.kube/config`. You are welcome to specify
+another location from where to load a kubeconfig file.
+
+Otherwise, kubeconfig parameters can be overridden piecemeal. Please see `K8sConfig.py` for more information.
+
+```
+from kubernetes import K8sConfig
+
+# Defaults found in ~/.kube/config
+cfg_default = K8sConfig()
+
+# Defaults found in another kubeconfig file
+cfg_other = K8sConfig(kubeconfig='/path/to/kubeconfig')
+
+# Overriding the host, using basic auth
+cfg_basic = K8sConfig(kubeconfig=None, api_host=somehost:8888, auth=('basic_user', 'basic_passwd'))
+
+# Overriding the host, using certificates
+cfg_cert = K8sConfig(kubeconfig=None, api_host=somehost:8888, cert=('/path/to/cert.crt', '/path/to/cert.key'))
+
+# Overriding the host, using a Bearer token
+cfg_token = K8sConfig(kubeconfig=None, api_host=somehost:8888, token='50a2fabfdd276f573ff97ace8b11c5f4')
+
+```
+
+### Containers
+
+This module uses the default container runtime.
+
+Defining a container:
+
+```
+from kubernetes import K8sContainer
+
+container = K8sContainer(name='redis', image='redis')
+container.add_port(container_port=6379, host_port=123456, name='redis')
+
+```
+
+### Pods
 
 Creating a pod:
 
-    from kubernetes import K8sConfig
     from kubernetes import K8sPod
-    from kubernetes import K8sContainer
     
-    that_cfg = K8sConfig(api_host='somehost:8888', auth=('basic_username', 'basic_passwd'))
-    that_pod = K8sPod(config=that_cfg, name='redis')
-    that_pod.add_container(container=K8sContainer(name='redis', image='library/redis:2')
-                          .add_port(container_port=6379, host_port=31010, name='redismasterport'))
-    that_pod.create()
+    pod = K8sPod(config=cfg_basic, name='redis')
+    pod.add_container(container)
+    pod.create()
     
 Fetching a pod:
 
-    from kubernetes import K8sConfig
     from kubernetes import K8sPod
     
-    that_cfg = K8sConfig(api_host='somehost:8888', token='50a2fabfdd276f573ff97ace8b11c5f4')
-    that_pod = K8sPod(config=that_cfg, name='redis')
-    that_pod.get()
+    pod = K8sPod(config=cfg_token, name='redis')
+    pod.get()
 
 Deleting a pod:
 
-    from kubernetes import K8sConfig
     from kubernetes import K8sPod
     
-    that_cfg = K8sConfig(api_host='somehost:8888')
-    that_pod = K8sPod(config=that_cfg, name='redis')
-    that_pod.get()
-    that_pod.delete()
+    pod = K8sPod(config=cfg_cert, name='redis')
+    pod.delete()
 
 ### ReplicationController
 
@@ -144,3 +176,15 @@ Deleting a secret:
     that_secret.get()
     that_secret.delete()
 
+### Unit tests
+
+Development of features and unit tests was done against both a full Kubernetes cluster, as well as using 
+the [minikube](https://github.com/kubernetes/minikube) tool. You will find a `./bin/minukube.sh` script in the 
+source tree which fetches the application binary.
+
+The unit tests which require making remote API calls check if there is a reachable API server; if no such endpoint
+is found, the test is skipped. It is recommended to begin testing things out against `minikube`.
+
+```
+$ nosetests tests/
+```

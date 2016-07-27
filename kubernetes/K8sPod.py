@@ -9,7 +9,7 @@
 from kubernetes.K8sPodBasedObject import K8sPodBasedObject
 from kubernetes.models.v1.Pod import Pod
 from kubernetes.models.v1.PodStatus import PodStatus
-from kubernetes.exceptions.NotFoundException import NotFoundException
+from kubernetes.K8sExceptions import NotFoundException
 
 
 class K8sPod(K8sPodBasedObject):

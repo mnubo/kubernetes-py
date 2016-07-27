@@ -7,8 +7,11 @@
 #
 
 import unittest
-from kubernetes import K8sPodBasedObject, K8sContainer
+import os
+from kubernetes import K8sPodBasedObject, K8sContainer, K8sConfig
 from kubernetes.models.v1 import Pod, ReplicationController, ObjectMeta, PodSpec
+
+kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
 
 
 class K8sPodBasedObjectTest(unittest.TestCase):
@@ -21,18 +24,26 @@ class K8sPodBasedObjectTest(unittest.TestCase):
 
     # --------------------------------------------------------------------------------- util
 
-    def _create_pod(self, name='yopod'):
-        obj = K8sPodBasedObject(obj_type='Pod', name=name)
-        self.assertIsNotNone(obj)
+    @staticmethod
+    def _create_pod(config=None, name=None):
+        if config is None:
+            try:
+                config = K8sConfig()
+            except SyntaxError:
+                config = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPodBasedObject(config=config, obj_type='Pod', name=name)
         obj.model = Pod(name=name)
-        self.assertIsInstance(obj.model, Pod)
         return obj
 
-    def _create_rc(self, name='yorc'):
-        obj = K8sPodBasedObject(obj_type='ReplicationController', name=name)
-        self.assertIsNotNone(obj)
+    @staticmethod
+    def _create_rc(config=None, name=None):
+        if config is None:
+            try:
+                config = K8sConfig()
+            except SyntaxError:
+                config = K8sConfig(kubeconfig=kubeconfig_fallback)
+        obj = K8sPodBasedObject(config=config, obj_type='ReplicationController', name=name)
         obj.model = ReplicationController(name=name)
-        self.assertIsInstance(obj.model, ReplicationController)
         return obj
 
     # --------------------------------------------------------------------------------- init
@@ -62,7 +73,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     def test_init_object_type_pod(self):
         ot = "Pod"
         name = "yopod"
-        obj = K8sPodBasedObject(name=name, obj_type=ot)
+        obj = self._create_pod(name=name)
         self.assertIsNotNone(obj)
         self.assertIsInstance(obj, K8sPodBasedObject)
         self.assertEqual(ot, obj.obj_type)
@@ -71,7 +82,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     def test_init_object_type_rc(self):
         ot = "ReplicationController"
         name = "yorc"
-        obj = K8sPodBasedObject(name=name, obj_type=ot)
+        obj = self._create_rc(name=name)
         self.assertIsNotNone(obj)
         self.assertIsInstance(obj, K8sPodBasedObject)
         self.assertEqual(ot, obj.obj_type)
@@ -80,7 +91,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- init
 
     def test_init_with_model_pod(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         self.assertIsInstance(obj.model, Pod)
         self.assertIsInstance(obj.model.model, dict)
         self.assertIsInstance(obj.model.pod_metadata, ObjectMeta)
@@ -88,7 +100,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         self.assertIsNone(obj.model.pod_status)
 
     def test_init_with_model_rc(self):
-        obj = self._create_rc()
+        name = "yoname"
+        obj = self._create_rc(name=name)
         self.assertIsInstance(obj.model, ReplicationController)
         self.assertIsInstance(obj.model.model, dict)
         self.assertIsInstance(obj.model.pod_metadata, ObjectMeta)
@@ -99,7 +112,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
 
     def test_struct_with_model_pod_check_podmeta(self):
         name = "yopod"
-        obj = self._create_pod(name)
+        obj = self._create_pod(name=name)
         meta = obj.model.pod_metadata
         self.assertIsNotNone(meta)
         self.assertIsInstance(meta, ObjectMeta)
@@ -116,7 +129,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         self.assertIsInstance(meta.model['namespace'], str)
 
     def test_struct_with_model_pod_check_podspec(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         spec = obj.model.pod_spec
         self.assertIsNotNone(spec)
         self.assertIsInstance(spec, PodSpec)
@@ -135,7 +149,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
 
     def test_struct_with_model_rc_check_podmeta(self):
         name = "yorc"
-        obj = self._create_rc(name)
+        obj = self._create_rc(name=name)
         meta = obj.model.pod_metadata
         self.assertIsNotNone(meta)
         self.assertIsInstance(meta, ObjectMeta)
@@ -152,7 +166,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         self.assertIsInstance(meta.model['namespace'], str)
 
     def test_struct_with_model_rc_check_podspec(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         spec = obj.model.pod_spec
         self.assertIsNotNone(spec)
         self.assertIsInstance(spec, PodSpec)
@@ -171,7 +186,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
 
     def test_struct_with_model_rc_check_rcmeta(self):
         name = "yorc"
-        obj = self._create_rc()
+        obj = self._create_rc(name=name)
         meta = obj.model.rc_metadata
         self.assertIsNotNone(meta)
         self.assertIsInstance(meta, ObjectMeta)
@@ -190,7 +205,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- add container
 
     def test_pod_add_container_invalid(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         c = object()
         try:
             obj.add_container(c)
@@ -199,7 +215,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, AssertionError)
 
     def test_rc_add_container_invalid(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         c = object()
         try:
             obj.add_container(c)
@@ -208,7 +225,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, AssertionError)
 
     def test_pod_add_container(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
 
         podspec = obj.model.model['spec']
         self.assertEqual(0, len(podspec['containers']))
@@ -228,7 +246,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         self.assertEqual(1, len(podspec.model['containers']))
 
     def test_rc_add_container(self):
-        obj = self._create_rc()
+        name = "yoname"
+        obj = self._create_rc(name=name)
 
         podspec = obj.model.model['spec']['template']['spec']
         self.assertEqual(0, len(podspec['containers']))
@@ -250,7 +269,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- add host volume
 
     def test_pod_add_host_volume_none_args(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         volname = None
         volpath = None
         try:
@@ -260,7 +280,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_rc_add_host_volume_none_args(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         volname = None
         volpath = None
         try:
@@ -270,7 +291,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_pod_add_host_volume_invalid_args(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         volname = 666
         volpath = 999
         try:
@@ -280,7 +302,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_rc_add_host_volume_invalid_args(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         volname = 666
         volpath = 999
         try:
@@ -290,7 +313,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_pod_add_host_volume(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         volname = "devnull"
         volpath = "/dev/null"
         obj.add_host_volume(name=volname, path=volpath)
@@ -304,7 +328,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         self.assertEqual(volname, podspec.model['volumes'][0]['name'])
 
     def test_rc_add_host_volume(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         volname = "devnull"
         volpath = "/dev/null"
         obj.add_host_volume(name=volname, path=volpath)
@@ -319,7 +344,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- add emptydir volume
 
     def test_pod_add_emptydir_volume_none_arg(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         volname = None
         try:
             obj.add_emptydir_volume(name=volname)
@@ -328,7 +354,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_rc_add_emptydir_volume_none_arg(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         volname = None
         try:
             obj.add_emptydir_volume(name=volname)
@@ -337,7 +364,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_pod_add_emptydir_volume_invalid_arg(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         volname = 666
         try:
             obj.add_emptydir_volume(name=volname)
@@ -346,7 +374,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_rc_add_emptydir_volume_invalid_arg(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         volname = 666
         try:
             obj.add_emptydir_volume(name=volname)
@@ -355,7 +384,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_pod_add_emptydir_volume(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         volname = "emptydir"
         obj.add_emptydir_volume(name=volname)
 
@@ -366,7 +396,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         self.assertEqual(volname, podspec.model['volumes'][0]['name'])
 
     def test_rc_add_emptydir_volume(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         volname = "emptydir"
         obj.add_emptydir_volume(name=volname)
 
@@ -379,7 +410,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- add pull secret
 
     def test_pod_add_image_pull_secrets_none_arg(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         secretname = None
         try:
             obj.add_image_pull_secrets(name=secretname)
@@ -388,7 +420,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_rc_add_image_pull_secrets_none_arg(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         secretname = None
         try:
             obj.add_image_pull_secrets(name=secretname)
@@ -397,7 +430,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_pod_add_image_pull_secrets_invalid_arg(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         secretname = 666
         try:
             obj.add_image_pull_secrets(name=secretname)
@@ -406,7 +440,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_rc_add_image_pull_secrets_invalid_arg(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         secretname = 666
         try:
             obj.add_image_pull_secrets(name=secretname)
@@ -415,7 +450,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_pod_add_image_pull_secrets(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         secretname = "yosecret"
         obj.add_image_pull_secrets(name=secretname)
 
@@ -429,7 +465,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         self.assertEqual(secretname, podspec.model['imagePullSecrets'][0]['name'])
 
     def test_rc_add_image_pull_secrets(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         secretname = "yosecret"
         obj.add_image_pull_secrets(name=secretname)
 
@@ -445,7 +482,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- del pod node name
 
     def test_pod_del_pod_node_name(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         nodename = "yonodename"
         obj.set_pod_node_name(name=nodename)
 
@@ -466,7 +504,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         self.assertNotIn('nodeName', podspec.model)
 
     def test_rc_del_pod_node_name(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         nodename = "yonodename"
         obj.set_pod_node_name(name=nodename)
 
@@ -489,19 +528,22 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- get pod containers
 
     def test_pod_get_pod_containers_empty(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         containers = obj.get_pod_containers()
         self.assertIsNotNone(containers)
         self.assertEqual(0, len(containers))
 
     def test_rc_get_pod_containers_empty(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         containers = obj.get_pod_containers()
         self.assertIsNotNone(containers)
         self.assertEqual(0, len(containers))
 
     def test_pod_get_pod_containers(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         count = 3
         for i in range(0, 3):
             name = "yocontainer_{0}".format(i)
@@ -515,7 +557,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         [self.assertIsInstance(x, dict) for x in containers]
 
     def test_rc_get_pod_containers(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         count = 3
         for i in range(0, 3):
             name = "yocontainer_{0}".format(i)
@@ -531,24 +574,28 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- get pod node name
 
     def test_pod_get_pod_node_name_none(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         name = obj.get_pod_node_name()
         self.assertIsNone(name)
 
     def test_rc_get_pod_node_name_none(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         name = obj.get_pod_node_name()
         self.assertIsNone(name)
 
     def test_pod_get_pod_node_name(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         nodename = "yonodename"
         obj.set_pod_node_name(name=nodename)
         name = obj.get_pod_node_name()
         self.assertEqual(name, nodename)
 
     def test_rc_get_pod_node_name(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         nodename = "yonodename"
         obj.set_pod_node_name(name=nodename)
         name = obj.get_pod_node_name()
@@ -557,24 +604,28 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- get pod node selector
 
     def test_pod_get_pod_node_selector_none(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         s = obj.get_pod_node_selector()
         self.assertIsNone(s)
 
     def test_rc_get_pod_node_selector_none(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         s = obj.get_pod_node_selector()
         self.assertIsNone(s)
 
     def test_pod_get_pod_node_selector(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         s_in = {"disktype": "ssd"}
         obj.set_pod_node_selector(new_dict=s_in)
         s_out = obj.get_pod_node_selector()
         self.assertEqual(s_in, s_out)
 
     def test_rc_get_pod_node_selector(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         s_in = {"disktype": "ssd"}
         obj.set_pod_node_selector(new_dict=s_in)
         s_out = obj.get_pod_node_selector()
@@ -583,24 +634,28 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- get pod restart policy
 
     def test_pod_get_pod_restart_policy_none(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         rp = obj.get_pod_restart_policy()
         self.assertEqual('Always', rp)  # set to 'Always' by default
 
     def test_rc_get_pod_restart_policy_none(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         rp = obj.get_pod_restart_policy()
         self.assertEqual('Always', rp)  # set to 'Always' by default
 
     def test_pod_get_pod_restart_policy(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         p_in = 'OnFailure'
         obj.set_pod_restart_policy(p_in)
         p_out = obj.get_pod_restart_policy()
         self.assertEqual(p_in, p_out)
 
     def test_rc_get_pod_restart_policy(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         p_in = 'OnFailure'
         obj.set_pod_restart_policy(p_in)
         p_out = obj.get_pod_restart_policy()
@@ -609,24 +664,28 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- get service account
 
     def test_pod_get_service_account_none(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         acct = obj.get_service_account()
         self.assertIsNone(acct)
 
     def test_rc_get_service_account_none(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         acct = obj.get_service_account()
         self.assertIsNone(acct)
 
     def test_pod_get_service_account(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         name_in = "yoservice"
         obj.set_service_account(name_in)
         name_out = obj.get_service_account()
         self.assertEqual(name_in, name_out)
 
     def test_rc_get_service_account(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         name_in = "yoservice"
         obj.set_service_account(name_in)
         name_out = obj.get_service_account()
@@ -635,7 +694,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- set active deadline
 
     def test_pod_set_active_deadline_none_arg(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         d = None
         try:
             obj.set_active_deadline(d)
@@ -643,7 +703,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_rc_set_active_deadline_none_arg(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         d = None
         try:
             obj.set_active_deadline(d)
@@ -651,7 +712,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_pod_set_active_deadline_invalid_arg(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         d = "yodeadline"
         try:
             obj.set_active_deadline(d)
@@ -659,7 +721,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_rc_set_active_deadline_invalid_arg(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         d = "yodeadline"
         try:
             obj.set_active_deadline(d)
@@ -667,7 +730,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_pod_set_active_deadline(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         d = 600
         obj.set_active_deadline(d)
 
@@ -682,7 +746,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         self.assertEqual(d, podspec.model['activeDeadlineSeconds'])
 
     def test_rc_set_active_deadline(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         d = 600
         obj.set_active_deadline(d)
 
@@ -699,7 +764,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- set pod node name
 
     def test_pod_set_pod_node_name_none_arg(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         nodename = None
         try:
             obj.set_pod_node_name(name=nodename)
@@ -707,7 +773,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_rc_set_pod_node_name_none_arg(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         nodename = None
         try:
             obj.set_pod_node_name(name=nodename)
@@ -715,7 +782,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_pod_set_pod_node_name_invalid_arg(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         nodename = 666
         try:
             obj.set_pod_node_name(name=nodename)
@@ -723,7 +791,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_rc_set_pod_node_name_invalid_arg(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         nodename = 666
         try:
             obj.set_pod_node_name(name=nodename)
@@ -731,7 +800,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_pod_set_pod_node_name(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         nodename = "yonodename"
         obj.set_pod_node_name(name=nodename)
 
@@ -745,7 +815,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         self.assertEqual(nodename, podspec.model['nodeName'])
 
     def test_rc_set_pod_node_name(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         nodename = "yonodename"
         obj.set_pod_node_name(name=nodename)
 
@@ -761,7 +832,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- set pod node selector
 
     def test_pod_set_pod_node_selector_none_arg(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         s_in = None
         try:
             obj.set_pod_node_selector(new_dict=s_in)
@@ -769,7 +841,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_rc_set_pod_node_selector_none_arg(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         s_in = None
         try:
             obj.set_pod_node_selector(new_dict=s_in)
@@ -777,7 +850,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_pod_set_pod_node_selector_invalid_arg(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         s_in = "yoselector"
         try:
             obj.set_pod_node_selector(new_dict=s_in)
@@ -785,7 +859,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_rc_set_pod_node_selector_invalid_arg(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         s_in = "yoselector"
         try:
             obj.set_pod_node_selector(new_dict=s_in)
@@ -793,7 +868,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_pod_set_pod_node_selector(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         s = {"disktype": "ssd"}
         obj.set_pod_node_selector(new_dict=s)
 
@@ -807,7 +883,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         self.assertEqual(s, podspec.model['nodeSelector'])
 
     def test_rc_set_pod_node_selector(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         s = {"disktype": "ssd"}
         obj.set_pod_node_selector(new_dict=s)
 
@@ -823,7 +900,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- set pod restart policy
 
     def test_pod_set_pod_restart_policy_none_arg(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         try:
             obj.set_pod_restart_policy()
             self.fail("Should not fail.")
@@ -831,7 +909,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_rc_set_pod_restart_policy_none_arg(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         try:
             obj.set_pod_restart_policy()
             self.fail("Should not fail.")
@@ -839,7 +918,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_pod_set_pod_restart_policy_not_a_string(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         policy = 666
         try:
             obj.set_pod_restart_policy(policy=policy)
@@ -848,7 +928,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_rc_set_pod_restart_policy_not_a_string(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         policy = 666
         try:
             obj.set_pod_restart_policy(policy=policy)
@@ -857,7 +938,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_pod_set_pod_restart_policy_invalid_arg(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         policy = 'yopolicy'
         try:
             obj.set_pod_restart_policy(policy=policy)
@@ -866,7 +948,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_rc_set_pod_restart_policy_invalid_arg(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         policy = 'yopolicy'
         try:
             obj.set_pod_restart_policy(policy=policy)
@@ -875,14 +958,16 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_pod_set_pod_restart_policy(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         policy = 'Always'
         obj.set_pod_restart_policy(policy=policy)
         p = obj.get_pod_restart_policy()
         self.assertEqual(policy, p)
 
     def test_rc_set_pod_restart_policy(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         policy = 'Always'
         obj.set_pod_restart_policy(policy=policy)
         p = obj.get_pod_restart_policy()
@@ -891,7 +976,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- set pod service account
 
     def test_pod_set_service_account_none_arg(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         try:
             obj.set_service_account()
             self.fail("Should not fail.")
@@ -899,7 +985,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_rc_set_service_account_none_arg(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         try:
             obj.set_service_account()
             self.fail("Should not fail.")
@@ -907,7 +994,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_pod_set_service_account_invalid_arg(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         name = 666
         try:
             obj.set_service_account(name)
@@ -916,7 +1004,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_rc_set_service_account_invalid_arg(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         name = 666
         try:
             obj.set_service_account(name)
@@ -925,14 +1014,16 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_pod_set_service_account(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         name_in = "yoservice"
         obj.set_service_account(name_in)
         name_out = obj.get_service_account()
         self.assertEqual(name_in, name_out)
 
     def test_rc_set_service_account(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         name_in = "yoservice"
         obj.set_service_account(name_in)
         name_out = obj.get_service_account()
@@ -941,7 +1032,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- set termination grace period
 
     def test_pod_set_termination_grace_period_none_arg(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         try:
             obj.set_termination_grace_period()
             self.fail("Should not fail.")
@@ -949,7 +1041,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_rc_set_termination_grace_period_none_arg(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         try:
             obj.set_termination_grace_period()
             self.fail("Should not fail.")
@@ -957,7 +1050,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_pod_set_termination_grace_period_invalid_arg(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         secs = -666
         try:
             obj.set_termination_grace_period(secs)
@@ -966,7 +1060,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_rc_set_termination_grace_period_invalid_arg(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         secs = -666
         try:
             obj.set_termination_grace_period(secs)
@@ -975,14 +1070,16 @@ class K8sPodBasedObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_pod_set_termination_grace_period(self):
-        obj = self._create_pod()
+        name = "yoname"
+        obj = self._create_pod(name=name)
         secs_in = 1234
         obj.set_termination_grace_period(secs_in)
         secs_out = obj.get_termination_grace_period()
         self.assertEqual(secs_in, secs_out)
 
     def test_rc_set_termination_grace_period(self):
-        obj = self._create_rc()
+        name = "yorc"
+        obj = self._create_rc(name=name)
         secs_in = 1234
         obj.set_termination_grace_period(secs_in)
         secs_out = obj.get_termination_grace_period()

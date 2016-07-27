@@ -11,8 +11,7 @@ from kubernetes.models.v1.BaseUrls import BaseUrls
 from kubernetes.models.v1.BaseModel import BaseModel
 from kubernetes.models.v1.DeleteOptions import DeleteOptions
 from kubernetes.K8sConfig import K8sConfig
-from kubernetes.exceptions.NotFoundException import NotFoundException
-from kubernetes.exceptions.UnprocessableEntityException import UnprocessableEntityException
+from kubernetes.K8sExceptions import NotFoundException, UnprocessableEntityException, BadRequestException
 import json
 
 VALID_K8s_OBJS = ['Pod', 'ReplicationController', 'Secret', 'Service']
@@ -69,12 +68,25 @@ class K8sObject(object):
 
     # ------------------------------------------------------------------------------------- remote API calls
 
-    def request(self, method='GET', host=None, url=None, auth=None, data=None, token=None):
+    def request(self, method='GET', host=None, url=None, auth=None, cert=None, data=None, token=None, ca_cert=None):
         host = self.config.api_host if host is None else host
         url = self.base_url if url is None else url
         auth = self.config.auth if auth is None else auth
+        cert = self.config.cert if cert is None else cert
         token = self.config.token if token is None else token
-        return HttpRequest(method=method, host=host, url=url, auth=auth, data=data, token=token).send()
+        ca_cert = self.config.ca_cert if ca_cert is None else ca_cert
+
+        r = HttpRequest(
+            method=method,
+            host=host,
+            url=url,
+            auth=auth,
+            cert=cert,
+            ca_cert=ca_cert,
+            data=data,
+            token=token
+        )
+        return r.send()
 
     def list(self):
         state = self.request(method='GET')
@@ -84,57 +96,77 @@ class K8sObject(object):
 
     def get_model(self):
         if self.name is None:
-            raise Exception('Cannot fetch object without name set first.')
-        this_url = '{base}/{name}'.format(base=self.base_url, name=self.name)
-        state = self.request(method='GET', url=this_url)
-        if state.get('success'):
-            model = state.get('data')
-        else:
-            message = 'Failed to fetch object definition for {resource_type} {name}. HTTP-{code}'\
-                .format(name=self.name, resource_type=self.obj_type, code=state.get('status', ''))
+            raise SyntaxError('K8sObject: name: [ {0} ] must be set to fetch the object.'.format(self.name))
+
+        url = '{base}/{name}'.format(base=self.base_url, name=self.name)
+        state = self.request(method='GET', url=url)
+
+        if not state.get('success'):
+            status = state.get('status', '')
+            reason = state.get('data', dict()).get('message', None)
+            message = 'K8sObject: GET [ {0}:{1} ] failed: HTTP {2} : {3} '.format(self.obj_type, self.name, status, reason)
             raise NotFoundException(message)
+
+        model = state.get('data')
         return model
 
-    def get_with_params(self, data):
+    def get_with_params(self, data=None):
+        if data is None:
+            raise SyntaxError('K8sObject: data: [ {0} ] cannot be None.'.format(data))
         if not isinstance(data, dict):
-            raise SyntaxError('data must be a dict of parameters to be encoded in the URL.')
-        this_url = '{base}'.format(base=self.base_url)
-        state = self.request(method='GET', url=this_url, data=data)
+            raise SyntaxError('K8sObject: data: [ {0} ] must be a dict.'.format(data.__class__.__name__))
+
+        url = '{base}'.format(base=self.base_url)
+        state = self.request(method='GET', url=url, data=data)
+
         return state.get('data', None).get('items', list())
 
     def create(self):
         if self.name is None:
-            raise Exception('Cannot create object without name set first.')
-        this_url = '{base}'.format(base=self.base_url)
-        state = self.request(method='POST', url=this_url, data=self.model.get())
+            raise SyntaxError('K8sObject: name: [ {0} ] must be set to CREATE the object.'.format(self.name))
+
+        url = '{base}'.format(base=self.base_url)
+        state = self.request(method='POST', url=url, data=self.model.get())
+
         if not state.get('success'):
-            message = 'Failed to create object: HTTP-{code} {http_data}'\
-                .format(code=state.get('status', ''), http_data=state.get('data', dict()).get('message', None))
-            if int(state.get('status', 0)) == 422:
+            status = state.get('status', '')
+            reason = state.get('data', dict()).get('message', None)
+            message = 'K8sObject: CREATE failed : HTTP {0} : {1}'.format(status, reason)
+            if int(status) == 422:
                 raise UnprocessableEntityException(message)
-            else:
-                raise Exception(message)
+            raise BadRequestException(message)
+
         return self
 
     def update(self):
         if self.name is None:
-            raise Exception('Cannot create object without name set first.')
-        this_url = '{base}/{name}'.format(base=self.base_url, name=self.name)
-        state = self.request(method='PUT', url=this_url, data=self.model.get())
+            raise SyntaxError('K8sObject: name: [ {0} ] must be set to UPDATE the object.'.format(self.name))
+
+        url = '{base}/{name}'.format(base=self.base_url, name=self.name)
+        state = self.request(method='PUT', url=url, data=self.model.get())
+
         if not state.get('success'):
-            message = 'Failed to update object: {http_data}'\
-                .format(http_data=state.get('data', dict()).get('message', None))
-            raise Exception(message)
+            status = state.get('status', '')
+            reason = state.get('data', dict()).get('message', None)
+            message = 'K8sObject: UPDATE failed: HTTP {0} : {1}'.format(status, reason)
+            raise BadRequestException(message)
+
         return self
 
     def delete(self):
         if self.name is None:
-            raise Exception('Cannot create object without name set first.')
-        this_url = '{base}/{name}'.format(base=self.base_url, name=self.name)
+            raise SyntaxError('K8sObject: name: [ {0} ] must be set to DELETE the object.'.format(self.name))
+
+        url = '{base}/{name}'.format(base=self.base_url, name=self.name)
         self.model = DeleteOptions(kind='DeleteOptions')
-        state = self.request(method='DELETE', url=this_url, data=self.model.get())
+        state = self.request(method='DELETE', url=url, data=self.model.get())
+
         if not state.get('success'):
-            message = 'Failed to delete object: {http_data}'\
-                .format(http_data=state.get('data', dict()).get('message', None))
-            raise Exception(message)
+            status = state.get('status', '')
+            reason = state.get('data', dict()).get('message', None)
+            message = 'K8sObject: DELETE failed: HTTP {0} : {1}'.format(status, reason)
+            if status == 404:
+                raise NotFoundException(message)
+            raise BadRequestException(message)
+
         return self
