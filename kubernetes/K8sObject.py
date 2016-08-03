@@ -52,11 +52,22 @@ class K8sObject(object):
     def __str__(self):
         return "[ {0} ] named [ {1} ]. Model: [ {2} ]".format(self.obj_type, self.name, self.model.get())
 
+    def __eq__(self, other):
+        # see https://github.com/kubernetes/kubernetes/blob/release-1.3/docs/design/identifiers.md
+        if isinstance(other, self.__class__):
+            # Uniquely name (via a name) an object across space.
+            return self.config.namespace == other.config.namespace and self.name == other.name
+        return NotImplemented
+
+    # ------------------------------------------------------------------------------------- representations
+
     def as_dict(self):
         return self.model.get()
 
     def as_json(self):
         return json.dumps(self.model.get())
+
+    # ------------------------------------------------------------------------------------- set name
 
     def set_name(self, name):
         self.name = name
