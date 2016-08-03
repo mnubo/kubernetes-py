@@ -12,6 +12,7 @@ import socket
 import os
 from kubernetes import K8sObject, K8sConfig
 from kubernetes.K8sExceptions import UnprocessableEntityException, NotFoundException, BadRequestException
+from tests.test_k8s_pod import K8sPodTest
 
 kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
 
@@ -45,6 +46,10 @@ class K8sObjectTest(unittest.TestCase):
                 config = K8sConfig(kubeconfig=kubeconfig_fallback)
         obj = K8sObject(config=config, name=name, obj_type=obj_type)
         return obj
+
+    @staticmethod
+    def _cleanup_objects():
+        K8sPodTest.cleanup_pods()
 
     # ------------------------------------------------------------------------------------- init
 
@@ -151,6 +156,7 @@ class K8sObjectTest(unittest.TestCase):
     def test_object_pod_list_from_scratch(self):
         config = K8sConfig(kubeconfig=kubeconfig_fallback)
         if config.api_host is not None and self._is_reachable(config.api_host):
+            self._cleanup_objects()
             ot = "Pod"
             name = "yomama"
             obj = self._create_object(config=config, name=name, obj_type=ot)
@@ -306,6 +312,7 @@ class K8sObjectTest(unittest.TestCase):
     def test_object_get_with_params_nonexistent(self):
         config = K8sConfig(kubeconfig=kubeconfig_fallback)
         if config.api_host is not None and self._is_reachable(config.api_host):
+            self._cleanup_objects()
             ot = "Pod"
             name = "yomama"
             obj = self._create_object(config=config, name=name, obj_type=ot)
