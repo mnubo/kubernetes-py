@@ -235,7 +235,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         self.assertEqual(0, len(podspec.model['containers']))
 
         name = "yopod"
-        image = "busybox"
+        image = "redis"
         c = K8sContainer(name=name, image=image)
         obj.add_container(c)
 
@@ -256,7 +256,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         self.assertEqual(0, len(podspec.model['containers']))
 
         name = "yopod"
-        image = "busybox"
+        image = "redis"
         c = K8sContainer(name=name, image=image)
         obj.add_container(c)
 
@@ -547,7 +547,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         count = 3
         for i in range(0, 3):
             name = "yocontainer_{0}".format(i)
-            image = "busybox"
+            image = "redis"
             c = K8sContainer(name=name, image=image)
             obj.add_container(c)
 
@@ -562,7 +562,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         count = 3
         for i in range(0, 3):
             name = "yocontainer_{0}".format(i)
-            image = "busybox"
+            image = "redis"
             c = K8sContainer(name=name, image=image)
             obj.add_container(c)
 
