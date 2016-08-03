@@ -20,3 +20,8 @@ class UnprocessableEntityException(Exception):
 class BadRequestException(Exception):
     def __init__(self, *args, **kwargs):
         super(BadRequestException, self).__init__(*args, **kwargs)
+
+
+class AlreadyExistsException(Exception):
+    def __init__(self, *args, **kwargs):
+        super(AlreadyExistsException, self).__init__(*args, **kwargs)

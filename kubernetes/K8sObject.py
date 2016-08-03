@@ -11,7 +11,7 @@ from kubernetes.models.v1.BaseUrls import BaseUrls
 from kubernetes.models.v1.BaseModel import BaseModel
 from kubernetes.models.v1.DeleteOptions import DeleteOptions
 from kubernetes.K8sConfig import K8sConfig
-from kubernetes.K8sExceptions import NotFoundException, UnprocessableEntityException, BadRequestException
+from kubernetes.K8sExceptions import *
 import json
 
 VALID_K8s_OBJS = ['Pod', 'ReplicationController', 'Secret', 'Service']
@@ -132,6 +132,8 @@ class K8sObject(object):
             status = state.get('status', '')
             reason = state.get('data', dict()).get('message', None)
             message = 'K8sObject: CREATE failed : HTTP {0} : {1}'.format(status, reason)
+            if int(status) == 409:
+                raise AlreadyExistsException(message)
             if int(status) == 422:
                 raise UnprocessableEntityException(message)
             raise BadRequestException(message)
