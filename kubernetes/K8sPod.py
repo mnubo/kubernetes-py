@@ -69,22 +69,17 @@ class K8sPod(K8sPodBasedObject):
     # ------------------------------------------------------------------------------------- polling readiness
 
     def is_ready(self):
-        ready = False
         status = self.get_status()
-        if status is not None:
-            assert isinstance(status, PodStatus)
+        if status is not None and isinstance(status, PodStatus):
             pod_phase = status.get_pod_phase()
             conditions = status.get_pod_conditions()
             conditions_ok = 0
             for cond in conditions:
-                assert isinstance(cond, dict)
-                cond_type = cond.get('type', '')
-                cond_status = cond.get('status', 'False')
-                if cond_status == 'True' and cond_type == 'Ready':
+                if cond.get('status', 'False') == 'True':
                     conditions_ok += 1
             if pod_phase == 'Running' and len(conditions) == conditions_ok:
-                ready = True
-        return ready
+                return True
+        return False
 
     # ------------------------------------------------------------------------------------- set
 
