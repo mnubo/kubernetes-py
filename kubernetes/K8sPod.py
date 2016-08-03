@@ -64,6 +64,7 @@ class K8sPod(K8sPodBasedObject):
         return self.model.get_pod_namespace()
 
     def get_status(self):
+        self.get()
         return self.model.get_pod_status()
 
     # ------------------------------------------------------------------------------------- polling readiness
