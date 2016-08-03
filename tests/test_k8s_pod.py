@@ -8,8 +8,12 @@
 
 import unittest
 import os
-from kubernetes import K8sPod, K8sConfig
-from kubernetes.models.v1 import Pod, ObjectMeta, PodSpec
+import socket
+import uuid
+import time
+from kubernetes import K8sPod, K8sConfig, K8sContainer
+from kubernetes.models.v1 import Pod, ObjectMeta, PodSpec, PodStatus
+from kubernetes.K8sExceptions import *
 
 kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
 
@@ -20,7 +24,7 @@ class K8sPodTest(unittest.TestCase):
         pass
 
     def tearDown(self):
-        pass
+        self.cleanup_pods()
 
     # ------------------------------------------------------------------------------------- utils
 
@@ -33,6 +37,31 @@ class K8sPodTest(unittest.TestCase):
                 config = K8sConfig(kubeconfig=kubeconfig_fallback)
         obj = K8sPod(config=config, name=name)
         return obj
+
+    @staticmethod
+    def _create_container(name=None, image="redis"):
+        obj = K8sContainer(name=name, image=image)
+        return obj
+
+    @staticmethod
+    def _is_reachable(api_host=None):
+        scheme, host, port = api_host.replace("//", "").split(':')
+        try:
+            s = socket.create_connection((host, port), timeout=1)
+            s.close()
+            return True
+        except Exception:
+            return False
+
+    @staticmethod
+    def cleanup_pods():
+        pod = K8sPodTest._create_pod(name="throwaway")
+        if pod.config.api_host is not None and K8sPodTest._is_reachable(pod.config.api_host):
+            pods = pod.list()
+            for p in pods:
+                result = K8sPod.get_by_name(name=p['metadata']['name'])
+                [x.delete() for x in result]
+                time.sleep(2)  # let the pod die
 
     # ------------------------------------------------------------------------------------- init
 
@@ -350,13 +379,28 @@ class K8sPodTest(unittest.TestCase):
 
     # ------------------------------------------------------------------------------------- get
 
-    # TODO: requires http call
+    def test_get_nonexistent(self):
+        name = "yopod"
+        pod = self._create_pod(name=name)
+        if pod.config.api_host is not None and self._is_reachable(pod.config.api_host):
+            try:
+                pod.get()
+                self.fail("Should not fail.")
+            except Exception as err:
+                self.assertIsInstance(err, NotFoundException)
+
     def test_get(self):
-        # name = "yopod"
-        # obj = K8sPod(name=name)
-        # model = obj.model
-        # self.assertEqual(model, obj.get())
-        pass
+        name = "yocontainer"
+        container = self._create_container(name=name)
+        name = "yopod"
+        pod = self._create_pod(name=name)
+        pod.add_container(container)
+        if pod.config.api_host is not None and self._is_reachable(pod.config.api_host):
+            from_create = pod.create()
+            from_get = pod.get()
+            self.assertIsInstance(from_create, K8sPod)
+            self.assertIsInstance(from_get, K8sPod)
+            self.assertEqual(from_create, from_get)
 
     # ------------------------------------------------------------------------------------- get annotation
 
@@ -493,27 +537,64 @@ class K8sPodTest(unittest.TestCase):
 
     # ------------------------------------------------------------------------------------- get pod status
 
-    def test_get_pod_status_local(self):
+    def test_get_pod_status_nonexistent(self):
         name = "yopod"
         pod = self._create_pod(name=name)
-        status = pod.get_status()
-        self.assertIsNone(status)
+        try:
+            pod.get_status()
+        except Exception as err:
+            self.assertIsInstance(err, NotFoundException)
 
-    # TODO: requires http call
-    def test_get_pod_status_remote(self):
-        pass
+    def test_get_pod_status(self):
+        name = "yocontainer"
+        container = self._create_container(name=name)
+        name = "yopod"
+        pod = self._create_pod(name=name)
+        pod.add_container(container)
+        if pod.config.api_host is not None and self._is_reachable(pod.config.api_host):
+            p = pod.create()
+            time.sleep(2)  # let creation happen
+            result = p.get_status()
+            self.assertIsInstance(result, PodStatus)
+            for i in ['conditions', 'containerStatuses', 'hostIP', 'phase', 'podIP', 'startTime']:
+                self.assertIn(i, result.model)
 
     # ------------------------------------------------------------------------------------- is_ready
 
     def test_is_ready_local(self):
+        name = "yopod-{0}".format(unicode(uuid.uuid4()))
+        pod = self._create_pod(name=name)
+        try:
+            pod.is_ready()
+            self.fail("Should not fail.")
+        except Exception as err:
+            self.assertIsInstance(err, NotFoundException)
+
+    def test_is_ready_false(self):
+        name = "yocontainer"
+        container = self._create_container(name=name)
+        name = "yopod-{0}".format(unicode(uuid.uuid4()))
+        pod = self._create_pod(name=name)
+        pod.add_container(container)
+        if pod.config.api_host is not None and self._is_reachable(pod.config.api_host):
+            p = pod.create()
+            result = p.is_ready()
+            self.assertFalse(result)
+
+    def test_is_ready_true(self):
+        name = "yocontainer"
+        container = self._create_container(name=name)
         name = "yopod"
         pod = self._create_pod(name=name)
-        is_ready = pod.is_ready()
-        self.assertFalse(is_ready)
-
-    # TODO: requires http call
-    def test_is_ready_remote(self):
-        pass
+        pod.add_container(container)
+        if pod.config.api_host is not None and self._is_reachable(pod.config.api_host):
+            p = pod.create()
+            count = 0
+            while not p.is_ready():
+                count += 1
+                if count == 100:
+                    self.fail("Timed out waiting on container to become ready.")
+            self.assertTrue(p.is_ready())
 
     # ------------------------------------------------------------------------------------- set annotations
 
@@ -619,11 +700,25 @@ class K8sPodTest(unittest.TestCase):
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
-    # TODO: requires http call
+    def test_get_by_name_nonexistent(self):
+        name = "yopod-{0}".format(unicode(uuid.uuid4()))
+        config = K8sConfig()
+        if config.api_host is not None and self._is_reachable(config.api_host):
+            pods = K8sPod.get_by_name(name=name)
+            self.assertIsInstance(pods, list)
+            self.assertEqual(0, len(pods))
+
     def test_get_by_name(self):
-        # name = "yopod"
-        # pods = K8sPod.get_by_name(name=name)
-        pass
+        name = "yocontainer"
+        container = self._create_container(name=name)
+        name = "yopod-{0}".format(unicode(uuid.uuid4()))
+        pod = self._create_pod(name=name)
+        pod.add_container(container)
+        if pod.config.api_host is not None and self._is_reachable(pod.config.api_host):
+            pod.create()
+            pods = K8sPod.get_by_name(name=name)
+            self.assertIsInstance(pods, list)
+            self.assertEqual(1, len(pods))
 
     # ------------------------------------------------------------------------------------- get by labels
 
@@ -642,8 +737,123 @@ class K8sPodTest(unittest.TestCase):
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
-    # TODO: requires http call
+    def test_get_by_labels_nonexistent(self):
+        name = "yopod-{0}".format(unicode(uuid.uuid4()))
+        config = K8sConfig()
+        if config.api_host is not None and self._is_reachable(config.api_host):
+            pods = K8sPod.get_by_labels(labels={'name': name})
+            self.assertIsInstance(pods, list)
+            self.assertEqual(0, len(pods))
+
     def test_get_by_labels(self):
-        # name = "yopod"
-        # pods = K8sPod.get_by_name(name=name)
-        pass
+        name = "yocontainer"
+        container = self._create_container(name=name)
+        name = "yopod-{0}".format(unicode(uuid.uuid4()))
+        pod = self._create_pod(name=name)
+        pod.add_container(container)
+        if pod.config.api_host is not None and self._is_reachable(pod.config.api_host):
+            pod.create()
+            pods = K8sPod.get_by_labels(labels={'name': name})
+            self.assertIsInstance(pods, list)
+            self.assertEqual(1, len(pods))
+
+    # ------------------------------------------------------------------------------------- api - create
+
+    def test_create_without_containers(self):
+        name = "yopod"
+        pod = self._create_pod(name=name)
+        if pod.config.api_host is not None and self._is_reachable(pod.config.api_host):
+            try:
+                pod.create()
+                self.fail("Should not fail.")
+            except Exception as err:
+                self.assertIsInstance(err, UnprocessableEntityException)
+
+    def test_create_already_exists(self):
+        name = "yocontainer"
+        c = self._create_container(name=name)
+        name = "yopod"
+        pod = self._create_pod(name=name)
+        pod.add_container(c)
+        if pod.config.api_host is not None and self._is_reachable(pod.config.api_host):
+            try:
+                result = pod.create()
+                self.assertIsInstance(result, K8sPod)
+                self.assertEqual(pod, result)
+                pod.create()
+            except Exception as err:
+                self.assertIsInstance(err, AlreadyExistsException)
+
+    def test_create_unique(self):
+        name = "yocontainer"
+        container = self._create_container(name=name)
+        config = K8sConfig()
+        pods = []
+        count = 3
+        if config.api_host is not None and self._is_reachable(config.api_host):
+            for i in range(0, count):
+                name = "yopod-{0}".format(unicode(uuid.uuid4()))
+                pod = self._create_pod(config, name)
+                pod.add_container(container)
+                result = pod.create()
+                self.assertIsInstance(result, K8sPod)
+                self.assertEqual(pod, result)
+                pods.append(pod)
+        self.assertEqual(count, len(pods))
+
+    # ------------------------------------------------------------------------------------- api - list
+
+    def test_list_nonexistent(self):
+        name = "yopod"
+        pod = self._create_pod(name=name)
+        if pod.config.api_host is not None and self._is_reachable(pod.config.api_host):
+            p = pod.list()
+            self.assertIsInstance(p, list)
+            self.assertEqual(0, len(p))
+
+    def test_list_multiple(self):
+        name = "yocontainer"
+        container = self._create_container(name=name)
+        config = K8sConfig()
+        pods = []
+        count = 3
+        if config.api_host is not None and self._is_reachable(config.api_host):
+            for i in range(0, count):
+                name = "yopod-{0}".format(unicode(uuid.uuid4()))
+                pod = self._create_pod(config, name)
+                pod.add_container(container)
+                result = pod.create()
+                self.assertIsInstance(result, K8sPod)
+                self.assertEqual(pod, result)
+                pods.append(pod)
+        self.assertEqual(count, len(pods))
+
+    # ------------------------------------------------------------------------------------- api - delete
+
+    def test_delete_nonexistent(self):
+        name = "yopod-{0}".format(unicode(uuid.uuid4()))
+        pod = self._create_pod(name=name)
+        if pod.config.api_host is not None and self._is_reachable(pod.config.api_host):
+            try:
+                pod.delete()
+                self.fail("Should not fail.")
+            except Exception as err:
+                self.assertIsInstance(err, NotFoundException)
+
+    def test_delete(self):
+        name = "yocontainer"
+        container = self._create_container(name)
+        name = "yopod-{0}".format(unicode(uuid.uuid4()))
+        pod = self._create_pod(name=name)
+        pod.add_container(container)
+        if pod.config.api_host is not None and self._is_reachable(pod.config.api_host):
+            from_create = pod.create()
+            from_get = pod.get()
+            self.assertEqual(from_create, from_get)
+            from_delete = pod.delete()
+            self.assertIsInstance(from_delete, K8sPod)
+            self.assertEqual(from_get, from_delete)
+            time.sleep(3)  # let the pod die
+            result = pod.list()
+            self.assertIsInstance(result, list)
+            self.assertEqual(0, len(result))
