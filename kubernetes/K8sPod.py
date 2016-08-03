@@ -10,6 +10,7 @@ from kubernetes.K8sPodBasedObject import K8sPodBasedObject
 from kubernetes.models.v1.Pod import Pod
 from kubernetes.models.v1.PodStatus import PodStatus
 from kubernetes.K8sExceptions import NotFoundException
+from kubernetes import K8sConfig
 
 
 class K8sPod(K8sPodBasedObject):
@@ -107,6 +108,8 @@ class K8sPod(K8sPodBasedObject):
             raise SyntaxError('K8sPod: name: [ {0} ] cannot be None.'.format(name))
         if not isinstance(name, str):
             raise SyntaxError('K8sPod: name: [ {0} ] must be a string.'.format(name))
+        if config is None:
+            config = K8sConfig()
 
         pod_list = list()
         data = {'labelSelector': 'name={0}'.format(name)}
@@ -127,6 +130,8 @@ class K8sPod(K8sPodBasedObject):
             raise SyntaxError('K8sPod: labels: [ {0} ] cannot be None.'.format(labels))
         if not isinstance(labels, dict):
             raise SyntaxError('K8sPod: labels: [ {0} ] must be a dict.'.format(labels))
+        if config is None:
+            config = K8sConfig()
 
         pod_list = list()
         my_labels = ",".join(['%s=%s' % (key, value) for (key, value) in labels.items()])
