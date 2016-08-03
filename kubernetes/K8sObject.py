@@ -97,7 +97,11 @@ class K8sObject(object):
             data=data,
             token=token
         )
-        return r.send()
+
+        try:
+            return r.send()
+        except IOError:
+            raise BadRequestException('Please check your credentials and / or certificates; do they exist?')
 
     def list(self):
         state = self.request(method='GET')
@@ -129,7 +133,6 @@ class K8sObject(object):
 
         url = '{base}'.format(base=self.base_url)
         state = self.request(method='GET', url=url, data=data)
-
         return state.get('data', None).get('items', list())
 
     def create(self):
