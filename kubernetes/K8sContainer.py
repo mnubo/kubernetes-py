@@ -15,7 +15,7 @@ class K8sContainer(object):
             self.model = Container(model=model)
         else:
             if name is None or image is None:
-                raise SyntaxError('You must provide a name and image')
+                raise SyntaxError('K8sContainer: name: [ {0} ] or image: [ {1} ] cannot be None.'.format(name, image))
             else:
                 self.model = Container(name=name, image=image)
 
