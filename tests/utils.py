@@ -25,8 +25,11 @@ def is_reachable(api_host):
         return False
 
 
-def create_container(name=None, image="redis"):
-    obj = K8sContainer(name=name, image=image)
+def create_container(model=None, name=None, image="redis"):
+    if model is None:
+        obj = K8sContainer(name=name, image=image)
+    else:
+        obj = K8sContainer(model=model)
     return obj
 
 
@@ -80,6 +83,6 @@ def cleanup_pods():
             result = K8sPod.get_by_name(name=p['metadata']['name'])
             try:
                 [x.delete() for x in result]
-                time.sleep(2)  # let the pod die
             except NotFoundException:
                 continue
+        time.sleep(3)  # let the pods die
