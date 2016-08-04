@@ -10,6 +10,7 @@ import unittest
 import os
 from kubernetes import K8sPodBasedObject, K8sContainer, K8sConfig
 from kubernetes.models.v1 import Pod, ReplicationController, ObjectMeta, PodSpec
+from tests.test_k8s_pod import K8sPodTest
 
 kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
 
@@ -20,7 +21,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         pass
 
     def tearDown(self):
-        pass
+        K8sPodTest.cleanup_pods()
 
     # --------------------------------------------------------------------------------- util
 
@@ -28,9 +29,11 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     def _create_pod(config=None, name=None):
         if config is None:
             try:
-                config = K8sConfig()
-            except SyntaxError:
                 config = K8sConfig(kubeconfig=kubeconfig_fallback)
+            except SyntaxError:
+                config = K8sConfig()
+            except IOError:
+                config = K8sConfig()
         obj = K8sPodBasedObject(config=config, obj_type='Pod', name=name)
         obj.model = Pod(name=name)
         return obj
@@ -39,9 +42,9 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     def _create_rc(config=None, name=None):
         if config is None:
             try:
-                config = K8sConfig()
-            except SyntaxError:
                 config = K8sConfig(kubeconfig=kubeconfig_fallback)
+            except SyntaxError:
+                config = K8sConfig()
         obj = K8sPodBasedObject(config=config, obj_type='ReplicationController', name=name)
         obj.model = ReplicationController(name=name)
         return obj
