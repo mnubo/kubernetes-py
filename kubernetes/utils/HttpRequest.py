@@ -1,7 +1,13 @@
-import httplib
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+#
+# This file is subject to the terms and conditions defined in
+# file 'LICENSE.md', which is part of this source code package.
+#
+
 import urllib
 import json
-import base64
 import requests
 from kubernetes.utils.ConvertData import convert
 
