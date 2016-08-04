@@ -37,7 +37,7 @@ class K8sContainerTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_init_image_only(self):
-        image = "busybox"
+        image = "redis"
         try:
             K8sContainer(image=image)
             self.fail("Should not fail.")
@@ -46,7 +46,7 @@ class K8sContainerTest(unittest.TestCase):
 
     def test_init_with_name_and_image(self):
         name = "yomama"
-        image = "busybox"
+        image = "redis"
         c = K8sContainer(name=name, image=image)
         self.assertIsNotNone(c)
         self.assertIsInstance(c, K8sContainer)
@@ -57,7 +57,7 @@ class K8sContainerTest(unittest.TestCase):
 
     def test_struct_k8scontainer(self):
         name = "yomama"
-        image = "busybox"
+        image = "redis"
         c = K8sContainer(name=name, image=image)
         self.assertIsNotNone(c)
         self.assertIsInstance(c, K8sContainer)
@@ -66,7 +66,7 @@ class K8sContainerTest(unittest.TestCase):
 
     def test_struct_container(self):
         name = "yomama"
-        image = "busybox"
+        image = "redis"
         c = K8sContainer(name=name, image=image)
         self.assertIsInstance(c.model, Container)
         self.assertIsNone(c.model.liveness_probe)
@@ -75,7 +75,7 @@ class K8sContainerTest(unittest.TestCase):
 
     def test_struct_container_model(self):
         name = "yomama"
-        image = "busybox"
+        image = "redis"
         c = K8sContainer(name=name, image=image)
         model = c.model.model
         self.assertIsInstance(model, dict)

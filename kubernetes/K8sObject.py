@@ -11,10 +11,15 @@ from kubernetes.models.v1.BaseUrls import BaseUrls
 from kubernetes.models.v1.BaseModel import BaseModel
 from kubernetes.models.v1.DeleteOptions import DeleteOptions
 from kubernetes.K8sConfig import K8sConfig
-from kubernetes.K8sExceptions import NotFoundException, UnprocessableEntityException, BadRequestException
+from kubernetes.K8sExceptions import *
 import json
 
-VALID_K8s_OBJS = ['Pod', 'ReplicationController', 'Secret', 'Service']
+VALID_K8s_OBJS = [
+    'Pod',
+    'ReplicationController',
+    'Secret',
+    'Service'
+]
 
 
 class K8sObject(object):
@@ -52,18 +57,30 @@ class K8sObject(object):
     def __str__(self):
         return "[ {0} ] named [ {1} ]. Model: [ {2} ]".format(self.obj_type, self.name, self.model.get())
 
+    def __eq__(self, other):
+        # see https://github.com/kubernetes/kubernetes/blob/release-1.3/docs/design/identifiers.md
+        if isinstance(other, self.__class__):
+            # Uniquely name (via a name) an object across space.
+            return self.config.namespace == other.config.namespace \
+                   and self.name == other.name
+        return NotImplemented
+
+    # ------------------------------------------------------------------------------------- representations
+
     def as_dict(self):
         return self.model.get()
 
     def as_json(self):
         return json.dumps(self.model.get())
 
+    # ------------------------------------------------------------------------------------- set name
+
     def set_name(self, name):
         self.name = name
         if self.model is not None:
-            my_method = getattr(self.model, "set_name", None)
-            if callable(my_method):
-                my_method(name=name)
+            meth = getattr(self.model, "set_name", None)
+            if callable(meth):
+                meth(name=name)
         return self
 
     # ------------------------------------------------------------------------------------- remote API calls
@@ -86,7 +103,11 @@ class K8sObject(object):
             data=data,
             token=token
         )
-        return r.send()
+
+        try:
+            return r.send()
+        except IOError:
+            raise BadRequestException('K8sObject: IOError: Your credentials or certificates might not exist.')
 
     def list(self):
         state = self.request(method='GET')
@@ -118,7 +139,6 @@ class K8sObject(object):
 
         url = '{base}'.format(base=self.base_url)
         state = self.request(method='GET', url=url, data=data)
-
         return state.get('data', None).get('items', list())
 
     def create(self):
@@ -132,6 +152,8 @@ class K8sObject(object):
             status = state.get('status', '')
             reason = state.get('data', dict()).get('message', None)
             message = 'K8sObject: CREATE failed : HTTP {0} : {1}'.format(status, reason)
+            if int(status) == 409:
+                raise AlreadyExistsException(message)
             if int(status) == 422:
                 raise UnprocessableEntityException(message)
             raise BadRequestException(message)
@@ -149,6 +171,10 @@ class K8sObject(object):
             status = state.get('status', '')
             reason = state.get('data', dict()).get('message', None)
             message = 'K8sObject: UPDATE failed: HTTP {0} : {1}'.format(status, reason)
+            if int(status) == 404:
+                raise NotFoundException(message)
+            if int(status) == 422:
+                raise UnprocessableEntityException(message)
             raise BadRequestException(message)
 
         return self
@@ -165,7 +191,7 @@ class K8sObject(object):
             status = state.get('status', '')
             reason = state.get('data', dict()).get('message', None)
             message = 'K8sObject: DELETE failed: HTTP {0} : {1}'.format(status, reason)
-            if status == 404:
+            if int(status) == 404:
                 raise NotFoundException(message)
             raise BadRequestException(message)
 

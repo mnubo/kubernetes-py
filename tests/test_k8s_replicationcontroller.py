@@ -7,11 +7,9 @@
 #
 
 import unittest
-import os
 from kubernetes import K8sReplicationController, K8sConfig
 from kubernetes.models.v1 import ReplicationController, ObjectMeta, PodSpec
-
-kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
+from tests import utils
 
 
 class K8sReplicationControllerTest(unittest.TestCase):
@@ -22,26 +20,18 @@ class K8sReplicationControllerTest(unittest.TestCase):
     def tearDown(self):
         pass
 
-    # ------------------------------------------------------------------------------------- utils
-
-    @staticmethod
-    def _create_rc(config=None, name=None, replicas=0):
-        if config is None:
-            try:
-                config = K8sConfig()
-            except SyntaxError:
-                config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sReplicationController(config=config, name=name, replicas=replicas)
-        return obj
-
     # --------------------------------------------------------------------------------- init
 
     def test_init_no_args(self):
         try:
             K8sReplicationController()
             self.fail("Should not fail.")
+        except SyntaxError:
+            pass
+        except IOError:
+            pass
         except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+            self.fail("Unhandled exception: [ {0} ]".format(err.__class__.__name__))
 
     def test_init_with_invalid_config(self):
         config = object()
@@ -54,14 +44,14 @@ class K8sReplicationControllerTest(unittest.TestCase):
     def test_init_with_invalid_name(self):
         name = object()
         try:
-            self._create_rc(name=name)
+            utils.create_rc(name=name)
             self.fail("Should not fail.")
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_init_with_name(self):
         name = "yomama"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         self.assertIsNotNone(rc)
         self.assertIsInstance(rc, K8sReplicationController)
         self.assertEqual(rc.name, name)
@@ -69,8 +59,8 @@ class K8sReplicationControllerTest(unittest.TestCase):
     def test_init_with_config_and_pull_secrets(self):
         ps = "yomama"
         name = "sofat"
-        config = K8sConfig(pull_secret=ps, kubeconfig=kubeconfig_fallback)
-        rc = self._create_rc(config=config, name=name)
+        config = K8sConfig(pull_secret=ps, kubeconfig=utils.kubeconfig_fallback)
+        rc = utils.create_rc(config=config, name=name)
         self.assertIsNotNone(rc.config)
         self.assertEqual(ps, rc.config.pull_secret)
 
@@ -78,7 +68,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_struct_k8s_rc(self):
         name = "yomama"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         self.assertIsNotNone(rc)
         self.assertIsInstance(rc, K8sReplicationController)
         self.assertIsNotNone(rc.model)
@@ -86,7 +76,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_struct_rc(self):
         name = "yomama"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         model = rc.model
         self.assertIsInstance(model.model, dict)
         self.assertIsInstance(model.pod_metadata, ObjectMeta)
@@ -96,7 +86,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_struct_rc_model(self):
         name = "yomama"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         model = rc.model.model
         self.assertIsNotNone(model)
         self.assertIsInstance(model, dict)
@@ -166,7 +156,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_add_annotation_none_args(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         try:
             rc.add_annotation()
             self.fail("Should not fail.")
@@ -175,7 +165,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_add_annotation_invalid_args(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = object()
         v = object()
         try:
@@ -186,7 +176,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_add_annotation(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = "yokey"
         v = "yovalue"
         rc.add_annotation(k, v)
@@ -201,7 +191,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_add_label_none_args(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         try:
             rc.add_label()
             self.fail("Should not fail.")
@@ -210,7 +200,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_add_label_invalid_args(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = object()
         v = object()
         try:
@@ -221,7 +211,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_add_label(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = "yokey"
         v = "yovalue"
         rc.add_label(k, v)
@@ -236,7 +226,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_add_pod_annotation_none_args(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         try:
             rc.add_pod_annotation()
             self.fail("Should not fail.")
@@ -245,7 +235,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_add_pod_annotation_invalid_args(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = object()
         v = object()
         try:
@@ -256,7 +246,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_add_pod_annotation(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = "yokey"
         v = "yovalue"
         rc.add_pod_annotation(k, v)
@@ -271,7 +261,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_add_pod_label_none_args(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         try:
             rc.add_pod_label()
             self.fail("Should not fail.")
@@ -280,7 +270,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_add_pod_label_invalid_args(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = object()
         v = object()
         try:
@@ -291,7 +281,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_add_pod_label(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = "yokey"
         v = "yovalue"
         rc.add_pod_label(k, v)
@@ -306,7 +296,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_del_annotation_none_arg(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         try:
             rc.del_annotation()
             self.fail("Should not fail.")
@@ -315,7 +305,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_del_annotation_invalid_arg(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = object()
         try:
             rc.del_annotation(k)
@@ -325,7 +315,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_del_annotation_doesnt_exist(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = "yokey"
         rc.del_annotation(k)
         self.assertNotIn('annotations', rc.model.model['metadata'])
@@ -333,7 +323,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_del_annotation(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = "yokey"
         v = "yovalue"
         rc.add_annotation(k, v)
@@ -347,7 +337,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_del_label_none_arg(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         try:
             rc.del_label()
             self.fail("Should not fail.")
@@ -356,7 +346,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_del_label_invalid_arg(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = object()
         try:
             rc.del_label(k)
@@ -366,7 +356,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_del_label_doesnt_exist(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = "yokey"
         rc.del_label(k)
         self.assertIn('labels', rc.model.model['metadata'])
@@ -375,7 +365,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_del_label(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = "yokey"
         v = "yovalue"
         rc.add_annotation(k, v)
@@ -389,7 +379,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_del_pod_annotation_none_args(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         try:
             rc.del_pod_annotation()
             self.fail("Should not fail.")
@@ -398,7 +388,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_del_pod_annotation_invalid_args(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = object()
         try:
             rc.del_pod_annotation(k)
@@ -408,7 +398,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_del_pod_annotation_doesnt_exist(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = "yokey"
         rc.del_pod_annotation(k)
         self.assertNotIn('annotations', rc.model.model['spec']['template']['metadata'])
@@ -416,7 +406,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_del_pod_annotation(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = "yokey"
         v = "yovalue"
         rc.add_pod_annotation(k, v)
@@ -430,7 +420,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_del_pod_label_none_args(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         try:
             rc.del_pod_label()
             self.fail("Should not fail.")
@@ -439,7 +429,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_del_pod_label_invalid_args(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = object()
         try:
             rc.del_pod_label(k)
@@ -449,7 +439,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_del_pod_label_doesnt_exist(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = "yokey"
         rc.del_pod_label(k)
         self.assertNotIn(k, rc.model.model['spec']['template']['metadata']['labels'])
@@ -457,7 +447,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_del_pod_label(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = "yokey"
         v = "yovalue"
         rc.add_pod_label(k, v)
@@ -480,7 +470,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_get_annotation_none_args(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         try:
             rc.get_annotation()
             self.fail("Should not fail.")
@@ -489,7 +479,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_get_annotation_invalid_args(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = object()
         try:
             rc.get_annotation(k)
@@ -499,14 +489,14 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_get_annotation_doesnt_exist(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = "yokey"
         ann = rc.get_annotation(k)
         self.assertIsNone(ann)
 
     def test_get_annotation(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = "yokey"
         v_in = "yovalue"
         rc.add_annotation(k, v_in)
@@ -517,13 +507,13 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_get_annotations_none(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         anns = rc.get_annotations()
         self.assertIsNone(anns)
 
     def test_get_annotations(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
 
         count = 4
         for i in range(0, count):
@@ -543,7 +533,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_get_label_none_args(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         try:
             rc.get_label()
             self.fail("Should not fail.")
@@ -552,7 +542,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_get_label_invalid_args(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = object()
         try:
             rc.get_label(k)
@@ -562,14 +552,14 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_get_label_doesnt_exist(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = "yokey"
         label = rc.get_label(k)
         self.assertIsNone(label)
 
     def test_get_label(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = "yokey"
         v_in = "yovalue"
         rc.add_label(k, v_in)
@@ -580,7 +570,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_get_labels_none(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         labels = rc.get_labels()
         self.assertIsNotNone(labels)  # 'name' is already a label
         self.assertIn('name', labels)
@@ -588,7 +578,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_get_labels(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
 
         count = 4
         for i in range(0, count):
@@ -608,7 +598,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_get_pod_annotation_none_args(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         try:
             rc.get_pod_annotation()
             self.fail("Should not fail.")
@@ -617,7 +607,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_get_pod_annotation_invalid_args(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = object()
         try:
             rc.get_pod_annotation(k)
@@ -627,14 +617,14 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_get_pod_annotation_doesnt_exist(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = "yokey"
         ann = rc.get_pod_annotation(k)
         self.assertIsNone(ann)
 
     def test_get_pod_annotation(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = "yokey"
         v_in = "yovalue"
         rc.add_pod_annotation(k, v_in)
@@ -645,13 +635,13 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_get_pod_annotations_none(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         anns = rc.get_pod_annotations()
         self.assertIsNone(anns)
 
     def test_get_pod_annotations(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
 
         count = 4
         for i in range(0, count):
@@ -671,7 +661,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_get_pod_label_none_args(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         try:
             rc.get_pod_label()
             self.fail("Should not fail.")
@@ -680,7 +670,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_get_pod_label_invalid_args(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = object()
         try:
             rc.get_pod_label(k)
@@ -690,14 +680,14 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_get_pod_label_doesnt_exist(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = "yokey"
         label = rc.get_pod_label(k)
         self.assertIsNone(label)
 
     def test_get_pod_label(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         k = "yokey"
         v_in = "yovalue"
         rc.add_pod_label(k, v_in)
@@ -708,7 +698,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_get_pod_labels_none(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         labels = rc.get_pod_labels()
         self.assertIsNotNone(labels)  # 'name' and 'rc_version' are already labels
         self.assertIn('name', labels)
@@ -717,7 +707,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_get_pod_labels(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
 
         count = 4
         for i in range(0, count):
@@ -737,14 +727,14 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_get_replicas_none(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         reps = rc.get_replicas()
         self.assertEqual(0, reps)
 
     def test_get_replicas(self):
         name = "yorc"
         count = 10
-        rc = self._create_rc(name=name, replicas=count)
+        rc = utils.create_rc(name=name, replicas=count)
         reps = rc.get_replicas()
         self.assertEqual(count, reps)
 
@@ -752,7 +742,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_get_selector(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         sel = rc.get_selector()
         self.assertIsNotNone(sel)
         self.assertIsInstance(sel, dict)
@@ -765,7 +755,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_set_annotations_none_arg(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         try:
             rc.set_annotations()
             self.fail("Should not fail.")
@@ -774,7 +764,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_set_annotations_invalid_arg(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         anns = object()
         try:
             rc.set_annotations(anns)
@@ -784,7 +774,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_set_annotations(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         anns_in = {'k1': 'v1', 'k2': 'v2'}
         rc.set_annotations(anns_in)
         anns_out = rc.get_annotations()
@@ -794,7 +784,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_set_labels_none_arg(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         try:
             rc.set_labels()
             self.fail("Should not fail.")
@@ -803,7 +793,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_set_labels_invalid_arg(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         labels = object()
         try:
             rc.set_labels(labels)
@@ -813,7 +803,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_set_labels(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         labels_in = {'k1': 'v1', 'k2': 'v2'}
         rc.set_labels(labels_in)
         labels_out = rc.get_labels()
@@ -823,7 +813,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_set_namespace_none_arg(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         try:
             rc.set_namespace()
         except Exception as err:
@@ -831,7 +821,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_set_namespace_invalid_arg(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         nspace = object()
         try:
             rc.set_namespace(nspace)
@@ -840,7 +830,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_set_namespace(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         nspace_in = "yonamespace"
         rc.set_namespace(nspace_in)
         nspace_out = rc.get_namespace()
@@ -850,7 +840,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_set_pod_annotations_none_arg(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         try:
             rc.set_pod_annotations()
             self.fail("Should not fail.")
@@ -859,7 +849,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_set_pod_annotations_invalid_arg(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         anns = object()
         try:
             rc.set_pod_annotations(anns)
@@ -869,7 +859,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_set_pod_annotations(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         anns_in = {'k1': 'v1', 'k2': 'v2'}
         rc.set_pod_annotations(anns_in)
         anns_out = rc.get_pod_annotations()
@@ -879,7 +869,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_set_pod_labels_none_arg(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         try:
             rc.set_pod_labels()
             self.fail("Should not fail.")
@@ -888,7 +878,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_set_pod_labels_invalid_arg(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         labels = object()
         try:
             rc.set_pod_labels(labels)
@@ -898,7 +888,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_set_pod_labels(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         labels_in = {'k1': 'v1', 'k2': 'v2'}
         rc.set_pod_labels(labels_in)
         labels_out = rc.get_pod_labels()
@@ -908,7 +898,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_set_replicas_none_arg(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         try:
             rc.set_replicas()
             self.fail("Should not fail.")
@@ -917,7 +907,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_set_replicas_invalid_arg(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         count = -99
         try:
             rc.set_replicas(count)
@@ -927,7 +917,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_set_replicas(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         count = 10
         before = rc.get_replicas()
         self.assertNotEqual(before, count)
@@ -940,7 +930,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_set_selector_none_arg(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         try:
             rc.set_selector()
             self.fail("Should not fail.")
@@ -949,7 +939,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_set_selector_invalid_arg(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         sel = object()
         try:
             rc.set_selector(sel)
@@ -959,7 +949,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_set_selector(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         sel_in = {'k1': 'v1', 'k2': 'v2'}
         rc.set_selector(sel_in)
         sel_out = rc.get_selector()
@@ -969,7 +959,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_wait_for_replicas_none_args(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         try:
             rc.wait_for_replicas()
         except Exception as err:
@@ -977,7 +967,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_wait_for_replicas_invalid_args(self):
         name = "yorc"
-        rc = self._create_rc(name=name)
+        rc = utils.create_rc(name=name)
         replicas = object()
         try:
             rc.wait_for_replicas(replicas=replicas)

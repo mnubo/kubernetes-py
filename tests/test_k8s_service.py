@@ -7,11 +7,9 @@
 #
 
 import unittest
-import os
 from kubernetes import K8sService, K8sConfig
 from kubernetes.models.v1 import Service, ObjectMeta
-
-kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
+from tests import utils
 
 
 class K8sServiceTest(unittest.TestCase):
@@ -28,9 +26,11 @@ class K8sServiceTest(unittest.TestCase):
     def _create_service(config=None, name=None):
         if config is None:
             try:
-                config = K8sConfig()
+                config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
             except SyntaxError:
-                config = K8sConfig(kubeconfig=kubeconfig_fallback)
+                config = K8sConfig()
+            except IOError:
+                config = K8sConfig()
         obj = K8sService(config=config, name=name)
         return obj
 
@@ -40,8 +40,12 @@ class K8sServiceTest(unittest.TestCase):
         try:
             K8sService()
             self.fail("Should not fail.")
+        except SyntaxError:
+            pass
+        except IOError:
+            pass
         except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+            self.fail("Unhandled exception: [ {0} ]".format(err.__class__.__name__))
 
     def test_init_with_invalid_config(self):
         config = object()
@@ -70,7 +74,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_init_with_name_and_config(self):
         nspace = "yonamespace"
-        config = K8sConfig(kubeconfig=kubeconfig_fallback, namespace=nspace)
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback, namespace=nspace)
         name = "yoname"
         svc = self._create_service(config=config, name=name)
         self.assertIsNotNone(svc)

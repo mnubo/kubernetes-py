@@ -7,6 +7,7 @@ A python module to use Kubernetes. Currently based on the version 1 of the API.
 
 Currently supported Kubernetes objects:
 
+* ~/.kube/config
 * Pod
 * ReplicationController
 * Secret
@@ -22,26 +23,24 @@ By default, the module attempts to load existing configuration from `~/.kube/con
 another location from where to load a kubeconfig file.
 
 Otherwise, kubeconfig parameters can be overridden piecemeal. Please see `K8sConfig.py` for more information.
+    
+    from kubernetes import K8sConfig
+    
+    # Defaults found in ~/.kube/config
+    cfg_default = K8sConfig()
+    
+    # Defaults found in another kubeconfig file
+    cfg_other = K8sConfig(kubeconfig='/path/to/kubeconfig')
+    
+    # Overriding the host, using basic auth
+    cfg_basic = K8sConfig(kubeconfig=None, api_host=somehost:8888, auth=('basic_user', 'basic_passwd'))
+    
+    # Overriding the host, using certificates
+    cfg_cert = K8sConfig(kubeconfig=None, api_host=somehost:8888, cert=('/path/to/cert.crt', '/path/to/cert.key'))
+    
+    # Overriding the host, using a Bearer token
+    cfg_token = K8sConfig(kubeconfig=None, api_host=somehost:8888, token='50a2fabfdd276f573ff97ace8b11c5f4')
 
-```
-from kubernetes import K8sConfig
-
-# Defaults found in ~/.kube/config
-cfg_default = K8sConfig()
-
-# Defaults found in another kubeconfig file
-cfg_other = K8sConfig(kubeconfig='/path/to/kubeconfig')
-
-# Overriding the host, using basic auth
-cfg_basic = K8sConfig(kubeconfig=None, api_host=somehost:8888, auth=('basic_user', 'basic_passwd'))
-
-# Overriding the host, using certificates
-cfg_cert = K8sConfig(kubeconfig=None, api_host=somehost:8888, cert=('/path/to/cert.crt', '/path/to/cert.key'))
-
-# Overriding the host, using a Bearer token
-cfg_token = K8sConfig(kubeconfig=None, api_host=somehost:8888, token='50a2fabfdd276f573ff97ace8b11c5f4')
-
-```
 
 ### Containers
 
@@ -49,13 +48,11 @@ This module uses the default container runtime.
 
 Defining a container:
 
-```
-from kubernetes import K8sContainer
+    from kubernetes import K8sContainer
+    
+    container = K8sContainer(name='redis', image='redis')
+    container.add_port(container_port=6379, host_port=6379, name='redis')
 
-container = K8sContainer(name='redis', image='redis')
-container.add_port(container_port=6379, host_port=123456, name='redis')
-
-```
 
 ### Pods
 

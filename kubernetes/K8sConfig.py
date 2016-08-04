@@ -41,12 +41,12 @@ class K8sConfig:
         dotconf = None
         if kubeconfig is not None:
             if not isfile(kubeconfig):
-                raise SyntaxError('K8sConfig: kubeconfig: [ {0} ] doesn\'t exist.'.format(kubeconfig))
+                raise IOError('K8sConfig: kubeconfig: [ {0} ] doesn\'t exist.'.format(kubeconfig))
             try:
                 with open(kubeconfig, 'r') as stream:
                     dotconf = yaml.load(stream)
-            except YAMLError:
-                raise SyntaxError('K8sConfig: kubeconfig: [ {0} ] is not a valid json file.'.format(kubeconfig))
+            except YAMLError as err:
+                raise SyntaxError('K8sConfig: kubeconfig: [ {0} ] is not a valid YAML file.'.format(kubeconfig))
 
         if dotconf is not None:
             # we're pulling configuration from a kubeconfig file
