@@ -14,7 +14,12 @@ from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sExceptions import *
 import json
 
-VALID_K8s_OBJS = ['Pod', 'ReplicationController', 'Secret', 'Service']
+VALID_K8s_OBJS = [
+    'Pod',
+    'ReplicationController',
+    'Secret',
+    'Service'
+]
 
 
 class K8sObject(object):
@@ -56,7 +61,8 @@ class K8sObject(object):
         # see https://github.com/kubernetes/kubernetes/blob/release-1.3/docs/design/identifiers.md
         if isinstance(other, self.__class__):
             # Uniquely name (via a name) an object across space.
-            return self.config.namespace == other.config.namespace and self.name == other.name
+            return self.config.namespace == other.config.namespace \
+                   and self.name == other.name
         return NotImplemented
 
     # ------------------------------------------------------------------------------------- representations
@@ -72,9 +78,9 @@ class K8sObject(object):
     def set_name(self, name):
         self.name = name
         if self.model is not None:
-            my_method = getattr(self.model, "set_name", None)
-            if callable(my_method):
-                my_method(name=name)
+            meth = getattr(self.model, "set_name", None)
+            if callable(meth):
+                meth(name=name)
         return self
 
     # ------------------------------------------------------------------------------------- remote API calls
@@ -101,7 +107,7 @@ class K8sObject(object):
         try:
             return r.send()
         except IOError:
-            raise BadRequestException('Please check your credentials and / or certificates; do they exist?')
+            raise BadRequestException('K8sObject: IOError: Your credentials or certificates might not exist.')
 
     def list(self):
         state = self.request(method='GET')
@@ -181,7 +187,7 @@ class K8sObject(object):
             status = state.get('status', '')
             reason = state.get('data', dict()).get('message', None)
             message = 'K8sObject: DELETE failed: HTTP {0} : {1}'.format(status, reason)
-            if status == 404:
+            if int(status) == 404:
                 raise NotFoundException(message)
             raise BadRequestException(message)
 
