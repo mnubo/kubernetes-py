@@ -171,6 +171,10 @@ class K8sObject(object):
             status = state.get('status', '')
             reason = state.get('data', dict()).get('message', None)
             message = 'K8sObject: UPDATE failed: HTTP {0} : {1}'.format(status, reason)
+            if int(status) == 404:
+                raise NotFoundException(message)
+            if int(status) == 422:
+                raise UnprocessableEntityException(message)
             raise BadRequestException(message)
 
         return self
