@@ -8,13 +8,9 @@
 
 import unittest
 import json
-import socket
-import os
 from kubernetes import K8sObject, K8sConfig
 from kubernetes.K8sExceptions import UnprocessableEntityException, NotFoundException, BadRequestException
-from tests.test_k8s_pod import K8sPodTest
-
-kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
+from tests import utils
 
 
 class K8sObjectTest(unittest.TestCase):
@@ -25,39 +21,18 @@ class K8sObjectTest(unittest.TestCase):
     def tearDown(self):
         pass
 
-    # ------------------------------------------------------------------------------------- utils
-
-    @staticmethod
-    def _is_reachable(api_host):
-        scheme, host, port = api_host.replace("//", "").split(':')
-        try:
-            s = socket.create_connection((host, port), timeout=1)
-            s.close()
-            return True
-        except Exception:
-            return False
-
-    @staticmethod
-    def _create_object(config=None, name=None, obj_type=None):
-        if config is None:
-            try:
-                config = K8sConfig()
-            except SyntaxError:
-                config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        obj = K8sObject(config=config, name=name, obj_type=obj_type)
-        return obj
-
-    @staticmethod
-    def _cleanup_objects():
-        K8sPodTest.cleanup_pods()
-
     # ------------------------------------------------------------------------------------- init
 
     def test_init_no_args(self):
         try:
             K8sObject()
+            self.fail("Should not fail.")
+        except SyntaxError:
+            pass
+        except IOError:
+            pass
         except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+            self.fail("Unhandled exception: [ {0} ]".format(err.__class__.__name__))
 
     def test_init_with_invalid_config(self):
         config = object()
@@ -70,7 +45,7 @@ class K8sObjectTest(unittest.TestCase):
     def test_init_with_invalid_name(self):
         name = object()
         try:
-            self._create_object(name)
+            utils.create_object(name)
             self.fail("Should not fail.")
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
@@ -78,21 +53,21 @@ class K8sObjectTest(unittest.TestCase):
     def test_init_invalid_object_type(self):
         ot = 666
         try:
-            self._create_object(obj_type=ot)
+            utils.create_object(obj_type=ot)
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_init_unknown_object_type(self):
         ot = "yomama"
         try:
-            self._create_object(obj_type=ot)
+            utils.create_object(obj_type=ot)
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_init_object_type_pod(self):
         ot = "Pod"
         name = "yomama"
-        obj = self._create_object(name=name, obj_type=ot)
+        obj = utils.create_object(name=name, obj_type=ot)
         self.assertIsInstance(obj, K8sObject)
         self.assertEqual(ot, obj.obj_type)
         self.assertEqual(name, obj.name)
@@ -100,7 +75,7 @@ class K8sObjectTest(unittest.TestCase):
     def test_init_object_type_rc(self):
         ot = "ReplicationController"
         name = "yomama"
-        obj = self._create_object(name=name, obj_type=ot)
+        obj = utils.create_object(name=name, obj_type=ot)
         self.assertIsInstance(obj, K8sObject)
         self.assertEqual(ot, obj.obj_type)
         self.assertEqual(name, obj.name)
@@ -108,7 +83,7 @@ class K8sObjectTest(unittest.TestCase):
     def test_init_object_type_secret(self):
         ot = "Secret"
         name = "yomama"
-        obj = self._create_object(name=name, obj_type=ot)
+        obj = utils.create_object(name=name, obj_type=ot)
         self.assertIsInstance(obj, K8sObject)
         self.assertEqual(ot, obj.obj_type)
         self.assertEqual(name, obj.name)
@@ -116,7 +91,7 @@ class K8sObjectTest(unittest.TestCase):
     def test_init_object_type_service(self):
         ot = "Service"
         name = "yomama"
-        obj = self._create_object(name=name, obj_type=ot)
+        obj = utils.create_object(name=name, obj_type=ot)
         self.assertIsInstance(obj, K8sObject)
         self.assertEqual(ot, obj.obj_type)
         self.assertEqual(name, obj.name)
@@ -126,14 +101,14 @@ class K8sObjectTest(unittest.TestCase):
     def test_object_as_dict(self):
         ot = "Service"
         name = "yomama"
-        obj = self._create_object(name=name, obj_type=ot)
+        obj = utils.create_object(name=name, obj_type=ot)
         dico = obj.as_dict()
         self.assertIsInstance(dico, dict)
 
     def test_object_as_json(self):
         ot = "Service"
         name = "yomama"
-        obj = self._create_object(name=name, obj_type=ot)
+        obj = utils.create_object(name=name, obj_type=ot)
         s = obj.as_json()
         self.assertIsInstance(s, str)
         valid = json.loads(s)
@@ -144,7 +119,7 @@ class K8sObjectTest(unittest.TestCase):
     def test_object_set_name(self):
         ot = "Pod"
         name1 = "yomama"
-        obj = self._create_object(name=name1, obj_type=ot)
+        obj = utils.create_object(name=name1, obj_type=ot)
         self.assertEqual(name1, obj.name)
         name2 = "sofat"
         obj.set_name(name2)
@@ -154,32 +129,32 @@ class K8sObjectTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------- api - list
 
     def test_object_pod_list_from_scratch(self):
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        if config.api_host is not None and self._is_reachable(config.api_host):
-            self._cleanup_objects()
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        if config.api_host is not None and utils.is_reachable(config.api_host):
+            utils.cleanup_objects()
             ot = "Pod"
             name = "yomama"
-            obj = self._create_object(config=config, name=name, obj_type=ot)
+            obj = utils.create_object(config=config, name=name, obj_type=ot)
             r = obj.list()
             self.assertIsNotNone(r)
             self.assertEqual(0, len(r))
 
     def test_object_rc_list_from_scratch(self):
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        if config.api_host is not None and self._is_reachable(config.api_host):
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "ReplicationController"
             name = "yomama"
-            obj = self._create_object(config=config, name=name, obj_type=ot)
+            obj = utils.create_object(config=config, name=name, obj_type=ot)
             r = obj.list()
             self.assertIsNotNone(r)
             self.assertEqual(0, len(r))
 
     def test_object_secret_list_from_scratch(self):
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        if config.api_host is not None and self._is_reachable(config.api_host):
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "Secret"
             name = "yomama"
-            obj = self._create_object(config=config, name=name, obj_type=ot)
+            obj = utils.create_object(config=config, name=name, obj_type=ot)
             r = obj.list()
             self.assertIsNotNone(r)
             self.assertEqual(1, len(r))
@@ -193,11 +168,11 @@ class K8sObjectTest(unittest.TestCase):
             self.assertIsInstance(secret['type'], str)
 
     def test_object_service_list_from_scratch(self):
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        if config.api_host is not None and self._is_reachable(config.api_host):
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "Service"
             name = "yomama"
-            obj = self._create_object(config=config, name=name, obj_type=ot)
+            obj = utils.create_object(config=config, name=name, obj_type=ot)
             r = obj.list()
             self.assertIsNotNone(r)
             self.assertEqual(1, len(r))
@@ -237,7 +212,7 @@ class K8sObjectTest(unittest.TestCase):
     def test_object_get_model_name_unset(self):
         ot = "Pod"
         name = "yomama"
-        obj = self._create_object(name=name, obj_type=ot)
+        obj = utils.create_object(name=name, obj_type=ot)
         obj.name = None
         try:
             obj.get_model()
@@ -245,44 +220,44 @@ class K8sObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_object_pod_get_model_doesnt_exist(self):
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        if config.api_host is not None and self._is_reachable(config.api_host):
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "Pod"
             name = "yomama"
-            obj = self._create_object(config=config, name=name, obj_type=ot)
+            obj = utils.create_object(config=config, name=name, obj_type=ot)
             try:
                 obj.get_model()
             except Exception as err:
                 self.assertIsInstance(err, NotFoundException)
 
     def test_object_rc_get_model_doesnt_exist(self):
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        if config.api_host is not None and self._is_reachable(config.api_host):
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "ReplicationController"
             name = "yomama"
-            obj = self._create_object(config=config, name=name, obj_type=ot)
+            obj = utils.create_object(config=config, name=name, obj_type=ot)
             try:
                 obj.get_model()
             except Exception as err:
                 self.assertIsInstance(err, NotFoundException)
 
     def test_object_secret_get_model_doesnt_exist(self):
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        if config.api_host is not None and self._is_reachable(config.api_host):
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "Secret"
             name = "yomama"
-            obj = self._create_object(config=config, name=name, obj_type=ot)
+            obj = utils.create_object(config=config, name=name, obj_type=ot)
             try:
                 obj.get_model()
             except Exception as err:
                 self.assertIsInstance(err, NotFoundException)
 
     def test_object_service_get_model_doesnt_exist(self):
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        if config.api_host is not None and self._is_reachable(config.api_host):
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "Service"
             name = "yomama"
-            obj = self._create_object(config=config, name=name, obj_type=ot)
+            obj = utils.create_object(config=config, name=name, obj_type=ot)
             try:
                 obj.get_model()
             except Exception as err:
@@ -293,7 +268,7 @@ class K8sObjectTest(unittest.TestCase):
     def test_object_get_with_params_none_arg(self):
         ot = "Pod"
         name = "yomama"
-        obj = self._create_object(name=name, obj_type=ot)
+        obj = utils.create_object(name=name, obj_type=ot)
         try:
             obj.get_with_params()
         except Exception as err:
@@ -302,7 +277,7 @@ class K8sObjectTest(unittest.TestCase):
     def test_object_get_with_params_invalid_arg(self):
         ot = "Pod"
         name = "yomama"
-        obj = self._create_object(name=name, obj_type=ot)
+        obj = utils.create_object(name=name, obj_type=ot)
         data = object()
         try:
             obj.get_with_params(data)
@@ -310,12 +285,12 @@ class K8sObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_object_get_with_params_nonexistent(self):
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        if config.api_host is not None and self._is_reachable(config.api_host):
-            self._cleanup_objects()
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        if config.api_host is not None and utils.is_reachable(config.api_host):
+            utils.cleanup_objects()
             ot = "Pod"
             name = "yomama"
-            obj = self._create_object(config=config, name=name, obj_type=ot)
+            obj = utils.create_object(config=config, name=name, obj_type=ot)
             data = {'yokey': 'yovalue'}
             r = obj.get_with_params(data)
             self.assertIsNotNone(r)
@@ -326,7 +301,7 @@ class K8sObjectTest(unittest.TestCase):
     def test_object_create_name_unset(self):
         ot = "Pod"
         name = "yomama"
-        obj = self._create_object(name=name, obj_type=ot)
+        obj = utils.create_object(name=name, obj_type=ot)
         obj.name = None
         try:
             obj.create()
@@ -334,44 +309,44 @@ class K8sObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_object_pod_create_unprocessable(self):
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        if config.api_host is not None and self._is_reachable(config.api_host):
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "Pod"
             name = "yomama"
-            obj = self._create_object(config=config, name=name, obj_type=ot)
+            obj = utils.create_object(config=config, name=name, obj_type=ot)
             try:
                 obj.create()
             except Exception as err:
                 self.assertIsInstance(err, UnprocessableEntityException)
 
     def test_object_rc_create_unprocessable(self):
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        if config.api_host is not None and self._is_reachable(config.api_host):
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "ReplicationController"
             name = "yomama"
-            obj = self._create_object(config=config, name=name, obj_type=ot)
+            obj = utils.create_object(config=config, name=name, obj_type=ot)
             try:
                 obj.create()
             except Exception as err:
                 self.assertIsInstance(err, UnprocessableEntityException)
 
     def test_object_secret_create_unprocessable(self):
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        if config.api_host is not None and self._is_reachable(config.api_host):
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "Secret"
             name = "yomama"
-            obj = self._create_object(config=config, name=name, obj_type=ot)
+            obj = utils.create_object(config=config, name=name, obj_type=ot)
             try:
                 obj.create()
             except Exception as err:
                 self.assertIsInstance(err, UnprocessableEntityException)
 
     def test_object_service_create_unprocessable(self):
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        if config.api_host is not None and self._is_reachable(config.api_host):
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "Service"
             name = "yomama"
-            obj = self._create_object(config=config, name=name, obj_type=ot)
+            obj = utils.create_object(config=config, name=name, obj_type=ot)
             try:
                 obj.create()
             except Exception as err:
@@ -382,7 +357,7 @@ class K8sObjectTest(unittest.TestCase):
     def test_object_update_name_unset(self):
         ot = "Pod"
         name = "yomama"
-        obj = self._create_object(name=name, obj_type=ot)
+        obj = utils.create_object(name=name, obj_type=ot)
         obj.name = None
         try:
             obj.update()
@@ -390,44 +365,44 @@ class K8sObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_object_pod_update_bad_request(self):
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        if config.api_host is not None and self._is_reachable(config.api_host):
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "Pod"
             name = "yomama"
-            obj = self._create_object(config=config, name=name, obj_type=ot)
+            obj = utils.create_object(config=config, name=name, obj_type=ot)
             try:
                 obj.update()
             except Exception as err:
                 self.assertIsInstance(err, BadRequestException)
 
     def test_object_rc_update_bad_request(self):
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        if config.api_host is not None and self._is_reachable(config.api_host):
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "ReplicationController"
             name = "yomama"
-            obj = self._create_object(config=config, name=name, obj_type=ot)
+            obj = utils.create_object(config=config, name=name, obj_type=ot)
             try:
                 obj.update()
             except Exception as err:
                 self.assertIsInstance(err, BadRequestException)
 
     def test_object_secret_update_bad_request(self):
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        if config.api_host is not None and self._is_reachable(config.api_host):
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "Secret"
             name = "yomama"
-            obj = self._create_object(config=config, name=name, obj_type=ot)
+            obj = utils.create_object(config=config, name=name, obj_type=ot)
             try:
                 obj.update()
             except Exception as err:
                 self.assertIsInstance(err, BadRequestException)
 
     def test_object_service_update_bad_request(self):
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        if config.api_host is not None and self._is_reachable(config.api_host):
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "Service"
             name = "yomama"
-            obj = self._create_object(config=config, name=name, obj_type=ot)
+            obj = utils.create_object(config=config, name=name, obj_type=ot)
             try:
                 obj.update()
             except Exception as err:
@@ -438,7 +413,7 @@ class K8sObjectTest(unittest.TestCase):
     def test_object_delete_name_unset(self):
         ot = "Pod"
         name = "yomama"
-        obj = self._create_object(name=name, obj_type=ot)
+        obj = utils.create_object(name=name, obj_type=ot)
         obj.name = None
         try:
             obj.delete()
@@ -446,44 +421,44 @@ class K8sObjectTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_object_pod_delete_not_found(self):
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        if config.api_host is not None and self._is_reachable(config.api_host):
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "Pod"
             name = "yomama"
-            obj = self._create_object(config=config, name=name, obj_type=ot)
+            obj = utils.create_object(config=config, name=name, obj_type=ot)
             try:
                 obj.delete()
             except Exception as err:
                 self.assertIsInstance(err, NotFoundException)
 
     def test_object_rc_delete_not_found(self):
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        if config.api_host is not None and self._is_reachable(config.api_host):
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "ReplicationController"
             name = "yomama"
-            obj = self._create_object(config=config, name=name, obj_type=ot)
+            obj = utils.create_object(config=config, name=name, obj_type=ot)
             try:
                 obj.delete()
             except Exception as err:
                 self.assertIsInstance(err, NotFoundException)
 
     def test_object_secret_delete_not_found(self):
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        if config.api_host is not None and self._is_reachable(config.api_host):
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "Secret"
             name = "yomama"
-            obj = self._create_object(config=config, name=name, obj_type=ot)
+            obj = utils.create_object(config=config, name=name, obj_type=ot)
             try:
                 obj.delete()
             except Exception as err:
                 self.assertIsInstance(err, NotFoundException)
 
     def test_object_service_delete_not_found(self):
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        if config.api_host is not None and self._is_reachable(config.api_host):
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "Service"
             name = "yomama"
-            obj = self._create_object(config=config, name=name, obj_type=ot)
+            obj = utils.create_object(config=config, name=name, obj_type=ot)
             try:
                 obj.delete()
             except Exception as err:

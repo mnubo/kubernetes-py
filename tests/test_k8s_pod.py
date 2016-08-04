@@ -7,15 +7,12 @@
 #
 
 import unittest
-import os
-import socket
 import uuid
 import time
-from kubernetes import K8sPod, K8sConfig, K8sContainer
+from kubernetes import K8sPod, K8sConfig
 from kubernetes.models.v1 import Pod, ObjectMeta, PodSpec, PodStatus
 from kubernetes.K8sExceptions import *
-
-kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
+from tests import utils
 
 
 class K8sPodTest(unittest.TestCase):
@@ -24,48 +21,7 @@ class K8sPodTest(unittest.TestCase):
         pass
 
     def tearDown(self):
-        self.cleanup_pods()
-
-    # ------------------------------------------------------------------------------------- utils
-
-    @staticmethod
-    def _create_pod(config=None, name=None):
-        if config is None:
-            try:
-                config = K8sConfig(kubeconfig=kubeconfig_fallback)
-            except SyntaxError:
-                config = K8sConfig()
-            except IOError:
-                config = K8sConfig()
-        obj = K8sPod(config=config, name=name)
-        return obj
-
-    @staticmethod
-    def _create_container(name=None, image="redis"):
-        obj = K8sContainer(name=name, image=image)
-        return obj
-
-    @staticmethod
-    def _is_reachable(api_host=None):
-        if api_host is not None:
-            scheme, host, port = api_host.replace("//", "").split(':')
-            try:
-                s = socket.create_connection((host, port), timeout=1)
-                s.close()
-                return True
-            except Exception as err:
-                return False
-        return False
-
-    @staticmethod
-    def cleanup_pods():
-        pod = K8sPodTest._create_pod(name="throwaway")
-        if K8sPodTest._is_reachable(pod.config.api_host):
-            pods = pod.list()
-            for p in pods:
-                result = K8sPod.get_by_name(name=p['metadata']['name'])
-                [x.delete() for x in result]
-                time.sleep(2)  # let the pod die
+        utils.cleanup_pods()
 
     # ------------------------------------------------------------------------------------- init
 
@@ -73,28 +29,40 @@ class K8sPodTest(unittest.TestCase):
         try:
             K8sPod()
             self.fail("Should not fail.")
+        except SyntaxError:
+            pass
+        except IOError:
+            pass
         except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+            self.fail("Unhandled exception: [ {0} ]".format(err.__class__.__name__))
 
     def test_init_with_invalid_config(self):
         config = object()
         try:
             K8sPod(config=config)
             self.fail("Should not fail.")
+        except SyntaxError:
+            pass
+        except IOError:
+            pass
         except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+            self.fail("Unhandled exception: [ {0} ]".format(err.__class__.__name__))
 
     def test_init_with_invalid_name(self):
         name = object()
         try:
             K8sPod(name=name)
             self.fail("Should not fail.")
+        except SyntaxError:
+            pass
+        except IOError:
+            pass
         except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+            self.fail("Unhandled exception: [ {0} ]".format(err.__class__.__name__))
 
     def test_init_with_name(self):
         name = "yomama"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         self.assertIsNotNone(pod)
         self.assertIsInstance(pod, K8sPod)
         self.assertEqual(pod.name, name)
@@ -102,8 +70,8 @@ class K8sPodTest(unittest.TestCase):
     def test_init_with_config_and_pull_secrets(self):
         ps = "yomama"
         name = "sofat"
-        cfg = K8sConfig(kubeconfig=kubeconfig_fallback, pull_secret=ps)
-        pod = self._create_pod(config=cfg, name=name)
+        cfg = K8sConfig(kubeconfig=utils.kubeconfig_fallback, pull_secret=ps)
+        pod = utils.create_pod(config=cfg, name=name)
         self.assertIsNotNone(pod.config)
         self.assertEqual(ps, pod.config.pull_secret)
 
@@ -111,7 +79,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_struct_k8spod(self):
         name = "yomama"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         self.assertIsNotNone(pod)
         self.assertIsInstance(pod, K8sPod)
         self.assertIsNotNone(pod.model)
@@ -119,7 +87,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_struct_pod(self):
         name = "yomama"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         model = pod.model
         self.assertIsInstance(model.model, dict)
         self.assertIsInstance(model.pod_metadata, ObjectMeta)
@@ -128,7 +96,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_struct_pod_model(self):
         name = "yomama"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         model = pod.model.model
         self.assertIsNotNone(model)
         self.assertIsInstance(model, dict)
@@ -162,7 +130,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_add_annotation_none_args(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         try:
             pod.add_annotation()
         except Exception as err:
@@ -170,7 +138,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_add_annotation_invalid_args(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         k = object()
         v = object()
         try:
@@ -180,7 +148,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_add_annotation(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
 
         k = "yokey"
         v = "yovalue"
@@ -197,7 +165,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_add_label_none_args(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         try:
             pod.add_label()
         except Exception as err:
@@ -205,7 +173,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_add_label_invalid_args(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         k = object()
         v = object()
         try:
@@ -215,7 +183,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_add_label(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         k = "yokey"
         v_in = "yovalue"
         pod.add_label(k, v_in)
@@ -226,7 +194,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_del_annotation_none_arg(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         try:
             pod.del_annotation()
         except Exception as err:
@@ -234,7 +202,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_del_annotation_invalid_arg(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         k = object()
         try:
             pod.del_annotation(k)
@@ -243,7 +211,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_del_annotation_none_yet(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
 
         k = "yokey"
         pod.del_annotation(k)
@@ -255,7 +223,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_del_annotation(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
 
         k = "yokey"
         v = "yovalue"
@@ -279,7 +247,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_del_annotation_does_not_exist(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
 
         k_1 = "yokey"
         v_1 = "yovalue"
@@ -306,7 +274,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_del_label_none_arg(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         try:
             pod.del_label()
         except Exception as err:
@@ -314,7 +282,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_del_label_invalid_arg(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         k = object()
         try:
             pod.del_label(k)
@@ -323,7 +291,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_del_label_none_yet(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
 
         k = "yokey"
         pod.del_label(k)
@@ -335,7 +303,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_del_label(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
 
         k = "yokey"
         v = "yovalue"
@@ -359,7 +327,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_del_label_does_not_exist(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
 
         k_1 = "yokey"
         v_1 = "yovalue"
@@ -385,8 +353,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_nonexistent(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
-        if self._is_reachable(pod.config.api_host):
+        pod = utils.create_pod(name=name)
+        if utils.is_reachable(pod.config.api_host):
             try:
                 pod.get()
                 self.fail("Should not fail.")
@@ -395,11 +363,11 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get(self):
         name = "yocontainer"
-        container = self._create_container(name=name)
+        container = utils.create_container(name=name)
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         pod.add_container(container)
-        if self._is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config.api_host):
             from_create = pod.create()
             from_get = pod.get()
             self.assertIsInstance(from_create, K8sPod)
@@ -410,7 +378,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_annotation_none_args(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
 
         try:
             pod.get_annotation()
@@ -419,7 +387,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_annotation_invalid_args(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
 
         k = object()
         try:
@@ -429,7 +397,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_annotation_doesnt_exist(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
 
         k = "yonotexists"
         ann = pod.get_annotation(k)
@@ -437,7 +405,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_annotation(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
 
         k = "yokey"
         v_in = "yovalue"
@@ -450,13 +418,13 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_annotations_none(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         anns = pod.get_annotations()
         self.assertIsNone(anns)
 
     def test_get_annotations(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
 
         count = 4
         for i in range(0, count):
@@ -476,7 +444,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_label_none_args(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
 
         try:
             pod.get_annotation()
@@ -485,7 +453,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_label_invalid_args(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
 
         k = object()
         try:
@@ -495,7 +463,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_label_doesnt_exist(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
 
         k = "yonotexists"
         l = pod.get_label(k)
@@ -503,7 +471,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_label(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
 
         k = "yokey"
         v_in = "yovalue"
@@ -516,14 +484,14 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_labels_none(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         labels = pod.get_labels()
         self.assertIsNotNone(labels)
         self.assertIn('name', labels)
 
     def test_get_labels(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
 
         count = 4
         for i in range(0, count):
@@ -543,9 +511,9 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_pod_status_nonexistent(self):
         name = "yopod"
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        pod = self._create_pod(name=name)
-        if self._is_reachable(pod.config.api_host):
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        pod = utils.create_pod(name=name)
+        if utils.is_reachable(pod.config.api_host):
             try:
                 pod.get_status()
             except Exception as err:
@@ -553,11 +521,11 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_pod_status(self):
         name = "yocontainer"
-        container = self._create_container(name=name)
+        container = utils.create_container(name=name)
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         pod.add_container(container)
-        if self._is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config.api_host):
             p = pod.create()
             time.sleep(2)  # let creation happen
             result = p.get_status()
@@ -569,8 +537,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_is_ready_nonexistent(self):
         name = "yopod-{0}".format(unicode(uuid.uuid4()))
-        pod = self._create_pod(name=name)
-        if self._is_reachable(pod.config.api_host):
+        pod = utils.create_pod(name=name)
+        if utils.is_reachable(pod.config.api_host):
             try:
                 pod.is_ready()
                 self.fail("Should not fail.")
@@ -579,22 +547,22 @@ class K8sPodTest(unittest.TestCase):
 
     def test_is_ready_false(self):
         name = "yocontainer"
-        container = self._create_container(name=name)
+        container = utils.create_container(name=name)
         name = "yopod-{0}".format(unicode(uuid.uuid4()))
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         pod.add_container(container)
-        if self._is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config.api_host):
             p = pod.create()
             result = p.is_ready()
             self.assertFalse(result)
 
     def test_is_ready_true(self):
         name = "yocontainer"
-        container = self._create_container(name=name)
+        container = utils.create_container(name=name)
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         pod.add_container(container)
-        if self._is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config.api_host):
             p = pod.create()
             count = 0
             while not p.is_ready():
@@ -607,7 +575,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_set_annotations_none_args(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         try:
             pod.set_annotations()
             self.fail("Should not fail.")
@@ -616,7 +584,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_set_annotations_invalid_args(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         anns = object()
         try:
             pod.set_annotations(anns)
@@ -626,7 +594,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_set_annotations(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         anns_in = {'key': 'value'}
         pod.set_annotations(anns_in)
         anns_out = pod.get_annotations()
@@ -636,7 +604,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_set_labels_none_args(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         try:
             pod.set_labels()
             self.fail("Should not fail.")
@@ -645,7 +613,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_set_labels_invalid_args(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         labels = object()
         try:
             pod.set_labels(labels)
@@ -655,7 +623,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_set_labels(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         labels_in = {'key': 'value'}
         pod.set_labels(labels_in)
         labels_out = pod.get_labels()
@@ -665,7 +633,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_set_namespace_none_args(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         try:
             pod.set_namespace()
             self.fail("Should not fail.")
@@ -674,7 +642,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_set_namespace_invalid_args(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         nspace = object()
         try:
             pod.set_namespace(nspace)
@@ -684,7 +652,7 @@ class K8sPodTest(unittest.TestCase):
 
     def test_set_namespace(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         nspace_in = "yonamespace"
         pod.set_namespace(nspace_in)
         nspace_out = pod.get_namespace()
@@ -709,19 +677,19 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_by_name_nonexistent(self):
         name = "yopod-{0}".format(unicode(uuid.uuid4()))
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        if self._is_reachable(config.api_host):
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        if utils.is_reachable(config.api_host):
             pods = K8sPod.get_by_name(name=name)
             self.assertIsInstance(pods, list)
             self.assertEqual(0, len(pods))
 
     def test_get_by_name(self):
         name = "yocontainer"
-        container = self._create_container(name=name)
+        container = utils.create_container(name=name)
         name = "yopod-{0}".format(unicode(uuid.uuid4()))
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         pod.add_container(container)
-        if self._is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config.api_host):
             pod.create()
             pods = K8sPod.get_by_name(name=name)
             self.assertIsInstance(pods, list)
@@ -746,19 +714,19 @@ class K8sPodTest(unittest.TestCase):
 
     def test_get_by_labels_nonexistent(self):
         name = "yopod-{0}".format(unicode(uuid.uuid4()))
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
-        if self._is_reachable(config.api_host):
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        if utils.is_reachable(config.api_host):
             pods = K8sPod.get_by_labels(labels={'name': name})
             self.assertIsInstance(pods, list)
             self.assertEqual(0, len(pods))
 
     def test_get_by_labels(self):
         name = "yocontainer"
-        container = self._create_container(name=name)
+        container = utils.create_container(name=name)
         name = "yopod-{0}".format(unicode(uuid.uuid4()))
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         pod.add_container(container)
-        if self._is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config.api_host):
             pod.create()
             pods = K8sPod.get_by_labels(labels={'name': name})
             self.assertIsInstance(pods, list)
@@ -768,8 +736,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_create_without_containers(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
-        if self._is_reachable(pod.config.api_host):
+        pod = utils.create_pod(name=name)
+        if utils.is_reachable(pod.config.api_host):
             try:
                 pod.create()
                 self.fail("Should not fail.")
@@ -778,11 +746,11 @@ class K8sPodTest(unittest.TestCase):
 
     def test_create_already_exists(self):
         name = "yocontainer"
-        c = self._create_container(name=name)
+        c = utils.create_container(name=name)
         name = "yopod"
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         pod.add_container(c)
-        if self._is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config.api_host):
             try:
                 result = pod.create()
                 self.assertIsInstance(result, K8sPod)
@@ -792,15 +760,15 @@ class K8sPodTest(unittest.TestCase):
                 self.assertIsInstance(err, AlreadyExistsException)
 
     def test_create_unique(self):
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         pods = []
         count = 3
-        if self._is_reachable(config.api_host):
+        if utils.is_reachable(config.api_host):
             name = "yocontainer"
-            container = self._create_container(name=name)
+            container = utils.create_container(name=name)
             for i in range(0, count):
                 name = "yopod-{0}".format(unicode(uuid.uuid4()))
-                pod = self._create_pod(config, name)
+                pod = utils.create_pod(config, name)
                 pod.add_container(container)
                 result = pod.create()
                 self.assertIsInstance(result, K8sPod)
@@ -812,22 +780,22 @@ class K8sPodTest(unittest.TestCase):
 
     def test_list_nonexistent(self):
         name = "yopod"
-        pod = self._create_pod(name=name)
-        if self._is_reachable(pod.config.api_host):
+        pod = utils.create_pod(name=name)
+        if utils.is_reachable(pod.config.api_host):
             p = pod.list()
             self.assertIsInstance(p, list)
             self.assertEqual(0, len(p))
 
     def test_list_multiple(self):
         name = "yocontainer"
-        container = self._create_container(name=name)
-        config = K8sConfig(kubeconfig=kubeconfig_fallback)
+        container = utils.create_container(name=name)
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         pods = []
         count = 3
-        if self._is_reachable(config.api_host):
+        if utils.is_reachable(config.api_host):
             for i in range(0, count):
                 name = "yopod-{0}".format(unicode(uuid.uuid4()))
-                pod = self._create_pod(config, name)
+                pod = utils.create_pod(config, name)
                 pod.add_container(container)
                 result = pod.create()
                 self.assertIsInstance(result, K8sPod)
@@ -839,8 +807,8 @@ class K8sPodTest(unittest.TestCase):
 
     def test_delete_nonexistent(self):
         name = "yopod-{0}".format(unicode(uuid.uuid4()))
-        pod = self._create_pod(name=name)
-        if self._is_reachable(pod.config.api_host):
+        pod = utils.create_pod(name=name)
+        if utils.is_reachable(pod.config.api_host):
             try:
                 pod.delete()
                 self.fail("Should not fail.")
@@ -849,11 +817,11 @@ class K8sPodTest(unittest.TestCase):
 
     def test_delete(self):
         name = "yocontainer"
-        container = self._create_container(name)
+        container = utils.create_container(name)
         name = "yopod-{0}".format(unicode(uuid.uuid4()))
-        pod = self._create_pod(name=name)
+        pod = utils.create_pod(name=name)
         pod.add_container(container)
-        if self._is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config.api_host):
             from_create = pod.create()
             from_get = pod.get()
             self.assertEqual(from_create, from_get)
