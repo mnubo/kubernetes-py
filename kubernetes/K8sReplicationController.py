@@ -14,7 +14,9 @@ from kubernetes.K8sPodBasedObject import K8sPodBasedObject
 from kubernetes.K8sPod import K8sPod
 from kubernetes.K8sContainer import K8sContainer
 from kubernetes.models.v1.ReplicationController import ReplicationController
-from kubernetes.K8sExceptions import NotFoundException
+from kubernetes.K8sExceptions import *
+
+SCALE_WAIT_TIMEOUT_SECONDS = 60
 
 
 class K8sReplicationController(K8sPodBasedObject):
@@ -157,6 +159,7 @@ class K8sReplicationController(K8sPodBasedObject):
         pod_list = list()
         pod_qty = len(pod_list)
         ready_check = False
+        start_time = time.time()
 
         print('Waiting for replicas to scale to: [ {0} ] with labels: [ {1} ]'.format(replicas, labels))
 
@@ -177,6 +180,10 @@ class K8sReplicationController(K8sPodBasedObject):
                     ready_check = True
             else:
                 ready_check = True
+
+            elapsed_time = time.time() - start_time
+            if elapsed_time >= SCALE_WAIT_TIMEOUT_SECONDS:  # timeout
+                raise TimedOutException("Timed out scaling replicas to: [ {0} ] with labels: [ {1} ]".format(replicas, labels))
 
             time.sleep(0.2)
         return self
