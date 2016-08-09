@@ -8,7 +8,6 @@
 
 import unittest
 import uuid
-import time
 from kubernetes import K8sReplicationController, K8sConfig
 from kubernetes.K8sExceptions import *
 from kubernetes.models.v1 import ReplicationController, ObjectMeta, PodSpec
@@ -1304,13 +1303,8 @@ class K8sReplicationControllerTest(unittest.TestCase):
         rc = utils.create_rc(name=name)
         rc.add_container(container)
         if utils.is_reachable(rc.config.api_host):
-            from_create = rc.create()
-            from_get = rc.get()
-            self.assertEqual(from_create, from_get)
-            from_delete = rc.delete()
-            self.assertIsInstance(from_delete, K8sReplicationController)
-            self.assertEqual(from_get, from_delete)
-            time.sleep(2)  # let the rc die
+            rc.create()
+            utils.cleanup_rcs()
             result = rc.list()
             self.assertIsInstance(result, list)
             self.assertEqual(0, len(result))
