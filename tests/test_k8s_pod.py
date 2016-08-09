@@ -759,7 +759,7 @@ class K8sPodTest(unittest.TestCase):
             except Exception as err:
                 self.assertIsInstance(err, AlreadyExistsException)
 
-    def test_create_unique(self):
+    def test_create_with_container(self):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         pods = []
         count = 3
@@ -811,6 +811,7 @@ class K8sPodTest(unittest.TestCase):
         if utils.is_reachable(pod.config.api_host):
             try:
                 pod.update()
+                self.fail("Should not fail.")
             except Exception as err:
                 self.assertIsInstance(err, NotFoundException)
 
@@ -853,6 +854,7 @@ class K8sPodTest(unittest.TestCase):
             pod2.set_namespace(nspace)
             try:
                 pod2.update()
+                self.fail("Should not fail.")
             except Exception as err:
                 self.assertIsInstance(err, BadRequestException)
 
@@ -872,6 +874,22 @@ class K8sPodTest(unittest.TestCase):
             pod1.set_labels(labels)
             try:
                 pod1.update()
+                self.fail("Should not fail.")
+            except Exception as err:
+                self.assertIsInstance(err, UnprocessableEntityException)
+
+    def test_update_add_container_fails(self):
+        cont_names = ["yocontainer", "yocontainer2"]
+        container = utils.create_container(name=cont_names[0])
+        pod_name = "yopod-{0}".format(unicode(uuid.uuid4()))
+        pod = utils.create_pod(name=pod_name)
+        pod.add_container(container)
+        if utils.is_reachable(pod.config.api_host):
+            pod.create()
+            container = utils.create_container(name=cont_names[1])
+            pod.add_container(container)
+            try:
+                pod.update()
                 self.fail("Should not fail.")
             except Exception as err:
                 self.assertIsInstance(err, UnprocessableEntityException)
@@ -909,7 +927,7 @@ class K8sPodTest(unittest.TestCase):
             from_delete = pod.delete()
             self.assertIsInstance(from_delete, K8sPod)
             self.assertEqual(from_get, from_delete)
-            time.sleep(3)  # let the pod die
+            time.sleep(2)  # let the pod die
             result = pod.list()
             self.assertIsInstance(result, list)
             self.assertEqual(0, len(result))
