@@ -462,12 +462,28 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     # --------------------------------------------------------------------------------- get
 
-    # TODO: requires http call
+    def test_get_nonexistent(self):
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        if utils.is_reachable(rc.config.api_host):
+            try:
+                rc.get()
+                self.fail("Should not fail.")
+            except Exception as err:
+                self.assertIsInstance(err, NotFoundException)
+
     def test_get(self):
-        # name = "yorc"
-        # rc = K8sReplicationController(name=name)
-        # rc.get()
-        pass
+        name = "yocontainer"
+        container = utils.create_container(name=name)
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        rc.add_container(container)
+        if utils.is_reachable(rc.config.api_host):
+            from_create = rc.create()
+            from_get = rc.get()
+            self.assertIsInstance(from_create, K8sReplicationController)
+            self.assertIsInstance(from_get, K8sReplicationController)
+            self.assertEqual(from_create, from_get)
 
     # --------------------------------------------------------------------------------- get annotation
 
@@ -977,13 +993,22 @@ class K8sReplicationControllerTest(unittest.TestCase):
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
-    # TODO: requires http call
-    def test_wait_for_replicas(self):
-        # name = "yorc"
-        # rc = K8sReplicationController(name=name)
-        # replicas = 99
-        # rc.wait_for_replicas(replicas=replicas)
-        pass
+    def test_wait_for_replicas_timed_out(self):
+        # this test makes no sense without a prior call to resize.
+        # it'll wait forever on a quantity of pods that does not change.
+        # please see test_resize().
+        cont_name = "yocontainer"
+        container = utils.create_container(name=cont_name)
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        rc.add_container(container)
+        count = 99
+        if utils.is_reachable(rc.config.api_host):
+            try:
+                rc.create()
+                rc.wait_for_replicas(replicas=count)
+            except Exception as err:
+                self.assertIsInstance(err, TimedOutException)
 
     # -------------------------------------------------------------------------------------  get by name
 
@@ -1011,11 +1036,27 @@ class K8sReplicationControllerTest(unittest.TestCase):
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
-    # TODO: requires http call
+    def test_get_by_name_nonexistent(self):
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        if utils.is_reachable(rc.config.api_host):
+            result = rc.get_by_name(name=name)
+            self.assertIsInstance(result, list)
+            self.assertEqual(0, len(result))
+
     def test_get_by_name(self):
-        # name = "yoname"
-        # K8sReplicationController.get_by_name(name=name)
-        pass
+        cont_name = "yocontainer"
+        container = utils.create_container(name=cont_name)
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        rc.add_container(container)
+        if utils.is_reachable(rc.config.api_host):
+            rc.create()
+            result = rc.get_by_name(name=name)
+            self.assertIsInstance(result, list)
+            self.assertEqual(1, len(result))
+            self.assertIsInstance(result[0], K8sReplicationController)
+            self.assertEqual(rc, result[0])
 
     # -------------------------------------------------------------------------------------  get by name
 
@@ -1054,12 +1095,30 @@ class K8sReplicationControllerTest(unittest.TestCase):
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
-    # TODO: requires http call
+    def test_resize_nonexistent(self):
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        replicas = 3
+        if utils.is_reachable(rc.config.api_host):
+            try:
+                K8sReplicationController.resize(name=name, replicas=replicas)
+                self.fail("Should not fail.")
+            except Exception as err:
+                self.assertIsInstance(err, NotFoundException)
+
     def test_resize(self):
-        # name = "yoname"
-        # replicas = 10
-        # K8sReplicationController.resize(name=name, replicas=replicas)
-        pass
+        cont_name = "yocontainer"
+        container = utils.create_container(name=cont_name)
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        rc.add_container(container)
+        replicas = 3
+        if utils.is_reachable(rc.config.api_host):
+            rc.create()
+            K8sReplicationController.resize(name=name, replicas=replicas)
+            result = rc.get()
+            self.assertIsInstance(result, K8sReplicationController)
+            self.assertEqual(replicas, result.model.model['spec']['replicas'])
 
     # -------------------------------------------------------------------------------------  rolling update
 
