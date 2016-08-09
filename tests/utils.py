@@ -21,7 +21,7 @@ def is_reachable(api_host):
         s = socket.create_connection((host, port), timeout=1)
         s.close()
         return True
-    except Exception:
+    except Exception as err:
         return False
 
 
@@ -36,9 +36,7 @@ def create_container(model=None, name=None, image="redis"):
 def create_config():
     try:
         config = K8sConfig(kubeconfig=kubeconfig_fallback)
-    except SyntaxError:
-        config = K8sConfig()
-    except IOError:
+    except Exception:
         config = K8sConfig()
     return config
 
@@ -72,7 +70,10 @@ def create_secret(config=None, name=None):
 
 
 def cleanup_objects():
-    cleanup_pods()
+    config = K8sConfig(kubeconfig=kubeconfig_fallback)
+    if is_reachable(config.api_host):
+        cleanup_pods()
+        cleanup_rcs()
 
 
 def cleanup_pods():
@@ -80,9 +81,22 @@ def cleanup_pods():
     if is_reachable(pod.config.api_host):
         pods = pod.list()
         for p in pods:
-            result = K8sPod.get_by_name(name=p['metadata']['name'])
+            _list = K8sPod.get_by_name(name=p['metadata']['name'])
             try:
-                [x.delete() for x in result]
+                [x.delete() for x in _list]
             except NotFoundException:
                 continue
-        time.sleep(3)  # let the pods die
+        time.sleep(2)  # let the pods die
+
+
+def cleanup_rcs():
+    rc = create_rc(name="throwaway")
+    if is_reachable(rc.config.api_host):
+        rcs = rc.list()
+        for rc in rcs:
+            _list = K8sReplicationController.get_by_name(name=rc['metadata']['name'])
+            try:
+                [x.delete() for x in _list]
+            except NotFoundException:
+                continue
+        time.sleep(2)  # let the replication controllers die
