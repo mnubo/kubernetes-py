@@ -8,7 +8,6 @@
 
 import os
 import socket
-import time
 from kubernetes import K8sConfig, K8sObject, K8sContainer, K8sPod, K8sReplicationController, K8sSecret
 from kubernetes.K8sExceptions import NotFoundException
 
@@ -72,31 +71,33 @@ def create_secret(config=None, name=None):
 def cleanup_objects():
     config = K8sConfig(kubeconfig=kubeconfig_fallback)
     if is_reachable(config.api_host):
-        cleanup_pods()
         cleanup_rcs()
+        cleanup_pods()
 
 
 def cleanup_pods():
-    pod = create_pod(name="throwaway")
-    if is_reachable(pod.config.api_host):
-        pods = pod.list()
-        for p in pods:
-            _list = K8sPod.get_by_name(name=p['metadata']['name'])
-            try:
-                [x.delete() for x in _list]
-            except NotFoundException:
-                continue
-        time.sleep(2)  # let the pods die
+    ref = create_pod(name="throwaway")
+    if is_reachable(ref.config.api_host):
+        pods = ref.list()
+        while len(pods) > 0:
+            for p in pods:
+                try:
+                    pod = K8sPod(name=p['metadata']['name']).get()
+                    pod.delete()
+                except NotFoundException:
+                    continue
+            pods = ref.list()
 
 
 def cleanup_rcs():
-    rc = create_rc(name="throwaway")
-    if is_reachable(rc.config.api_host):
-        rcs = rc.list()
-        for rc in rcs:
-            _list = K8sReplicationController.get_by_name(name=rc['metadata']['name'])
-            try:
-                [x.delete() for x in _list]
-            except NotFoundException:
-                continue
-        time.sleep(2)  # let the replication controllers die
+    ref = create_rc(name="throwaway")
+    if is_reachable(ref.config.api_host):
+        rcs = ref.list()
+        while len(rcs) > 0:
+            for rc in rcs:
+                try:
+                    obj = K8sReplicationController(name=rc['metadata']['name']).get()
+                    obj.delete()
+                except NotFoundException:
+                    continue
+            rcs = ref.list()
