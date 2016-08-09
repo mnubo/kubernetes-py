@@ -921,13 +921,8 @@ class K8sPodTest(unittest.TestCase):
         pod = utils.create_pod(name=name)
         pod.add_container(container)
         if utils.is_reachable(pod.config.api_host):
-            from_create = pod.create()
-            from_get = pod.get()
-            self.assertEqual(from_create, from_get)
-            from_delete = pod.delete()
-            self.assertIsInstance(from_delete, K8sPod)
-            self.assertEqual(from_get, from_delete)
-            time.sleep(2)  # let the pod die
+            pod.create()
+            utils.cleanup_pods()
             result = pod.list()
             self.assertIsInstance(result, list)
             self.assertEqual(0, len(result))
