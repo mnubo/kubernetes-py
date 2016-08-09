@@ -17,7 +17,7 @@ kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(
 def is_reachable(api_host):
     scheme, host, port = api_host.replace("//", "").split(':')
     try:
-        s = socket.create_connection((host, port), timeout=1)
+        s = socket.create_connection((host, port), timeout=0.5)
         s.close()
         return True
     except Exception as err:
