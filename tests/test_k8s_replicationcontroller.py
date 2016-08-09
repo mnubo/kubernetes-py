@@ -18,7 +18,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         pass
 
     def tearDown(self):
-        pass
+        utils.cleanup_objects()
 
     # --------------------------------------------------------------------------------- init
 
