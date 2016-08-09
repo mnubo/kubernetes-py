@@ -25,3 +25,8 @@ class BadRequestException(Exception):
 class AlreadyExistsException(Exception):
     def __init__(self, *args, **kwargs):
         super(AlreadyExistsException, self).__init__(*args, **kwargs)
+
+
+class TimedOutException(Exception):
+    def __init__(self, *args, **kwargs):
+        super(TimedOutException, self).__init__(*args, **kwargs)
