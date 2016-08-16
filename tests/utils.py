@@ -26,7 +26,10 @@ def is_reachable(api_host):
 
 def create_container(model=None, name=None, image="redis"):
     if model is None:
-        obj = K8sContainer(name=name, image=image)
+        obj = K8sContainer(
+            name=name,
+            image=image
+        )
     else:
         obj = K8sContainer(model=model)
     return obj
@@ -43,28 +46,42 @@ def create_config():
 def create_object(config=None, name=None, obj_type=None):
     if config is None:
         config = create_config()
-    obj = K8sObject(config=config, name=name, obj_type=obj_type)
+    obj = K8sObject(
+        config=config,
+        name=name,
+        obj_type=obj_type
+    )
     return obj
 
 
 def create_pod(config=None, name=None):
     if config is None:
         config = create_config()
-    obj = K8sPod(config=config, name=name)
+    obj = K8sPod(
+        config=config,
+        name=name
+    )
     return obj
 
 
 def create_rc(config=None, name=None, replicas=0):
     if config is None:
         config = create_config()
-    obj = K8sReplicationController(config=config, name=name, replicas=replicas)
+    obj = K8sReplicationController(
+        config=config,
+        name=name,
+        replicas=replicas
+    )
     return obj
 
 
 def create_secret(config=None, name=None):
     if config is None:
         config = create_config()
-    obj = K8sSecret(config=config, name=name)
+    obj = K8sSecret(
+        config=config,
+        name=name
+    )
     return obj
 
 
@@ -82,7 +99,7 @@ def cleanup_pods():
         while len(pods) > 0:
             for p in pods:
                 try:
-                    pod = K8sPod(name=p['metadata']['name']).get()
+                    pod = K8sPod(config=ref.config, name=p['metadata']['name']).get()
                     pod.delete()
                 except NotFoundException:
                     continue
@@ -96,7 +113,7 @@ def cleanup_rcs():
         while len(rcs) > 0:
             for rc in rcs:
                 try:
-                    obj = K8sReplicationController(name=rc['metadata']['name']).get()
+                    obj = K8sReplicationController(config=ref.config, name=rc['metadata']['name']).get()
                     obj.delete()
                 except NotFoundException:
                     continue

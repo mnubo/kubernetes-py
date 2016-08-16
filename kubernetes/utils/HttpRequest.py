@@ -47,12 +47,10 @@ class HttpRequest:
                 url=self.url,
                 auth=self.auth,
                 cert=self.cert,
-                verify=False
+                verify=self.ca_cert if self.ca_cert is not None else False
             )
-
         else:
             json_encoded = json.dumps(self.data)
-            # @todo: Add certificate verification !
             response = requests.request(
                 method=self.http_method,
                 url=self.url,
@@ -60,7 +58,7 @@ class HttpRequest:
                 cert=self.cert,
                 headers=http_headers,
                 data=json_encoded,
-                verify=False
+                verify=self.ca_cert if self.ca_cert is not None else False
             )
 
         state['status'] = response.status_code

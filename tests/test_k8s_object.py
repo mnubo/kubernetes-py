@@ -19,7 +19,7 @@ class K8sObjectTest(unittest.TestCase):
         pass
 
     def tearDown(self):
-        pass
+        utils.cleanup_objects()
 
     # ------------------------------------------------------------------------------------- init
 
@@ -131,7 +131,6 @@ class K8sObjectTest(unittest.TestCase):
     def test_object_pod_list_from_scratch(self):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         if config.api_host is not None and utils.is_reachable(config.api_host):
-            utils.cleanup_objects()
             ot = "Pod"
             name = "yomama"
             obj = utils.create_object(config=config, name=name, obj_type=ot)
@@ -287,7 +286,6 @@ class K8sObjectTest(unittest.TestCase):
     def test_object_get_with_params_nonexistent(self):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         if config.api_host is not None and utils.is_reachable(config.api_host):
-            utils.cleanup_objects()
             ot = "Pod"
             name = "yomama"
             obj = utils.create_object(config=config, name=name, obj_type=ot)

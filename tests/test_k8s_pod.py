@@ -527,7 +527,7 @@ class K8sPodTest(unittest.TestCase):
         pod.add_container(container)
         if utils.is_reachable(pod.config.api_host):
             p = pod.create()
-            time.sleep(2)  # let creation happen
+            time.sleep(3)  # let creation happen
             result = p.get_status()
             self.assertIsInstance(result, PodStatus)
             for i in ['conditions', 'containerStatuses', 'hostIP', 'phase', 'podIP', 'startTime']:
@@ -679,7 +679,7 @@ class K8sPodTest(unittest.TestCase):
         name = "yopod-{0}".format(unicode(uuid.uuid4()))
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         if utils.is_reachable(config.api_host):
-            pods = K8sPod.get_by_name(name=name)
+            pods = K8sPod.get_by_name(config=config, name=name)
             self.assertIsInstance(pods, list)
             self.assertEqual(0, len(pods))
 
@@ -691,7 +691,7 @@ class K8sPodTest(unittest.TestCase):
         pod.add_container(container)
         if utils.is_reachable(pod.config.api_host):
             pod.create()
-            pods = K8sPod.get_by_name(name=name)
+            pods = K8sPod.get_by_name(config=pod.config, name=name)
             self.assertIsInstance(pods, list)
             self.assertEqual(1, len(pods))
 
@@ -716,7 +716,7 @@ class K8sPodTest(unittest.TestCase):
         name = "yopod-{0}".format(unicode(uuid.uuid4()))
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         if utils.is_reachable(config.api_host):
-            pods = K8sPod.get_by_labels(labels={'name': name})
+            pods = K8sPod.get_by_labels(config=config, labels={'name': name})
             self.assertIsInstance(pods, list)
             self.assertEqual(0, len(pods))
 
@@ -728,7 +728,7 @@ class K8sPodTest(unittest.TestCase):
         pod.add_container(container)
         if utils.is_reachable(pod.config.api_host):
             pod.create()
-            pods = K8sPod.get_by_labels(labels={'name': name})
+            pods = K8sPod.get_by_labels(config=pod.config, labels={'name': name})
             self.assertIsInstance(pods, list)
             self.assertEqual(1, len(pods))
 
@@ -824,7 +824,7 @@ class K8sPodTest(unittest.TestCase):
         pod.add_container(container)
         if utils.is_reachable(pod.config.api_host):
             pod.create()
-            result = pod.get_by_name(name=name1)
+            result = K8sPod.get_by_name(config=pod.config, name=name1)
             self.assertIsInstance(result, list)
             self.assertEqual(1, len(result))
             self.assertIsInstance(result[0], K8sPod)
@@ -844,7 +844,7 @@ class K8sPodTest(unittest.TestCase):
         pod1.add_container(container)
         if utils.is_reachable(pod1.config.api_host):
             pod1.create()
-            result = pod1.get_by_name(name=name)
+            result = K8sPod.get_by_name(config=pod1.config, name=name)
             self.assertIsInstance(result, list)
             self.assertEqual(1, len(result))
             pod2 = result[0]
@@ -868,7 +868,7 @@ class K8sPodTest(unittest.TestCase):
             pod1.create()
             labels = pod1.get_labels()
             labels['yomama'] = 'sofat'
-            pods = pod1.get_by_labels(labels=labels)
+            pods = pod1.get_by_labels(config=pod1.config, labels=labels)
             self.assertIsInstance(pods, list)
             self.assertEqual(0, len(pods))
             pod1.set_labels(labels)
