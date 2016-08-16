@@ -1155,11 +1155,11 @@ class K8sReplicationControllerTest(unittest.TestCase):
         name = "yorc-{0}".format(unicode(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         rc.add_container(container)
-        #if utils.is_reachable(rc.config.api_host):
-        rc.create()
-        rollout = K8sReplicationController.rolling_update(config=rc.config, name=name, image=new_image)
-        self.assertEqual(new_image, rollout.model.model['spec']['template']['spec']['containers'][0]['image'])
-        self.assertEqual(new_image, rollout.model.pod_spec.containers[0].model['image'])
+        if utils.is_reachable(rc.config.api_host):
+            rc.create()
+            rollout = K8sReplicationController.rolling_update(config=rc.config, name=name, image=new_image)
+            self.assertEqual(new_image, rollout.model.model['spec']['template']['spec']['containers'][0]['image'])
+            self.assertEqual(new_image, rollout.model.pod_spec.containers[0].model['image'])
 
     def test_rolling_update_two_containers_size_0_fails(self):
         cont_name_1 = "redis"
