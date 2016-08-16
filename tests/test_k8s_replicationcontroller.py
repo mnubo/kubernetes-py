@@ -1039,7 +1039,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         name = "yorc-{0}".format(unicode(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         if utils.is_reachable(rc.config.api_host):
-            result = rc.get_by_name(name=name)
+            result = K8sReplicationController.get_by_name(config=rc.config, name=name)
             self.assertIsInstance(result, list)
             self.assertEqual(0, len(result))
 
@@ -1051,7 +1051,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         rc.add_container(container)
         if utils.is_reachable(rc.config.api_host):
             rc.create()
-            result = rc.get_by_name(name=name)
+            result = K8sReplicationController.get_by_name(config=rc.config, name=name)
             self.assertIsInstance(result, list)
             self.assertEqual(1, len(result))
             self.assertIsInstance(result[0], K8sReplicationController)
@@ -1100,7 +1100,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         replicas = 3
         if utils.is_reachable(rc.config.api_host):
             try:
-                K8sReplicationController.resize(name=name, replicas=replicas)
+                K8sReplicationController.resize(config=rc.config, name=name, replicas=replicas)
                 self.fail("Should not fail.")
             except Exception as err:
                 self.assertIsInstance(err, NotFoundException)
@@ -1114,7 +1114,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         replicas = 3
         if utils.is_reachable(rc.config.api_host):
             rc.create()
-            K8sReplicationController.resize(name=name, replicas=replicas)
+            K8sReplicationController.resize(config=rc.config, name=name, replicas=replicas)
             result = rc.get()
             self.assertIsInstance(result, K8sReplicationController)
             self.assertEqual(replicas, result.model.model['spec']['replicas'])
@@ -1129,7 +1129,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         rc.add_container(container)
         if utils.is_reachable(rc.config.api_host):
             try:
-                rc.rolling_update()
+                K8sReplicationController.rolling_update()
             except Exception as err:
                 self.assertIsInstance(err, SyntaxError)
 
@@ -1143,7 +1143,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         rc.add_container(container)
         if utils.is_reachable(rc.config.api_host):
             try:
-                rc.rolling_update(name=name, image=new_image)
+                K8sReplicationController.rolling_update(config=rc.config, name=name, image=new_image)
             except Exception as err:
                 self.assertIsInstance(err, NotFoundException)
 
@@ -1157,7 +1157,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         rc.add_container(container)
         if utils.is_reachable(rc.config.api_host):
             rc.create()
-            rollout = rc.rolling_update(name=name, image=new_image)
+            rollout = K8sReplicationController.rolling_update(config=rc.config, name=name, image=new_image)
             self.assertEqual(new_image, rollout.model.model['spec']['template']['spec']['containers'][0]['image'])
             self.assertEqual(new_image, rollout.model.pod_spec.containers[0].model['image'])
 
@@ -1176,7 +1176,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         if utils.is_reachable(rc.config.api_host):
             rc.create()
             try:
-                rc.rolling_update(name=name, image=new_image)
+                K8sReplicationController.rolling_update(config=rc.config, name=name, image=new_image)
             except Exception as err:
                 self.assertIsInstance(err, UnprocessableEntityException)
 
@@ -1194,7 +1194,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         rc.add_container(container_2)
         if utils.is_reachable(rc.config.api_host):
             rc.create()
-            rollout = rc.rolling_update(name=name, image=new_image, container_name=cont_name_1)
+            rollout = K8sReplicationController.rolling_update(config=rc.config, name=name, image=new_image, container_name=cont_name_1)
             self.assertEqual(2, len(rollout.model.pod_spec.containers))
             for c in rollout.model.pod_spec.containers:
                 self.assertIn(c.model['name'], [cont_name_1, cont_name_2])
@@ -1215,14 +1215,29 @@ class K8sReplicationControllerTest(unittest.TestCase):
         rc.add_container(container_2)
         if utils.is_reachable(rc.config.api_host):
             rc.create()
-            rc.resize(name=name, replicas=count)
+            K8sReplicationController.resize(
+                config=rc.config,
+                name=name,
+                replicas=count
+            )
             labels = rc.get_pod_labels()
-            pods = K8sPod.get_by_labels(labels=labels)
+            pods = K8sPod.get_by_labels(
+                config=rc.config,
+                labels=labels
+            )
             self.assertEqual(count, len(pods))
             self.assertEqual(image_1, pods[0].model.pod_spec.containers[0].model['image'])
-            rollout = rc.rolling_update(name=name, image=new_image, container_name=cont_name_1)
+            rollout = K8sReplicationController.rolling_update(
+                config=rc.config,
+                name=name,
+                image=new_image,
+                container_name=cont_name_1
+            )
             labels = rollout.get_pod_labels()
-            pods = K8sPod.get_by_labels(labels=labels)
+            pods = K8sPod.get_by_labels(
+                config=rc.config,
+                labels=labels
+            )
             self.assertEqual(count, len(pods))
             self.assertEqual(new_image, pods[0].model.pod_spec.containers[0].model['image'])
 
@@ -1241,15 +1256,30 @@ class K8sReplicationControllerTest(unittest.TestCase):
         rc.add_container(container_2)
         if utils.is_reachable(rc.config.api_host):
             rc.create()
-            rc.resize(name=name, replicas=count)
+            K8sReplicationController.resize(
+                config=rc.config,
+                name=name,
+                replicas=count
+            )
             labels = rc.get_pod_labels()
-            pods = K8sPod.get_by_labels(labels=labels)
+            pods = K8sPod.get_by_labels(
+                config=rc.config,
+                labels=labels
+            )
             self.assertEqual(count, len(pods))
             for i in range(0, count):
                 self.assertEqual(image_1, pods[i].model.pod_spec.containers[0].model['image'])
-            rollout = rc.rolling_update(name=name, image=new_image, container_name=cont_name_1)
+            rollout = K8sReplicationController.rolling_update(
+                config=rc.config,
+                name=name,
+                image=new_image,
+                container_name=cont_name_1
+            )
             labels = rollout.get_pod_labels()
-            pods = K8sPod.get_by_labels(labels=labels)
+            pods = K8sPod.get_by_labels(
+                config=rc.config,
+                labels=labels
+            )
             self.assertEqual(count, len(pods))
             for i in range(0, count):
                 self.assertEqual(new_image, pods[i].model.pod_spec.containers[0].model['image'])
@@ -1270,7 +1300,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
         if utils.is_reachable(rc_1.config.api_host):
             rc_1.create()
-            rollout = rc_1.rolling_update(name=name, rc_new=rc_2)
+            rollout = K8sReplicationController.rolling_update(config=rc_1.config, name=name, rc_new=rc_2)
             self.assertEqual(new_image, rollout.model.model['spec']['template']['spec']['containers'][0]['image'])
             self.assertEqual(new_image, rollout.model.pod_spec.containers[0].model['image'])
 
@@ -1297,7 +1327,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
         if utils.is_reachable(rc_1.config.api_host):
             rc_1.create()
-            rollout = rc_1.rolling_update(name=name_1, rc_new=rc_2)
+            rollout = K8sReplicationController.rolling_update(config=rc_1.config, name=name_1, rc_new=rc_2)
             self.assertEqual(new_image, rollout.model.model['spec']['template']['spec']['containers'][0]['image'])
             self.assertEqual(new_image, rollout.model.pod_spec.containers[0].model['image'])
 
@@ -1325,14 +1355,28 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
         if utils.is_reachable(rc_1.config.api_host):
             rc_1.create()
-            rc_1.resize(name=name_1, replicas=count)
+            K8sReplicationController.resize(
+                config=rc_1.config,
+                name=name_1,
+                replicas=count
+            )
             labels = rc_1.get_pod_labels()
-            pods = K8sPod.get_by_labels(labels=labels)
+            pods = K8sPod.get_by_labels(
+                config=rc_1.config,
+                labels=labels
+            )
             self.assertEqual(count, len(pods))
             self.assertEqual(image_1, pods[0].model.pod_spec.containers[0].model['image'])
-            rollout = rc_1.rolling_update(name=name_1, rc_new=rc_2)
+            rollout = K8sReplicationController.rolling_update(
+                config=rc_1.config,
+                name=name_1,
+                rc_new=rc_2
+            )
             labels = rollout.get_pod_labels()
-            pods = K8sPod.get_by_labels(labels=labels)
+            pods = K8sPod.get_by_labels(
+                config=rc_1.config,
+                labels=labels
+            )
             self.assertEqual(count, len(pods))
             self.assertEqual(new_image, pods[0].model.pod_spec.containers[0].model['image'])
 
@@ -1360,15 +1404,29 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
         if utils.is_reachable(rc_1.config.api_host):
             rc_1.create()
-            rc_1.resize(name=name_1, replicas=count)
+            K8sReplicationController.resize(
+                config=rc_1.config,
+                name=name_1,
+                replicas=count
+            )
             labels = rc_1.get_pod_labels()
-            pods = K8sPod.get_by_labels(labels=labels)
+            pods = K8sPod.get_by_labels(
+                config=rc_1.config,
+                labels=labels
+            )
             self.assertEqual(count, len(pods))
             for i in range(0, count):
                 self.assertEqual(image_1, pods[i].model.pod_spec.containers[0].model['image'])
-            rollout = rc_1.rolling_update(name=name_1, rc_new=rc_2)
+            rollout = K8sReplicationController.rolling_update(
+                config=rc_1.config,
+                name=name_1,
+                rc_new=rc_2
+            )
             labels = rollout.get_pod_labels()
-            pods = K8sPod.get_by_labels(labels=labels)
+            pods = K8sPod.get_by_labels(
+                config=rc_1.config,
+                labels=labels
+            )
             self.assertEqual(count, len(pods))
             for i in range(0, count):
                 self.assertEqual(new_image, pods[i].model.pod_spec.containers[0].model['image'])
@@ -1459,7 +1517,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         rc.add_container(container)
         if utils.is_reachable(rc.config.api_host):
             rc.create()
-            result = rc.get_by_name(name=name1)
+            result = K8sReplicationController.get_by_name(config=rc.config, name=name1)
             self.assertIsInstance(result, list)
             self.assertEqual(1, len(result))
             self.assertIsInstance(result[0], K8sReplicationController)
@@ -1479,7 +1537,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         rc.add_container(container)
         if utils.is_reachable(rc.config.api_host):
             rc.create()
-            result = rc.get_by_name(name=name)
+            result = K8sReplicationController.get_by_name(config=rc.config, name=name)
             self.assertIsInstance(result, list)
             self.assertEqual(1, len(result))
             rc2 = result[0]

@@ -33,13 +33,25 @@ Otherwise, kubeconfig parameters can be overridden piecemeal. Please see `K8sCon
     cfg_other = K8sConfig(kubeconfig='/path/to/kubeconfig')
     
     # Overriding the host, using basic auth
-    cfg_basic = K8sConfig(kubeconfig=None, api_host=somehost:8888, auth=('basic_user', 'basic_passwd'))
+    cfg_basic = K8sConfig(
+        kubeconfig=None, 
+        api_host=somehost:8888, 
+        auth=('basic_user', 'basic_passwd')
+    )
     
     # Overriding the host, using certificates
-    cfg_cert = K8sConfig(kubeconfig=None, api_host=somehost:8888, cert=('/path/to/cert.crt', '/path/to/cert.key'))
+    cfg_cert = K8sConfig(
+        kubeconfig=None, 
+        api_host=somehost:8888, 
+        cert=('/path/to/cert.crt', '/path/to/cert.key')
+    )
     
     # Overriding the host, using a Bearer token
-    cfg_token = K8sConfig(kubeconfig=None, api_host=somehost:8888, token='50a2fabfdd276f573ff97ace8b11c5f4')
+    cfg_token = K8sConfig(
+        kubeconfig=None, 
+        api_host=somehost:8888, 
+        token='50a2fabfdd276f573ff97ace8b11c5f4'
+    )
 
 
 ### Containers
@@ -51,7 +63,11 @@ Defining a container:
     from kubernetes import K8sContainer
     
     container = K8sContainer(name='redis', image='redis')
-    container.add_port(container_port=6379, host_port=6379, name='redis')
+    container.add_port(
+        container_port=6379, 
+        host_port=6379, 
+        name='redis'
+    )
 
 
 ### Pods
@@ -82,31 +98,29 @@ Deleting a pod:
 
 Creating a replication controller:
 
-    from kubernetes import K8sConfig
     from kubernetes import K8sReplicationController
     
-    that_cfg = K8sConfig(api_host='somehost:8888')
-    that_rc = K8sReplicationController(config=that_cfg, name='redis', image='library/redis:2', replicas=1)
-    that_rc.create()
+    rc = K8sReplicationController(
+        config=cfg_cert, 
+        name='redis', 
+        image='redis:3.2.3', 
+        replicas=1
+    )
+    rc.create()
 
 Fetching a replication controller:
 
-    from kubernetes import K8sConfig
     from kubernetes import K8sReplicationController
     
-    that_cfg = K8sConfig(api_host='somehost:8888')
-    that_rc = K8sReplicationController(config=that_cfg, name='redis')
-    that_rc.get()
+    rc = K8sReplicationController(config=cfg_cert, name='redis')
+    rc.get()
 
 Deleting a replication controller:
 
-    from kubernetes import K8sConfig
     from kubernetes import K8sReplicationController
     
-    that_cfg = K8sConfig(api_host='somehost:8888')
-    that_rc = K8sReplicationController(config=that_cfg, name='redis')
-    that_rc.get()
-    that_rc.delete()
+    rc = K8sReplicationController(config=cfg_cert, name='redis')
+    rc.delete()
 
 ### Service
 
@@ -183,5 +197,20 @@ The unit tests which require making remote API calls check if there is a reachab
 is found, the test is skipped. It is recommended to begin testing things out against `minikube`.
 
 ```
-$ nosetests tests/
+$ nosetests --with-coverage --cover-package=kubernetes
 ```
+
+Please note that when using minikube, the generated `~/.minikube/ca.crt` defines the following hosts:
+
+* `kubernetes`
+* `kubernetes.default`
+* `kubernetes.default.svc`
+* `kubernetes.default.svc.cluster.local`
+
+For certificate validation to succeed, you should edit your `~/.kube/config` to address one of the hosts:
+
+    - cluster:
+        certificate-authority: /Users/kubernetes/.minikube/ca.crt
+        server: https://kubernetes:8443
+
+And also add an entry to your `/etc/hosts` file.
