@@ -19,8 +19,9 @@ class K8sContainer(object):
             else:
                 self.model = Container(name=name, image=image)
 
+    # -------------------------------------------------------------------------------------  add
+
     def add_port(self, container_port, host_port=None, protocol=None, name=None, host_ip=None):
-        assert isinstance(container_port, int)
         if host_port is not None:
             assert isinstance(host_port, int)
         if protocol is not None:
@@ -29,8 +30,15 @@ class K8sContainer(object):
             assert isinstance(name, str)
         if host_ip is not None:
             assert isinstance(host_ip, str)
-        self.model.add_port(container_port=container_port, host_port=host_port, name=name, protocol=protocol,
-                            host_ip=host_ip)
+
+        self.model.add_port(
+            container_port=container_port,
+            host_port=host_port,
+            name=name,
+            protocol=protocol,
+            host_ip=host_ip
+        )
+
         return self
 
     def add_env(self, k, v):
@@ -46,6 +54,8 @@ class K8sContainer(object):
         self.model.add_volume_mount(name=name, mount_path=mount_path, read_only=read_only)
         return self
 
+    # -------------------------------------------------------------------------------------  get
+
     def get(self):
         return self
 
@@ -57,6 +67,8 @@ class K8sContainer(object):
 
     def get_readiness_probe(self):
         return self.model.get_readiness_probe()
+
+    # -------------------------------------------------------------------------------------  set
 
     def set_arguments(self, args):
         assert isinstance(args, list)
@@ -73,8 +85,11 @@ class K8sContainer(object):
         self.model.set_host_network(mode=mode)
         return self
 
-    def set_image(self, image):
-        assert isinstance(image, str)
+    def set_image(self, image=None):
+        if image is None:
+            raise SyntaxError("K8sContainer: image: [ {0} ] cannot be None.".format(image))
+        if not isinstance(image, str):
+            raise SyntaxError("K8sContainer: image: [ {0} ] must be a string.".format(image.__class__.__name__))
         self.model.set_image(image=image)
         return self
 

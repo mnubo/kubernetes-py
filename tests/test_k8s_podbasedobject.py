@@ -18,7 +18,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         pass
 
     def tearDown(self):
-        utils.cleanup_pods()
+        utils.cleanup_objects()
 
     # --------------------------------------------------------------------------------- init
 

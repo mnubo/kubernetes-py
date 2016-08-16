@@ -14,7 +14,9 @@ from kubernetes.K8sPodBasedObject import K8sPodBasedObject
 from kubernetes.K8sPod import K8sPod
 from kubernetes.K8sContainer import K8sContainer
 from kubernetes.models.v1.ReplicationController import ReplicationController
-from kubernetes.K8sExceptions import NotFoundException
+from kubernetes.K8sExceptions import *
+
+SCALE_WAIT_TIMEOUT_SECONDS = 60
 
 
 class K8sReplicationController(K8sPodBasedObject):
@@ -157,29 +159,40 @@ class K8sReplicationController(K8sPodBasedObject):
         pod_list = list()
         pod_qty = len(pod_list)
         ready_check = False
+        start_time = time.time()
 
         print('Waiting for replicas to scale to: [ {0} ] with labels: [ {1} ]'.format(replicas, labels))
 
         while not ((pod_qty == replicas) and ready_check):
-            if labels is None:
-                pod_list = K8sPod.get_by_name(config=self.config, name=name)
-            else:
-                pod_list = K8sPod.get_by_labels(config=self.config, labels=labels)
-
+            pod_list = self._get_pods(name=name, labels=labels)
             pod_qty = len(pod_list)
             if replicas > 0:
                 pods_ready = 0
                 for pod in pod_list:
                     assert isinstance(pod, K8sPod)
-                    if pod.is_ready():
-                        pods_ready += 1
-                if pods_ready == len(pod_list):
+                    try:
+                        if pod.is_ready():
+                            pods_ready += 1
+                    except NotFoundException:
+                        # while scaling down
+                        pass
+                if pods_ready >= len(pod_list):
                     ready_check = True
             else:
                 ready_check = True
 
+            elapsed_time = time.time() - start_time
+            if elapsed_time >= SCALE_WAIT_TIMEOUT_SECONDS:  # timeout
+                raise TimedOutException("Timed out scaling replicas to: [ {0} ] with labels: [ {1} ]".format(replicas, labels))
+
             time.sleep(0.2)
         return self
+
+    def _get_pods(self, name=None, labels=None):
+        if labels is None:
+            return K8sPod.get_by_name(config=self.config, name=name)
+        else:
+            return K8sPod.get_by_labels(config=self.config, labels=labels)
 
     # -------------------------------------------------------------------------------------  get by name
 
@@ -234,111 +247,130 @@ class K8sReplicationController(K8sPodBasedObject):
     # -------------------------------------------------------------------------------------  rolling update
 
     @staticmethod
-    def rolling_update(config=None, name=None, image=None, container_name=None, new_rc=None, wait_seconds=10):
-        next_rc_suffix = '-next'
-        partner_annotation = 'update-partner'
-        replicas_annotation = 'desired-replicas'
-        next_name = name + next_rc_suffix
+    def rolling_update(config=None, name=None, image=None, container_name=None, rc_new=None, wait_seconds=10):
+        """
+        Performs a simple rolling update of a ReplicationController.
+
+        See https://github.com/kubernetes/kubernetes/blob/release-1.0/docs/design/simple-rolling-update.md
+        for algorithm details.
+
+        :param config: An instance of K8sConfig. If omitted, reads from ~/.kube/config.
+        :param name: The name of the ReplicationController we want to update.
+        :param image: The updated image version we want applied.
+        :param container_name: The name of the container we're targeting for the update.
+                               Required if more than one container is present.
+        :param rc_new: An instance of K8sReplicationController with the new configuration to apply.
+                       Mutually exclusive with [image, container_name] if specified.
+        :param wait_seconds:
+
+        :return:
+        """
+
+        if name is None:
+            raise SyntaxError('K8sReplicationController: name: [ {0} ] cannot be None.'.format(name))
+        if image is None and rc_new is None:
+            raise SyntaxError("K8sReplicationController: please specify either 'image' or 'rc_new'")
+        if name is not None and image is not None and rc_new is not None:
+            raise SyntaxError('K8sReplicationController: rc_new is mutually exclusive with a [image, container_name] pair.')
+
         phase = 'init'
-        next_exists = False
-        next_rc = None
+        ann_update_partner = 'update-partner'
+        ann_desired_replicas = 'desired-replicas'
+
+        name_next = "{0}-next".format(name)
+
+        rc_current = None
+        rc_next = None
+        rc_current_exists = False
+        rc_next_exists = False
 
         try:
-            current_rc = K8sReplicationController(config=config, name=name).get()
-            current_exists = True
-        except NotFoundException:
-            raise NotFoundException('RollingUpdate: Current replication controller does not exist.')
-
-        try:
-            next_rc = K8sReplicationController(config=config, name=next_name).get()
-            next_exists = True
+            rc_current = K8sReplicationController(config=config, name=name).get()
+            rc_current_exists = True
         except NotFoundException:
             pass
 
-        if current_exists and not next_exists:
-            try:
-                if new_rc is not None:
-                    next_rc = new_rc
-                    next_rc.add_annotation(k=replicas_annotation, v=next_rc.get_replicas())
-                else:
-                    next_rc = copy.deepcopy(current_rc)
-                    next_rc.add_annotation(k=replicas_annotation, v=current_rc.get_replicas())
-                    if container_name is not None:
-                        next_rc.set_image(name=container_name, image=image)
-                    else:
-                        next_rc.set_image(name=name, image=image)
-                next_rc.set_name(name=next_name)
-                next_rc.add_pod_label(k='name', v=name)
-                my_version = str(uuid.uuid4())
-                next_rc.add_pod_label(k='rc_version', v=my_version)
-                next_rc.set_selector(dico=dict(name=name, rc_version=my_version))
-                next_rc.set_replicas(replicas=0)
-                next_rc.set_pod_generate_name(mode=True, name=name)
-                next_rc.create()
-            except Exception as e:
-                message = "Got an exception of type {my_type} with message {my_msg}"\
-                    .format(my_type=type(e), my_msg=e.message)
-                raise Exception(message)
-            try:
-                current_rc.add_annotation(k=partner_annotation, v=next_name)
-                current_rc.update()
-            except Exception as e:
-                message = "Got an exception of type {my_type} with message {my_msg}"\
-                    .format(my_type=type(e), my_msg=e.message)
-                raise Exception(message)
+        try:
+            rc_next = K8sReplicationController(config=config, name=name_next).get()
+            rc_next_exists = True
+        except NotFoundException:
+            pass
+
+        if not rc_current_exists and not rc_next_exists:
+            raise NotFoundException('K8sReplicationController: rc: [ {0} ] does not exist.'.format(name))
+
+        if rc_current_exists and not rc_next_exists:
+
+            if rc_new is not None:
+                rc_next = rc_new
+                rc_next.add_annotation(k=ann_desired_replicas, v=str(rc_current.get_replicas()))
+
+            else:
+                rc_next = copy.deepcopy(rc_current)
+                rc_next.add_annotation(k=ann_desired_replicas, v=str(rc_current.get_replicas()))
+
+                if len(rc_next.model.pod_spec.containers) > 1 and not container_name:
+                    raise UnprocessableEntityException('K8sReplicationController: unable to determine on which container to perform a rolling_update; please specify the target container_name.')
+                if len(rc_next.model.pod_spec.containers) == 1 and not container_name:
+                    container_name = rc_next.model.pod_spec.containers[0].model['name']
+
+                rc_next.set_image(name=container_name, image=image)
+
+            my_version = str(uuid.uuid4())
+
+            rc_next.set_name(name=name_next)
+            rc_next.add_pod_label(k='name', v=name)
+            rc_next.add_pod_label(k='rc_version', v=my_version)
+            rc_next.set_selector(dico=dict(name=name, rc_version=my_version))
+            rc_next.set_replicas(replicas=0)
+            rc_next.set_pod_generate_name(mode=True, name=name)
+            rc_next.create()
+
+            rc_current.add_annotation(k=ann_update_partner, v=name_next)
+            rc_current.update()
+
             phase = 'rollout'
 
-        elif next_exists and not current_exists:
+        elif rc_next_exists and not rc_current_exists:
             phase = 'rename'
 
-        elif current_exists and next_exists:
-            if not next_rc.get_annotation(k=replicas_annotation):
-                try:
-                    next_rc.add_annotation(k=replicas_annotation, v=current_rc.get_replicas())
-                    next_rc.update()
-                except Exception as e:
-                    message = "Got an exception of type {my_type} with message {my_msg}"\
-                        .format(my_type=type(e), my_msg=e.message)
-                    raise Exception(message)
+        elif rc_current_exists and rc_next_exists:
+            if not rc_next.get_annotation(k=ann_desired_replicas):
+                rc_next.add_annotation(k=ann_desired_replicas, v=rc_current.get_replicas())
+                rc_next.update()
             phase = 'rollout'
 
         if phase == 'rollout':
-            desired_replicas = next_rc.get_annotation(k=replicas_annotation)
-            try:
-                while next_rc.get_replicas() < int(desired_replicas):
-                    next_replicas = next_rc.get_replicas() + 1
-                    next_rc.set_replicas(replicas=next_replicas)
-                    next_rc.update()
-                    next_rc.wait_for_replicas(replicas=next_replicas, labels=next_rc.get_pod_labels())
-                    time.sleep(wait_seconds)
-                    if current_rc.get_replicas() > 0:
-                        current_replicas = current_rc.get_replicas() - 1
-                        current_rc.set_replicas(replicas=current_replicas)
-                        current_rc.update()
-                        current_rc.wait_for_replicas(replicas=current_replicas, labels=current_rc.get_pod_labels())
-                if current_rc.get_replicas() > 0:
-                    current_rc.set_replicas(replicas=0)
-                    current_rc.update()
-                    current_rc.wait_for_replicas(replicas=0, labels=current_rc.get_pod_labels())
+            desired_replicas = rc_next.get_annotation(k=ann_desired_replicas)
 
-            except Exception as e:
-                message = "Got an exception of type {my_type} with message {my_msg}"\
-                    .format(my_type=type(e), my_msg=e.message)
-                raise Exception(message)
+            while rc_next.get_replicas() < int(desired_replicas):
+
+                next_replicas = rc_next.get_replicas() + 1
+                rc_next.set_replicas(replicas=next_replicas)
+                rc_next.update()
+                rc_next.wait_for_replicas(replicas=next_replicas, labels=rc_next.get_pod_labels())
+                time.sleep(wait_seconds)
+
+                if rc_current.get_replicas() > 0:
+                    current_replicas = rc_current.get_replicas() - 1
+                    rc_current.set_replicas(replicas=current_replicas)
+                    rc_current.update()
+                    rc_current.wait_for_replicas(replicas=current_replicas, labels=rc_current.get_pod_labels())
+
+            if rc_current.get_replicas() > 0:
+                rc_current.set_replicas(replicas=0)
+                rc_current.update()
+                rc_current.wait_for_replicas(replicas=0, labels=rc_current.get_pod_labels())
+
             phase = 'rename'
 
         if phase == 'rename':
-            try:
-                current_rc.delete()
-                current_rc = copy.deepcopy(next_rc)
-                current_rc.set_name(name=name)
-                current_rc.del_annotation(k=partner_annotation)
-                current_rc.del_annotation(k=replicas_annotation)
-                current_rc.create()
-                next_rc.delete()
-            except Exception as e:
-                message = "Got an exception of type {my_type} with message {my_msg}"\
-                    .format(my_type=type(e), my_msg=e.message)
-                raise Exception(message)
+            rc_current.delete()
+            rc_current = copy.deepcopy(rc_next)
+            rc_current.set_name(name=name)
+            rc_current.del_annotation(k=ann_update_partner)
+            rc_current.del_annotation(k=ann_desired_replicas)
+            rc_current.create()
+            rc_next.delete()
 
-        return current_rc
+        return rc_current

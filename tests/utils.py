@@ -8,7 +8,6 @@
 
 import os
 import socket
-import time
 from kubernetes import K8sConfig, K8sObject, K8sContainer, K8sPod, K8sReplicationController, K8sSecret
 from kubernetes.K8sExceptions import NotFoundException
 
@@ -18,10 +17,10 @@ kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(
 def is_reachable(api_host):
     scheme, host, port = api_host.replace("//", "").split(':')
     try:
-        s = socket.create_connection((host, port), timeout=1)
+        s = socket.create_connection((host, port), timeout=0.5)
         s.close()
         return True
-    except Exception:
+    except Exception as err:
         return False
 
 
@@ -36,9 +35,7 @@ def create_container(model=None, name=None, image="redis"):
 def create_config():
     try:
         config = K8sConfig(kubeconfig=kubeconfig_fallback)
-    except SyntaxError:
-        config = K8sConfig()
-    except IOError:
+    except Exception:
         config = K8sConfig()
     return config
 
@@ -72,17 +69,35 @@ def create_secret(config=None, name=None):
 
 
 def cleanup_objects():
-    cleanup_pods()
+    config = K8sConfig(kubeconfig=kubeconfig_fallback)
+    if is_reachable(config.api_host):
+        cleanup_rcs()
+        cleanup_pods()
 
 
 def cleanup_pods():
-    pod = create_pod(name="throwaway")
-    if is_reachable(pod.config.api_host):
-        pods = pod.list()
-        for p in pods:
-            result = K8sPod.get_by_name(name=p['metadata']['name'])
-            try:
-                [x.delete() for x in result]
-            except NotFoundException:
-                continue
-        time.sleep(3)  # let the pods die
+    ref = create_pod(name="throwaway")
+    if is_reachable(ref.config.api_host):
+        pods = ref.list()
+        while len(pods) > 0:
+            for p in pods:
+                try:
+                    pod = K8sPod(name=p['metadata']['name']).get()
+                    pod.delete()
+                except NotFoundException:
+                    continue
+            pods = ref.list()
+
+
+def cleanup_rcs():
+    ref = create_rc(name="throwaway")
+    if is_reachable(ref.config.api_host):
+        rcs = ref.list()
+        while len(rcs) > 0:
+            for rc in rcs:
+                try:
+                    obj = K8sReplicationController(name=rc['metadata']['name']).get()
+                    obj.delete()
+                except NotFoundException:
+                    continue
+            rcs = ref.list()

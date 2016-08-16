@@ -7,7 +7,9 @@
 #
 
 import unittest
-from kubernetes import K8sReplicationController, K8sConfig
+import uuid
+from kubernetes import K8sReplicationController, K8sConfig, K8sPod
+from kubernetes.K8sExceptions import *
 from kubernetes.models.v1 import ReplicationController, ObjectMeta, PodSpec
 from tests import utils
 
@@ -18,7 +20,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         pass
 
     def tearDown(self):
-        pass
+        utils.cleanup_objects()
 
     # --------------------------------------------------------------------------------- init
 
@@ -459,12 +461,28 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     # --------------------------------------------------------------------------------- get
 
-    # TODO: requires http call
+    def test_get_nonexistent(self):
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        if utils.is_reachable(rc.config.api_host):
+            try:
+                rc.get()
+                self.fail("Should not fail.")
+            except Exception as err:
+                self.assertIsInstance(err, NotFoundException)
+
     def test_get(self):
-        # name = "yorc"
-        # rc = K8sReplicationController(name=name)
-        # rc.get()
-        pass
+        name = "yocontainer"
+        container = utils.create_container(name=name)
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        rc.add_container(container)
+        if utils.is_reachable(rc.config.api_host):
+            from_create = rc.create()
+            from_get = rc.get()
+            self.assertIsInstance(from_create, K8sReplicationController)
+            self.assertIsInstance(from_get, K8sReplicationController)
+            self.assertEqual(from_create, from_get)
 
     # --------------------------------------------------------------------------------- get annotation
 
@@ -974,13 +992,22 @@ class K8sReplicationControllerTest(unittest.TestCase):
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
-    # TODO: requires http call
-    def test_wait_for_replicas(self):
-        # name = "yorc"
-        # rc = K8sReplicationController(name=name)
-        # replicas = 99
-        # rc.wait_for_replicas(replicas=replicas)
-        pass
+    def test_wait_for_replicas_timed_out(self):
+        # this test makes no sense without a prior call to resize.
+        # it'll wait forever on a quantity of pods that does not change.
+        # please see test_resize().
+        cont_name = "yocontainer"
+        container = utils.create_container(name=cont_name)
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        rc.add_container(container)
+        count = 99
+        if utils.is_reachable(rc.config.api_host):
+            try:
+                rc.create()
+                rc.wait_for_replicas(replicas=count)
+            except Exception as err:
+                self.assertIsInstance(err, TimedOutException)
 
     # -------------------------------------------------------------------------------------  get by name
 
@@ -1008,11 +1035,27 @@ class K8sReplicationControllerTest(unittest.TestCase):
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
-    # TODO: requires http call
+    def test_get_by_name_nonexistent(self):
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        if utils.is_reachable(rc.config.api_host):
+            result = rc.get_by_name(name=name)
+            self.assertIsInstance(result, list)
+            self.assertEqual(0, len(result))
+
     def test_get_by_name(self):
-        # name = "yoname"
-        # K8sReplicationController.get_by_name(name=name)
-        pass
+        cont_name = "yocontainer"
+        container = utils.create_container(name=cont_name)
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        rc.add_container(container)
+        if utils.is_reachable(rc.config.api_host):
+            rc.create()
+            result = rc.get_by_name(name=name)
+            self.assertIsInstance(result, list)
+            self.assertEqual(1, len(result))
+            self.assertIsInstance(result[0], K8sReplicationController)
+            self.assertEqual(rc, result[0])
 
     # -------------------------------------------------------------------------------------  get by name
 
@@ -1051,15 +1094,465 @@ class K8sReplicationControllerTest(unittest.TestCase):
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
-    # TODO: requires http call
+    def test_resize_nonexistent(self):
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        replicas = 3
+        if utils.is_reachable(rc.config.api_host):
+            try:
+                K8sReplicationController.resize(name=name, replicas=replicas)
+                self.fail("Should not fail.")
+            except Exception as err:
+                self.assertIsInstance(err, NotFoundException)
+
     def test_resize(self):
-        # name = "yoname"
-        # replicas = 10
-        # K8sReplicationController.resize(name=name, replicas=replicas)
-        pass
+        cont_name = "yocontainer"
+        container = utils.create_container(name=cont_name)
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        rc.add_container(container)
+        replicas = 3
+        if utils.is_reachable(rc.config.api_host):
+            rc.create()
+            K8sReplicationController.resize(name=name, replicas=replicas)
+            result = rc.get()
+            self.assertIsInstance(result, K8sReplicationController)
+            self.assertEqual(replicas, result.model.model['spec']['replicas'])
 
     # -------------------------------------------------------------------------------------  rolling update
 
-    # TODO: requires http call
-    def test_rolling_update(self):
-        pass
+    def test_rolling_update_none_args(self):
+        cont_name = "yocontainer"
+        container = utils.create_container(name=cont_name)
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        rc.add_container(container)
+        if utils.is_reachable(rc.config.api_host):
+            try:
+                rc.rolling_update()
+            except Exception as err:
+                self.assertIsInstance(err, SyntaxError)
+
+    def test_rolling_update_doesnt_exist(self):
+        cont_name = "redis"
+        image = "redis:3.2.0"
+        new_image = "redis:3.2.3"
+        container = utils.create_container(name=cont_name, image=image)
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        rc.add_container(container)
+        if utils.is_reachable(rc.config.api_host):
+            try:
+                rc.rolling_update(name=name, image=new_image)
+            except Exception as err:
+                self.assertIsInstance(err, NotFoundException)
+
+    def test_rolling_update_one_container_size_0(self):
+        cont_name = "redis"
+        image = "redis:3.2.0"
+        new_image = "redis:3.2.3"
+        container = utils.create_container(name=cont_name, image=image)
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        rc.add_container(container)
+        if utils.is_reachable(rc.config.api_host):
+            rc.create()
+            rollout = rc.rolling_update(name=name, image=new_image)
+            self.assertEqual(new_image, rollout.model.model['spec']['template']['spec']['containers'][0]['image'])
+            self.assertEqual(new_image, rollout.model.pod_spec.containers[0].model['image'])
+
+    def test_rolling_update_two_containers_size_0_fails(self):
+        cont_name_1 = "redis"
+        cont_name_2 = "nginx"
+        image_1 = "redis:3.2.0"
+        image_2 = "nginx:1.10"
+        new_image = "redis:3.2.3"
+        container_1 = utils.create_container(name=cont_name_1, image=image_1)
+        container_2 = utils.create_container(name=cont_name_2, image=image_2)
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        rc.add_container(container_1)
+        rc.add_container(container_2)
+        if utils.is_reachable(rc.config.api_host):
+            rc.create()
+            try:
+                rc.rolling_update(name=name, image=new_image)
+            except Exception as err:
+                self.assertIsInstance(err, UnprocessableEntityException)
+
+    def test_rolling_update_two_containers_size_0_succeeds(self):
+        cont_name_1 = "redis"
+        cont_name_2 = "nginx"
+        image_1 = "redis:3.2.0"
+        image_2 = "nginx:1.10"
+        new_image = "redis:3.2.3"
+        container_1 = utils.create_container(name=cont_name_1, image=image_1)
+        container_2 = utils.create_container(name=cont_name_2, image=image_2)
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        rc.add_container(container_1)
+        rc.add_container(container_2)
+        if utils.is_reachable(rc.config.api_host):
+            rc.create()
+            rollout = rc.rolling_update(name=name, image=new_image, container_name=cont_name_1)
+            self.assertEqual(2, len(rollout.model.pod_spec.containers))
+            for c in rollout.model.pod_spec.containers:
+                self.assertIn(c.model['name'], [cont_name_1, cont_name_2])
+                self.assertIn(c.model['image'], [new_image, image_2])
+
+    def test_rolling_update_two_containers_size_1(self):
+        cont_name_1 = "redis"
+        cont_name_2 = "nginx"
+        image_1 = "redis:3.2.0"
+        image_2 = "nginx:1.10"
+        new_image = "redis:3.2.3"
+        count = 1
+        container_1 = utils.create_container(name=cont_name_1, image=image_1)
+        container_2 = utils.create_container(name=cont_name_2, image=image_2)
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        rc.add_container(container_1)
+        rc.add_container(container_2)
+        if utils.is_reachable(rc.config.api_host):
+            rc.create()
+            rc.resize(name=name, replicas=count)
+            labels = rc.get_pod_labels()
+            pods = K8sPod.get_by_labels(labels=labels)
+            self.assertEqual(count, len(pods))
+            self.assertEqual(image_1, pods[0].model.pod_spec.containers[0].model['image'])
+            rollout = rc.rolling_update(name=name, image=new_image, container_name=cont_name_1)
+            labels = rollout.get_pod_labels()
+            pods = K8sPod.get_by_labels(labels=labels)
+            self.assertEqual(count, len(pods))
+            self.assertEqual(new_image, pods[0].model.pod_spec.containers[0].model['image'])
+
+    def test_rolling_update_two_containers_size_3(self):
+        cont_name_1 = "redis"
+        cont_name_2 = "nginx"
+        image_1 = "redis:3.2.0"
+        image_2 = "nginx:1.10"
+        new_image = "redis:3.2.3"
+        count = 3
+        container_1 = utils.create_container(name=cont_name_1, image=image_1)
+        container_2 = utils.create_container(name=cont_name_2, image=image_2)
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        rc.add_container(container_1)
+        rc.add_container(container_2)
+        if utils.is_reachable(rc.config.api_host):
+            rc.create()
+            rc.resize(name=name, replicas=count)
+            labels = rc.get_pod_labels()
+            pods = K8sPod.get_by_labels(labels=labels)
+            self.assertEqual(count, len(pods))
+            for i in range(0, count):
+                self.assertEqual(image_1, pods[i].model.pod_spec.containers[0].model['image'])
+            rollout = rc.rolling_update(name=name, image=new_image, container_name=cont_name_1)
+            labels = rollout.get_pod_labels()
+            pods = K8sPod.get_by_labels(labels=labels)
+            self.assertEqual(count, len(pods))
+            for i in range(0, count):
+                self.assertEqual(new_image, pods[i].model.pod_spec.containers[0].model['image'])
+
+    def test_rolling_update_one_container_size_0_new_rc(self):
+        cont_name = "redis"
+        image = "redis:3.2.0"
+        new_image = "redis:3.2.3"
+
+        cont_1 = utils.create_container(name=cont_name, image=image)
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc_1 = utils.create_rc(name=name)
+        rc_1.add_container(cont_1)
+
+        cont_2 = utils.create_container(name=cont_name, image=new_image)
+        rc_2 = utils.create_rc(name=name)
+        rc_2.add_container(cont_2)
+
+        if utils.is_reachable(rc_1.config.api_host):
+            rc_1.create()
+            rollout = rc_1.rolling_update(name=name, rc_new=rc_2)
+            self.assertEqual(new_image, rollout.model.model['spec']['template']['spec']['containers'][0]['image'])
+            self.assertEqual(new_image, rollout.model.pod_spec.containers[0].model['image'])
+
+    def test_rolling_update_two_containers_size_0_new_rc(self):
+        cont_name_1 = "redis"
+        cont_name_2 = "nginx"
+        image_1 = "redis:3.2.0"
+        image_2 = "nginx:1.10"
+        new_image = "redis:3.2.3"
+
+        container_1 = utils.create_container(name=cont_name_1, image=image_1)
+        container_2 = utils.create_container(name=cont_name_2, image=image_2)
+        container_3 = utils.create_container(name=cont_name_1, image=new_image)
+
+        name_1 = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc_1 = utils.create_rc(name=name_1)
+        rc_1.add_container(container_1)
+        rc_1.add_container(container_2)
+
+        name_2 = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc_2 = utils.create_rc(name=name_2)
+        rc_2.add_container(container_3)
+        rc_2.add_container(container_2)
+
+        if utils.is_reachable(rc_1.config.api_host):
+            rc_1.create()
+            rollout = rc_1.rolling_update(name=name_1, rc_new=rc_2)
+            self.assertEqual(new_image, rollout.model.model['spec']['template']['spec']['containers'][0]['image'])
+            self.assertEqual(new_image, rollout.model.pod_spec.containers[0].model['image'])
+
+    def test_rolling_update_two_containers_size_1_new_rc(self):
+        cont_name_1 = "redis"
+        cont_name_2 = "nginx"
+        image_1 = "redis:3.2.0"
+        image_2 = "nginx:1.10"
+        new_image = "redis:3.2.3"
+        count = 1
+
+        container_1 = utils.create_container(name=cont_name_1, image=image_1)
+        container_2 = utils.create_container(name=cont_name_2, image=image_2)
+        container_3 = utils.create_container(name=cont_name_1, image=new_image)
+
+        name_1 = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc_1 = utils.create_rc(name=name_1)
+        rc_1.add_container(container_1)
+        rc_1.add_container(container_2)
+
+        name_2 = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc_2 = utils.create_rc(name=name_2)
+        rc_2.add_container(container_3)
+        rc_2.add_container(container_2)
+
+        if utils.is_reachable(rc_1.config.api_host):
+            rc_1.create()
+            rc_1.resize(name=name_1, replicas=count)
+            labels = rc_1.get_pod_labels()
+            pods = K8sPod.get_by_labels(labels=labels)
+            self.assertEqual(count, len(pods))
+            self.assertEqual(image_1, pods[0].model.pod_spec.containers[0].model['image'])
+            rollout = rc_1.rolling_update(name=name_1, rc_new=rc_2)
+            labels = rollout.get_pod_labels()
+            pods = K8sPod.get_by_labels(labels=labels)
+            self.assertEqual(count, len(pods))
+            self.assertEqual(new_image, pods[0].model.pod_spec.containers[0].model['image'])
+
+    def test_rolling_update_two_containers_size_3_new_rc(self):
+        cont_name_1 = "redis"
+        cont_name_2 = "nginx"
+        image_1 = "redis:3.2.0"
+        image_2 = "nginx:1.10"
+        new_image = "redis:3.2.3"
+        count = 3
+
+        container_1 = utils.create_container(name=cont_name_1, image=image_1)
+        container_2 = utils.create_container(name=cont_name_2, image=image_2)
+        container_3 = utils.create_container(name=cont_name_1, image=new_image)
+
+        name_1 = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc_1 = utils.create_rc(name=name_1)
+        rc_1.add_container(container_1)
+        rc_1.add_container(container_2)
+
+        name_2 = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc_2 = utils.create_rc(name=name_2)
+        rc_2.add_container(container_3)
+        rc_2.add_container(container_2)
+
+        if utils.is_reachable(rc_1.config.api_host):
+            rc_1.create()
+            rc_1.resize(name=name_1, replicas=count)
+            labels = rc_1.get_pod_labels()
+            pods = K8sPod.get_by_labels(labels=labels)
+            self.assertEqual(count, len(pods))
+            for i in range(0, count):
+                self.assertEqual(image_1, pods[i].model.pod_spec.containers[0].model['image'])
+            rollout = rc_1.rolling_update(name=name_1, rc_new=rc_2)
+            labels = rollout.get_pod_labels()
+            pods = K8sPod.get_by_labels(labels=labels)
+            self.assertEqual(count, len(pods))
+            for i in range(0, count):
+                self.assertEqual(new_image, pods[i].model.pod_spec.containers[0].model['image'])
+
+    # -------------------------------------------------------------------------------------  api - create
+
+    def test_create_without_containers(self):
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        if utils.is_reachable(rc.config.api_host):
+            try:
+                rc.create()
+                self.fail("Should not fail.")
+            except Exception as err:
+                self.assertIsInstance(err, UnprocessableEntityException)
+
+    def test_create_with_container(self):
+        name = "yocontainer"
+        container = utils.create_container(name=name)
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        rc.add_container(container=container)
+        if utils.is_reachable(rc.config.api_host):
+            obj = rc.create()
+            self.assertIsNotNone(obj)
+            self.assertIsInstance(obj, K8sReplicationController)
+
+    def test_create_already_exists(self):
+        name = "yocontainer"
+        container = utils.create_container(name=name)
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        rc.add_container(container=container)
+        if utils.is_reachable(rc.config.api_host):
+            try:
+                obj = rc.create()
+                self.assertIsNotNone(obj)
+                self.assertIsInstance(obj, K8sReplicationController)
+                rc.create()
+            except Exception as err:
+                self.assertIsInstance(err, AlreadyExistsException)
+
+    # ------------------------------------------------------------------------------------- api - list
+
+    def test_list_nonexistent(self):
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        if utils.is_reachable(rc.config.api_host):
+            objs = rc.list()
+            self.assertIsInstance(objs, list)
+            self.assertEqual(0, len(objs))
+
+    def test_list_multiple(self):
+        name = "yocontainer"
+        container = utils.create_container(name=name)
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        rcs = []
+        count = 3
+        if utils.is_reachable(config.api_host):
+            for i in range(0, count):
+                name = "yorc-{0}".format(unicode(uuid.uuid4()))
+                rc = utils.create_rc(config, name)
+                rc.add_container(container)
+                result = rc.create()
+                self.assertIsInstance(result, K8sReplicationController)
+                self.assertEqual(rc, result)
+                rcs.append(rc)
+            self.assertEqual(count, len(rcs))
+
+    # ------------------------------------------------------------------------------------- api - update
+
+    def test_update_nonexistent(self):
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        if utils.is_reachable(rc.config.api_host):
+            try:
+                rc.update()
+                self.fail("Should not fail.")
+            except Exception as err:
+                self.assertIsInstance(err, NotFoundException)
+
+    def test_update_name_fails(self):
+        name = "yocontainer"
+        container = utils.create_container(name=name)
+        name1 = "yorc1"
+        name2 = "yorc2"
+        rc = utils.create_rc(name=name1)
+        rc.add_container(container)
+        if utils.is_reachable(rc.config.api_host):
+            rc.create()
+            result = rc.get_by_name(name=name1)
+            self.assertIsInstance(result, list)
+            self.assertEqual(1, len(result))
+            self.assertIsInstance(result[0], K8sReplicationController)
+            result[0].name = name2
+            try:
+                result[0].update()
+                self.fail("Should not fail.")
+            except Exception as err:
+                self.assertIsInstance(err, BadRequestException)
+
+    def test_update_namespace_fails(self):
+        name = "yocontainer"
+        container = utils.create_container(name=name)
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        nspace = "yonamespace"
+        rc = utils.create_rc(name=name)
+        rc.add_container(container)
+        if utils.is_reachable(rc.config.api_host):
+            rc.create()
+            result = rc.get_by_name(name=name)
+            self.assertIsInstance(result, list)
+            self.assertEqual(1, len(result))
+            rc2 = result[0]
+            self.assertIsInstance(rc2, K8sReplicationController)
+            self.assertNotEqual(rc2.get_namespace(), nspace)
+            self.assertEqual(rc, rc2)
+            rc2.set_namespace(nspace)
+            try:
+                rc2.update()
+                self.fail("Should not fail.")
+            except Exception as err:
+                self.assertIsInstance(err, BadRequestException)
+
+    def test_update_labels_succeeds(self):
+        name = "yocontainer"
+        container = utils.create_container(name=name)
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        rc.add_container(container)
+        if utils.is_reachable(rc.config.api_host):
+            rc.create()
+            labels = rc.get_labels()
+            labels['yomama'] = 'sofat'
+            rc.set_labels(labels)
+            rc.update()
+            result = rc.get()
+            self.assertIsInstance(result, K8sReplicationController)
+            dico = result.get_labels()
+            self.assertIsInstance(dico, dict)
+            for k, v in labels.iteritems():
+                self.assertEqual(dico[k], v)
+
+    def test_update_add_container_succeeds(self):
+        cont_names = ["yocontainer", "yocontainer2"]
+        container = utils.create_container(name=cont_names[0])
+        rc_name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=rc_name)
+        rc.add_container(container)
+        if utils.is_reachable(rc.config.api_host):
+            rc.create()
+            container = utils.create_container(name=cont_names[1])
+            rc.add_container(container)
+            result = rc.update()
+            self.assertIsInstance(result, K8sReplicationController)
+            self.assertEqual(result, rc)
+            conts = result.get_pod_containers()
+            self.assertIsInstance(conts, list)
+            self.assertEqual(2, len(conts))
+            for c in conts:
+                self.assertIsInstance(c, dict)
+                self.assertIn(c['name'], cont_names)
+
+    # ------------------------------------------------------------------------------------- api - delete
+
+    def test_delete_nonexistent(self):
+        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        if utils.is_reachable(rc.config.api_host):
+            try:
+                rc.delete()
+                self.fail("Should not fail.")
+            except Exception as err:
+                self.assertIsInstance(err, NotFoundException)
+
+    def test_delete(self):
+        name = "yocontainer"
+        container = utils.create_container(name=name)
+        name = "yopod-{0}".format(unicode(uuid.uuid4()))
+        rc = utils.create_rc(name=name)
+        rc.add_container(container)
+        if utils.is_reachable(rc.config.api_host):
+            rc.create()
+            utils.cleanup_rcs()
+            result = rc.list()
+            self.assertIsInstance(result, list)
+            self.assertEqual(0, len(result))

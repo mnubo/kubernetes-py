@@ -29,60 +29,50 @@ class PodBasedModel(BaseModel):
     # ------------------------------------------------------------------------------------- add
 
     def add_container(self, container):
-        try:
-            assert isinstance(container, Container)
-            self.pod_spec.add_container(container=container)
-        except:
-            raise
+        self.pod_spec.add_container(container=container)
+        self._update_model()
         return self
 
     def add_host_volume(self, name, path):
-        try:
-            self.pod_spec.add_host_volume(name=name, path=path)
-        except:
-            raise
+        self.pod_spec.add_host_volume(name=name, path=path)
+        self._update_model()
         return self
 
     def add_emptydir_volume(self, name):
-        try:
-            self.pod_spec.add_emptydir_volume(name=name)
-        except:
-            raise
+        self.pod_spec.add_emptydir_volume(name=name)
+        self._update_model()
         return self
 
     def add_image_pull_secrets(self, name):
-        try:
-            self.pod_spec.add_image_pull_secrets(name=name)
-        except:
-            raise
+        self.pod_spec.add_image_pull_secrets(name=name)
+        self._update_model()
         return self
 
     def add_pod_annotation(self, k=None, v=None):
-        try:
-            self.pod_metadata.add_annotation(k=k, v=v)
-        except:
-            raise
+        self.pod_metadata.add_annotation(k=k, v=v)
+        self._update_model()
         return self
 
     def add_pod_label(self, k=None, v=None):
-        try:
-            self.pod_metadata.add_label(k=k, v=v)
-        except:
-            raise
+        self.pod_metadata.add_label(k=k, v=v)
+        self._update_model()
         return self
 
     # ------------------------------------------------------------------------------------- delete
 
     def del_pod_annotation(self, k):
         self.pod_metadata.del_annotation(k=k)
+        self._update_model()
         return self
 
     def del_pod_label(self, k):
         self.pod_metadata.del_label(k=k)
+        self._update_model()
         return self
 
     def del_pod_node_name(self):
         self.pod_spec.del_node_name()
+        self._update_model()
         return self
 
     # ------------------------------------------------------------------------------------- get
@@ -133,79 +123,65 @@ class PodBasedModel(BaseModel):
     # ------------------------------------------------------------------------------------- set
 
     def set_active_deadline(self, seconds):
-        try:
-            self.pod_spec.set_active_deadline(seconds)
-        except:
-            raise
+        self.pod_spec.set_active_deadline(seconds)
+        self._update_model()
         return self
 
     def set_dns_policy(self, policy):
-        try:
-            self.pod_spec.set_dns_policy(policy=policy)
-        except:
-            raise
+        self.pod_spec.set_dns_policy(policy=policy)
+        self._update_model()
         return self
 
     def set_pod_annotations(self, new_dict):
         self.pod_metadata.set_annotations(dico=new_dict)
+        self._update_model()
         return self
 
     def set_pod_generate_name(self, mode, name):
-        assert isinstance(mode, bool)
-        if name is not None:
-            assert isinstance(name, str)
         self.pod_metadata.set_generate_name(mode=mode, name=name)
+        self._update_model()
         return self
 
     def set_pod_labels(self, dico):
         self.pod_metadata.set_labels(dico=dico)
+        self._update_model()
         return self
 
     def set_pod_image(self, name, image):
-        assert isinstance(name, str)
-        assert isinstance(image, str)
         self.pod_spec.set_image(name=name, image=image)
+        self._update_model()
 
     def set_pod_name(self, name=None):
-        assert isinstance(name, str)
-        try:
-            self.pod_metadata.set_name(name=name)
-        except:
-            raise
+        self.pod_metadata.set_name(name=name)
+        self._update_model()
         return self
 
     def set_pod_namespace(self, name=None):
-        try:
-            self.pod_metadata.set_namespace(name=name)
-        except:
-            raise
+        self.pod_metadata.set_namespace(name=name)
+        self._update_model()
         return self
 
     def set_pod_node_name(self, name):
         self.pod_spec.set_node_name(name=name)
+        self._update_model()
         return self
 
     def set_pod_node_selector(self, new_dict):
         self.pod_spec.set_node_selector(dico=new_dict)
+        self._update_model()
         return self
 
     def set_pod_restart_policy(self, policy):
-        try:
-            self.pod_spec.set_restart_policy(policy=policy)
-        except:
-            raise
+        self.pod_spec.set_restart_policy(policy=policy)
+        self._update_model()
         return self
 
     def set_service_account(self, name):
-        try:
-            self.pod_spec.set_service_account(name=name)
-        except:
-            raise
+        self.pod_spec.set_service_account(name=name)
+        self._update_model()
         return self
 
     def set_termination_grace_period(self, seconds=None):
-        try:
-            self.pod_spec.set_termination_grace_period(seconds=seconds)
-        except:
-            raise
+        self.pod_spec.set_termination_grace_period(seconds=seconds)
+        self._update_model()
         return self

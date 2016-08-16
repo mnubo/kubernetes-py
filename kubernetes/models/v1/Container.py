@@ -135,10 +135,7 @@ class Container(BaseModel):
         return self
 
     def set_image(self, image=None):
-        if image is None:
-            raise SyntaxError('image should be a string.')
-        else:
-            self.model['image'] = image
+        self.model['image'] = image
         return self
 
     def set_liveness_probe(self, **kwargs):
