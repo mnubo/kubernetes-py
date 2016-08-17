@@ -9,8 +9,10 @@
 import unittest
 import json
 import base64
+import uuid
 from kubernetes import K8sSecret, K8sConfig
 from kubernetes.models.v1 import Secret, ObjectMeta
+from kubernetes.K8sExceptions import *
 from tests import utils
 
 
@@ -20,7 +22,7 @@ class K8sSecretTest(unittest.TestCase):
         pass
 
     def tearDown(self):
-        pass
+        utils.cleanup_objects()
 
     # --------------------------------------------------------------------------------- init
 
@@ -179,12 +181,27 @@ class K8sSecretTest(unittest.TestCase):
 
     # --------------------------------------------------------------------------------- get
 
-    # TODO: requires http call
+    def test_get_doesnt_exist(self):
+        name = "yosecret"
+        secret = utils.create_secret(name=name)
+        if utils.is_reachable(secret.config.api_host):
+            try:
+                secret.get()
+                self.fail("Should not fail.")
+            except Exception as err:
+                self.assertIsInstance(err, NotFoundException)
+
     def test_get(self):
-        # name = "yosecret"
-        # secret = K8sSecret(name=name)
-        # secret.get()
-        pass
+        name = "yosecret-{0}".format(unicode(uuid.uuid4()))
+        secret = utils.create_secret(name=name)
+        if utils.is_reachable(secret.config.api_host):
+            from_create = secret.create()
+            self.assertIsInstance(from_create, K8sSecret)
+            self.assertEqual(from_create.name, name)
+            from_get = secret.get()
+            self.assertIsInstance(from_get, K8sSecret)
+            self.assertEqual(from_get.name, name)
+            self.assertEqual(from_create, from_get)
 
     # --------------------------------------------------------------------------------- set data
 
@@ -215,6 +232,7 @@ class K8sSecretTest(unittest.TestCase):
         v = {'key1': 'value1', 'key2': 'value2'}
         try:
             secret.set_data(k, v)
+            self.fail("Should not fail.")
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
@@ -393,3 +411,124 @@ class K8sSecretTest(unittest.TestCase):
         self.assertEqual(account_uid, secret.model.model['metadata']['annotations']['kubernetes.io/service-account.uid'])
         self.assertEqual(account_name, secret.model.secret_metadata.model['annotations']['kubernetes.io/service-account.name'])
         self.assertEqual(account_uid, secret.model.secret_metadata.model['annotations']['kubernetes.io/service-account.uid'])
+
+    # --------------------------------------------------------------------------------- api - create
+
+    def test_create(self):
+        name = "yosecret-{0}".format(unicode(uuid.uuid4()))
+        secret = utils.create_secret(name=name)
+        if utils.is_reachable(secret.config.api_host):
+            secret.create()
+            _list = secret.list()
+            self.assertEqual(2, len(_list))  # service-account-token + 1
+
+    def test_create_already_exists(self):
+        name = "yosecret-{0}".format(unicode(uuid.uuid4()))
+        secret = utils.create_secret(name=name)
+        if utils.is_reachable(secret.config.api_host):
+            secret.create()
+            try:
+                secret.create()
+                self.fail("Should not fail.")
+            except Exception as err:
+                self.assertIsInstance(err, AlreadyExistsException)
+
+    # --------------------------------------------------------------------------------- api - list
+
+    def test_list_without_create(self):
+        name = "yosecret-{0}".format(unicode(uuid.uuid4()))
+        secret = utils.create_secret(name=name)
+        if utils.is_reachable(secret.config.api_host):
+            _list = secret.list()
+            self.assertEqual(1, len(_list))  # service-account-token
+
+    def test_list(self):
+        count = 10
+        config = utils.create_config()
+        if utils.is_reachable(config.api_host):
+            for i in range(0, count):
+                name = "yosecret-{0}".format(unicode(uuid.uuid4()))
+                secret = utils.create_secret(name=name)
+                secret.create()
+            secret = utils.create_secret(name="yosecret")
+            _list = secret.list()
+            self.assertEqual(count + 1, len(_list))  # including service-account-token
+
+    # --------------------------------------------------------------------------------- api - update
+
+    def test_update_nonexistent(self):
+        name = "yosecret-{0}".format(unicode(uuid.uuid4()))
+        secret = utils.create_secret(name=name)
+        if utils.is_reachable(secret.config.api_host):
+            try:
+                secret.update()
+                self.fail("Should not fail.")
+            except Exception as err:
+                self.assertIsInstance(err, NotFoundException)
+
+    def test_update_data(self):
+        name = "yosecret-{0}".format(unicode(uuid.uuid4()))
+        secret = utils.create_secret(name=name)
+        k = "yokey"
+        v = "yovalue"
+        if utils.is_reachable(secret.config.api_host):
+            secret.create()
+            secret.set_data(k=k, v=v)
+            secret.update()
+            from_get = secret.get()
+            self.assertEqual('Opaque', from_get.get_type())
+            data = from_get.get_data(k)
+            self.assertEqual(data, v)
+
+    def test_update_dockercfg_secret_fails(self):
+        name = "yosecret-{0}".format(unicode(uuid.uuid4()))
+        secret = utils.create_secret(name=name)
+        v = "yovalue"
+        if utils.is_reachable(secret.config.api_host):
+            secret.create()
+            secret.set_dockercfg_secret(data=v)
+            try:
+                secret.update()
+                self.fail("Should not fail.")
+            except Exception as err:
+                self.assertIsInstance(err, UnprocessableEntityException)
+
+    def test_update_dockercfg_json_secret_fails(self):
+        name = "yosecret-{0}".format(unicode(uuid.uuid4()))
+        secret = utils.create_secret(name=name)
+        v = "yovalue"
+        if utils.is_reachable(secret.config.api_host):
+            secret.create()
+            secret.set_dockercfg_json_secret(data=v)
+            try:
+                secret.update()
+                self.fail("Should not fail.")
+            except Exception as err:
+                self.assertIsInstance(err, UnprocessableEntityException)
+
+    # --------------------------------------------------------------------------------- api - delete
+
+    def test_delete_nonexistent(self):
+        name = "yosecret-{0}".format(unicode(uuid.uuid4()))
+        secret = utils.create_secret(name=name)
+        if utils.is_reachable(secret.config.api_host):
+            try:
+                secret.delete()
+                self.fail("Should not fail.")
+            except Exception as err:
+                self.assertIsInstance(err, NotFoundException)
+
+    def test_delete(self):
+        name = "yosecret-{0}".format(unicode(uuid.uuid4()))
+        secret = utils.create_secret(name=name)
+        if utils.is_reachable(secret.config.api_host):
+            _list = secret.list()
+            count_before_create = len(_list)
+            secret.create()
+            _list = secret.list()
+            count_after_create = len(_list)
+            self.assertEqual(count_before_create + 1, count_after_create)
+            secret.delete()
+            _list = secret.list()
+            count_final = len(_list)
+            self.assertEqual(count_before_create, count_final)

@@ -8,6 +8,7 @@
 
 from kubernetes.models.v1.BaseModel import BaseModel
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
+from kubernetes.K8sExceptions import *
 import base64
 
 
@@ -64,6 +65,22 @@ class Secret(BaseModel):
     def get_labels(self):
         return self.secret_metadata.get_annotations()
 
+    def get_data(self, k=None):
+        if k is None:
+            raise SyntaxError('Secret: k: [ {0} ] cannot be None.'.format(k))
+        if not isinstance(k, str):
+            raise SyntaxError('Secret: k: [ {0} ] must be a string.'.format(k.__class__.__name__))
+        if 'data' not in self.model or k not in self.model['data']:
+            raise NotFoundException('Secret: k: [ {0} ] not found.'.format(k))
+        encoded = self.model['data'][k]
+        return base64.b64decode(encoded)
+
+    def get_type(self):
+        return self.model['type']
+
+    def get_dockercfg_secret(self):
+        return self.get_data(k='.dockercfg')
+
     # ------------------------------------------------------------------------------------- set
 
     def set_annotations(self, new_dict):
@@ -75,7 +92,7 @@ class Secret(BaseModel):
         if k is None or v is None:
             raise SyntaxError('Secret: k: [ {0} ] or v: [ {1} ] cannot be None.'.format(k, v))
         if not isinstance(k, str) or not isinstance(v, str):
-            raise SyntaxError('Secret: k: [ {0} ] or v: [ {1} ]must be a string.'.format(k, v))
+            raise SyntaxError('Secret: k: [ {0} ] or v: [ {1} ] must be a string.'.format(k, v))
         if 'data' not in self.model:
             self.model['data'] = dict()
         self.model['data'][k] = base64.b64encode(v)

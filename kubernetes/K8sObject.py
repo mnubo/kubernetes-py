@@ -106,13 +106,13 @@ class K8sObject(object):
 
         try:
             return r.send()
-        except IOError:
-            raise BadRequestException('K8sObject: IOError: Your credentials or certificates might not exist.')
+        except IOError as err:
+            raise BadRequestException('K8sObject: IOError: {0}'.format(err))
 
     def list(self):
         state = self.request(method='GET')
         if not state.get('status'):
-            raise Exception('Could not fetch list of objects of type: {this_type}.'.format(this_type=self.obj_type))
+            raise Exception('K8sObject: Could not fetch list of objects of type: [ {0} ]'.format(self.obj_type))
         return state.get('data', dict()).get('items', list())
 
     def get_model(self):

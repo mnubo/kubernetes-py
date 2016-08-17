@@ -90,6 +90,7 @@ def cleanup_objects():
     if is_reachable(config.api_host):
         cleanup_rcs()
         cleanup_pods()
+        cleanup_secrets()
 
 
 def cleanup_pods():
@@ -118,3 +119,18 @@ def cleanup_rcs():
                 except NotFoundException:
                     continue
             rcs = ref.list()
+
+
+def cleanup_secrets():
+    ref = create_secret(name="throwaway")
+    if is_reachable(ref.config.api_host):
+        secrets = ref.list()
+        while len(secrets) > 1:
+            for secret in secrets:
+                try:
+                    obj = K8sSecret(config=ref.config, name=secret['metadata']['name']).get()
+                    if 'service-account-token' not in obj.model.model['type']:
+                        obj.delete()
+                except NotFoundException:
+                    continue
+            secrets = ref.list()

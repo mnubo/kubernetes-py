@@ -29,8 +29,18 @@ class K8sSecret(K8sObject):
     # ------------------------------------------------------------------------------------- get
 
     def get(self):
-        self.model = Secret(model=self.get_model())
+        self.model = Secret(name=self.name, model=self.get_model())
         return self
+
+    def get_data(self, k=None):
+        data = self.model.get_data(k=k)
+        return data
+
+    def get_type(self):
+        return self.model.get_type()
+
+    def get_dockercfg_secret(self):
+        return self.model.get_dockercfg_secret()
 
     # ------------------------------------------------------------------------------------- set
 
