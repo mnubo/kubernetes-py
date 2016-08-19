@@ -445,10 +445,11 @@ class K8sServiceTest(unittest.TestCase):
     def test_get_nonexistent(self):
         name = "yoservice"
         svc = utils.create_service(name=name)
-        try:
-            svc.get()
-        except Exception as err:
-            self.assertIsInstance(err, NotFoundException)
+        if utils.is_reachable(svc.config.api_host):
+            try:
+                svc.get()
+            except Exception as err:
+                self.assertIsInstance(err, NotFoundException)
 
     def test_get(self):
         name = "yo-{0}".format(unicode(uuid.uuid4().get_hex()[:16]))
