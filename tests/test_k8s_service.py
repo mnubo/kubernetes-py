@@ -7,8 +7,10 @@
 #
 
 import unittest
+import uuid
 from kubernetes import K8sService, K8sConfig
 from kubernetes.models.v1 import Service, ObjectMeta
+from kubernetes.K8sExceptions import *
 from tests import utils
 
 
@@ -18,21 +20,7 @@ class K8sServiceTest(unittest.TestCase):
         pass
 
     def tearDown(self):
-        pass
-
-    # ------------------------------------------------------------------------------------- utils
-
-    @staticmethod
-    def _create_service(config=None, name=None):
-        if config is None:
-            try:
-                config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
-            except SyntaxError:
-                config = K8sConfig()
-            except IOError:
-                config = K8sConfig()
-        obj = K8sService(config=config, name=name)
-        return obj
+        utils.cleanup_objects()
 
     # --------------------------------------------------------------------------------- init
 
@@ -58,14 +46,14 @@ class K8sServiceTest(unittest.TestCase):
     def test_init_with_invalid_name(self):
         name = object()
         try:
-            self._create_service(name=name)
+            utils.create_service(name=name)
             self.fail("Should not fail.")
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
     def test_init_with_name(self):
         name = "yoname"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         self.assertIsNotNone(svc)
         self.assertIsInstance(svc, K8sService)
         self.assertEqual('Service', svc.obj_type)
@@ -76,7 +64,7 @@ class K8sServiceTest(unittest.TestCase):
         nspace = "yonamespace"
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback, namespace=nspace)
         name = "yoname"
-        svc = self._create_service(config=config, name=name)
+        svc = utils.create_service(config=config, name=name)
         self.assertIsNotNone(svc)
         self.assertIsInstance(svc, K8sService)
         self.assertEqual(svc.name, name)
@@ -88,7 +76,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_struct_k8s_service(self):
         name = "yoname"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         self.assertIsInstance(svc, K8sService)
         self.assertIsInstance(svc.base_url, str)
         self.assertIsInstance(svc.config, K8sConfig)
@@ -98,7 +86,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_struct_service(self):
         name = "yoname"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         self.assertIsInstance(svc, K8sService)
         self.assertIsInstance(svc.model, Service)
         self.assertIsInstance(svc.model.model, dict)
@@ -106,7 +94,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_struct_service_model(self):
         name = "yoname"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         model = svc.model.model
         self.assertIsInstance(model, dict)
         self.assertEqual(4, len(model))
@@ -134,7 +122,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_add_annotation_none_args(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         try:
             svc.add_annotation()
             self.fail("Should not fail.")
@@ -143,7 +131,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_add_annotation_invalid_args(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         k = object()
         v = object()
         try:
@@ -154,7 +142,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_add_annotation(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         k = "yokey"
         v = "yovalue"
         svc.add_annotation(k, v)
@@ -169,7 +157,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_add_label_none_args(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         try:
             svc.add_label()
             self.fail("Should not fail.")
@@ -178,7 +166,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_add_label_invalid_args(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         k = object()
         v = object()
         try:
@@ -189,7 +177,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_add_label(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         k = "yokey"
         v = "yovalue"
         svc.add_label(k, v)
@@ -203,13 +191,13 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_add_port_none_args(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         svc.add_port()
         self.assertEqual(0, len(svc.model.model['spec']['ports']))
 
     def test_add_port_invalid_port(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         port = object()
         try:
             svc.add_port(port=port)
@@ -219,7 +207,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_add_port_invalid_name(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         name = object()
         try:
             svc.add_port(name=name)
@@ -229,7 +217,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_add_port_invalid_target_port(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         target_port = object()
         try:
             svc.add_port(target_port=target_port)
@@ -239,7 +227,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_add_port_invalid_protocol(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         protocol = object()
         try:
             svc.add_port(protocol=protocol)
@@ -249,7 +237,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_add_port_invalid_node_port(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         node_port = object()
         try:
             svc.add_port(node_port=node_port)
@@ -259,7 +247,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_add_port_with_all_args(self):
         svc_name = "yoservice"
-        svc = self._create_service(name=svc_name)
+        svc = utils.create_service(name=svc_name)
         port = 666
         port_name = "yoport"
         target_port = 666
@@ -286,7 +274,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_add_selector_none_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         try:
             svc.add_selector()
             self.fail("Should not fail.")
@@ -295,7 +283,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_add_selector_invalid_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         sel = object()
         try:
             svc.add_selector(selector=sel)
@@ -305,7 +293,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_add_selector_dict_wrong_mapping(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         sel = {'abc': 1234}
         try:
             svc.add_selector(selector=sel)
@@ -315,7 +303,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_add_selector(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         sel = {'abc': 'def'}
         svc.add_selector(selector=sel)
         self.assertIn('selector', svc.model.model['spec'])
@@ -325,14 +313,14 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_del_meta_creation_timestamp_doesnt_exist(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         svc.del_meta_creation_timestamp()
         self.assertNotIn('creationTimestamp', svc.model.model['metadata'])
         self.assertNotIn('creationTimestamp', svc.model.svc_metadata.model)
 
     def test_del_meta_creation_timestamp_with_set(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         ts = "yotimestamp"
         svc.set_meta_creation_timestamp(ts)
         self.assertIn('creationTimestamp', svc.model.model['metadata'])
@@ -345,14 +333,14 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_del_meta_generation_doesnt_exist(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         svc.del_meta_generation()
         self.assertNotIn('generation', svc.model.model['metadata'])
         self.assertNotIn('generation', svc.model.svc_metadata.model)
 
     def test_del_meta_generation_with_set(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         gen = 2
         svc.set_meta_generation(gen)
         self.assertIn('generation', svc.model.model['metadata'])
@@ -365,14 +353,14 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_del_meta_resource_version_doesnt_exist(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         svc.del_meta_resource_version()
         self.assertNotIn('resourceVersion', svc.model.model['metadata'])
         self.assertNotIn('resourceVersion', svc.model.svc_metadata.model)
 
     def test_del_meta_resource_version_with_set(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         ver = '2'
         svc.set_meta_resource_version(ver)
         self.assertIn('resourceVersion', svc.model.model['metadata'])
@@ -385,14 +373,14 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_del_meta_self_link_doesnt_exist(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         svc.del_meta_self_link()
         self.assertNotIn('selfLink', svc.model.model['metadata'])
         self.assertNotIn('selfLink', svc.model.svc_metadata.model)
 
     def test_del_meta_self_link_with_set(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         link = 'yolink'
         svc.set_meta_self_link(link)
         self.assertIn('selfLink', svc.model.model['metadata'])
@@ -405,14 +393,14 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_del_meta_uid_doesnt_exist(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         svc.del_meta_uid()
         self.assertNotIn('uid', svc.model.model['metadata'])
         self.assertNotIn('uid', svc.model.svc_metadata.model)
 
     def test_del_meta_uid_with_set(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         uid = 'youid'
         svc.set_meta_uid(uid)
         self.assertIn('uid', svc.model.model['metadata'])
@@ -425,7 +413,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_del_server_generated_meta_doesnt_exist(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         svc.del_server_generated_meta_attr()
         for i in ['generation', 'resourceVersion', 'creationTimestamp',
                   'deletionTimestamp', 'deletionGracePeriodSeconds', 'status', 'selfLink', 'uid']:
@@ -434,7 +422,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_del_server_generated_meta_with_set(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         svc.set_meta_generation(2)
         svc.set_meta_resource_version('yoresourceversion')
         svc.set_meta_creation_timestamp('yotimestamp')
@@ -454,18 +442,29 @@ class K8sServiceTest(unittest.TestCase):
 
     # --------------------------------------------------------------------------------- get
 
-    # TODO: requires http call
+    def test_get_nonexistent(self):
+        name = "yoservice"
+        svc = utils.create_service(name=name)
+        try:
+            svc.get()
+        except Exception as err:
+            self.assertIsInstance(err, NotFoundException)
+
     def test_get(self):
-        # name = "yoservice"
-        # svc = K8sService(name=name)
-        # svc.get()
-        pass
+        name = "yo-{0}".format(unicode(uuid.uuid4().get_hex()[:16]))
+        svc = utils.create_service(name=name)
+        svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
+        if utils.is_reachable(svc.config.api_host):
+            svc.create()
+            from_get = svc.get()
+            self.assertIsInstance(from_get, K8sService)
+            self.assertEqual(svc, from_get)
 
     # --------------------------------------------------------------------------------- get annotation
 
     def test_get_annotation_none_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         try:
             svc.get_annotation()
             self.fail("Should not fail.")
@@ -474,7 +473,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_get_annotation_invalid_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         k = object()
         try:
             svc.get_annotation(k)
@@ -484,14 +483,14 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_get_annotation_doesnt_exist(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         k = "yokey"
         v = svc.get_annotation(k)
         self.assertIsNone(v)
 
     def test_get_annotation(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         k = "yokey"
         v_in = "yovalue"
         svc.add_annotation(k, v_in)
@@ -502,13 +501,13 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_get_annotations_doesnt_exist(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         anns = svc.get_annotations()
         self.assertIsNone(anns)
 
     def test_get_annotations(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         count = 4
         for i in range(0, count):
             k = "yokey_{0}".format(i)
@@ -526,13 +525,13 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_get_cluster_ip_doesnt_exist(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         cip = svc.get_cluster_ip()
         self.assertIsNone(cip)
 
     def test_get_cluster_ip(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         cip_in = "192.168.99.100"
         svc.set_cluster_ip(cip_in)
         cip_out = svc.get_cluster_ip()
@@ -542,13 +541,13 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_get_external_ips_doesnt_exist(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         eips = svc.get_external_ips()
         self.assertIsNone(eips)
 
     def test_get_external_ips(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         eips_in = ["192.168.99.100"]
         svc.set_external_ips(eips_in)
         eips_out = svc.get_external_ips()
@@ -558,7 +557,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_get_label_none_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         try:
             svc.get_label()
             self.fail("Should not fail.")
@@ -567,7 +566,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_get_label_invalid_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         k = object()
         try:
             svc.get_label(k)
@@ -577,14 +576,14 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_get_label_doesnt_exist(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         k = "yokey"
         v = svc.get_label(k)
         self.assertIsNone(v)
 
     def test_get_label(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         k = "yokey"
         v_in = "yovalue"
         svc.add_label(k, v_in)
@@ -595,14 +594,14 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_get_labels_doesnt_exist(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         labels = svc.get_labels()
         self.assertIsNotNone(labels)  # 'name' is already a label
         self.assertIn('name', labels)
 
     def test_get_labels(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         labels_in = {'yokey': 'yovalue'}
         svc.set_labels(labels_in)
         labels_out = svc.get_labels()
@@ -612,13 +611,13 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_get_meta_creation_timestamp_doesnt_exist(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         tstamp = svc.get_meta_creation_timestamp()
         self.assertIsNone(tstamp)
 
     def test_get_meta_creation_timestamp(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         tstamp_in = "yotimestamp"
         svc.set_meta_creation_timestamp(tstamp_in)
         tstamp_out = svc.get_meta_creation_timestamp()
@@ -628,13 +627,13 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_get_meta_generation_doesnt_exist(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         gen = svc.get_meta_generation()
         self.assertIsNone(gen)
 
     def test_get_meta_generation(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         gen_in = 2
         svc.set_meta_generation(gen_in)
         gen_out = svc.get_meta_generation()
@@ -644,13 +643,13 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_get_meta_resource_version_doesnt_exist(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         ver = svc.get_meta_resource_version()
         self.assertIsNone(ver)
 
     def test_get_meta_resource_version(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         ver_in = "yoversion"
         svc.set_meta_resource_version(ver_in)
         ver_out = svc.get_meta_resource_version()
@@ -660,13 +659,13 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_get_meta_self_link_doesnt_exist(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         slink = svc.get_meta_self_link()
         self.assertIsNone(slink)
 
     def test_get_meta_self_link(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         slink_in = "yoselflink"
         svc.set_meta_self_link(slink_in)
         slink_out = svc.get_meta_self_link()
@@ -676,13 +675,13 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_get_meta_uid_doesnt_exist(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         uid = svc.get_meta_uid()
         self.assertIsNone(uid)
 
     def test_get_meta_uid(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         uid_in = "yoselflink"
         svc.set_meta_uid(uid_in)
         uid_out = svc.get_meta_uid()
@@ -692,7 +691,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_annotations_none_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         try:
             svc.set_annotations()
             self.fail('Should not fail.')
@@ -701,7 +700,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_annotations_invalid_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         labels = object()
         try:
             svc.set_annotations(labels)
@@ -711,7 +710,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_annotations_invalid_dict(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         labels = {'yokey': 1234}
         try:
             svc.set_annotations(labels)
@@ -721,7 +720,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_annotations(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         anns = {'yokey': 'yovalue'}
         svc.set_annotations(anns)
         self.assertIn('annotations', svc.model.model['metadata'])
@@ -731,7 +730,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_cluster_ip_none_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         try:
             svc.set_cluster_ip()
             self.fail("Should not fail.")
@@ -740,7 +739,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_cluster_ip_invalid_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         cip = object()
         try:
             svc.set_cluster_ip(cip)
@@ -750,7 +749,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_cluster_ip_invalid_ip_address(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         cip = "192.168.00000.1234345"
         try:
             svc.set_cluster_ip(cip)
@@ -760,7 +759,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_cluster_ip(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         cip = "192.168.99.100"
         svc.set_cluster_ip(cip)
         self.assertIn('clusterIP', svc.model.model['spec'])
@@ -770,7 +769,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_external_ips_none_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         try:
             svc.set_external_ips()
             self.fail("Should not fail.")
@@ -779,7 +778,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_external_ips_invalid_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         eips = object()
         try:
             svc.set_external_ips(eips)
@@ -789,7 +788,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_external_ips_invalid_ip_address(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         eips = ["192.168.00000.1234345"]
         try:
             svc.set_external_ips(eips)
@@ -799,7 +798,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_external_ip(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         eips = ["192.168.99.100"]
         svc.set_external_ips(eips)
         self.assertIn('externalIPs', svc.model.model['spec'])
@@ -809,7 +808,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_labels_none_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         try:
             svc.set_labels()
             self.fail('Should not fail.')
@@ -818,7 +817,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_labels_invalid_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         labels = object()
         try:
             svc.set_labels(labels)
@@ -828,7 +827,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_labels_invalid_dict(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         labels = {'yokey': 1234}
         try:
             svc.set_labels(labels)
@@ -838,7 +837,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_labels(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         labels = {'yokey': 'yovalue'}
         svc.set_labels(labels)
         self.assertIn('labels', svc.model.model['metadata'])
@@ -848,7 +847,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_load_balancer_ip_none_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         try:
             svc.set_load_balancer_ip()
             self.fail("Should not fail.")
@@ -857,7 +856,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_load_balancer_ip_invalid_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         lbip = object()
         try:
             svc.set_load_balancer_ip(lbip)
@@ -867,7 +866,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_load_balancer_ip_invalid_ip_address(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         lbip = "192.168.00000.1234345"
         try:
             svc.set_load_balancer_ip(lbip)
@@ -877,7 +876,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_load_balancer_ip(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         lbip = "192.168.99.100"
         svc.set_load_balancer_ip(lbip)
         self.assertIn('loadBalancerIP', svc.model.model['spec'])
@@ -887,7 +886,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_namespace_none_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         try:
             svc.set_namespace()
             self.fail("Should not fail.")
@@ -896,7 +895,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_namespace_invalid_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         nspace = object()
         try:
             svc.set_namespace(nspace)
@@ -906,7 +905,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_namespace(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         nspace = "yonamespace"
         svc.set_namespace(nspace)
         self.assertIn('namespace', svc.model.model['metadata'])
@@ -918,7 +917,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_meta_creation_timestamp_none_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         try:
             svc.set_meta_creation_timestamp()
             self.fail("Should not fail.")
@@ -927,7 +926,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_meta_creation_timestamp_invalid_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         ts = object()
         try:
             svc.set_meta_creation_timestamp(ts)
@@ -937,7 +936,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_meta_creation_timestamp(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         ts = "yotimestamp"
         svc.set_meta_creation_timestamp(ts)
         self.assertIn('creationTimestamp', svc.model.model['metadata'])
@@ -949,7 +948,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_meta_generation_none_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         try:
             svc.set_meta_generation()
             self.fail("Should not fail.")
@@ -958,7 +957,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_meta_generation_invalid_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         gen = object()
         try:
             svc.set_meta_generation(gen)
@@ -968,7 +967,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_meta_generation(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         gen = 2
         svc.set_meta_generation(gen)
         self.assertIn('generation', svc.model.model['metadata'])
@@ -980,7 +979,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_meta_resource_version_none_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         try:
             svc.set_meta_resource_version()
             self.fail("Should not fail.")
@@ -989,7 +988,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_meta_resource_version_invalid_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         ver = object()
         try:
             svc.set_meta_resource_version(ver)
@@ -999,7 +998,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_meta_resource_version(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         ver = '2'
         svc.set_meta_resource_version(ver)
         self.assertIn('resourceVersion', svc.model.model['metadata'])
@@ -1011,7 +1010,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_meta_self_link_none_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         try:
             svc.set_meta_self_link()
             self.fail("Should not fail.")
@@ -1020,7 +1019,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_meta_self_link_invalid_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         link = object()
         try:
             svc.set_meta_self_link(link)
@@ -1030,7 +1029,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_meta_self_link(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         link = 'yolink'
         svc.set_meta_self_link(link)
         self.assertIn('selfLink', svc.model.model['metadata'])
@@ -1042,7 +1041,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_meta_uid_none_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         try:
             svc.set_meta_uid()
             self.fail("Should not fail.")
@@ -1051,7 +1050,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_meta_uid_invalid_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         uid = object()
         try:
             svc.set_meta_uid(uid)
@@ -1061,7 +1060,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_meta_uid(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         uid = 'youid'
         svc.set_meta_uid(uid)
         self.assertIn('uid', svc.model.model['metadata'])
@@ -1073,7 +1072,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_session_affinity_none_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         try:
             svc.set_session_affinity()
             self.fail("Should not fail.")
@@ -1082,7 +1081,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_session_affinity_invalid_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         aff = object()
         try:
             svc.set_session_affinity(aff)
@@ -1092,7 +1091,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_session_affinity_invalid_string(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         aff = 'yoaffinity'
         try:
             svc.set_session_affinity(aff)
@@ -1101,7 +1100,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_session_affinity(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         for i in ['None', 'ClientIP']:
             svc.set_session_affinity(i)
             self.assertIn('sessionAffinity', svc.model.model['spec'])
@@ -1111,7 +1110,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_service_type_none_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         try:
             svc.set_service_type()
             self.fail("Should not fail.")
@@ -1120,7 +1119,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_service_type_invalid_arg(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         stype = object()
         try:
             svc.set_service_type(stype)
@@ -1130,7 +1129,7 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_service_type_invalid_string(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         stype = "yoservicetype"
         try:
             svc.set_service_type(stype)
@@ -1140,8 +1139,164 @@ class K8sServiceTest(unittest.TestCase):
 
     def test_set_service_type(self):
         name = "yoservice"
-        svc = self._create_service(name=name)
+        svc = utils.create_service(name=name)
         for i in ['ClusterIP', 'NodePort', 'LoadBalancer']:
             svc.set_service_type(i)
             self.assertIn('type', svc.model.model['spec'])
             self.assertEqual(i, svc.model.model['spec']['type'])
+
+    # --------------------------------------------------------------------------------- api - get by name
+
+    def test_get_by_name_nonexistent(self):
+        name = "yo-{0}".format(unicode(uuid.uuid4().get_hex()[:16]))
+        svc = utils.create_service(name=name)
+        svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
+        if utils.is_reachable(svc.config.api_host):
+            _list = K8sService.get_by_name(config=svc.config, name=name)
+            self.assertIsInstance(_list, list)
+            self.assertEqual(0, len(_list))
+
+    def test_get_by_name(self):
+        name = "yo-{0}".format(unicode(uuid.uuid4().get_hex()[:16]))
+        svc = utils.create_service(name=name)
+        svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
+        if utils.is_reachable(svc.config.api_host):
+            svc.create()
+            _list = K8sService.get_by_name(config=svc.config, name=name)
+            self.assertIsInstance(_list, list)
+            self.assertEqual(1, len(_list))
+            from_get = _list[0]
+            self.assertIsInstance(from_get, K8sService)
+            self.assertEqual(from_get, svc)
+
+    # --------------------------------------------------------------------------------- api - list
+
+    def test_list_without_create(self):
+        name = "yo-{0}".format(unicode(uuid.uuid4().get_hex()[:16]))
+        svc = utils.create_service(name=name)
+        svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
+        if utils.is_reachable(svc.config.api_host):
+            _list = svc.list()
+            self.assertIsInstance(_list, list)
+            self.assertEqual(1, len(_list))  # api server exists already
+            self.assertIsInstance(_list[0], dict)
+
+    def test_list(self):
+        name = "yo-{0}".format(unicode(uuid.uuid4().get_hex()[:16]))
+        svc = utils.create_service(name=name)
+        svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
+        if utils.is_reachable(svc.config.api_host):
+            svc.create()
+            _list = svc.list()
+            self.assertIsInstance(_list, list)
+            self.assertEqual(2, len(_list))  # api server exists already
+            from_query = _list[1]
+            self.assertIsInstance(from_query, dict)
+            self.assertEqual(name, from_query['metadata']['name'])
+
+    # --------------------------------------------------------------------------------- api - create
+
+    def test_create_name_too_long(self):
+        name = "yo-{0}".format(unicode(uuid.uuid4()))
+        svc = utils.create_service(name=name)
+        svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
+        if utils.is_reachable(svc.config.api_host):
+            try:
+                svc.create()
+                self.fail("Should not fail.")
+            except Exception as err:
+                self.assertIsInstance(err, UnprocessableEntityException)
+
+    def test_create(self):
+        name = "yo-{0}".format(unicode(uuid.uuid4().get_hex()[:16]))
+        svc = utils.create_service(name=name)
+        svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
+        if utils.is_reachable(svc.config.api_host):
+            svc.create()
+            from_get = svc.get()
+            self.assertEqual(svc, from_get)
+
+    def test_create_already_exists(self):
+        name = "yo-{0}".format(unicode(uuid.uuid4().get_hex()[:16]))
+        svc = utils.create_service(name=name)
+        svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
+        if utils.is_reachable(svc.config.api_host):
+            svc.create()
+            try:
+                svc.create()
+                self.fail("Should not fail.")
+            except Exception as err:
+                self.assertIsInstance(err, UnprocessableEntityException)
+
+    # --------------------------------------------------------------------------------- api - update
+
+    def test_update_nonexistent(self):
+        name = "yo-{0}".format(unicode(uuid.uuid4().get_hex()[:16]))
+        svc = utils.create_service(name=name)
+        svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
+        if utils.is_reachable(svc.config.api_host):
+            try:
+                svc.update()
+                self.fail("Should not fail.")
+            except Exception as err:
+                self.assertIsInstance(err, NotFoundException)
+
+    def test_update_nothing_changed(self):
+        name = "yo-{0}".format(unicode(uuid.uuid4().get_hex()[:16]))
+        svc = utils.create_service(name=name)
+        svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
+        if utils.is_reachable(svc.config.api_host):
+            from_create = svc.create()
+            from_update = svc.update()
+            self.assertEqual(from_create, from_update)
+
+    def test_update_set_cluster_ip_fails(self):
+        name = "yo-{0}".format(unicode(uuid.uuid4().get_hex()[:16]))
+        svc = utils.create_service(name=name)
+        svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
+        if utils.is_reachable(svc.config.api_host):
+            svc.create()
+            svc.set_cluster_ip("192.168.123.123")
+            svc.set_meta_resource_version(ver="1")
+            try:
+                svc.update()
+                self.fail("Should not fail.")
+            except Exception as err:
+                self.assertIsInstance(err, UnprocessableEntityException)
+
+    def test_update_set_external_ips(self):
+        name = "yo-{0}".format(unicode(uuid.uuid4().get_hex()[:16]))
+        svc = utils.create_service(name=name)
+        svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
+        ip = '192.168.123.123'
+        if utils.is_reachable(svc.config.api_host):
+            svc.create()
+            svc.set_external_ips([ip])
+            svc.update()
+            self.assertIn(ip, svc.model.model['spec']['externalIPs'])
+
+    # --------------------------------------------------------------------------------- api - delete
+
+    def test_delete_nonexistent(self):
+        name = "yo-{0}".format(unicode(uuid.uuid4().get_hex()[:16]))
+        svc = utils.create_service(name=name)
+        svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
+        if utils.is_reachable(svc.config.api_host):
+            try:
+                svc.delete()
+            except Exception as err:
+                self.assertIsInstance(err, NotFoundException)
+
+    def test_delete(self):
+        name = "yo-{0}".format(unicode(uuid.uuid4().get_hex()[:16]))
+        svc = utils.create_service(name=name)
+        svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
+        if utils.is_reachable(svc.config.api_host):
+            svc.create()
+            from_get = K8sService.get_by_name(svc.config, svc.name)
+            self.assertIsInstance(from_get, list)
+            self.assertIn(svc, from_get)
+            svc.delete()
+            from_get = K8sService.get_by_name(svc.config, svc.name)
+            self.assertNotIn(svc, from_get)
+
