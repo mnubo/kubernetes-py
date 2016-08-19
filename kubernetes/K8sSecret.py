@@ -16,6 +16,18 @@ class K8sSecret(K8sObject):
         K8sObject.__init__(self, config=config, obj_type='Secret', name=name)
         self.model = Secret(name=name, namespace=self.config.namespace)
 
+    # -------------------------------------------------------------------------------------  override
+
+    def create(self):
+        super(K8sSecret, self).create()
+        self.get()
+        return self
+
+    def update(self):
+        super(K8sSecret, self).update()
+        self.get()
+        return self
+
     # ------------------------------------------------------------------------------------- add
 
     def add_annotation(self, k=None, v=None):
