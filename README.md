@@ -126,66 +126,58 @@ Deleting a replication controller:
 
 Creating a service:
 
-    from kubernetes import K8sConfig
     from kubernetes import K8sService
     
-    that_cfg = K8sConfig(api_host='somehost:8888')
-    that_svc = K8sService(config=that_cfg, name='redis')\
-        .add_port(name='redisport', port=31010, target_port='redisport')\
-        .add_selector(selector=dict(name='redis'))\
-        .set_cluster_ip('192.168.1.100')
-    that_svc.create()
+    svc = K8sService(config=cfg_cert, name='redis')
+    svc.add_port(name='redisport', port=31010, target_port='redisport')
+    svc.add_selector(selector=dict(name='redis'))
+    svc.set_cluster_ip('192.168.1.100')
+    svc.create()
 
 Fetching a service:
 
-    from kubernetes import K8sConfig
     from kubernetes import K8sService
-    
-    that_cfg = K8sConfig(api_host='somehost:8888')
-    that_svc = K8sService(config=that_cfg, name='redis')
-    that_svc.get()
+
+    svc = K8sService(config=cfg_cert, name='redis')
+    svc.get()
 
 Deleting a service:
 
-    from kubernetes import K8sConfig
     from kubernetes import K8sService
     
-    that_cfg = K8sConfig(api_host='somehost:8888')
-    that_svc = K8sService(config=that_cfg, name='redis')
-    that_svc.get()
-    that_svc.delete()
+    svc = K8sService(config=cfg_cert, name='redis')
+    svc.delete()
 
 ### Secret
 
 Creating a secret:
 
-    from kubernetes import K8sConfig
     from kubernetes import K8sSecret
     
-    that_cfg = K8sConfig(api_host='somehost:8888')
-    that_secret = K8sSecret(config=that_cfg, name='myregistry')\
-        .set_dockercfg_secret(data='{"somehost":{"auth":"bW81Ym8fZG7ja2HyOmMvY2tlcmZvhm1UdWovMJIR",'
-                                   '"email":"email@company.com"}}')
-    that_secret.create()
+    data = {
+        'somehost': {
+            'auth': 'sometoken',
+            'email': 'someone@somecompany.com'
+        }
+    }
+    
+    secret = K8sSecret(config=cfg_cert, name='my_registry')
+    secret.set_dockercfg_secret(data=data)
+    secret.create()
 
 Fetching a secret:
 
-    from kubernetes import K8sConfig
     from kubernetes import K8sSecret
-    
-    that_cfg = K8sConfig(api_host='somehost:8888')
-    that_secret = K8sSecret(config=that_cfg, name='myregistry')
-    that_secret.get()
+
+    secret = K8sSecret(config=cfg_cert, name='my_registry')
+    secret.get()
 
 Deleting a secret:
 
-    from kubernetes import K8sConfig
     from kubernetes import K8sSecret
     
-    that_cfg = K8sConfig(api_host='somehost:8888')
-    that_secret = K8sSecret(config=that_cfg, name='myregistry')
-    that_secret.get()
-    that_secret.delete()
+    secret = K8sSecret(config=cfg_cert, name='my_registry')
+    secret.delete()
 
 ### Unit tests
 
@@ -213,4 +205,4 @@ For certificate validation to succeed, you should edit your `~/.kube/config` to 
         certificate-authority: /Users/kubernetes/.minikube/ca.crt
         server: https://kubernetes:8443
 
-And also add an entry to your `/etc/hosts` file.
+And also add an entry to your `/etc/hosts` file for the host alias you choose.
