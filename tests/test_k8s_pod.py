@@ -858,7 +858,7 @@ class K8sPodTest(unittest.TestCase):
             except Exception as err:
                 self.assertIsInstance(err, BadRequestException)
 
-    def test_update_labels_fails(self):
+    def test_update_labels(self):
         name = "yocontainer"
         container = utils.create_container(name=name)
         name = "yopod-{0}".format(unicode(uuid.uuid4()))
@@ -868,15 +868,14 @@ class K8sPodTest(unittest.TestCase):
             pod1.create()
             labels = pod1.get_labels()
             labels['yomama'] = 'sofat'
-            pods = pod1.get_by_labels(config=pod1.config, labels=labels)
+            pods = K8sPod.get_by_labels(config=pod1.config, labels=labels)
             self.assertIsInstance(pods, list)
             self.assertEqual(0, len(pods))
             pod1.set_labels(labels)
-            try:
-                pod1.update()
-                self.fail("Should not fail.")
-            except Exception as err:
-                self.assertIsInstance(err, UnprocessableEntityException)
+            pod1.update()
+            pods = K8sPod.get_by_labels(config=pod1.config, labels=labels)
+            self.assertIsInstance(pods, list)
+            self.assertEqual(1, len(pods))
 
     def test_update_add_container_fails(self):
         cont_names = ["yocontainer", "yocontainer2"]
