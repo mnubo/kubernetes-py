@@ -17,6 +17,18 @@ class K8sService(K8sObject):
         K8sObject.__init__(self, config=config, obj_type='Service', name=name)
         self.model = Service(name=name, namespace=self.config.namespace)
 
+    # -------------------------------------------------------------------------------------  override
+
+    def create(self):
+        super(K8sService, self).create()
+        self.get()
+        return self
+
+    def update(self):
+        super(K8sService, self).update()
+        self.get()
+        return self
+
     # ------------------------------------------------------------------------------------- add
 
     def add_annotation(self, k=None, v=None):
@@ -147,18 +159,10 @@ class K8sService(K8sObject):
 
     @staticmethod
     def get_by_name(config=None, name=None):
-        try:
-            service_list = list()
-            data = dict(labelSelector="name={svc_name}".format(svc_name=name))
-            services = K8sService(config=config, name=name).get_with_params(data=data)
-            for svc in services:
-                try:
-                    service_name = Service(model=svc).get_name()
-                    service_list.append(K8sService(config=config, name=service_name).get())
-                except NotFoundException:
-                    pass
-        except Exception as e:
-            message = "Got an exception of type {my_type} with message {my_msg}"\
-                .format(my_type=type(e), my_msg=e.message)
-            raise Exception(message)
+        service_list = list()
+        data = dict(labelSelector="name={svc_name}".format(svc_name=name))
+        services = K8sService(config=config, name=name).get_with_params(data=data)
+        for svc in services:
+            service_name = Service(model=svc).get_name()
+            service_list.append(K8sService(config=config, name=service_name).get())
         return service_list

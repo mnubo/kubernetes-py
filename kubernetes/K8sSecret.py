@@ -16,6 +16,18 @@ class K8sSecret(K8sObject):
         K8sObject.__init__(self, config=config, obj_type='Secret', name=name)
         self.model = Secret(name=name, namespace=self.config.namespace)
 
+    # -------------------------------------------------------------------------------------  override
+
+    def create(self):
+        super(K8sSecret, self).create()
+        self.get()
+        return self
+
+    def update(self):
+        super(K8sSecret, self).update()
+        self.get()
+        return self
+
     # ------------------------------------------------------------------------------------- add
 
     def add_annotation(self, k=None, v=None):
@@ -29,8 +41,18 @@ class K8sSecret(K8sObject):
     # ------------------------------------------------------------------------------------- get
 
     def get(self):
-        self.model = Secret(model=self.get_model())
+        self.model = Secret(name=self.name, model=self.get_model())
         return self
+
+    def get_data(self, k=None):
+        data = self.model.get_data(k=k)
+        return data
+
+    def get_type(self):
+        return self.model.get_type()
+
+    def get_dockercfg_secret(self):
+        return self.model.get_dockercfg_secret()
 
     # ------------------------------------------------------------------------------------- set
 
