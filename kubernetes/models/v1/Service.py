@@ -58,8 +58,10 @@ class Service(BaseModel):
             if (not isinstance(target_port, str) and not isinstance(target_port, int)) or not 0 < target_port < 65536:
                 raise SyntaxError('Service: target_port: [ {0} ] must be either a string or a positive integer.'.format(target_port))
         if protocol is not None:
+            if not isinstance(protocol, str):
+                raise SyntaxError('Service: protocol: [ {0} ] must be a string.'.format(protocol.__class__.__name__))
             if protocol.upper() not in ['TCP', 'UDP']:
-                raise SyntaxError('Service: port: [ {0} ] must be in: [ \'TCP\', \'UDP\' ]'.format(protocol))
+                raise SyntaxError('Service: protocol: [ {0} ] must be either: [ \'TCP\', \'UDP\' ]'.format(protocol))
         if node_port is not None:
             if not isinstance(node_port, int) or not 0 < node_port < 65536:
                 raise SyntaxError('Service: node_port: [ {0} ] should be a positive integer.'.format(node_port))
