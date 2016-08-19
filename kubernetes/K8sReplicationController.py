@@ -39,6 +39,18 @@ class K8sReplicationController(K8sPodBasedObject):
         if self.config.pull_secret is not None:
             self.add_image_pull_secrets(name=self.config.pull_secret)
 
+    # -------------------------------------------------------------------------------------  override
+
+    def create(self):
+        super(K8sReplicationController, self).create()
+        self.get()
+        return self
+
+    def update(self):
+        super(K8sReplicationController, self).update()
+        self.get()
+        return self
+
     # -------------------------------------------------------------------------------------  add
 
     def add_annotation(self, k=None, v=None):
