@@ -13,6 +13,7 @@ from kubernetes.models.v1.Container import Container
 
 
 class PodBasedModel(BaseModel):
+    
     def __init__(self):
         BaseModel.__init__(self)
         self.pod_spec = PodSpec()

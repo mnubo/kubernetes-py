@@ -10,8 +10,9 @@ import os
 import socket
 from kubernetes import (
     K8sConfig,
-    K8sObject,
     K8sContainer,
+    K8sDeployment,
+    K8sObject,
     K8sPod,
     K8sReplicationController,
     K8sSecret,
@@ -103,6 +104,16 @@ def create_service(config=None, name=None):
     return obj
 
 
+def create_deployment(config=None, name=None):
+    if config is None:
+        config = create_config()
+    obj = K8sDeployment(
+        config=config,
+        name=name
+    )
+    return obj
+
+
 def cleanup_objects():
     config = K8sConfig(kubeconfig=kubeconfig_fallback)
     if is_reachable(config.api_host):
@@ -168,6 +179,20 @@ def cleanup_services():
                 except NotFoundException:
                     continue
             services = ref.list()
+
+
+def cleanup_deployments():
+    ref = create_deployment(name="throwaway")
+    if is_reachable(ref.config.api_host):
+        deps = ref.list()
+        while len(deps) > 0:
+            for d in deps:
+                try:
+                    obj = K8sDeployment(config=ref.config, name=d['metadata']['name']).get()
+                    obj.delete()
+                except NotFoundException:
+                    continue
+            deps = ref.list()
 
 
 def _is_api_server(service=None):

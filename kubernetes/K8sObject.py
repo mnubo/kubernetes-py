@@ -15,6 +15,7 @@ from kubernetes.K8sExceptions import *
 import json
 
 VALID_K8s_OBJS = [
+    'Deployment',
     'Pod',
     'ReplicationController',
     'Secret',
