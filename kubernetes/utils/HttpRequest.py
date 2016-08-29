@@ -9,12 +9,17 @@
 import urllib
 import json
 import requests
+import tempfile
+import os
+import base64
 from kubernetes.utils.ConvertData import convert
 
 
 class HttpRequest:
 
-    def __init__(self, method='GET', host='localhost:80', url='/', data=None, auth=None, cert=None, ca_cert=None, token=None):
+    def __init__(self, method='GET', host='localhost:80', url='/', data=None, auth=None,
+                 cert=None, ca_cert=None, ca_cert_data=None, token=None):
+
         self.http_method = method
         self.http_host = host
         self.url = url
@@ -22,6 +27,7 @@ class HttpRequest:
         self.auth = auth
         self.cert = cert
         self.ca_cert = ca_cert
+        self.ca_cert_data = ca_cert_data
         self.token = token
 
     def send(self):
@@ -41,25 +47,44 @@ class HttpRequest:
 
         self.url = self.http_host + self.url
 
-        if self.data is None:
-            response = requests.request(
-                method=self.http_method,
-                url=self.url,
-                auth=self.auth,
-                cert=self.cert,
-                verify=self.ca_cert if self.ca_cert is not None else False
-            )
-        else:
-            json_encoded = json.dumps(self.data)
-            response = requests.request(
-                method=self.http_method,
-                url=self.url,
-                auth=self.auth,
-                cert=self.cert,
-                headers=http_headers,
-                data=json_encoded,
-                verify=self.ca_cert if self.ca_cert is not None else False
-            )
+        temp = None
+        verify = False
+        if self.ca_cert is not None:
+            verify = self.ca_cert
+        if self.ca_cert_data is not None:
+            temp = tempfile.NamedTemporaryFile(delete=False)
+            data = base64.b64decode(self.ca_cert_data)
+            temp.write(data)
+            temp.close()
+            verify = temp.name
+
+        try:
+            if self.data is None:
+                response = requests.request(
+                    method=self.http_method,
+                    url=self.url,
+                    auth=self.auth,
+                    cert=self.cert,
+                    verify=verify
+                )
+            else:
+                json_encoded = json.dumps(self.data)
+                response = requests.request(
+                    method=self.http_method,
+                    url=self.url,
+                    auth=self.auth,
+                    cert=self.cert,
+                    headers=http_headers,
+                    data=json_encoded,
+                    verify=verify
+                )
+
+        except Exception as err:
+            raise err
+
+        finally:
+            if temp is not None:
+                os.unlink(temp.name)
 
         state['status'] = response.status_code
         state['reason'] = response.reason
