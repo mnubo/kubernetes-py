@@ -19,7 +19,7 @@ class K8sDeploymentTests(unittest.TestCase):
         pass
 
     def tearDown(self):
-        utils.cleanup_objects()
+        pass
 
     # --------------------------------------------------------------------------------- init
 
@@ -59,7 +59,7 @@ class K8sDeploymentTests(unittest.TestCase):
 
     # ------------------------------------------x--------------------------------------- api - create
 
-    def test_create_without_containers(self):
+    def test_create_no_args(self):
         name = "yodep-{0}".format(unicode(uuid.uuid4()))
         dep = utils.create_deployment(name=name)
         if utils.is_reachable(dep.config.api_host):
@@ -68,3 +68,19 @@ class K8sDeploymentTests(unittest.TestCase):
                 self.fail("Should not fail.")
             except Exception as err:
                 self.assertIsInstance(err, UnprocessableEntityException)
+
+    def test_create_with_container_zero_replicas(self):
+        name = "yodep-{0}".format(unicode(uuid.uuid4()))
+        dep = utils.create_deployment(name=name)
+        cont_name = "redis"
+        cont_image = "redis:3.2.3"
+        cont = utils.create_container(name=cont_name, image=cont_image)
+        dep.add_container(container=cont)
+        if utils.is_reachable(dep.config.api_host):
+            d = dep.create()
+            self.assertIsNotNone(d)
+            self.assertIsInstance(d, K8sDeployment)
+            self.assertEqual(d, dep)
+            self.assertEqual(0, d.model.model['spec']['replicas'])
+
+
