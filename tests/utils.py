@@ -24,10 +24,23 @@ kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(
 
 
 def is_reachable(api_host):
-    scheme, host, port = api_host.replace("//", "").split(':')
+    port = None
+    s = None
     try:
-        s = socket.create_connection((host, port), timeout=0.5)
-        s.close()
+        scheme, host, port = api_host.replace("//", "").split(':')
+    except ValueError:  # no port specified
+        scheme, host = api_host.replace("//", "").split(":")
+    try:
+        if port is not None:
+            s = socket.create_connection((host, port), timeout=0.5)
+        else:
+            if scheme == 'http':
+                port = 80
+            elif scheme == 'https':
+                port = 443
+            s = socket.create_connection((host, port), timeout=0.5)
+        if s is not None:
+            s.close()
         return True
     except Exception as err:
         return False
