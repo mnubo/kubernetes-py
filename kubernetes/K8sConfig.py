@@ -53,6 +53,7 @@ class K8sConfig(object):
 
             self.api_host = None
             self.ca_cert = None
+            self.ca_cert_data = None
             self.auth = None
             self.token = None
             self.client_certificate = None
@@ -69,8 +70,12 @@ class K8sConfig(object):
 
             for cluster in self.clusters:
                 if cluster['name'] == self.current_context:
-                    self.api_host = cluster['cluster']['server']
-                    self.ca_cert = cluster['cluster']['certificate-authority']
+                    if 'server' in cluster['cluster']:
+                        self.api_host = cluster['cluster']['server']
+                    if 'certificate-authority' in cluster['cluster']:
+                        self.ca_cert = cluster['cluster']['certificate-authority']
+                    if 'certificate-authority-data' in cluster['cluster']:
+                        self.ca_cert_data = cluster['cluster']['certificate-authority-data']
 
             for user in self.users:
                 if user['name'] == self.current_context:
