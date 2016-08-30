@@ -17,7 +17,6 @@ class ReplicationController(PodBasedModel):
         PodBasedModel.__init__(self)
 
         if model is not None:
-            assert isinstance(model, dict)
             self.model = model
             if 'status' in self.model:
                 self.model.pop('status', None)
@@ -26,6 +25,7 @@ class ReplicationController(PodBasedModel):
             if 'template' in self.model['spec']:
                 self.pod_spec = PodSpec(model=self.model['spec']['template']['spec'])
                 self.pod_metadata = ObjectMeta(model=self.model['spec']['template']['metadata'])
+
         else:
             if name is None:
                 raise SyntaxError('ReplicationController: name: [ {0} ] cannot be None.'.format(name))
