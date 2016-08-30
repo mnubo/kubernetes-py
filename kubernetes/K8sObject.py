@@ -17,6 +17,7 @@ import json
 VALID_K8s_OBJS = [
     'Deployment',
     'Pod',
+    'ReplicaSet',
     'ReplicationController',
     'Secret',
     'Service'
