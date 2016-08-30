@@ -7,6 +7,7 @@
 #
 
 import unittest
+import utils
 from kubernetes import K8sContainer
 from kubernetes.models.v1 import Container
 
@@ -17,7 +18,7 @@ class K8sContainerTest(unittest.TestCase):
         pass
 
     def tearDown(self):
-        pass
+        utils.cleanup_objects()
 
     # ------------------------------------------------------------------------------------- init
 
