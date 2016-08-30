@@ -139,7 +139,9 @@ def create_deployment(config=None, name=None):
 def cleanup_objects():
     config = K8sConfig(kubeconfig=kubeconfig_fallback)
     if is_reachable(config.api_host):
-        cleanup_rcs()
+        cleanup_rc()
+        cleanup_deployments()
+        cleanup_rs()
         cleanup_pods()
         cleanup_secrets()
         cleanup_services()
