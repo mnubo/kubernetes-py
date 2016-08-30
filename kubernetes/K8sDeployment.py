@@ -7,11 +7,15 @@
 #
 
 import uuid
-from kubernetes.K8sPodBasedObject import K8sPodBasedObject
+import time
+from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sContainer import K8sContainer
+from kubernetes.K8sPodBasedObject import K8sPodBasedObject
 from kubernetes.models.v1.Deployment import Deployment
+from kubernetes.K8sExceptions import TimedOutException, NotFoundException
 
 API_VERSION = 'extensions/v1beta1'
+SCALE_WAIT_TIMEOUT_SECONDS = 60
 
 
 class K8sDeployment(K8sPodBasedObject):
@@ -46,8 +50,7 @@ class K8sDeployment(K8sPodBasedObject):
         super(K8sDeployment, self).create()
         self.get()
         if self.model.model['spec']['replicas'] > 0:
-            while not self._has_desired_replicas():
-                self.get()
+            self._wait_for_desired_replicas()
         return self
 
     def update(self):
@@ -55,7 +58,7 @@ class K8sDeployment(K8sPodBasedObject):
         self.get()
         return self
 
-    # -------------------------------------------------------------------------------------  checking replicas
+    # -------------------------------------------------------------------------------------  checking rollout success
 
     def _has_available_replicas(self):
         if 'status' in self.model.model:
@@ -68,6 +71,21 @@ class K8sDeployment(K8sPodBasedObject):
             if self.model.model['status']['updatedReplicas'] == self.model.model['spec']['replicas']:
                 return True
         return False
+
+    def _wait_for_desired_replicas(self):
+        start_time = time.time()
+        while not self._has_desired_replicas():
+            self.get()
+            elapsed_time = time.time() - start_time
+            if elapsed_time >= SCALE_WAIT_TIMEOUT_SECONDS:  # timeout
+                raise TimedOutException(
+                    "Timed out scaling replicas to: [ {0} ] with labels: [ {1} ]"
+                    .format(
+                        self.model.model['spec']['replicas'],
+                        self.model.model['spec']['selector']['matchLabels']
+                    )
+                )
+            time.sleep(0.2)
 
     # -------------------------------------------------------------------------------------  get
 
