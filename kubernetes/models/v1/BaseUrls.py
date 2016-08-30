@@ -13,13 +13,14 @@ class BaseUrls(object):
 
     """
 
-    def __init__(self, namespace='default', version='v1'):
+    def __init__(self, namespace='default', api_version='v1', extensions_api_version='v1beta1'):
         self.urls = dict()
-        self.urls['Deployment'] = '/apis/extensions/v1beta1/namespaces/{1}/deployments'.format(version, namespace)
-        self.urls['Pod'] = '/api/{0}/namespaces/{1}/pods'.format(version, namespace)
-        self.urls['ReplicationController'] = '/api/{0}/namespaces/{1}/replicationcontrollers'.format(version, namespace)
-        self.urls['Service'] = '/api/{0}/namespaces/{1}/services'.format(version, namespace)
-        self.urls['Secret'] = '/api/{0}/namespaces/{1}/secrets'.format(version, namespace)
+        self.urls['Deployment'] = '/apis/extensions/{0}/namespaces/{1}/deployments'.format(extensions_api_version, namespace)
+        self.urls['Pod'] = '/api/{0}/namespaces/{1}/pods'.format(api_version, namespace)
+        self.urls['ReplicaSet'] = '/apis/extensions/{0}/namespaces/{1}/replicasets'.format(extensions_api_version, namespace)
+        self.urls['ReplicationController'] = '/api/{0}/namespaces/{1}/replicationcontrollers'.format(api_version, namespace)
+        self.urls['Service'] = '/api/{0}/namespaces/{1}/services'.format(api_version, namespace)
+        self.urls['Secret'] = '/api/{0}/namespaces/{1}/secrets'.format(api_version, namespace)
 
     def get_base_url(self, object_type=None):
         if object_type is None or not isinstance(object_type, str) or object_type not in self.urls.keys():
