@@ -18,13 +18,10 @@ class Deployment(PodBasedModel):
     def __init__(self, name=None, image=None, namespace='default', replicas=0, model=None):
         PodBasedModel.__init__(self)
 
-        if name is None:
-            raise SyntaxError('Deployment: name: [ {0} ] cannot be None.'.format(name))
-        if not isinstance(name, str):
-            raise SyntaxError('Deployment: name: [ {0} ] must be a string.'.format(name))
-
         if model is not None:
             self.model = model
+            # if 'status' in self.model:
+            #     self.model.pop('status', None)
             if 'metadata' in self.model:
                 self.deployment_metadata = ObjectMeta(model=self.model['metadata'])
             if 'template' in self.model['spec']:
@@ -32,6 +29,11 @@ class Deployment(PodBasedModel):
                 self.pod_metadata = ObjectMeta(model=self.model['spec']['template']['metadata'])
 
         else:
+            if name is None:
+                raise SyntaxError('Deployment: name: [ {0} ] cannot be None.'.format(name))
+            if not isinstance(name, str):
+                raise SyntaxError('Deployment: name: [ {0} ] must be a string.'.format(name))
+
             self.model = dict(kind='Deployment', apiVersion=API_VERSION)
             self.deployment_metadata = ObjectMeta(name=name, namespace=namespace)
             self.pod_metadata = ObjectMeta(name=name, namespace=namespace)
