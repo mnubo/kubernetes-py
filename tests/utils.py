@@ -96,6 +96,16 @@ def create_rc(config=None, name=None, replicas=0):
     return obj
 
 
+def create_rs(config=None, name=None):
+    if config is None:
+        config = create_config()
+    obj = K8sReplicaSet(
+        config=config,
+        name=name,
+    )
+    return obj
+
+
 def create_secret(config=None, name=None):
     if config is None:
         config = create_config()
@@ -191,6 +201,20 @@ def cleanup_services():
                 except NotFoundException:
                     continue
             services = ref.list()
+
+
+def cleanup_rs():
+    ref = create_rs(name="throwaway")
+    if is_reachable(ref.config.api_host):
+        rs_list = ref.list()
+        while len(rs_list) > 0:
+            for rs in rs_list:
+                try:
+                    obj = K8sReplicaSet(config=ref.config, name=rs['metadata']['name']).get()
+                    obj.delete()
+                except NotFoundException:
+                    continue
+            rs_list = ref.list()
 
 
 def cleanup_deployments():
