@@ -108,3 +108,27 @@ class K8sDeployment(K8sPodBasedObject):
         self.model.set_replicas(replicas=replicas)
         return self
 
+    # -------------------------------------------------------------------------------------  get by name
+
+    @staticmethod
+    def get_by_name(config=None, name=None):
+        if name is None:
+            raise SyntaxError('Deployment: name: [ {0} ] cannot be None.'.format(name))
+        if not isinstance(name, str):
+            raise SyntaxError('Deployment: name: [ {0} ] must be a string.'.format(name))
+
+        if config is not None and not isinstance(config, K8sConfig):
+            raise SyntaxError('Deployment: config: [ {0} ] must be a K8sConfig'.format(config))
+
+        dep_list = list()
+        data = {'labelSelector': 'name={0}'.format(name)}
+        deps = K8sDeployment(config=config, name=name).get_with_params(data=data)
+
+        for dep in deps:
+            try:
+                dep_name = Deployment(model=dep).get_name()
+                dep_list.append(K8sDeployment(config=config, name=dep_name).get())
+            except NotFoundException:
+                pass
+
+        return dep_list
