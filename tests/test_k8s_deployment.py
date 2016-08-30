@@ -193,3 +193,51 @@ class K8sDeploymentTests(unittest.TestCase):
             result = dep.list()
             self.assertIsInstance(result, list)
             self.assertEqual(0, len(result))
+
+    # -------------------------------------------------------------------------------------  get by name
+
+    def test_get_by_name_none_args(self):
+        try:
+            K8sDeployment.get_by_name()
+            self.fail("Should not fail.")
+        except Exception as err:
+            self.assertIsInstance(err, SyntaxError)
+
+    def test_get_by_name_invalid_config(self):
+        name = "yoname"
+        config = object()
+        try:
+            K8sDeployment.get_by_name(config=config, name=name)
+            self.fail("Should not fail.")
+        except Exception as err:
+            self.assertIsInstance(err, SyntaxError)
+
+    def test_get_by_name_invalid_name(self):
+        name = object()
+        try:
+            K8sDeployment.get_by_name(name=name)
+            self.fail("Should not fail.")
+        except Exception as err:
+            self.assertIsInstance(err, SyntaxError)
+
+    def test_get_by_name_nonexistent(self):
+        name = "yodep-{0}".format(unicode(uuid.uuid4()))
+        dep = utils.create_deployment(name=name)
+        if utils.is_reachable(dep.config.api_host):
+            result = K8sDeployment.get_by_name(config=dep.config, name=name)
+            self.assertIsInstance(result, list)
+            self.assertEqual(0, len(result))
+
+    def test_get_by_name(self):
+        cont_name = "yocontainer"
+        container = utils.create_container(name=cont_name)
+        name = "yodep-{0}".format(unicode(uuid.uuid4()))
+        dep = utils.create_deployment(name=name)
+        dep.add_container(container)
+        if utils.is_reachable(dep.config.api_host):
+            dep.create()
+            result = K8sDeployment.get_by_name(config=dep.config, name=name)
+            self.assertIsInstance(result, list)
+            self.assertEqual(1, len(result))
+            self.assertIsInstance(result[0], K8sDeployment)
+            self.assertEqual(dep, result[0])
