@@ -45,12 +45,29 @@ class K8sDeployment(K8sPodBasedObject):
     def create(self):
         super(K8sDeployment, self).create()
         self.get()
+        if self.model.model['spec']['replicas'] > 0:
+            while not self._has_desired_replicas():
+                self.get()
         return self
 
     def update(self):
         super(K8sDeployment, self).update()
         self.get()
         return self
+
+    # -------------------------------------------------------------------------------------  checking replicas
+
+    def _has_available_replicas(self):
+        if 'status' in self.model.model:
+            if 'availableReplicas' in self.model.model['status']:
+                return True
+        return False
+
+    def _has_desired_replicas(self):
+        if self._has_available_replicas():
+            if self.model.model['status']['updatedReplicas'] == self.model.model['spec']['replicas']:
+                return True
+        return False
 
     # -------------------------------------------------------------------------------------  get
 

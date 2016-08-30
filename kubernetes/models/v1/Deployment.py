@@ -23,14 +23,19 @@ class Deployment(PodBasedModel):
         if not isinstance(name, str):
             raise SyntaxError('Deployment: name: [ {0} ] must be a string.'.format(name))
 
-        self.model = dict(kind='Deployment', apiVersion=API_VERSION)
-        self.deployment_metadata = ObjectMeta(name=name, namespace=namespace)
-
         if model is not None:
             self.model = model
-            self.pod_spec = PodSpec(model=model['spec']['template']['spec'])
+            if 'metadata' in self.model:
+                self.deployment_metadata = ObjectMeta(model=self.model['metadata'])
+            if 'template' in self.model['spec']:
+                self.pod_spec = PodSpec(model=self.model['spec']['template']['spec'])
+                self.pod_metadata = ObjectMeta(model=self.model['spec']['template']['metadata'])
 
         else:
+            self.model = dict(kind='Deployment', apiVersion=API_VERSION)
+            self.deployment_metadata = ObjectMeta(name=name, namespace=namespace)
+            self.pod_metadata = ObjectMeta(name=name, namespace=namespace)
+
             self.model['spec'] = {
                 "replicas": replicas,
                 "selector": {
@@ -47,7 +52,6 @@ class Deployment(PodBasedModel):
                 self.pod_spec = PodSpec(name=name)
 
             self.pod_spec.set_restart_policy('Always')
-            self.pod_metadata = ObjectMeta(name=name, namespace=namespace)
 
         self._update_model()
 
