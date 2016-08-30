@@ -159,7 +159,7 @@ def cleanup_pods():
             pods = ref.list()
 
 
-def cleanup_rcs():
+def cleanup_rc():
     ref = create_rc(name="throwaway")
     if is_reachable(ref.config.api_host):
         rcs = ref.list()

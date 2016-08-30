@@ -1610,7 +1610,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         rc.add_container(container)
         if utils.is_reachable(rc.config.api_host):
             rc.create()
-            utils.cleanup_rcs()
+            utils.cleanup_rc()
             result = rc.list()
             self.assertIsInstance(result, list)
             self.assertEqual(0, len(result))
