@@ -1485,6 +1485,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         rcs = []
         count = 3
+        objs = []
         if utils.is_reachable(config.api_host):
             for i in range(0, count):
                 name = "yorc-{0}".format(unicode(uuid.uuid4()))
@@ -1494,7 +1495,9 @@ class K8sReplicationControllerTest(unittest.TestCase):
                 self.assertIsInstance(result, K8sReplicationController)
                 self.assertEqual(rc, result)
                 rcs.append(rc)
+                objs = rc.list()
             self.assertEqual(count, len(rcs))
+            self.assertEqual(count, len(objs))
 
     # ------------------------------------------------------------------------------------- api - update
 
