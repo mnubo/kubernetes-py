@@ -69,6 +69,13 @@ class Deployment(PodBasedModel):
             self.model['spec']['template']['spec'] = self.pod_spec.get()
         return self
 
+    # -------------------------------------------------------------------------------------  get
+
+    def get_name(self):
+        return self.deployment_metadata.get_name()
+
+    # -------------------------------------------------------------------------------------  set
+
     def set_replicas(self, replicas=None):
         if replicas is None:
             raise SyntaxError('Deployment: replicas: [ {0} ] cannot be None.'.format(replicas))
