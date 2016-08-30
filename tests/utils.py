@@ -8,16 +8,15 @@
 
 import os
 import socket
-from kubernetes import (
-    K8sConfig,
-    K8sContainer,
-    K8sDeployment,
-    K8sObject,
-    K8sPod,
-    K8sReplicationController,
-    K8sSecret,
-    K8sService
-)
+from kubernetes.K8sConfig import K8sConfig
+from kubernetes.K8sContainer import K8sContainer
+from kubernetes.K8sDeployment import K8sDeployment
+from kubernetes.K8sObject import K8sObject
+from kubernetes.K8sPod import K8sPod
+from kubernetes.K8sReplicaSet import K8sReplicaSet
+from kubernetes.K8sReplicationController import K8sReplicationController
+from kubernetes.K8sSecret import K8sSecret
+from kubernetes.K8sService import K8sService
 from kubernetes.K8sExceptions import NotFoundException
 
 kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
