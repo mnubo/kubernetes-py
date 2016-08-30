@@ -34,20 +34,22 @@ class ReplicationController(PodBasedModel):
 
             self.model = dict(kind='ReplicationController', apiVersion='v1')
             self.rc_metadata = ObjectMeta(name=name, namespace=namespace)
+            self.pod_metadata = ObjectMeta(name=name, namespace=namespace)
 
             self.model['spec'] = {
                 "replicas": replicas,
                 "selector": dict(name=name)
             }
-
             self.model['spec']['template'] = dict()
+
             if image is not None:
                 self.pod_spec = PodSpec(name=name, image=image)
             else:
                 self.pod_spec = PodSpec(name=name)
+
             self.pod_spec.set_restart_policy('Always')
-            self.pod_metadata = ObjectMeta(name=name, namespace=namespace)
-            self._update_model()
+
+        self._update_model()
 
     def _update_model(self):
         self.model['metadata'] = self.rc_metadata.get()
