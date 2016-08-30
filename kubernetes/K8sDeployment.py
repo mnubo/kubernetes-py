@@ -40,10 +40,6 @@ class K8sDeployment(K8sPodBasedObject):
         if self.config.pull_secret is not None:
             self.add_image_pull_secrets(name=self.config.pull_secret)
 
-    def set_replicas(self, replicas=None):
-        self.model.set_replicas(replicas=replicas)
-        return self
-
     # -------------------------------------------------------------------------------------  override
 
     def create(self):
@@ -71,5 +67,9 @@ class K8sDeployment(K8sPodBasedObject):
 
     def set_selector(self, dico=None):
         self.model.set_selector(dico=dico)
+        return self
+
+    def set_replicas(self, replicas=None):
+        self.model.set_replicas(replicas=replicas)
         return self
 
