@@ -51,7 +51,7 @@ class K8sObject(object):
         self.model = BaseModel()
 
         try:
-            urls = BaseUrls(version=self.config.version, namespace=self.config.namespace)
+            urls = BaseUrls(api_version=self.config.version, namespace=self.config.namespace)
             self.base_url = urls.get_base_url(object_type=obj_type)
         except:
             raise Exception('Could not set BaseUrl for type: [ {0} ]'.format(obj_type))
