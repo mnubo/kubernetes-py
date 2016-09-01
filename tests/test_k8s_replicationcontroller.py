@@ -1057,7 +1057,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
             self.assertIsInstance(result[0], K8sReplicationController)
             self.assertEqual(rc, result[0])
 
-    # -------------------------------------------------------------------------------------  get by name
+    # -------------------------------------------------------------------------------------  resize
 
     def test_resize_none_args(self):
         try:
