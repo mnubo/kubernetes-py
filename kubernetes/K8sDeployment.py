@@ -160,3 +160,46 @@ class K8sDeployment(K8sPodBasedObject):
                 pass
 
         return dep_list
+
+    # -------------------------------------------------------------------------------------  rollback
+
+    def rollback(self, revision=None):
+        """
+        Currently raises an HTTP 400 Error. Unsure what to feed the endpoint
+
+        'Deployment in version "v1beta1" cannot be handled as a DeploymentRollback:
+        converting (v1beta1.Deployment) to (extensions.DeploymentRollback):
+        UpdatedAnnotations not present in src'
+
+        :param revision: The revision to rollback to.
+        :return:
+        """
+
+        # if self.name is None:
+        #     raise SyntaxError('K8sDeployment: name: [ {0} ] must be set to ROLLBACK the Deployment.'.format(self.name))
+        # if revision is not None and not isinstance(revision, str):
+        #     raise SyntaxError('K8sDeployment: revision: [ {0} ] must be a string.'.format(revision.__class__.__name__))
+        #
+        # data = {
+        #     'kind': self.model.model['kind'],
+        #     'apiversion': self.model.model['apiVersion'],
+        #     'name': self.model.model['metadata']['name'],
+        #     'updatedAnnotations': {
+        #         'label': "1234"
+        #     }
+        # }
+        # if revision is not None:
+        #     data['rollbackTo']['revision'] = revision
+        #
+        # url = '{base}/{name}/rollback'.format(base=self.base_url, name=data['name'])
+        # state = self.request(method='POST', url=url, data=data)
+        #
+        # if not state.get('success'):
+        #     status = state.get('status', '')
+        #     reason = state.get('data', dict()).get('message', None)
+        #     message = 'K8sDeployment: ROLLBACK failed : HTTP {0} : {1}'.format(status, reason)
+        #     raise BadRequestException(message)
+        #
+        # return self
+
+        raise NotImplementedError()
