@@ -105,14 +105,35 @@ class K8sDeployment(K8sPodBasedObject):
         )
         return self
 
+    def get_labels(self):
+        return self.model.get_labels()
+
+    def get_namespace(self):
+        return self.model.get_namespace()
+
+    def get_pod_labels(self):
+        return self.model.get_pod_labels()
+
     # -------------------------------------------------------------------------------------  set
 
-    def set_selector(self, dico=None):
-        self.model.set_selector(dico=dico)
+    def set_labels(self, dico=None):
+        self.model.set_labels(dico=dico)
+        return self
+
+    def set_namespace(self, name=None):
+        self.model.set_namespace(name=name)
+        return self
+
+    def set_pod_labels(self, labels=None):
+        self.model.set_pod_labels(labels=labels)
         return self
 
     def set_replicas(self, replicas=None):
         self.model.set_replicas(replicas=replicas)
+        return self
+
+    def set_selector(self, dico=None):
+        self.model.set_selector(dico=dico)
         return self
 
     # -------------------------------------------------------------------------------------  get by name
