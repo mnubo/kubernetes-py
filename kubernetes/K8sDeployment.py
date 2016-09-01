@@ -12,7 +12,7 @@ from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sPodBasedObject import K8sPodBasedObject
 from kubernetes.models.v1.Deployment import Deployment
-from kubernetes.K8sExceptions import TimedOutException, NotFoundException
+from kubernetes.K8sExceptions import TimedOutException, NotFoundException, BadRequestException
 
 API_VERSION = 'extensions/v1beta1'
 SCALE_WAIT_TIMEOUT_SECONDS = 60
@@ -26,12 +26,9 @@ class K8sDeployment(K8sPodBasedObject):
         self.model = Deployment(name=name, namespace=self.config.namespace)
         self.set_replicas(replicas)
 
-        deployment_version = str(uuid.uuid4())
-        self.model.add_pod_label(k='dep_version', v=deployment_version)
         selector = {
             'matchLabels': {
-                'name': name,
-                'dep_version': deployment_version
+                'name': name
             }
         }
         self.set_selector(selector)
@@ -56,36 +53,46 @@ class K8sDeployment(K8sPodBasedObject):
     def update(self):
         super(K8sDeployment, self).update()
         self.get()
+        if self.model.model['spec']['replicas'] > 0:
+            self._wait_for_desired_replicas()
         return self
 
     # -------------------------------------------------------------------------------------  checking rollout success
-
-    def _has_available_replicas(self):
-        if 'status' in self.model.model:
-            if 'availableReplicas' in self.model.model['status']:
-                return True
-        return False
-
-    def _has_desired_replicas(self):
-        if self._has_available_replicas():
-            if self.model.model['status']['updatedReplicas'] == self.model.model['spec']['replicas']:
-                return True
-        return False
 
     def _wait_for_desired_replicas(self):
         start_time = time.time()
         while not self._has_desired_replicas():
             self.get()
-            elapsed_time = time.time() - start_time
-            if elapsed_time >= SCALE_WAIT_TIMEOUT_SECONDS:  # timeout
-                raise TimedOutException(
-                    "Timed out scaling replicas to: [ {0} ] with labels: [ {1} ]"
-                    .format(
-                        self.model.model['spec']['replicas'],
-                        self.model.model['spec']['selector']['matchLabels']
-                    )
+            self._check_timeout(start_time)
+
+    def _has_desired_replicas(self):
+        if self._has_replica_data():
+            desired = self.model.model['spec']['replicas']
+            updated = self.model.model['status']['updatedReplicas']
+            available = self.model.model['status']['availableReplicas']
+            if desired == updated and desired == available:
+                return True
+        return False
+
+    def _has_replica_data(self):
+        if 'status' in self.model.model:
+            has_available = 'availableReplicas' in self.model.model['status']
+            has_updated = 'updatedReplicas' in self.model.model['status']
+            if has_available and has_updated:
+                return True
+        return False
+
+    def _check_timeout(self, start_time=None):
+        elapsed_time = time.time() - start_time
+        if elapsed_time >= SCALE_WAIT_TIMEOUT_SECONDS:  # timeout
+            raise TimedOutException(
+                "Timed out scaling replicas to: [ {0} ] with labels: [ {1} ]"
+                .format(
+                    self.model.model['spec']['replicas'],
+                    self.model.model['spec']['selector']['matchLabels']
                 )
-            time.sleep(0.2)
+            )
+        time.sleep(0.2)
 
     # -------------------------------------------------------------------------------------  get
 
