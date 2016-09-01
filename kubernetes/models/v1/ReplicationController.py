@@ -148,7 +148,7 @@ class ReplicationController(PodBasedModel):
             raise SyntaxError('ReplicationController: dico: [ {0} ] cannot be None.'.format(dico))
         if not isinstance(dico, dict):
             raise SyntaxError('ReplicationController: dico: [ {0} ] must be a dict.'.format(dico))
-        self.rc_metadata.set_labels(dico=dico)
+        self.rc_metadata.set_labels(labels=dico)
         return self
 
     def set_name(self, name=None):

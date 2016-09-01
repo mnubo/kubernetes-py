@@ -48,11 +48,15 @@ class PodSpec(BaseModel):
 
             self._update_model()
 
+    # ------------------------------------------------------------------------------------- private methods
+
     def _update_model(self):
         self.model['containers'] = []
         for c in self.containers:
             assert isinstance(c, Container)
             self.model['containers'].append(c.get())
+
+    # ------------------------------------------------------------------------------------- add
 
     def add_container(self, container=None):
         if container is None or not isinstance(container, Container):
@@ -96,9 +100,13 @@ class PodSpec(BaseModel):
         self.model['imagePullSecrets'].append(dict(name=name))
         return self
 
+    # ------------------------------------------------------------------------------------- del
+
     def del_node_name(self):
         self.model.pop('nodeName', None)
         return self
+
+    # ------------------------------------------------------------------------------------- get
 
     def get_containers(self):
         return self.containers
@@ -118,22 +126,18 @@ class PodSpec(BaseModel):
     def get_termination_grace_period(self):
         return self.model.get('terminationGracePeriodSeconds', None)
 
+    # ------------------------------------------------------------------------------------- set
+
     def set_active_deadline(self, seconds=None):
         if seconds is None:
             raise SyntaxError('PodSpec: seconds: [ {0} ] cannot be None.'.format(seconds))
         if not isinstance(seconds, int) or seconds < 0:
             raise SyntaxError('PodSpec: seconds: [ {0} ] should be a positive integer.'.format(seconds))
+
         self.model['activeDeadlineSeconds'] = seconds
         return self
 
-    def set_dns_policy(self, policy='Default'):
-        if policy in ['Default', 'ClusterFirst']:
-            self.model['dnsPolicy'] = policy
-        else:
-            raise SyntaxError('PodSpec: policy should be one of: Default, ClusterFirst')
-        return self
-
-    def set_image(self, name=None, image=None):
+    def set_container_image(self, name=None, image=None):
         if image is None or not isinstance(image, str):
             raise SyntaxError('PodSpec: image should be a string.')
         if name is None or not isinstance(name, str):
@@ -145,11 +149,19 @@ class PodSpec(BaseModel):
                 break
         return self
 
+    def set_dns_policy(self, policy='Default'):
+        if policy in ['Default', 'ClusterFirst']:
+            self.model['dnsPolicy'] = policy
+        else:
+            raise SyntaxError('PodSpec: policy should be one of: Default, ClusterFirst')
+        return self
+
     def set_node_selector(self, dico=None):
         if dico is None:
             raise SyntaxError('PodSpec: Node selector: [ {0} ] cannot be None.'.format(dico))
         if not isinstance(dico, dict):
             raise SyntaxError('PodSpec: Node selector: [ {0} ] must be a dict.'.format(dico))
+
         self.model['nodeSelector'] = dico
         return self
 
@@ -160,6 +172,7 @@ class PodSpec(BaseModel):
             raise SyntaxError('PodSpec: policy: [ {0} ] must be a string.'.format(policy))
         if policy not in ['Always', 'OnFailure', 'Never']:
             raise SyntaxError('PodSpec: policy: [ {0} ] must be in: [ \'Always\', \'OnFailure\', \'Never\' ]')
+
         self.model['restartPolicy'] = policy
         return self
 
@@ -168,6 +181,7 @@ class PodSpec(BaseModel):
             raise SyntaxError('PodSpec: name: [ {0} ] cannot be None.'.format(name))
         if not isinstance(name, str):
             raise SyntaxError('PodSpec: name: [ {0} ] must be a string.'.format(name))
+
         self.model['serviceAccountName'] = name
         return self
 
@@ -176,6 +190,7 @@ class PodSpec(BaseModel):
             raise SyntaxError('PodSpec: name: [ {0} ] cannot be None.'.format(name))
         if not isinstance(name, str):
             raise SyntaxError('PodSpec: name: [ {0} ] must be a string.'.format(name))
+
         self.model['nodeName'] = name
         return self
 
@@ -184,5 +199,6 @@ class PodSpec(BaseModel):
             raise SyntaxError('PodSpec: seconds: [ {0} ] cannot be None.'.format(seconds))
         if not isinstance(seconds, int) or not seconds > 0:
             raise SyntaxError('PodSpec: seconds: [ {0} ] must be a positive integer.'.format(seconds))
+
         self.model['terminationGracePeriodSeconds'] = seconds
         return self

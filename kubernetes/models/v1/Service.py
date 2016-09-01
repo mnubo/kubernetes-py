@@ -215,7 +215,7 @@ class Service(BaseModel):
         return self
 
     def set_labels(self, dico):
-        self.svc_metadata.set_labels(dico=dico)
+        self.svc_metadata.set_labels(labels=dico)
         return self
 
     def set_load_balancer_ip(self, ip=None):

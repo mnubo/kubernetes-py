@@ -66,12 +66,12 @@ class K8sPodBasedObject(K8sObject):
         self.model.set_active_deadline(seconds=seconds)
         return self
 
-    def set_dns_policy(self, policy=None):
-        self.model.set_dns_policy(policy=policy)
+    def set_container_image(self, name, image=None):
+        self.model.set_pod_image(name=name, image=image)
         return self
 
-    def set_image(self, name, image=None):
-        self.model.set_pod_image(name=name, image=image)
+    def set_dns_policy(self, policy=None):
+        self.model.set_dns_policy(policy=policy)
         return self
 
     def set_pod_generate_name(self, mode=None, name=None):
