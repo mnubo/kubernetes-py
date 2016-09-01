@@ -36,41 +36,32 @@ class K8sDeploymentTests(unittest.TestCase):
 
     def test_init_with_invalid_config(self):
         config = object()
-        try:
+        with self.assertRaises(SyntaxError):
             K8sDeployment(config=config)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_init_with_invalid_name(self):
         name = object()
-        try:
+        with self.assertRaises(SyntaxError):
             utils.create_rc(name=name)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_init_with_name(self):
         name = "yomama"
-        rc = utils.create_rc(name=name)
-        self.assertIsNotNone(rc)
-        self.assertIsInstance(rc, K8sDeployment)
-        self.assertEqual(rc.name, name)
+        dep = utils.create_deployment(name=name)
+        self.assertIsNotNone(dep)
+        self.assertIsInstance(dep, K8sDeployment)
+        self.assertEqual(dep.name, name)
 
     # ------------------------------------------x--------------------------------------- api - create
 
     def test_create_no_args(self):
-        name = "yodep-{0}".format(unicode(uuid.uuid4()))
+        name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=name)
         if utils.is_reachable(dep.config.api_host):
-            try:
+            with self.assertRaises(UnprocessableEntityException):
                 dep.create()
-                self.fail("Should not fail.")
-            except Exception as err:
-                self.assertIsInstance(err, UnprocessableEntityException)
 
     def test_create_zero_replicas(self):
-        name = "yodep-{0}".format(unicode(uuid.uuid4()))
+        name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=name)
         cont_name = "redis"
         cont_image = "redis:3.2.3"
@@ -87,7 +78,7 @@ class K8sDeploymentTests(unittest.TestCase):
             self.assertNotIn('updatedReplicas', d.model.model['status'])
 
     def test_create_one_replica(self):
-        name = "yodep-{0}".format(unicode(uuid.uuid4()))
+        name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=name)
         cont_name = "nginx"
         cont_image = "nginx:1.7.9"
@@ -104,7 +95,7 @@ class K8sDeploymentTests(unittest.TestCase):
             self.assertEqual(1, d.model.model['status']['updatedReplicas'])
 
     def test_create_three_replicas(self):
-        name = "yodep-{0}".format(unicode(uuid.uuid4()))
+        name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=name)
         cont_name = "nginx"
         cont_image = "nginx:1.7.9"
@@ -121,7 +112,7 @@ class K8sDeploymentTests(unittest.TestCase):
             self.assertEqual(3, d.model.model['status']['updatedReplicas'])
 
     def test_create_already_exists(self):
-        name = "yodep-{0}".format(unicode(uuid.uuid4()))
+        name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=name)
         cont_name = "nginx"
         cont_image = "nginx:1.7.9"
@@ -130,15 +121,13 @@ class K8sDeploymentTests(unittest.TestCase):
         dep.set_replicas(1)
         if utils.is_reachable(dep.config.api_host):
             dep.create()
-            try:
+            with self.assertRaises(AlreadyExistsException):
                 dep.create()
-            except Exception as err:
-                self.assertIsInstance(err, AlreadyExistsException)
 
-    # ------------------------------------------x--------------------------------------- api - list
+    # --------------------------------------------------------------------------------- api - list
 
     def test_list_nonexistent(self):
-        name = "yodep-{0}".format(unicode(uuid.uuid4()))
+        name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=name)
         if utils.is_reachable(dep.config.api_host):
             objs = dep.list()
@@ -154,7 +143,7 @@ class K8sDeploymentTests(unittest.TestCase):
         objs = []
         if utils.is_reachable(config.api_host):
             for i in range(0, count):
-                name = "yodep-{0}".format(unicode(uuid.uuid4()))
+                name = "yodep-{0}".format(str(uuid.uuid4()))
                 dep = utils.create_deployment(config, name)
                 dep.add_container(container)
                 result = dep.create()
@@ -167,24 +156,125 @@ class K8sDeploymentTests(unittest.TestCase):
 
     # --------------------------------------------------------------------------------- api - update
 
+    def test_update_nonexistent(self):
+        name = "yodep-{0}".format(str(uuid.uuid4()))
+        dep = utils.create_deployment(name=name)
+        if utils.is_reachable(dep.config.api_host):
+            with self.assertRaises(NotFoundException):
+                dep.update()
 
+    def test_update_name_fails(self):
+        name = "yocontainer"
+        container = utils.create_container(name=name)
+        name1 = "yodep1"
+        name2 = "yodep2"
+        dep = utils.create_deployment(name=name1)
+        dep.add_container(container)
+        if utils.is_reachable(dep.config.api_host):
+            dep.create()
+            dep.name = name2
+            with self.assertRaises(BadRequestException):
+                dep.update()
+
+    def test_update_namespace_fails(self):
+        name = "yocontainer"
+        container = utils.create_container(name=name)
+        name = "yorc-{0}".format(str(uuid.uuid4()))
+        nspace = "yonamespace"
+        dep = utils.create_deployment(name=name)
+        dep.add_container(container)
+        if utils.is_reachable(dep.config.api_host):
+            dep.create()
+            dep.set_namespace(nspace)
+            with self.assertRaises(BadRequestException):
+                dep.update()
+
+    def test_update_container_image(self):
+        name = "nginx"
+        image1 = "nginx:1.7.9"
+        image2 = "nginx:1.9.1"
+        container = utils.create_container(name=name, image=image1)
+        dep_name = "yodep-{0}".format(str(uuid.uuid4()))
+        dep = utils.create_deployment(name=dep_name)
+        dep.add_container(container)
+        dep.set_replicas(3)
+        if utils.is_reachable(dep.config.api_host):
+            dep.create()
+            self.assertEqual(image1, dep.model.model['spec']['template']['spec']['containers'][0]['image'])
+            dep.set_container_image(name=name, image=image2)
+            dep.update()
+            self.assertIn('annotations', dep.model.deployment_metadata.model)
+            self.assertIn('deployment.kubernetes.io/revision', dep.model.deployment_metadata.model['annotations'])
+            self.assertNotEqual(image1, dep.model.model['spec']['template']['spec']['containers'][0]['image'])
+            self.assertEqual(image2, dep.model.model['spec']['template']['spec']['containers'][0]['image'])
+
+    def test_update_labels(self):
+        name = "nginx"
+        image = "nginx:1.7.9"
+        container = utils.create_container(name=name, image=image)
+        dep_name = "yodep-{0}".format(str(uuid.uuid4()))
+        dep = utils.create_deployment(name=dep_name)
+        dep.add_container(container)
+        dep.set_replicas(3)
+        if utils.is_reachable(dep.config.api_host):
+            dep.create()
+            labels = dep.get_labels()
+            labels['newkey'] = 'newvalue'
+            dep.set_labels(labels)
+            updated = dep.update()
+            self.assertEqual(labels, updated.get_labels())
+
+    def test_update_pod_labels(self):
+        name = "nginx"
+        image = "nginx:1.7.9"
+        container = utils.create_container(name=name, image=image)
+        dep_name = "yodep-{0}".format(str(uuid.uuid4()))
+        dep = utils.create_deployment(name=dep_name)
+        dep.add_container(container)
+        dep.set_replicas(3)
+        if utils.is_reachable(dep.config.api_host):
+            dep.create()
+            labels = dep.get_pod_labels()
+            labels['newkey'] = 'newvalue'
+            dep.set_pod_labels(labels)
+            updated = dep.update()
+            self.assertEqual(labels, updated.get_pod_labels())
+
+    # --------------------------------------------------------------------------------- api - rollback
+
+    def test_rollback_no_args(self):
+        name = "nginx"
+        image1 = "nginx:1.7.9"
+        image2 = "nginx:1.9.1"
+        container = utils.create_container(name=name, image=image1)
+        dep_name = "yodep-{0}".format(str(uuid.uuid4()))
+        dep = utils.create_deployment(name=dep_name)
+        dep.add_container(container)
+        dep.set_replicas(3)
+        if utils.is_reachable(dep.config.api_host):
+            dep.create()
+            self.assertEqual(image1, dep.model.model['spec']['template']['spec']['containers'][0]['image'])
+            dep.set_container_image(name=name, image=image2)
+            dep.update()
+            self.assertIn('annotations', dep.model.deployment_metadata.model)
+            self.assertIn('deployment.kubernetes.io/revision', dep.model.deployment_metadata.model['annotations'])
+            self.assertNotEqual(image1, dep.model.model['spec']['template']['spec']['containers'][0]['image'])
+            self.assertEqual(image2, dep.model.model['spec']['template']['spec']['containers'][0]['image'])
+            dep.rollback()
 
     # --------------------------------------------------------------------------------- api - delete
 
     def test_delete_nonexistent(self):
-        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name = "yorc-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=name)
         if utils.is_reachable(dep.config.api_host):
-            try:
+            with self.assertRaises(NotFoundException):
                 dep.delete()
-                self.fail("Should not fail.")
-            except Exception as err:
-                self.assertIsInstance(err, NotFoundException)
 
     def test_delete(self):
         name = "yocontainer"
         container = utils.create_container(name=name)
-        name = "yodep-{0}".format(unicode(uuid.uuid4()))
+        name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=name)
         dep.add_container(container)
         if utils.is_reachable(dep.config.api_host):
@@ -197,31 +287,22 @@ class K8sDeploymentTests(unittest.TestCase):
     # -------------------------------------------------------------------------------------  get by name
 
     def test_get_by_name_none_args(self):
-        try:
+        with self.assertRaises(SyntaxError):
             K8sDeployment.get_by_name()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_get_by_name_invalid_config(self):
         name = "yoname"
         config = object()
-        try:
+        with self.assertRaises(SyntaxError):
             K8sDeployment.get_by_name(config=config, name=name)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_get_by_name_invalid_name(self):
         name = object()
-        try:
+        with self.assertRaises(SyntaxError):
             K8sDeployment.get_by_name(name=name)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_get_by_name_nonexistent(self):
-        name = "yodep-{0}".format(unicode(uuid.uuid4()))
+        name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=name)
         if utils.is_reachable(dep.config.api_host):
             result = K8sDeployment.get_by_name(config=dep.config, name=name)
@@ -231,7 +312,7 @@ class K8sDeploymentTests(unittest.TestCase):
     def test_get_by_name(self):
         cont_name = "yocontainer"
         container = utils.create_container(name=cont_name)
-        name = "yodep-{0}".format(unicode(uuid.uuid4()))
+        name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=name)
         dep.add_container(container)
         if utils.is_reachable(dep.config.api_host):
