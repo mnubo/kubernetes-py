@@ -74,13 +74,39 @@ class Deployment(PodBasedModel):
     def get_name(self):
         return self.deployment_metadata.get_name()
 
+    def get_labels(self):
+        return self.deployment_metadata.get_labels()
+
+    def get_namespace(self):
+        return self.deployment_metadata.get_namespace()
+
     # -------------------------------------------------------------------------------------  set
+
+    def set_labels(self, dico=None):
+        if dico is None:
+            raise SyntaxError('Deployment: dico: [ {0} ] cannot be None.'.format(dico))
+        if not isinstance(dico, dict):
+            raise SyntaxError('Deployment: dico: [ {0} ] must be a dict.'.format(dico))
+
+        self.deployment_metadata.set_labels(labels=dico)
+        return self
+
+    def set_namespace(self, name=None):
+        if name is None:
+            raise SyntaxError('Deployment: name: [ {0} ] cannot be None.'.format(name))
+        if not isinstance(name, str):
+            raise SyntaxError('Deployment: dico: [ {0} ] must be a string.'.format(name))
+
+        self.deployment_metadata.set_namespace(name=name)
+        self.pod_metadata.set_namespace(name=name)
+        return self
 
     def set_replicas(self, replicas=None):
         if replicas is None:
             raise SyntaxError('Deployment: replicas: [ {0} ] cannot be None.'.format(replicas))
         if not isinstance(replicas, int) or replicas < 0:
             raise SyntaxError('Deployment: replicas: [ {0} ] must be a positive integer.'.format(replicas))
+
         self.model['spec']['replicas'] = replicas
         return self
 
@@ -89,6 +115,7 @@ class Deployment(PodBasedModel):
             raise SyntaxError('Deployment: dico: [ {0} ] cannot be None.'.format(dico))
         if not isinstance(dico, dict):
             raise SyntaxError('Deployment: dico: [ {0} ] must be a dict.'.format(dico))
+
         self.model['spec']['selector'] = dico
         return self
 
