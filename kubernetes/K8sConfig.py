@@ -38,6 +38,8 @@ class K8sConfig(object):
         :param version: The version of the API to target. Defaults to 'v1'.
         """
 
+        super(K8sConfig, self).__init__()
+
         dotconf = None
         if kubeconfig is not None:
             if not isfile(kubeconfig):

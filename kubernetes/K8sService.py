@@ -14,7 +14,7 @@ from kubernetes.K8sExceptions import NotFoundException
 class K8sService(K8sObject):
 
     def __init__(self, config=None, name=None):
-        K8sObject.__init__(self, config=config, obj_type='Service', name=name)
+        super(K8sService, self).__init__(config=config, obj_type='Service', name=name)
         self.model = Service(name=name, namespace=self.config.namespace)
 
     # -------------------------------------------------------------------------------------  override

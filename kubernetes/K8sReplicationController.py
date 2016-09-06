@@ -22,7 +22,8 @@ SCALE_WAIT_TIMEOUT_SECONDS = 60
 class K8sReplicationController(K8sPodBasedObject):
 
     def __init__(self, config=None, name=None, image=None, replicas=0):
-        K8sPodBasedObject.__init__(self, config=config, obj_type='ReplicationController', name=name)
+        super(K8sReplicationController, self).__init__(config=config, obj_type='ReplicationController', name=name)
+
         self.model = ReplicationController(name=name, namespace=self.config.namespace)
         self.set_replicas(replicas)
 

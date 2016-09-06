@@ -13,7 +13,7 @@ from kubernetes.K8sContainer import K8sContainer
 class K8sPodBasedObject(K8sObject):
 
     def __init__(self, name=None, obj_type=None, config=None):
-        K8sObject.__init__(self, config=config, obj_type=obj_type, name=name)
+        super(K8sPodBasedObject, self).__init__(config=config, obj_type=obj_type, name=name)
 
     # ------------------------------------------------------------------------------------- add
 

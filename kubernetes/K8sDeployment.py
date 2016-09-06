@@ -20,7 +20,8 @@ SCALE_WAIT_TIMEOUT_SECONDS = 60
 class K8sDeployment(K8sPodBasedObject):
 
     def __init__(self, config=None, name=None, image=None, replicas=0):
-        K8sPodBasedObject.__init__(self, config=config, obj_type='Deployment', name=name)
+        super(K8sDeployment, self).__init__(config=config, obj_type='Deployment', name=name)
+
         self.config.version = API_VERSION
         self.model = Deployment(name=name, namespace=self.config.namespace)
         self.set_replicas(replicas)

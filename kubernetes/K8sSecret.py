@@ -13,7 +13,7 @@ from kubernetes.models.v1.Secret import Secret
 class K8sSecret(K8sObject):
 
     def __init__(self, config=None, name=None):
-        K8sObject.__init__(self, config=config, obj_type='Secret', name=name)
+        super(K8sSecret, self).__init__(config=config, obj_type='Secret', name=name)
         self.model = Secret(name=name, namespace=self.config.namespace)
 
     # -------------------------------------------------------------------------------------  override

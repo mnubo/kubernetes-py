@@ -27,6 +27,7 @@ VALID_K8s_OBJS = [
 class K8sObject(object):
 
     def __init__(self, config=None, name=None, obj_type=None):
+        super(K8sObject, self).__init__()
 
         if config is not None and not isinstance(config, K8sConfig):
             raise SyntaxError('K8sObject: config: [ {0} ] must be of type K8sConfig.'.format(config.__class__.__name__))

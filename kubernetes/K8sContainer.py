@@ -10,7 +10,14 @@ from kubernetes.models.v1.Container import Container
 
 
 class K8sContainer(object):
+    """
+    The K8sContainer object currently supports the default Kubernetes container runtime, ie. Docker.
+
+    """
+
     def __init__(self, model=None, name=None, image=None):
+        super(K8sContainer, self).__init__()
+
         if model is not None:
             self.model = Container(model=model)
         else:
