@@ -6,7 +6,6 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import uuid
 import time
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sContainer import K8sContainer
@@ -67,10 +66,9 @@ class K8sDeployment(K8sPodBasedObject):
 
     def _has_desired_replicas(self):
         if self._has_replica_data():
-            desired = self.model.model['spec']['replicas']
-            updated = self.model.model['status']['updatedReplicas']
-            available = self.model.model['status']['availableReplicas']
-            if desired == updated and desired == available:
+            r = self.get_replicas()
+            if r['desired'] == r['updated'] and \
+               r['desired'] == r['available']:
                 return True
         return False
 
@@ -113,6 +111,16 @@ class K8sDeployment(K8sPodBasedObject):
 
     def get_pod_labels(self):
         return self.model.get_pod_labels()
+
+    def get_replicas(self):
+        desired = self.model.model['spec']['replicas']
+        updated = self.model.model['status']['updatedReplicas']
+        available = self.model.model['status']['availableReplicas']
+        return {
+            'desired': desired,
+            'updated': updated,
+            'available': available
+        }
 
     # -------------------------------------------------------------------------------------  set
 
@@ -175,8 +183,6 @@ class K8sDeployment(K8sPodBasedObject):
         :return:
         """
 
-        # if self.name is None:
-        #     raise SyntaxError('K8sDeployment: name: [ {0} ] must be set to ROLLBACK the Deployment.'.format(self.name))
         # if revision is not None and not isinstance(revision, str):
         #     raise SyntaxError('K8sDeployment: revision: [ {0} ] must be a string.'.format(revision.__class__.__name__))
         #
@@ -203,3 +209,17 @@ class K8sDeployment(K8sPodBasedObject):
         # return self
 
         raise NotImplementedError()
+
+    # -------------------------------------------------------------------------------------  scale
+
+    def scale(self, replicas=None):
+
+        if replicas is None:
+            raise SyntaxError('K8sDeployment: replicas: [ {0} ] cannot be None.'.format(replicas))
+        if not isinstance(replicas, int) or not replicas > 0:
+            raise SyntaxError('K8sDeployment: replicas: [ {0} ] must be a positive integer.'.format(replicas))
+
+        self.set_replicas(replicas)
+        self.update()
+
+        return self

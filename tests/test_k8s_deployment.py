@@ -322,3 +322,22 @@ class K8sDeploymentTests(unittest.TestCase):
             self.assertEqual(1, len(result))
             self.assertIsInstance(result[0], K8sDeployment)
             self.assertEqual(dep, result[0])
+
+    # -------------------------------------------------------------------------------------  get scale
+
+    def test_scale(self):
+        cont_name = "yocontainer"
+        container = utils.create_container(name=cont_name)
+        name = "yodep-{0}".format(str(uuid.uuid4()))
+        dep = utils.create_deployment(name=name)
+        dep.add_container(container)
+        dep.set_replicas(3)
+        if utils.is_reachable(dep.config.api_host):
+            dep.create()
+            replicas = dep.get_replicas()
+            for k in replicas:
+                self.assertEqual(3, replicas[k])
+            dep.scale(5)
+            replicas = dep.get_replicas()
+            for k in replicas:
+                self.assertEqual(5, replicas[k])
