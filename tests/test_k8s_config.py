@@ -53,7 +53,7 @@ class K8sConfigTest(unittest.TestCase):
         if config.ca_cert_data is not None:
             self.assertIsInstance(config.ca_cert_data, str)
         if config.cert is not None:
-            self.assertIsInstance(config.cert, str)
+            self.assertIsInstance(config.cert, tuple)
         if config.client_certificate is not None:
             self.assertIsInstance(config.client_certificate, str)
         if config.client_key is not None:
