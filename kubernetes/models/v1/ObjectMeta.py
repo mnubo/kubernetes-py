@@ -273,15 +273,15 @@ class ObjectMeta(BaseModel):
         self.model['generation'] = gen
         return self
 
-    def set_labels(self, dico=None):
-        if dico is None:
-            raise SyntaxError('ObjectMeta: dico: [ {0} ] cannot be None.'.format(dico))
-        if not isinstance(dico, dict):
-            raise SyntaxError('ObjectMeta: dico: [ {0} ] must be a dict.'.format(dico.__class__.__name__))
-        for k, v in dico.iteritems():
+    def set_labels(self, labels=None):
+        if labels is None:
+            raise SyntaxError('ObjectMeta: dico: [ {0} ] cannot be None.'.format(labels))
+        if not isinstance(labels, dict):
+            raise SyntaxError('ObjectMeta: dico: [ {0} ] must be a dict.'.format(labels.__class__.__name__))
+        for k, v in labels.iteritems():
             if not isinstance(k, str) or not isinstance(v, str):
-                raise SyntaxError('ObjectMeta: dico: [ {0} ] must be a mapping of str -> str.'.format(dico))
-        self.model['labels'] = dico
+                raise SyntaxError('ObjectMeta: dico: [ {0} ] must be a mapping of str -> str.'.format(labels))
+        self.model['labels'] = labels
         return self
 
     def set_name(self, name=None, set_label=True):

@@ -101,7 +101,7 @@ class K8sPod(K8sPodBasedObject):
         return self
 
     def set_labels(self, dico=None):
-        self.model.set_pod_labels(dico=dico)
+        self.model.set_pod_labels(labels=dico)
         return self
 
     def set_namespace(self, name=None):

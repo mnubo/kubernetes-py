@@ -12,10 +12,11 @@ from kubernetes.models.v1.ObjectMeta import ObjectMeta
 
 
 class ReplicationController(PodBasedModel):
+
     def __init__(self, name=None, image=None, namespace='default', replicas=1, model=None):
         PodBasedModel.__init__(self)
+
         if model is not None:
-            assert isinstance(model, dict)
             self.model = model
             if 'status' in self.model:
                 self.model.pop('status', None)
@@ -24,6 +25,7 @@ class ReplicationController(PodBasedModel):
             if 'template' in self.model['spec']:
                 self.pod_spec = PodSpec(model=self.model['spec']['template']['spec'])
                 self.pod_metadata = ObjectMeta(model=self.model['spec']['template']['metadata'])
+
         else:
             if name is None:
                 raise SyntaxError('ReplicationController: name: [ {0} ] cannot be None.'.format(name))
@@ -32,20 +34,22 @@ class ReplicationController(PodBasedModel):
 
             self.model = dict(kind='ReplicationController', apiVersion='v1')
             self.rc_metadata = ObjectMeta(name=name, namespace=namespace)
+            self.pod_metadata = ObjectMeta(name=name, namespace=namespace)
 
             self.model['spec'] = {
                 "replicas": replicas,
                 "selector": dict(name=name)
             }
-
             self.model['spec']['template'] = dict()
+
             if image is not None:
                 self.pod_spec = PodSpec(name=name, image=image)
             else:
                 self.pod_spec = PodSpec(name=name)
+
             self.pod_spec.set_restart_policy('Always')
-            self.pod_metadata = ObjectMeta(name=name, namespace=namespace)
-            self._update_model()
+
+        self._update_model()
 
     def _update_model(self):
         self.model['metadata'] = self.rc_metadata.get()
@@ -144,7 +148,7 @@ class ReplicationController(PodBasedModel):
             raise SyntaxError('ReplicationController: dico: [ {0} ] cannot be None.'.format(dico))
         if not isinstance(dico, dict):
             raise SyntaxError('ReplicationController: dico: [ {0} ] must be a dict.'.format(dico))
-        self.rc_metadata.set_labels(dico=dico)
+        self.rc_metadata.set_labels(labels=dico)
         return self
 
     def set_name(self, name=None):

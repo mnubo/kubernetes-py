@@ -15,7 +15,9 @@ from kubernetes.K8sExceptions import *
 import json
 
 VALID_K8s_OBJS = [
+    'Deployment',
     'Pod',
+    'ReplicaSet',
     'ReplicationController',
     'Secret',
     'Service'
@@ -49,7 +51,7 @@ class K8sObject(object):
         self.model = BaseModel()
 
         try:
-            urls = BaseUrls(version=self.config.version, namespace=self.config.namespace)
+            urls = BaseUrls(api_version=self.config.version, namespace=self.config.namespace)
             self.base_url = urls.get_base_url(object_type=obj_type)
         except:
             raise Exception('Could not set BaseUrl for type: [ {0} ]'.format(obj_type))
@@ -85,13 +87,16 @@ class K8sObject(object):
 
     # ------------------------------------------------------------------------------------- remote API calls
 
-    def request(self, method='GET', host=None, url=None, auth=None, cert=None, data=None, token=None, ca_cert=None):
+    def request(self, method='GET', host=None, url=None, auth=None, cert=None,
+                data=None, token=None, ca_cert=None, ca_cert_data=None):
+
         host = self.config.api_host if host is None else host
         url = self.base_url if url is None else url
         auth = self.config.auth if auth is None else auth
         cert = self.config.cert if cert is None else cert
         token = self.config.token if token is None else token
         ca_cert = self.config.ca_cert if ca_cert is None else ca_cert
+        ca_cert_data = self.config.ca_cert_data if ca_cert_data is None else ca_cert_data
 
         r = HttpRequest(
             method=method,
@@ -100,6 +105,7 @@ class K8sObject(object):
             auth=auth,
             cert=cert,
             ca_cert=ca_cert,
+            ca_cert_data=ca_cert_data,
             data=data,
             token=token
         )

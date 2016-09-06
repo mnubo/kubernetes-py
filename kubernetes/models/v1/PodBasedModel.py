@@ -13,6 +13,7 @@ from kubernetes.models.v1.Container import Container
 
 
 class PodBasedModel(BaseModel):
+    
     def __init__(self):
         BaseModel.__init__(self)
         self.pod_spec = PodSpec()
@@ -142,13 +143,13 @@ class PodBasedModel(BaseModel):
         self._update_model()
         return self
 
-    def set_pod_labels(self, dico):
-        self.pod_metadata.set_labels(dico=dico)
+    def set_pod_labels(self, labels):
+        self.pod_metadata.set_labels(labels=labels)
         self._update_model()
         return self
 
     def set_pod_image(self, name, image):
-        self.pod_spec.set_image(name=name, image=image)
+        self.pod_spec.set_container_image(name=name, image=image)
         self._update_model()
 
     def set_pod_name(self, name=None):

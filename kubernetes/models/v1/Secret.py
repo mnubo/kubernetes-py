@@ -118,7 +118,7 @@ class Secret(BaseModel):
 
     def set_labels(self, new_dict):
         assert isinstance(new_dict, dict)
-        self.secret_metadata.set_labels(dico=new_dict)
+        self.secret_metadata.set_labels(labels=new_dict)
         return self
 
     def set_service_account_token(self, account_name=None, account_uid=None,

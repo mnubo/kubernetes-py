@@ -52,25 +52,29 @@ class K8sConfig(object):
             # we're pulling configuration from a kubeconfig file
 
             self.api_host = None
-            self.ca_cert = None
             self.auth = None
-            self.token = None
+            self.ca_cert = None
+            self.ca_cert_data = None
+            self.cert = None
             self.client_certificate = None
             self.client_key = None
-            self.cert = None
-
             self.clusters = dotconf['clusters']
             self.contexts = dotconf['contexts']
             self.current_context = dotconf['current-context']
             self.preferences = dotconf['preferences']
             self.pull_secret = pull_secret
+            self.token = None
             self.users = dotconf['users']
             self.version = dotconf['apiVersion']
 
             for cluster in self.clusters:
                 if cluster['name'] == self.current_context:
-                    self.api_host = cluster['cluster']['server']
-                    self.ca_cert = cluster['cluster']['certificate-authority']
+                    if 'server' in cluster['cluster']:
+                        self.api_host = cluster['cluster']['server']
+                    if 'certificate-authority' in cluster['cluster']:
+                        self.ca_cert = cluster['cluster']['certificate-authority']
+                    if 'certificate-authority-data' in cluster['cluster']:
+                        self.ca_cert_data = cluster['cluster']['certificate-authority-data']
 
             for user in self.users:
                 if user['name'] == self.current_context:

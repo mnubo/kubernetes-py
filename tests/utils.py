@@ -8,25 +8,38 @@
 
 import os
 import socket
-from kubernetes import (
-    K8sConfig,
-    K8sObject,
-    K8sContainer,
-    K8sPod,
-    K8sReplicationController,
-    K8sSecret,
-    K8sService
-)
+from kubernetes.K8sConfig import K8sConfig
+from kubernetes.K8sContainer import K8sContainer
+from kubernetes.K8sDeployment import K8sDeployment
+from kubernetes.K8sObject import K8sObject
+from kubernetes.K8sPod import K8sPod
+from kubernetes.K8sReplicaSet import K8sReplicaSet
+from kubernetes.K8sReplicationController import K8sReplicationController
+from kubernetes.K8sSecret import K8sSecret
+from kubernetes.K8sService import K8sService
 from kubernetes.K8sExceptions import NotFoundException
 
 kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
 
 
 def is_reachable(api_host):
-    scheme, host, port = api_host.replace("//", "").split(':')
+    port = None
+    s = None
     try:
-        s = socket.create_connection((host, port), timeout=0.5)
-        s.close()
+        scheme, host, port = api_host.replace("//", "").split(':')
+    except ValueError:  # no port specified
+        scheme, host = api_host.replace("//", "").split(":")
+    try:
+        if port is not None:
+            s = socket.create_connection((host, port), timeout=0.5)
+        else:
+            if scheme == 'http':
+                port = 80
+            elif scheme == 'https':
+                port = 443
+            s = socket.create_connection((host, port), timeout=0.5)
+        if s is not None:
+            s.close()
         return True
     except Exception as err:
         return False
@@ -83,6 +96,16 @@ def create_rc(config=None, name=None, replicas=0):
     return obj
 
 
+def create_rs(config=None, name=None):
+    if config is None:
+        config = create_config()
+    obj = K8sReplicaSet(
+        config=config,
+        name=name,
+    )
+    return obj
+
+
 def create_secret(config=None, name=None):
     if config is None:
         config = create_config()
@@ -103,10 +126,22 @@ def create_service(config=None, name=None):
     return obj
 
 
+def create_deployment(config=None, name=None):
+    if config is None:
+        config = create_config()
+    obj = K8sDeployment(
+        config=config,
+        name=name
+    )
+    return obj
+
+
 def cleanup_objects():
     config = K8sConfig(kubeconfig=kubeconfig_fallback)
     if is_reachable(config.api_host):
-        cleanup_rcs()
+        cleanup_rc()
+        cleanup_deployments()
+        cleanup_rs()
         cleanup_pods()
         cleanup_secrets()
         cleanup_services()
@@ -126,7 +161,7 @@ def cleanup_pods():
             pods = ref.list()
 
 
-def cleanup_rcs():
+def cleanup_rc():
     ref = create_rc(name="throwaway")
     if is_reachable(ref.config.api_host):
         rcs = ref.list()
@@ -168,6 +203,34 @@ def cleanup_services():
                 except NotFoundException:
                     continue
             services = ref.list()
+
+
+def cleanup_rs():
+    ref = create_rs(name="throwaway")
+    if is_reachable(ref.config.api_host):
+        rs_list = ref.list()
+        while len(rs_list) > 0:
+            for rs in rs_list:
+                try:
+                    obj = K8sReplicaSet(config=ref.config, name=rs['metadata']['name']).get()
+                    obj.delete()
+                except NotFoundException:
+                    continue
+            rs_list = ref.list()
+
+
+def cleanup_deployments():
+    ref = create_deployment(name="throwaway")
+    if is_reachable(ref.config.api_host):
+        deps = ref.list()
+        while len(deps) > 0:
+            for d in deps:
+                try:
+                    obj = K8sDeployment(config=ref.config, name=d['metadata']['name']).get()
+                    obj.delete()
+                except NotFoundException:
+                    continue
+            deps = ref.list()
 
 
 def _is_api_server(service=None):

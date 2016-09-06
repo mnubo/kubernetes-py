@@ -8,6 +8,7 @@ A python module to use Kubernetes. Currently based on the version 1 of the API.
 Currently supported Kubernetes objects:
 
 * ~/.kube/config
+* Deployment
 * Pod
 * ReplicationController
 * Secret
@@ -62,7 +63,7 @@ Defining a container:
 
     from kubernetes import K8sContainer
     
-    container = K8sContainer(name='redis', image='redis')
+    container = K8sContainer(name='redis', image='redis:3.0.7')
     container.add_port(
         container_port=6379, 
         host_port=6379, 
@@ -70,9 +71,71 @@ Defining a container:
     )
 
 
+### Deployments
+
+Creating a Deployment:
+
+    from kubernetes import K8sDeployment
+    
+    deployment = K8sDeployment(
+        config=cfg_cert, 
+        name='my_deployment',
+        replicas=3
+    )
+    deployment.add_container(container)
+    deployment.create()
+
+Fetching a Deployment:
+
+    from kubernetes import K8sDeployment
+    
+    deployment = K8sDeployment(config=cfg_cert, name='my_deployment')
+    deployment.get()
+
+
+Fetching all available Deployments:
+
+    from kubernetes import K8sDeployment
+    
+    deployment = K8sDeployment(config=cfg_cert, name='my_deployment')
+    deployment.list()
+
+
+Updating a Deployment:
+
+    from kubernetes import K8sDeployment, K8sContainer
+    
+    deployment = K8sDeployment(config=cfg_cert, name='my_deployment')
+    container = K8sContainer(name='nginx', image='nginx:1.7.9')
+    deployment.add_container(container)
+    deployment.create()
+    deployment.set_container_image(name='nginx', image='nginx:1.9.1')
+    deployment.update()
+
+
+Scaling a Deployment:
+
+    from kubernetes import K8sDeployment, K8sContainer
+    
+    deployment = K8sDeployment(config=cfg_cert, name='my_deployment')
+    container = K8sContainer(name='nginx', image='nginx:1.7.9')
+    deployment.add_container(container)
+    deployment.set_replicas(3)
+    deployment.create()
+    deployment.scale(10)
+
+
+Deleting a Deployment:
+
+    from kubernetes import K8sDeployment
+    
+    deployment = K8sDeployment(confif=cfg_cert, name='my_deployment')
+    deployment.delete()    
+
+
 ### Pods
 
-Creating a pod:
+Creating a Pod:
 
     from kubernetes import K8sPod
     
@@ -80,14 +143,21 @@ Creating a pod:
     pod.add_container(container)
     pod.create()
     
-Fetching a pod:
+Fetching a Pod:
 
     from kubernetes import K8sPod
     
     pod = K8sPod(config=cfg_token, name='redis')
     pod.get()
+    
+Fetching all available Pods:
 
-Deleting a pod:
+    from kubernetes import K8sPod
+    
+    pod = K8sPod(config=cfg_token, name='redis')
+    pod.list()
+
+Deleting a Pod:
 
     from kubernetes import K8sPod
     
@@ -96,7 +166,7 @@ Deleting a pod:
 
 ### ReplicationController
 
-Creating a replication controller:
+Creating a ReplicationController:
 
     from kubernetes import K8sReplicationController
     
@@ -108,14 +178,21 @@ Creating a replication controller:
     )
     rc.create()
 
-Fetching a replication controller:
+Fetching a ReplicationController:
 
     from kubernetes import K8sReplicationController
     
     rc = K8sReplicationController(config=cfg_cert, name='redis')
     rc.get()
+    
+Fetching all available ReplicationControllers:
 
-Deleting a replication controller:
+    from kubernetes import K8sReplicationController
+    
+    rc = K8sReplicationController(config=cfg_cert, name='redis')
+    rc.list()    
+
+Deleting a ReplicationController:
 
     from kubernetes import K8sReplicationController
     
@@ -186,7 +263,8 @@ the [minikube](https://github.com/kubernetes/minikube) tool. You will find a `./
 source tree which fetches the application binary.
 
 The unit tests which require making remote API calls check if there is a reachable API server; if no such endpoint
-is found, the test is skipped. It is recommended to begin testing things out against `minikube`.
+is found, the test is skipped. It is recommended to begin testing things out against `minikube`. However, be aware
+that minikube does not support the entire feature set of a full Kubernetes install (eg. Deployments).
 
 ```
 $ nosetests --with-coverage --cover-package=kubernetes

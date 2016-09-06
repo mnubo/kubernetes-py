@@ -145,7 +145,7 @@ class K8sReplicationController(K8sPodBasedObject):
         return self
 
     def set_pod_labels(self, dico=None):
-        self.model.set_pod_labels(dico=dico)
+        self.model.set_pod_labels(labels=dico)
         return self
 
     def set_replicas(self, replicas=None):
@@ -326,7 +326,7 @@ class K8sReplicationController(K8sPodBasedObject):
                 if len(rc_next.model.pod_spec.containers) == 1 and not container_name:
                     container_name = rc_next.model.pod_spec.containers[0].model['name']
 
-                rc_next.set_image(name=container_name, image=image)
+                rc_next.set_container_image(name=container_name, image=image)
 
             my_version = str(uuid.uuid4())
 
