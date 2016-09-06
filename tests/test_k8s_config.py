@@ -44,15 +44,34 @@ class K8sConfigTest(unittest.TestCase):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         self.assertIsNotNone(config)
         self.assertIsInstance(config, K8sConfig)
-        self.assertIsInstance(config.api_host, str)
-        self.assertIsInstance(config.client_certificate, str)
-        self.assertIsInstance(config.client_key, str)
-        self.assertIsInstance(config.clusters, list)
-        self.assertIsInstance(config.contexts, list)
-        self.assertIsInstance(config.current_context, str)
-        self.assertIsInstance(config.preferences, dict)
-        self.assertIsInstance(config.users, list)
-        self.assertIsInstance(config.version, str)
+        if config.api_host is not None:
+            self.assertIsInstance(config.api_host, str)
+        if config.auth is not None:
+            self.assertIsInstance(config.auth, tuple)
+        if config.ca_cert is not None:
+            self.assertIsInstance(config.ca_cert, str)
+        if config.ca_cert_data is not None:
+            self.assertIsInstance(config.ca_cert_data, str)
+        if config.cert is not None:
+            self.assertIsInstance(config.cert, str)
+        if config.client_certificate is not None:
+            self.assertIsInstance(config.client_certificate, str)
+        if config.client_key is not None:
+            self.assertIsInstance(config.client_key, str)
+        if config.clusters is not None:
+            self.assertIsInstance(config.clusters, list)
+        if config.contexts is not None:
+            self.assertIsInstance(config.contexts, list)
+        if config.current_context is not None:
+            self.assertIsInstance(config.current_context, str)
+        if config.preferences is not None:
+            self.assertIsInstance(config.preferences, dict)
+        if config.pull_secret is not None:
+            self.assertIsInstance(config.pull_secret, str)
+        if config.users is not None:
+            self.assertIsInstance(config.users, list)
+        if config.version is not None:
+            self.assertIsInstance(config.version, str)
 
     # ------------------------------------------------------------------------------------- init with custom args
 

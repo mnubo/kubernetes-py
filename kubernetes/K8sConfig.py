@@ -52,19 +52,18 @@ class K8sConfig(object):
             # we're pulling configuration from a kubeconfig file
 
             self.api_host = None
+            self.auth = None
             self.ca_cert = None
             self.ca_cert_data = None
-            self.auth = None
-            self.token = None
+            self.cert = None
             self.client_certificate = None
             self.client_key = None
-            self.cert = None
-
             self.clusters = dotconf['clusters']
             self.contexts = dotconf['contexts']
             self.current_context = dotconf['current-context']
             self.preferences = dotconf['preferences']
             self.pull_secret = pull_secret
+            self.token = None
             self.users = dotconf['users']
             self.version = dotconf['apiVersion']
 
