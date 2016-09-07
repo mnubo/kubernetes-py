@@ -11,15 +11,20 @@ import socket
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sDeployment import K8sDeployment
+from kubernetes.K8sExceptions import NotFoundException
 from kubernetes.K8sObject import K8sObject
 from kubernetes.K8sPod import K8sPod
 from kubernetes.K8sReplicaSet import K8sReplicaSet
 from kubernetes.K8sReplicationController import K8sReplicationController
 from kubernetes.K8sSecret import K8sSecret
 from kubernetes.K8sService import K8sService
-from kubernetes.K8sExceptions import NotFoundException
+from kubernetes.K8sVolume import K8sVolume
+
 
 kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
+
+
+# --------------------------------------------------------------------------------- reachability
 
 
 def is_reachable(api_host):
@@ -45,6 +50,30 @@ def is_reachable(api_host):
         return False
 
 
+# --------------------------------------------------------------------------------- detecting api server
+
+
+def _is_api_server(service=None):
+    if not isinstance(service, dict):
+        return False
+    if 'metadata' not in service:
+        return False
+    if 'labels' not in service['metadata']:
+        return False
+    if 'component' not in service['metadata']['labels']:
+        return False
+    if 'provider' not in service['metadata']['labels']:
+        return False
+    if 'apiserver' != service['metadata']['labels']['component']:
+        return False
+    if 'kubernetes' != service['metadata']['labels']['provider']:
+        return False
+    return True
+
+
+# --------------------------------------------------------------------------------- create
+
+
 def create_container(model=None, name=None, image="redis"):
     if model is None:
         obj = K8sContainer(
@@ -62,6 +91,16 @@ def create_config():
     except Exception:
         config = K8sConfig()
     return config
+
+
+def create_deployment(config=None, name=None):
+    if config is None:
+        config = create_config()
+    obj = K8sDeployment(
+        config=config,
+        name=name
+    )
+    return obj
 
 
 def create_object(config=None, name=None, obj_type=None):
@@ -126,14 +165,17 @@ def create_service(config=None, name=None):
     return obj
 
 
-def create_deployment(config=None, name=None):
-    if config is None:
-        config = create_config()
-    obj = K8sDeployment(
-        config=config,
-        name=name
+def create_volume(name=None, type=None, mount_path=None, read_only=False):
+    obj = K8sVolume(
+        name=name,
+        type=type,
+        mount_path=mount_path,
+        read_only=read_only
     )
     return obj
+
+
+# --------------------------------------------------------------------------------- delete
 
 
 def cleanup_objects():
@@ -232,20 +274,3 @@ def cleanup_deployments():
                     continue
             deps = ref.list()
 
-
-def _is_api_server(service=None):
-    if not isinstance(service, dict):
-        return False
-    if 'metadata' not in service:
-        return False
-    if 'labels' not in service['metadata']:
-        return False
-    if 'component' not in service['metadata']['labels']:
-        return False
-    if 'provider' not in service['metadata']['labels']:
-        return False
-    if 'apiserver' != service['metadata']['labels']['component']:
-        return False
-    if 'kubernetes' != service['metadata']['labels']['provider']:
-        return False
-    return True
