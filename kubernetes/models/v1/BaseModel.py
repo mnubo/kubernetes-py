@@ -8,6 +8,7 @@
 
 valid_versions = ['v1']
 
+
 class BaseModel(object):
 
     def __init__(self):
