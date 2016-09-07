@@ -192,7 +192,7 @@ class K8sSecretTest(unittest.TestCase):
                 self.assertIsInstance(err, NotFoundException)
 
     def test_get(self):
-        name = "yosecret-{0}".format(unicode(uuid.uuid4()))
+        name = "yosecret-{0}".format(str(uuid.uuid4()))
         secret = utils.create_secret(name=name)
         if utils.is_reachable(secret.config.api_host):
             from_create = secret.create()
@@ -415,7 +415,7 @@ class K8sSecretTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- api - create
 
     def test_create(self):
-        name = "yosecret-{0}".format(unicode(uuid.uuid4()))
+        name = "yosecret-{0}".format(str(uuid.uuid4()))
         secret = utils.create_secret(name=name)
         if utils.is_reachable(secret.config.api_host):
             secret.create()
@@ -423,7 +423,7 @@ class K8sSecretTest(unittest.TestCase):
             self.assertEqual(2, len(_list))  # service-account-token + 1
 
     def test_create_already_exists(self):
-        name = "yosecret-{0}".format(unicode(uuid.uuid4()))
+        name = "yosecret-{0}".format(str(uuid.uuid4()))
         secret = utils.create_secret(name=name)
         if utils.is_reachable(secret.config.api_host):
             secret.create()
@@ -436,7 +436,7 @@ class K8sSecretTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- api - list
 
     def test_list_without_create(self):
-        name = "yosecret-{0}".format(unicode(uuid.uuid4()))
+        name = "yosecret-{0}".format(str(uuid.uuid4()))
         secret = utils.create_secret(name=name)
         if utils.is_reachable(secret.config.api_host):
             _list = secret.list()
@@ -447,7 +447,7 @@ class K8sSecretTest(unittest.TestCase):
         config = utils.create_config()
         if utils.is_reachable(config.api_host):
             for i in range(0, count):
-                name = "yosecret-{0}".format(unicode(uuid.uuid4()))
+                name = "yosecret-{0}".format(str(uuid.uuid4()))
                 secret = utils.create_secret(name=name)
                 secret.create()
             secret = utils.create_secret(name="yosecret")
@@ -457,7 +457,7 @@ class K8sSecretTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- api - update
 
     def test_update_nonexistent(self):
-        name = "yosecret-{0}".format(unicode(uuid.uuid4()))
+        name = "yosecret-{0}".format(str(uuid.uuid4()))
         secret = utils.create_secret(name=name)
         if utils.is_reachable(secret.config.api_host):
             try:
@@ -467,7 +467,7 @@ class K8sSecretTest(unittest.TestCase):
                 self.assertIsInstance(err, NotFoundException)
 
     def test_update_data(self):
-        name = "yosecret-{0}".format(unicode(uuid.uuid4()))
+        name = "yosecret-{0}".format(str(uuid.uuid4()))
         secret = utils.create_secret(name=name)
         k = "yokey"
         v = "yovalue"
@@ -481,7 +481,7 @@ class K8sSecretTest(unittest.TestCase):
             self.assertEqual(data, v)
 
     def test_update_dockercfg_secret_fails(self):
-        name = "yosecret-{0}".format(unicode(uuid.uuid4()))
+        name = "yosecret-{0}".format(str(uuid.uuid4()))
         secret = utils.create_secret(name=name)
         v = "yovalue"
         if utils.is_reachable(secret.config.api_host):
@@ -494,7 +494,7 @@ class K8sSecretTest(unittest.TestCase):
                 self.assertIsInstance(err, UnprocessableEntityException)
 
     def test_update_dockercfg_json_secret_fails(self):
-        name = "yosecret-{0}".format(unicode(uuid.uuid4()))
+        name = "yosecret-{0}".format(str(uuid.uuid4()))
         secret = utils.create_secret(name=name)
         v = "yovalue"
         if utils.is_reachable(secret.config.api_host):
@@ -509,7 +509,7 @@ class K8sSecretTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- api - delete
 
     def test_delete_nonexistent(self):
-        name = "yosecret-{0}".format(unicode(uuid.uuid4()))
+        name = "yosecret-{0}".format(str(uuid.uuid4()))
         secret = utils.create_secret(name=name)
         if utils.is_reachable(secret.config.api_host):
             try:
@@ -519,7 +519,7 @@ class K8sSecretTest(unittest.TestCase):
                 self.assertIsInstance(err, NotFoundException)
 
     def test_delete(self):
-        name = "yosecret-{0}".format(unicode(uuid.uuid4()))
+        name = "yosecret-{0}".format(str(uuid.uuid4()))
         secret = utils.create_secret(name=name)
         if utils.is_reachable(secret.config.api_host):
             _list = secret.list()
