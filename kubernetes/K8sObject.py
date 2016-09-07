@@ -20,7 +20,8 @@ VALID_K8s_OBJS = [
     'ReplicaSet',
     'ReplicationController',
     'Secret',
-    'Service'
+    'Service',
+    'Volume'
 ]
 
 

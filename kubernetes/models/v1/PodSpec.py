@@ -6,6 +6,8 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+from kubernetes.K8sVolume import K8sVolume
+from kubernetes.K8sExceptions import AlreadyExistsException, UnprocessableEntityException
 from kubernetes.models.v1.BaseModel import BaseModel
 from kubernetes.models.v1.Container import Container
 
@@ -65,6 +67,32 @@ class PodSpec(BaseModel):
             self.containers.append(container)
             self._update_model()
         return self
+
+    def add_volume(self, volume=None):
+        if volume is None:
+            raise SyntaxError('PodSpec: volume: [ {0} ] cannot be None.'.format(volume))
+        if not isinstance(volume, K8sVolume):
+            raise SyntaxError('PodSpec: volume: [ {0} ] must be a K8sVolume'.format(volume))
+
+        volnames = [x['name'] for x in self.model['volumes']]
+        if volume.name in volnames:
+            raise AlreadyExistsException('PodSpec: volume: [ {0} ] already exists.'.format(volume.name))
+
+        if volume.type == "hostPath" and volume.host_path is None:
+            msg = 'PodSpec: volume: [ {0} ] cannot be added; please set a hostPath.'.format(volume.name)
+            raise UnprocessableEntityException(msg)
+
+        vol = {
+            'name': volume.name,
+            '{0}'.format(volume.type): {}
+        }
+
+        if volume.type == 'emptyDir' and volume.medium != '':
+            vol[volume.type]['medium'] = volume.medium
+        if volume.type == 'hostPath':
+            vol[volume.type]['path'] = volume.host_path
+
+        self.model['volumes'].append(vol)
 
     def add_host_volume(self, name=None, path=None):
         if name is None or path is None:

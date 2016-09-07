@@ -6,6 +6,7 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+from kubernetes.K8sVolume import K8sVolume
 from kubernetes.models.v1.BaseModel import BaseModel
 from kubernetes.models.v1.Probe import Probe
 
@@ -55,11 +56,11 @@ class Container(BaseModel):
 
     def add_port(self, container_port, host_port=None, protocol=None, name=None, host_ip=None):
         portdef = dict()
-        if container_port > 0 and container_port < 65536:
+        if 0 < container_port < 65536:
             portdef['containerPort'] = int(container_port)
             if name is not None:
                 portdef['name'] = name
-            if host_port is not None and (host_port > 0 and host_port < 65536):
+            if host_port is not None and (0 < host_port < 65536):
                 portdef['hostPort'] = int(host_port)
             if host_ip is not None:
                 portdef['hostIP'] = host_ip
@@ -82,16 +83,23 @@ class Container(BaseModel):
             self.model['env'].append({"name": name, "value": value})
         return self
 
-    def add_volume_mount(self, name=None, read_only=False, mount_path=None):
-        if name is None or mount_path is None:
-            raise SyntaxError('name and mount_path should be strings.')
-        else:
-            if 'volumeMounts' not in self.model.keys():
-                self.model['volumeMounts'] = []
-            my_vm = dict(name=name, mountPath=mount_path)
-            if read_only:
-                my_vm['readOnly'] = read_only
-            self.model['volumeMounts'].append(my_vm)
+    def add_volume_mount(self, volume=None):
+        if not isinstance(volume, K8sVolume):
+            raise SyntaxError('Container: volume: [ {0} ] must be a K8sVolume.'.format(volume.__class__.__name__))
+
+        if 'volumeMounts' not in self.model:
+            self.model['volumeMounts'] = []
+
+        vol = {
+            'mountPath': volume.mount_path,
+            'name': volume.name,
+            'readOnly': 'false'
+        }
+
+        if volume.read_only is True:
+            vol['readOnly'] = 'true'
+
+        self.model['volumeMounts'].append(vol)
         return self
 
     def get_liveness_probe(self):

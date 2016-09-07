@@ -14,10 +14,11 @@ class K8sContainer(object):
         if model is not None:
             self.model = Container(model=model)
         else:
-            if name is None or image is None:
-                raise SyntaxError('K8sContainer: name: [ {0} ] or image: [ {1} ] cannot be None.'.format(name, image))
-            else:
-                self.model = Container(name=name, image=image)
+            if name is None:
+                raise SyntaxError('K8sContainer: name: [ {0} ] cannot be None.'.format(name))
+            if image is None:
+                raise SyntaxError('K8sContainer: image: [ {0} ] cannot be None.'.format(image))
+            self.model = Container(name=name, image=image)
 
     # -------------------------------------------------------------------------------------  add
 
@@ -47,11 +48,8 @@ class K8sContainer(object):
         self.model.add_env(name=k, value=v)
         return self
 
-    def add_volume_mount(self, name, mount_path, read_only=False):
-        assert isinstance(name, str)
-        assert isinstance(mount_path, str)
-        assert isinstance(read_only, bool)
-        self.model.add_volume_mount(name=name, mount_path=mount_path, read_only=read_only)
+    def add_volume_mount(self, volume=None):
+        self.model.add_volume_mount(volume)
         return self
 
     # -------------------------------------------------------------------------------------  get

@@ -8,7 +8,8 @@
 
 import unittest
 import utils
-from kubernetes import K8sContainer
+from kubernetes.K8sContainer import K8sContainer
+from kubernetes.K8sVolume import K8sVolume
 from kubernetes.models.v1 import Container
 
 
@@ -103,3 +104,58 @@ class K8sContainerTest(unittest.TestCase):
         self.assertIn('memory', model['resources']['requests'])
         self.assertIsInstance(model['resources']['requests']['memory'], str)
         self.assertIn('terminationMessagePath', model)
+
+    # ------------------------------------------------------------------------------------- add volume mount
+
+    def test_add_volume_mount_no_args(self):
+        name = "yomama"
+        image = "redis"
+        c = K8sContainer(name=name, image=image)
+        with self.assertRaises(SyntaxError):
+            c.add_volume_mount()
+
+    def test_add_volume_mount_invalid_volume(self):
+        name = "yomama"
+        image = "redis"
+        volume = object()
+        c = K8sContainer(name=name, image=image)
+        with self.assertRaises(SyntaxError):
+            c.add_volume_mount(volume)
+
+    def test_add_volume_emptydir(self):
+        name = "redis"
+        image = "redis:3.0.7"
+        c = K8sContainer(name=name, image=image)
+        volname = "vol1"
+        voltype = "emptyDir"
+        volmount = "/path/on/container"
+        vol = K8sVolume(name=volname, type=voltype, mount_path=volmount)
+        c.add_volume_mount(vol)
+        self.assertIn('volumeMounts', c.model.model)
+        self.assertIsInstance(c.model.model['volumeMounts'], list)
+        self.assertEqual(1, len(c.model.model['volumeMounts']))
+        self.assertIsInstance(c.model.model['volumeMounts'][0], dict)
+        for i in ['mountPath', 'name', 'readOnly']:
+            self.assertIn(i, c.model.model['volumeMounts'][0])
+        self.assertEqual(volname, c.model.model['volumeMounts'][0]['name'])
+        self.assertEqual(volmount, c.model.model['volumeMounts'][0]['mountPath'])
+
+    def test_add_volume_hostpath(self):
+        name = "redis"
+        image = "redis:3.0.7"
+        c = K8sContainer(name=name, image=image)
+        volname = "vol1"
+        voltype = "hostPath"
+        volmount = "/path/on/container"
+        volhostpath = "/path/on/host"
+        vol = K8sVolume(name=volname, type=voltype, mount_path=volmount)
+        vol.set_host_path(volhostpath)
+        c.add_volume_mount(vol)
+        self.assertIn('volumeMounts', c.model.model)
+        self.assertIsInstance(c.model.model['volumeMounts'], list)
+        self.assertEqual(1, len(c.model.model['volumeMounts']))
+        self.assertIsInstance(c.model.model['volumeMounts'][0], dict)
+        for i in ['mountPath', 'name', 'readOnly']:
+            self.assertIn(i, c.model.model['volumeMounts'][0])
+        self.assertEqual(volname, c.model.model['volumeMounts'][0]['name'])
+        self.assertEqual(volmount, c.model.model['volumeMounts'][0]['mountPath'])

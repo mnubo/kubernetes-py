@@ -21,6 +21,7 @@ class BaseUrls(object):
         self.urls['ReplicationController'] = '/api/{0}/namespaces/{1}/replicationcontrollers'.format(api_version, namespace)
         self.urls['Service'] = '/api/{0}/namespaces/{1}/services'.format(api_version, namespace)
         self.urls['Secret'] = '/api/{0}/namespaces/{1}/secrets'.format(api_version, namespace)
+        self.urls['Volume'] = None
 
     def get_base_url(self, object_type=None):
         if object_type is None or not isinstance(object_type, str) or object_type not in self.urls.keys():
