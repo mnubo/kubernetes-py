@@ -26,7 +26,7 @@ class K8sConfig(object):
     def __init__(self, kubeconfig=DEFAULT_KUBECONFIG, api_host=DEFAULT_API_HOST, auth=None, cert=None,
                  namespace=DEFAULT_NAMESPACE, pull_secret=None, token=None, version=DEFAULT_API_VERSION):
         """
-        Pulls configuration from a kubeconfig file, if present, otherwise accepts user-defined parameters.s
+        Pulls configuration from a kubeconfig file, if present, otherwise accepts user-defined parameters.
         See http://kubernetes.io/docs/user-guide/kubeconfig-file/ for information on the kubeconfig file.
 
         :param kubeconfig: Absolute path to the kubeconfig file, if any.
