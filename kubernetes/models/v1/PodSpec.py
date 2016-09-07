@@ -91,6 +91,8 @@ class PodSpec(BaseModel):
             vol[volume.type]['medium'] = volume.medium
         if volume.type == 'hostPath':
             vol[volume.type]['path'] = volume.host_path
+        if volume.type == 'secret':
+            vol[volume.type]['secretName'] = volume.secret_name
 
         self.model['volumes'].append(vol)
 

@@ -150,6 +150,46 @@ class K8sVolumeTest(unittest.TestCase):
         vol.set_host_path(host_path)
         self.assertEqual(host_path, vol.host_path)
 
+    # --------------------------------------------------------------------------------- secret
+
+    def test_secret_init(self):
+        name = "yoname"
+        type = "secret"
+        mount_path = "/path/on/container"
+        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        self.assertIsNotNone(vol)
+        self.assertIsInstance(vol, K8sVolume)
+        self.assertEqual(type, vol.type)
+
+    def test_secret_set_name_invalid_secret(self):
+        name = "yoname"
+        type = "secret"
+        mount_path = "/path/on/container"
+        secret = object()
+        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        with self.assertRaises(SyntaxError):
+            vol.set_secret_name(secret)
+
+    def test_secret_set_name_invalid_type(self):
+        name = "yoname"
+        type = "emptyDir"
+        mount_path = "/path/on/container"
+        secret_name = "yosecret"
+        secret = utils.create_secret(name=secret_name)
+        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        with self.assertRaises(SyntaxError):
+            vol.set_secret_name(secret)
+
+    def test_secret_set_name(self):
+        name = "yoname"
+        type = "secret"
+        mount_path = "/path/on/container"
+        secret_name = "yosecret"
+        secret = utils.create_secret(name=secret_name)
+        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        vol.set_secret_name(secret)
+        self.assertEqual(vol.secret_name, secret_name)
+
     # --------------------------------------------------------------------------------- api - pod - emptydir
 
     def test_pod_emptydir(self):
@@ -206,6 +246,49 @@ class K8sVolumeTest(unittest.TestCase):
         pod.add_container(container)
 
         if utils.is_reachable(pod.config.api_host):
+            pod.create()
+            vols = pod.model.model['spec']['volumes']
+            volnames = [x['name'] for x in vols]
+            self.assertIn(vol_name, volnames)
+            vols = pod.model.pod_spec.model['volumes']
+            volnames = [x['name'] for x in vols]
+            self.assertIn(vol_name, volnames)
+            self.assertEqual(1, len(pod.model.model['spec']['containers']))
+            mounts = pod.model.model['spec']['containers'][0]['volumeMounts']
+            mountnames = [x['name'] for x in mounts]
+            self.assertIn(vol_name, mountnames)
+            self.assertEqual(1, len(pod.model.pod_spec.model['containers']))
+            mounts = pod.model.pod_spec.model['containers'][0]['volumeMounts']
+            mountnames = [x['name'] for x in mounts]
+            self.assertIn(vol_name, mountnames)
+
+    # --------------------------------------------------------------------------------- api - pod - secret
+
+    def test_pod_secret(self):
+        container_name = "nginx"
+        container_image = "nginx:1.7.9"
+        container = utils.create_container(name=container_name, image=container_image)
+
+        secret_name = "yosecret"
+        secret = utils.create_secret(name=secret_name)
+        k = ".secret-file"
+        v = "dmFsdWUtMg0KDQo="
+        secret.set_data(k, v)
+
+        vol_name = "secret"
+        vol_type = "secret"
+        vol_mount = "/test-secret"
+        volume = utils.create_volume(name=vol_name, type=vol_type, mount_path=vol_mount)
+        volume.set_secret_name(secret)
+        container.add_volume_mount(volume)
+
+        pod_name = "nginx"
+        pod = utils.create_pod(name=pod_name)
+        pod.add_volume(volume)
+        pod.add_container(container)
+
+        if utils.is_reachable(pod.config.api_host):
+            secret.create()
             pod.create()
             vols = pod.model.model['spec']['volumes']
             volnames = [x['name'] for x in vols]
@@ -292,6 +375,56 @@ class K8sVolumeTest(unittest.TestCase):
         rc.set_replicas(1)
 
         if utils.is_reachable(rc.config.api_host):
+            rc.create()
+            vols = rc.model.model['spec']['template']['spec']['volumes']
+            volnames = [x['name'] for x in vols]
+            self.assertIn(vol_name, volnames)
+            vols = rc.model.pod_spec.model['volumes']
+            volnames = [x['name'] for x in vols]
+            self.assertIn(vol_name, volnames)
+            self.assertEqual(2, len(rc.model.model['spec']['template']['spec']['containers']))
+            mounts = rc.model.model['spec']['template']['spec']['containers'][0]['volumeMounts']
+            mountnames = [x['name'] for x in mounts]
+            self.assertIn(vol_name, mountnames)
+            self.assertEqual(2, len(rc.model.pod_spec.model['containers']))
+            mounts = rc.model.pod_spec.model['containers'][0]['volumeMounts']
+            mountnames = [x['name'] for x in mounts]
+            self.assertIn(vol_name, mountnames)
+
+    # --------------------------------------------------------------------------------- api - rc - secret
+
+    def test_rc_secret(self):
+        container_name = "nginx"
+        container_image = "nginx:1.7.9"
+        container_nginx = utils.create_container(name=container_name, image=container_image)
+
+        container_name = "redis"
+        container_image = "redis:3.0.7"
+        container_redis = utils.create_container(name=container_name, image=container_image)
+
+        secret_name = "yosecret"
+        secret = utils.create_secret(name=secret_name)
+        k = ".secret-file"
+        v = "dmFsdWUtMg0KDQo="
+        secret.set_data(k, v)
+
+        vol_name = "secret"
+        vol_type = "secret"
+        vol_mount = "/test-secret"
+        volume = utils.create_volume(name=vol_name, type=vol_type, mount_path=vol_mount)
+        volume.set_secret_name(secret)
+        container_nginx.add_volume_mount(volume)
+        container_redis.add_volume_mount(volume)
+
+        rc_name = "app"
+        rc = utils.create_rc(name=rc_name)
+        rc.add_volume(volume)
+        rc.add_container(container_nginx)
+        rc.add_container(container_redis)
+        rc.set_replicas(1)
+
+        if utils.is_reachable(rc.config.api_host):
+            secret.create()
             rc.create()
             vols = rc.model.model['spec']['template']['spec']['volumes']
             volnames = [x['name'] for x in vols]

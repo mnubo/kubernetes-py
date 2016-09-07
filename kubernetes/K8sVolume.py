@@ -6,23 +6,23 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import re
 from kubernetes.K8sObject import K8sObject
+from kubernetes.K8sSecret import K8sSecret
 
 VALID_VOLUME_TYPES = [
     'emptyDir',
     'hostPath',
-    # 'gcePersistentDisk',
-    # 'awsElasticBlockStore',
-    # 'nfs',
+    # 'gcePersistentDisk',          .2
+    # 'awsElasticBlockStore',       .1
+    # 'nfs',                        .3
     # 'iscsi',
     # 'flocker',
     # 'glusterfs',
     # 'rbd',
     # 'cephfs',
-    # 'gitRepo',
+    # 'gitRepo',                    .4
     'secret',
-    # 'persistentVolumeClaim',
+    # 'persistentVolumeClaim',      .5
     # 'downwardAPI',
     # 'azureFileVolume',
     # 'vsphereVolume',
@@ -42,6 +42,11 @@ class K8sVolume(K8sObject):
         if not isinstance(name, str):
             raise SyntaxError('K8sVolume: name: [ {0} ] must be a string.'.format(name.__class__.__name__))
 
+        if type is None:
+            type = 'emptyDir'
+        if type is not None and type not in VALID_VOLUME_TYPES:
+            raise SyntaxError('K8sVolume: volume_type: [ {0} ] is invalid. Must be in: [ {1} ]'.format(type, VALID_VOLUME_TYPES))
+
         if mount_path is None:
             raise SyntaxError('K8sVolume: mount_path: [ {0} ] cannot be None.'.format(mount_path))
         if not isinstance(mount_path, str):
@@ -53,11 +58,6 @@ class K8sVolume(K8sObject):
             raise SyntaxError('K8sVolume: read_only: [ {0} ] must be a boolean.'.format(read_only.__class__.__name__))
 
         super(K8sVolume, self).__init__(name=name, obj_type='Volume')
-
-        if type is None:
-            type = 'emptyDir'
-        if type is not None and type not in VALID_VOLUME_TYPES:
-            raise SyntaxError('K8sVolume: volume_type: [ {0} ] is invalid. Must be in: [ {1} ]'.format(type, VALID_VOLUME_TYPES))
 
         self.host_path = None  # used with type 'hostPath'
         self.medium = ''  # used with type 'emptyDir'
@@ -99,4 +99,15 @@ class K8sVolume(K8sObject):
             raise SyntaxError("K8sVolume: path: [ {0} ] is not a valid path.".format(path))
 
         self.host_path = path
+        return self
+
+    # -------------------------------------------------------------------------------------  secret
+
+    def set_secret_name(self, secret=None):
+        if not isinstance(secret, K8sSecret):
+            raise SyntaxError('K8sVolume: secret: [ {0} ] must be a K8sSecret.'.format(secret.__class__.__name__))
+        if secret is not None and self.type != 'secret':
+            raise SyntaxError('K8sVolume: secret: [ {0} ] can only be used with type [ secret ]'.format(secret.name))
+
+        self.secret_name = secret.name
         return self
