@@ -93,11 +93,11 @@ class Container(BaseModel):
         vol = {
             'mountPath': volume.mount_path,
             'name': volume.name,
-            'readOnly': 'false'
+            'readOnly': False
         }
 
         if volume.read_only is True:
-            vol['readOnly'] = 'true'
+            vol['readOnly'] = True
 
         self.model['volumeMounts'].append(vol)
         return self
