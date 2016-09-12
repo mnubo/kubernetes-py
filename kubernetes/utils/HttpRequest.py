@@ -91,7 +91,10 @@ class HttpRequest:
         resp_data = response.text.decode('utf-8')
 
         if len(resp_data) > 0:
-            state['data'] = convert(data=json.loads(resp_data))
+            try:
+                state['data'] = convert(data=json.loads(resp_data))
+            except ValueError:
+                state['data'] = resp_data.strip()
 
         if state['status'] in [200, 201]:
             state['success'] = True

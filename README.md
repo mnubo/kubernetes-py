@@ -13,6 +13,7 @@ Currently supported Kubernetes objects:
 * ReplicationController
 * Secret
 * Service
+* Volume
 
 ## Usage
 
@@ -255,6 +256,32 @@ Deleting a secret:
     
     secret = K8sSecret(config=cfg_cert, name='my_registry')
     secret.delete()
+    
+### Volume
+
+We currently support: 
+
+- `emptyDir`
+- `hostPath`
+- `awsElasticBlockStore`
+- `gcePersistentDisk`
+
+Mounting an AWS EBS volume inside a Pod:
+    
+    from kubernetes import K8sVolume
+    
+    volume = K8sVolume(
+        config=cfg_cert,
+        name='aws-volume',
+        type='awdElasticBlockStore',
+        mount_path='/path/inside/container'
+    )
+    volume.set_volume_id('vol-123456')  # this volume must already exist
+    container.add_volume_mount(volume)
+    pod.add_volume(volume)
+    pod.add_container(container)
+    pod.create()
+
 
 ### Unit tests
 

@@ -20,13 +20,15 @@ VALID_K8s_OBJS = [
     'ReplicaSet',
     'ReplicationController',
     'Secret',
-    'Service'
+    'Service',
+    'Volume'
 ]
 
 
 class K8sObject(object):
 
     def __init__(self, config=None, name=None, obj_type=None):
+        super(K8sObject, self).__init__()
 
         if config is not None and not isinstance(config, K8sConfig):
             raise SyntaxError('K8sObject: config: [ {0} ] must be of type K8sConfig.'.format(config.__class__.__name__))
@@ -156,8 +158,11 @@ class K8sObject(object):
 
         if not state.get('success'):
             status = state.get('status', '')
-            reason = state.get('data', dict()).get('message', None)
+            state_data = state.get('data', dict())
+            reason = state_data['message'] if 'message' in state_data else state_data
             message = 'K8sObject: CREATE failed : HTTP {0} : {1}'.format(status, reason)
+            if int(status) == 401:
+                raise UnauthorizedException(message)
             if int(status) == 409:
                 raise AlreadyExistsException(message)
             if int(status) == 422:

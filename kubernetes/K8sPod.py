@@ -6,19 +6,22 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+import time
 from kubernetes.K8sPodBasedObject import K8sPodBasedObject
 from kubernetes.models.v1.Pod import Pod
 from kubernetes.models.v1.PodStatus import PodStatus
-from kubernetes.K8sExceptions import NotFoundException
+from kubernetes.K8sExceptions import NotFoundException, TimedOutException
 from kubernetes import K8sConfig
+
+POD_READY_TIMEOUT_SECONDS = 60
 
 
 class K8sPod(K8sPodBasedObject):
 
     def __init__(self, config=None, name=None):
-        K8sPodBasedObject.__init__(self, config=config, obj_type='Pod', name=name)
-        self.model = Pod(name=name, namespace=self.config.namespace)
+        super(K8sPod, self).__init__(config=config, obj_type='Pod', name=name)
 
+        self.model = Pod(name=name, namespace=self.config.namespace)
         if self.config.pull_secret is not None:
             self.model.add_image_pull_secrets(name=self.config.pull_secret)
 
@@ -27,12 +30,22 @@ class K8sPod(K8sPodBasedObject):
     def create(self):
         super(K8sPod, self).create()
         self.get()
+        self._wait_for_readiness()
         return self
 
     def update(self):
         super(K8sPod, self).update()
         self.get()
+        self._wait_for_readiness()
         return self
+
+    def _wait_for_readiness(self):
+        start_time = time.time()
+        while not self.is_ready():
+            time.sleep(0.2)
+            elapsed_time = time.time() - start_time
+            if elapsed_time >= POD_READY_TIMEOUT_SECONDS:
+                raise TimedOutException("Timed out on Pod readiness: [ {0} ]".format(self.name))
 
     # -------------------------------------------------------------------------------------  add
 

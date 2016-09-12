@@ -13,7 +13,7 @@ from kubernetes.K8sContainer import K8sContainer
 class K8sPodBasedObject(K8sObject):
 
     def __init__(self, name=None, obj_type=None, config=None):
-        K8sObject.__init__(self, config=config, obj_type=obj_type, name=name)
+        super(K8sPodBasedObject, self).__init__(config=config, obj_type=obj_type, name=name)
 
     # ------------------------------------------------------------------------------------- add
 
@@ -22,16 +22,12 @@ class K8sPodBasedObject(K8sObject):
         self.model.add_container(container=container.get_model())
         return self
 
-    def add_host_volume(self, name=None, path=None):
-        self.model.add_host_volume(name=name, path=path)
-        return self
-
-    def add_emptydir_volume(self, name=None):
-        self.model.add_emptydir_volume(name=name)
-        return self
-
     def add_image_pull_secrets(self, name=None):
         self.model.add_image_pull_secrets(name=name)
+        return self
+
+    def add_volume(self, volume=None):
+        self.model.add_volume(volume)
         return self
 
     # ------------------------------------------------------------------------------------- delete

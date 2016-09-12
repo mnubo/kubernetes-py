@@ -12,7 +12,7 @@ from kubernetes.models.v1.ReplicaSet import ReplicaSet
 
 class K8sReplicaSet(K8sPodBasedObject):
     """
-    A K8sReplicaSet object is primarily used for HTTP DELETE operations.
+    This module uses K8sReplicaSet for HTTP DELETE operations.
 
     From http://kubernetes.io/docs/user-guide/replicasets/:
 
@@ -33,7 +33,7 @@ class K8sReplicaSet(K8sPodBasedObject):
     """
 
     def __init__(self, config=None, name=None):
-        K8sPodBasedObject.__init__(self, config=config, obj_type='ReplicaSet', name=name)
+        super(K8sReplicaSet, self).__init__(config=config, obj_type='ReplicaSet', name=name)
         self.model = ReplicaSet(name=name, namespace=self.config.namespace)
 
     # -------------------------------------------------------------------------------------  get
