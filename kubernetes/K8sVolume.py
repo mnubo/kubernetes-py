@@ -36,7 +36,7 @@ VALID_EMPTYDIR_MEDIA = [
 
 class K8sVolume(K8sObject):
 
-    def __init__(self, name=None, type=None, mount_path=None, read_only=False):
+    def __init__(self, config=None, name=None, type=None, mount_path=None, read_only=False):
         if name is None:
             raise SyntaxError('K8sVolume: name: [ {0} ] cannot be None.'.format(name))
         if not isinstance(name, str):
@@ -57,7 +57,7 @@ class K8sVolume(K8sObject):
         if not isinstance(read_only, bool):
             raise SyntaxError('K8sVolume: read_only: [ {0} ] must be a boolean.'.format(read_only.__class__.__name__))
 
-        super(K8sVolume, self).__init__(name=name, obj_type='Volume')
+        super(K8sVolume, self).__init__(config=config, name=name, obj_type='Volume')
 
         self.aws_volume_id = None  # used with type 'awsElasticBlockStore'
         self.fs_type = 'ext4'  # used with types 'awsElasticBlockStore' and 'gcePersistentDisk'
