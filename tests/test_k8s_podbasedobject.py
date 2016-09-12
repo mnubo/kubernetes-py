@@ -336,7 +336,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     def test_pod_add_volume_emptydir(self):
         name = "yoname"
         obj = utils.create_pod(name=name)
-        vol = K8sVolume(name=name, mount_path="/var/test", type='emptyDir')
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, mount_path="/var/test", type='emptyDir')
         obj.add_volume(vol)
         self.assertEqual(1, len(obj.model.model['spec']['volumes']))
         self.assertEqual(1, len(obj.model.pod_spec.model['volumes']))
@@ -346,7 +347,8 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     def test_pod_add_volume_emptydir_with_medium(self):
         name = "yoname"
         obj = utils.create_pod(name=name)
-        vol = K8sVolume(name=name, mount_path="/var/test", type='emptyDir')
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, mount_path="/var/test", type='emptyDir')
         vol.set_medium('Memory')
         obj.add_volume(vol)
         self.assertEqual(1, len(obj.model.model['spec']['volumes']))
@@ -359,14 +361,16 @@ class K8sPodBasedObjectTest(unittest.TestCase):
     def test_pod_add_volume_hostpath_no_path_specified(self):
         name = "yoname"
         obj = utils.create_pod(name=name)
-        vol = K8sVolume(name=name, mount_path="/var/test", type='hostPath')
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, mount_path="/var/test", type='hostPath')
         with self.assertRaises(UnprocessableEntityException):
             obj.add_volume(vol)
 
     def test_pod_add_volume_hostpath(self):
         name = "yoname"
         obj = utils.create_pod(name=name)
-        vol = K8sVolume(name=name, mount_path="/var/test", type='hostPath')
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, mount_path="/var/test", type='hostPath')
         host_path = '/var/lib/docker'
         vol.set_host_path(host_path)
         obj.add_volume(vol)

@@ -129,7 +129,8 @@ class K8sContainerTest(unittest.TestCase):
         volname = "vol1"
         voltype = "emptyDir"
         volmount = "/path/on/container"
-        vol = K8sVolume(name=volname, type=voltype, mount_path=volmount)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=volname, type=voltype, mount_path=volmount)
         c.add_volume_mount(vol)
         self.assertIn('volumeMounts', c.model.model)
         self.assertIsInstance(c.model.model['volumeMounts'], list)
@@ -148,7 +149,8 @@ class K8sContainerTest(unittest.TestCase):
         voltype = "hostPath"
         volmount = "/path/on/container"
         volhostpath = "/path/on/host"
-        vol = K8sVolume(name=volname, type=voltype, mount_path=volmount)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=volname, type=voltype, mount_path=volmount)
         vol.set_host_path(volhostpath)
         c.add_volume_mount(vol)
         self.assertIn('volumeMounts', c.model.model)

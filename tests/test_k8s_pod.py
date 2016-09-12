@@ -545,7 +545,7 @@ class K8sPodTest(unittest.TestCase):
             except Exception as err:
                 self.assertIsInstance(err, NotFoundException)
 
-    def test_is_ready_false(self):
+    def test_is_ready(self):
         name = "yocontainer"
         container = utils.create_container(name=name)
         name = "yopod-{0}".format(str(uuid.uuid4()))
@@ -553,22 +553,6 @@ class K8sPodTest(unittest.TestCase):
         pod.add_container(container)
         if utils.is_reachable(pod.config.api_host):
             p = pod.create()
-            result = p.is_ready()
-            self.assertFalse(result)
-
-    def test_is_ready_true(self):
-        name = "yocontainer"
-        container = utils.create_container(name=name)
-        name = "yopod-{0}".format(str(uuid.uuid4()))
-        pod = utils.create_pod(name=name)
-        pod.add_container(container)
-        if utils.is_reachable(pod.config.api_host):
-            p = pod.create()
-            count = 0
-            while not p.is_ready():
-                count += 1
-                if count == 100:
-                    self.fail("Timed out waiting on container to become ready.")
             self.assertTrue(p.is_ready())
 
     # ------------------------------------------------------------------------------------- set annotations

@@ -35,21 +35,24 @@ class K8sVolumeTest(unittest.TestCase):
     def test_init_invalid_type(self):
         name = "yoname"
         type = object()
+        config = utils.create_config()
         with self.assertRaises(SyntaxError):
-            K8sVolume(name=name, type=type)
+            K8sVolume(config=config, name=name, type=type)
 
     def test_init_invalid_mount_path(self):
         name = 'yoname'
         type = 'emptyDir'
         mount_path = object()
+        config = utils.create_config()
         with self.assertRaises(SyntaxError):
-            K8sVolume(name=name, type=type, mount_path=mount_path)
+            K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
 
     def test_init_windows_mount_path(self):
         name = 'yoname'
         type = 'emptyDir'
         mount_path = "C:\Program Files\Your Mom"
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         self.assertIsNotNone(vol)
         self.assertIsInstance(vol, K8sVolume)
         self.assertEqual('emptyDir', vol.type)
@@ -57,7 +60,8 @@ class K8sVolumeTest(unittest.TestCase):
     def test_init(self):
         name = "yoname"
         mount_path = "/path/on/container"
-        vol = K8sVolume(name=name, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, mount_path=mount_path)
         self.assertIsNotNone(vol)
         self.assertIsInstance(vol, K8sVolume)
         self.assertEqual('emptyDir', vol.type)
@@ -68,7 +72,8 @@ class K8sVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "emptyDir"
         mount_path = "/path/on/container"
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         self.assertIsNotNone(vol)
         self.assertIsInstance(vol, K8sVolume)
         self.assertEqual(type, vol.type)
@@ -77,7 +82,8 @@ class K8sVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "hostPath"
         mount_path = "/path/on/container"
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         with self.assertRaises(SyntaxError):
             vol.set_medium()
 
@@ -86,7 +92,8 @@ class K8sVolumeTest(unittest.TestCase):
         type = "hostPath"
         medium = "yomedium"
         mount_path = "/path/on/container"
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         with self.assertRaises(SyntaxError):
             vol.set_medium(medium)
 
@@ -94,7 +101,8 @@ class K8sVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "emptyDir"
         mount_path = "/path/on/container"
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_medium()
         self.assertEqual('', vol.medium)
 
@@ -102,7 +110,8 @@ class K8sVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "emptyDir"
         mount_path = "/path/on/container"
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_medium('')
         self.assertEqual('', vol.medium)
 
@@ -111,7 +120,8 @@ class K8sVolumeTest(unittest.TestCase):
         type = "emptyDir"
         mount_path = "/path/on/container"
         medium = "Memory"
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_medium(medium)
         self.assertEqual(medium, vol.medium)
 
@@ -121,7 +131,8 @@ class K8sVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "hostPath"
         mount_path = "/path/on/container"
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         self.assertIsNotNone(vol)
         self.assertIsInstance(vol, K8sVolume)
         self.assertEqual(type, vol.type)
@@ -131,7 +142,8 @@ class K8sVolumeTest(unittest.TestCase):
         type = "emptyDir"
         mount_path = "/path/on/container"
         host_path = "/path/on/host"
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         with self.assertRaises(SyntaxError):
             vol.set_host_path(host_path)
 
@@ -139,7 +151,8 @@ class K8sVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "hostPath"
         mount_path = "/path/on/container"
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         with self.assertRaises(SyntaxError):
             vol.set_host_path()
 
@@ -148,7 +161,8 @@ class K8sVolumeTest(unittest.TestCase):
         type = "hostPath"
         host_path = "/path/on/host"
         mount_path = "/path/on/container"
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_host_path(host_path)
         self.assertEqual(host_path, vol.host_path)
 
@@ -158,7 +172,8 @@ class K8sVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "secret"
         mount_path = "/path/on/container"
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         self.assertIsNotNone(vol)
         self.assertIsInstance(vol, K8sVolume)
         self.assertEqual(type, vol.type)
@@ -168,7 +183,8 @@ class K8sVolumeTest(unittest.TestCase):
         type = "secret"
         mount_path = "/path/on/container"
         secret = object()
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         with self.assertRaises(SyntaxError):
             vol.set_secret_name(secret)
 
@@ -178,7 +194,8 @@ class K8sVolumeTest(unittest.TestCase):
         mount_path = "/path/on/container"
         secret_name = "yosecret"
         secret = utils.create_secret(name=secret_name)
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         with self.assertRaises(SyntaxError):
             vol.set_secret_name(secret)
 
@@ -188,7 +205,8 @@ class K8sVolumeTest(unittest.TestCase):
         mount_path = "/path/on/container"
         secret_name = "yosecret"
         secret = utils.create_secret(name=secret_name)
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_secret_name(secret)
         self.assertEqual(vol.secret_name, secret_name)
 
@@ -198,7 +216,8 @@ class K8sVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "awsElasticBlockStore"
         mount_path = "/path/on/container"
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         self.assertIsNotNone(vol)
         self.assertIsInstance(vol, K8sVolume)
         self.assertEqual(type, vol.type)
@@ -207,7 +226,8 @@ class K8sVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "awsElasticBlockStore"
         mount_path = "/path/on/container"
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         with self.assertRaises(SyntaxError):
             vol.set_volume_id()
 
@@ -216,7 +236,8 @@ class K8sVolumeTest(unittest.TestCase):
         type = "awsElasticBlockStore"
         mount_path = "/path/on/container"
         volume_id = object()
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         with self.assertRaises(SyntaxError):
             vol.set_volume_id(volume_id)
 
@@ -225,7 +246,8 @@ class K8sVolumeTest(unittest.TestCase):
         type = "emptyDir"
         mount_path = "/path/on/container"
         volume_id = "vol-0a89c9040d544a371"
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         with self.assertRaises(SyntaxError):
             vol.set_volume_id(volume_id)
 
@@ -234,7 +256,8 @@ class K8sVolumeTest(unittest.TestCase):
         type = "awsElasticBlockStore"
         mount_path = "/path/on/container"
         volume_id = "vol-0a89c9040d544a371"
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_volume_id(volume_id)
         self.assertEqual(vol.aws_volume_id, volume_id)
 
@@ -244,7 +267,8 @@ class K8sVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "gcePersistentDisk"
         mount_path = "/path/on/container"
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         self.assertIsNotNone(vol)
         self.assertIsInstance(vol, K8sVolume)
         self.assertEqual(type, vol.type)
@@ -253,7 +277,8 @@ class K8sVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "gcePersistentDisk"
         mount_path = "/path/on/container"
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         with self.assertRaises(SyntaxError):
             vol.set_pd_name()
 
@@ -262,7 +287,8 @@ class K8sVolumeTest(unittest.TestCase):
         type = "gcePersistentDisk"
         mount_path = "/path/on/container"
         pd_name = object()
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         with self.assertRaises(SyntaxError):
             vol.set_volume_id(pd_name)
 
@@ -271,7 +297,8 @@ class K8sVolumeTest(unittest.TestCase):
         type = "emptyDir"
         mount_path = "/path/on/container"
         pd_name = "yopdname"
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         with self.assertRaises(SyntaxError):
             vol.set_volume_id(pd_name)
 
@@ -280,7 +307,8 @@ class K8sVolumeTest(unittest.TestCase):
         type = "awsElasticBlockStore"
         mount_path = "/path/on/container"
         volume_id = "vol-0a89c9040d544a371"
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_volume_id(volume_id)
         self.assertEqual(vol.aws_volume_id, volume_id)
 
@@ -290,7 +318,8 @@ class K8sVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "awsElasticBlockStore"
         mount_path = "/path/on/container"
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         with self.assertRaises(SyntaxError):
             vol.set_fs_type()
 
@@ -298,7 +327,8 @@ class K8sVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "gcePersistentDisk"
         mount_path = "/path/on/container"
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         with self.assertRaises(SyntaxError):
             vol.set_fs_type()
 
@@ -307,7 +337,8 @@ class K8sVolumeTest(unittest.TestCase):
         type = "awsElasticBlockStore"
         mount_path = "/path/on/container"
         fs_type = object()
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         with self.assertRaises(SyntaxError):
             vol.set_fs_type(fs_type)
 
@@ -316,7 +347,8 @@ class K8sVolumeTest(unittest.TestCase):
         type = "gcePersistentDisk"
         mount_path = "/path/on/container"
         fs_type = object()
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         with self.assertRaises(SyntaxError):
             vol.set_fs_type(fs_type)
 
@@ -325,7 +357,8 @@ class K8sVolumeTest(unittest.TestCase):
         type = "emptyDir"
         mount_path = "/path/on/container"
         fs_type = object()
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         with self.assertRaises(SyntaxError):
             vol.set_fs_type(fs_type)
 
@@ -334,7 +367,8 @@ class K8sVolumeTest(unittest.TestCase):
         type = "awsElasticBlockStore"
         mount_path = "/path/on/container"
         fs_type = "xfs"
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_fs_type(fs_type)
         self.assertEqual(vol.fs_type, fs_type)
 
@@ -343,7 +377,8 @@ class K8sVolumeTest(unittest.TestCase):
         type = "gcePersistentDisk"
         mount_path = "/path/on/container"
         fs_type = "xfs"
-        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_fs_type(fs_type)
         self.assertEqual(vol.fs_type, fs_type)
 
