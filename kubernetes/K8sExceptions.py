@@ -7,6 +7,11 @@
 #
 
 
+class UnauthorizedException(Exception):
+    def __init__(self, *args, **kwargs):
+        super(UnauthorizedException, self).__init__(*args, **kwargs)
+
+
 class NotFoundException(Exception):
     def __init__(self, *args, **kwargs):
         super(NotFoundException, self).__init__(*args, **kwargs)

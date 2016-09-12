@@ -1198,7 +1198,7 @@ class K8sServiceTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- api - create
 
     def test_create_name_too_long(self):
-        name = "yo-{0}".format(unicode(uuid.uuid4()))
+        name = "yo-{0}".format(str(uuid.uuid4()))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
         if utils.is_reachable(svc.config.api_host):

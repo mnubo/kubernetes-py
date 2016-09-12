@@ -462,7 +462,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- get
 
     def test_get_nonexistent(self):
-        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         if utils.is_reachable(rc.config.api_host):
             try:
@@ -474,7 +474,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
     def test_get(self):
         name = "yocontainer"
         container = utils.create_container(name=name)
-        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         rc.add_container(container)
         if utils.is_reachable(rc.config.api_host):
@@ -998,7 +998,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         # please see test_resize().
         cont_name = "yocontainer"
         container = utils.create_container(name=cont_name)
-        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         rc.add_container(container)
         count = 99
@@ -1036,7 +1036,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_get_by_name_nonexistent(self):
-        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         if utils.is_reachable(rc.config.api_host):
             result = K8sReplicationController.get_by_name(config=rc.config, name=name)
@@ -1046,7 +1046,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
     def test_get_by_name(self):
         cont_name = "yocontainer"
         container = utils.create_container(name=cont_name)
-        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         rc.add_container(container)
         if utils.is_reachable(rc.config.api_host):
@@ -1095,7 +1095,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_resize_nonexistent(self):
-        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         replicas = 3
         if utils.is_reachable(rc.config.api_host):
@@ -1108,7 +1108,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
     def test_resize(self):
         cont_name = "yocontainer"
         container = utils.create_container(name=cont_name)
-        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         rc.add_container(container)
         replicas = 3
@@ -1124,7 +1124,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
     def test_rolling_update_none_args(self):
         cont_name = "yocontainer"
         container = utils.create_container(name=cont_name)
-        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         rc.add_container(container)
         if utils.is_reachable(rc.config.api_host):
@@ -1138,7 +1138,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         image = "redis:3.2.0"
         new_image = "redis:3.2.3"
         container = utils.create_container(name=cont_name, image=image)
-        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         rc.add_container(container)
         if utils.is_reachable(rc.config.api_host):
@@ -1152,7 +1152,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         image = "redis:3.2.0"
         new_image = "redis:3.2.3"
         container = utils.create_container(name=cont_name, image=image)
-        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         rc.add_container(container)
         if utils.is_reachable(rc.config.api_host):
@@ -1169,7 +1169,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         new_image = "redis:3.2.3"
         container_1 = utils.create_container(name=cont_name_1, image=image_1)
         container_2 = utils.create_container(name=cont_name_2, image=image_2)
-        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         rc.add_container(container_1)
         rc.add_container(container_2)
@@ -1188,7 +1188,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         new_image = "redis:3.2.3"
         container_1 = utils.create_container(name=cont_name_1, image=image_1)
         container_2 = utils.create_container(name=cont_name_2, image=image_2)
-        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         rc.add_container(container_1)
         rc.add_container(container_2)
@@ -1209,7 +1209,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         count = 1
         container_1 = utils.create_container(name=cont_name_1, image=image_1)
         container_2 = utils.create_container(name=cont_name_2, image=image_2)
-        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         rc.add_container(container_1)
         rc.add_container(container_2)
@@ -1250,7 +1250,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         count = 3
         container_1 = utils.create_container(name=cont_name_1, image=image_1)
         container_2 = utils.create_container(name=cont_name_2, image=image_2)
-        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         rc.add_container(container_1)
         rc.add_container(container_2)
@@ -1290,7 +1290,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         new_image = "redis:3.2.3"
 
         cont_1 = utils.create_container(name=cont_name, image=image)
-        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name = "yorc-{0}".format(str(uuid.uuid4()))
         rc_1 = utils.create_rc(name=name)
         rc_1.add_container(cont_1)
 
@@ -1315,12 +1315,12 @@ class K8sReplicationControllerTest(unittest.TestCase):
         container_2 = utils.create_container(name=cont_name_2, image=image_2)
         container_3 = utils.create_container(name=cont_name_1, image=new_image)
 
-        name_1 = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name_1 = "yorc-{0}".format(str(uuid.uuid4()))
         rc_1 = utils.create_rc(name=name_1)
         rc_1.add_container(container_1)
         rc_1.add_container(container_2)
 
-        name_2 = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name_2 = "yorc-{0}".format(str(uuid.uuid4()))
         rc_2 = utils.create_rc(name=name_2)
         rc_2.add_container(container_3)
         rc_2.add_container(container_2)
@@ -1343,12 +1343,12 @@ class K8sReplicationControllerTest(unittest.TestCase):
         container_2 = utils.create_container(name=cont_name_2, image=image_2)
         container_3 = utils.create_container(name=cont_name_1, image=new_image)
 
-        name_1 = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name_1 = "yorc-{0}".format(str(uuid.uuid4()))
         rc_1 = utils.create_rc(name=name_1)
         rc_1.add_container(container_1)
         rc_1.add_container(container_2)
 
-        name_2 = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name_2 = "yorc-{0}".format(str(uuid.uuid4()))
         rc_2 = utils.create_rc(name=name_2)
         rc_2.add_container(container_3)
         rc_2.add_container(container_2)
@@ -1392,12 +1392,12 @@ class K8sReplicationControllerTest(unittest.TestCase):
         container_2 = utils.create_container(name=cont_name_2, image=image_2)
         container_3 = utils.create_container(name=cont_name_1, image=new_image)
 
-        name_1 = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name_1 = "yorc-{0}".format(str(uuid.uuid4()))
         rc_1 = utils.create_rc(name=name_1)
         rc_1.add_container(container_1)
         rc_1.add_container(container_2)
 
-        name_2 = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name_2 = "yorc-{0}".format(str(uuid.uuid4()))
         rc_2 = utils.create_rc(name=name_2)
         rc_2.add_container(container_3)
         rc_2.add_container(container_2)
@@ -1434,7 +1434,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
     # -------------------------------------------------------------------------------------  api - create
 
     def test_create_without_containers(self):
-        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         if utils.is_reachable(rc.config.api_host):
             try:
@@ -1446,7 +1446,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
     def test_create_with_container(self):
         name = "yocontainer"
         container = utils.create_container(name=name)
-        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         rc.add_container(container=container)
         if utils.is_reachable(rc.config.api_host):
@@ -1457,7 +1457,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
     def test_create_already_exists(self):
         name = "yocontainer"
         container = utils.create_container(name=name)
-        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         rc.add_container(container=container)
         if utils.is_reachable(rc.config.api_host):
@@ -1472,7 +1472,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------- api - list
 
     def test_list_nonexistent(self):
-        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         if utils.is_reachable(rc.config.api_host):
             objs = rc.list()
@@ -1488,7 +1488,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         objs = []
         if utils.is_reachable(config.api_host):
             for i in range(0, count):
-                name = "yorc-{0}".format(unicode(uuid.uuid4()))
+                name = "yorc-{0}".format(str(uuid.uuid4()))
                 rc = utils.create_rc(config, name)
                 rc.add_container(container)
                 result = rc.create()
@@ -1502,7 +1502,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------- api - update
 
     def test_update_nonexistent(self):
-        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         if utils.is_reachable(rc.config.api_host):
             try:
@@ -1534,7 +1534,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
     def test_update_namespace_fails(self):
         name = "yocontainer"
         container = utils.create_container(name=name)
-        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name = "yorc-{0}".format(str(uuid.uuid4()))
         nspace = "yonamespace"
         rc = utils.create_rc(name=name)
         rc.add_container(container)
@@ -1557,7 +1557,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
     def test_update_labels_succeeds(self):
         name = "yocontainer"
         container = utils.create_container(name=name)
-        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         rc.add_container(container)
         if utils.is_reachable(rc.config.api_host):
@@ -1576,7 +1576,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
     def test_update_add_container_succeeds(self):
         cont_names = ["yocontainer", "yocontainer2"]
         container = utils.create_container(name=cont_names[0])
-        rc_name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        rc_name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=rc_name)
         rc.add_container(container)
         if utils.is_reachable(rc.config.api_host):
@@ -1596,7 +1596,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------- api - delete
 
     def test_delete_nonexistent(self):
-        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         if utils.is_reachable(rc.config.api_host):
             try:
@@ -1608,7 +1608,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
     def test_delete(self):
         name = "yocontainer"
         container = utils.create_container(name=name)
-        name = "yopod-{0}".format(unicode(uuid.uuid4()))
+        name = "yopod-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         rc.add_container(container)
         if utils.is_reachable(rc.config.api_host):

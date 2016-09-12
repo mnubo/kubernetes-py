@@ -6,6 +6,7 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+from kubernetes.K8sVolume import K8sVolume
 from kubernetes.models.v1.BaseModel import BaseModel
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.models.v1.PodSpec import PodSpec
@@ -34,13 +35,8 @@ class PodBasedModel(BaseModel):
         self._update_model()
         return self
 
-    def add_host_volume(self, name, path):
-        self.pod_spec.add_host_volume(name=name, path=path)
-        self._update_model()
-        return self
-
-    def add_emptydir_volume(self, name):
-        self.pod_spec.add_emptydir_volume(name=name)
+    def add_volume(self, volume=None):
+        self.pod_spec.add_volume(volume)
         self._update_model()
         return self
 

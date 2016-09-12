@@ -21,7 +21,7 @@ class K8sReplicaSetTests(unittest.TestCase):
         utils.cleanup_objects()
 
     def test_delete_nonexistent(self):
-        name = "yorc-{0}".format(unicode(uuid.uuid4()))
+        name = "yorc-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=name)
         if utils.is_reachable(dep.config.api_host):
             try:

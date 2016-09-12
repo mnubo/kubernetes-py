@@ -7,8 +7,11 @@
 #
 
 import unittest
-from kubernetes import K8sPodBasedObject, K8sContainer
+from kubernetes.K8sPodBasedObject import K8sPodBasedObject
+from kubernetes.K8sContainer import K8sContainer
+from kubernetes.K8sVolume import K8sVolume
 from kubernetes.models.v1 import Pod, ReplicationController, ObjectMeta, PodSpec
+from kubernetes.K8sExceptions import UnprocessableEntityException
 from tests import utils
 
 
@@ -249,147 +252,6 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         self.assertEqual(1, len(podspec.containers))
         self.assertEqual(1, len(podspec.model['containers']))
 
-    # --------------------------------------------------------------------------------- add host volume
-
-    def test_pod_add_host_volume_none_args(self):
-        name = "yoname"
-        obj = utils.create_pod(name=name)
-        volname = None
-        volpath = None
-        try:
-            obj.add_host_volume(name=volname, path=volpath)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
-
-    def test_rc_add_host_volume_none_args(self):
-        name = "yorc"
-        obj = utils.create_rc(name=name)
-        volname = None
-        volpath = None
-        try:
-            obj.add_host_volume(name=volname, path=volpath)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
-
-    def test_pod_add_host_volume_invalid_args(self):
-        name = "yoname"
-        obj = utils.create_pod(name=name)
-        volname = 666
-        volpath = 999
-        try:
-            obj.add_host_volume(name=volname, path=volpath)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
-
-    def test_rc_add_host_volume_invalid_args(self):
-        name = "yorc"
-        obj = utils.create_rc(name=name)
-        volname = 666
-        volpath = 999
-        try:
-            obj.add_host_volume(name=volname, path=volpath)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
-
-    def test_pod_add_host_volume(self):
-        name = "yoname"
-        obj = utils.create_pod(name=name)
-        volname = "devnull"
-        volpath = "/dev/null"
-        obj.add_host_volume(name=volname, path=volpath)
-
-        podspec = obj.model.model['spec']
-        self.assertEqual(1, len(podspec['volumes']))
-        self.assertEqual(volname, podspec['volumes'][0]['name'])
-
-        podspec = obj.model.pod_spec
-        self.assertEqual(1, len(podspec.model['volumes']))
-        self.assertEqual(volname, podspec.model['volumes'][0]['name'])
-
-    def test_rc_add_host_volume(self):
-        name = "yorc"
-        obj = utils.create_rc(name=name)
-        volname = "devnull"
-        volpath = "/dev/null"
-        obj.add_host_volume(name=volname, path=volpath)
-
-        podspec = obj.model.model['spec']['template']['spec']
-        self.assertEqual(1, len(podspec['volumes']))
-        self.assertEqual(volname, podspec['volumes'][0]['name'])
-        podspec = obj.model.pod_spec
-        self.assertEqual(1, len(podspec.model['volumes']))
-        self.assertEqual(volname, podspec.model['volumes'][0]['name'])
-
-    # --------------------------------------------------------------------------------- add emptydir volume
-
-    def test_pod_add_emptydir_volume_none_arg(self):
-        name = "yoname"
-        obj = utils.create_pod(name=name)
-        volname = None
-        try:
-            obj.add_emptydir_volume(name=volname)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
-
-    def test_rc_add_emptydir_volume_none_arg(self):
-        name = "yorc"
-        obj = utils.create_rc(name=name)
-        volname = None
-        try:
-            obj.add_emptydir_volume(name=volname)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
-
-    def test_pod_add_emptydir_volume_invalid_arg(self):
-        name = "yoname"
-        obj = utils.create_pod(name=name)
-        volname = 666
-        try:
-            obj.add_emptydir_volume(name=volname)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
-
-    def test_rc_add_emptydir_volume_invalid_arg(self):
-        name = "yorc"
-        obj = utils.create_rc(name=name)
-        volname = 666
-        try:
-            obj.add_emptydir_volume(name=volname)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
-
-    def test_pod_add_emptydir_volume(self):
-        name = "yoname"
-        obj = utils.create_pod(name=name)
-        volname = "emptydir"
-        obj.add_emptydir_volume(name=volname)
-
-        podspec = obj.model.model['spec']
-        self.assertEqual(1, len(podspec['volumes']))
-        self.assertEqual(volname, podspec['volumes'][0]['name'])
-        podspec = obj.model.pod_spec
-        self.assertEqual(volname, podspec.model['volumes'][0]['name'])
-
-    def test_rc_add_emptydir_volume(self):
-        name = "yorc"
-        obj = utils.create_rc(name=name)
-        volname = "emptydir"
-        obj.add_emptydir_volume(name=volname)
-
-        podspec = obj.model.model['spec']['template']['spec']
-        self.assertEqual(1, len(podspec['volumes']))
-        self.assertEqual(volname, podspec['volumes'][0]['name'])
-        podspec = obj.model.pod_spec
-        self.assertEqual(volname, podspec.model['volumes'][0]['name'])
-
     # --------------------------------------------------------------------------------- add pull secret
 
     def test_pod_add_image_pull_secrets_none_arg(self):
@@ -461,6 +323,59 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         self.assertIn('imagePullSecrets', podspec.model)
         self.assertEqual(1, len(podspec.model['imagePullSecrets']))
         self.assertEqual(secretname, podspec.model['imagePullSecrets'][0]['name'])
+
+    # --------------------------------------------------------------------------------- add volume
+
+    def test_pod_add_volume_invalid(self):
+        name = "yoname"
+        obj = utils.create_pod(name=name)
+        vol = object()
+        with self.assertRaises(SyntaxError):
+            obj.add_volume(vol)
+
+    def test_pod_add_volume_emptydir(self):
+        name = "yoname"
+        obj = utils.create_pod(name=name)
+        vol = K8sVolume(name=name, mount_path="/var/test", type='emptyDir')
+        obj.add_volume(vol)
+        self.assertEqual(1, len(obj.model.model['spec']['volumes']))
+        self.assertEqual(1, len(obj.model.pod_spec.model['volumes']))
+        self.assertEqual(name, obj.model.model['spec']['volumes'][0]['name'])
+        self.assertEqual(name, obj.model.pod_spec.model['volumes'][0]['name'])
+
+    def test_pod_add_volume_emptydir_with_medium(self):
+        name = "yoname"
+        obj = utils.create_pod(name=name)
+        vol = K8sVolume(name=name, mount_path="/var/test", type='emptyDir')
+        vol.set_medium('Memory')
+        obj.add_volume(vol)
+        self.assertEqual(1, len(obj.model.model['spec']['volumes']))
+        self.assertEqual(1, len(obj.model.pod_spec.model['volumes']))
+        self.assertEqual(name, obj.model.model['spec']['volumes'][0]['name'])
+        self.assertEqual(name, obj.model.pod_spec.model['volumes'][0]['name'])
+        self.assertEqual('Memory', obj.model.model['spec']['volumes'][0][vol.type]['medium'])
+        self.assertEqual('Memory', obj.model.pod_spec.model['volumes'][0][vol.type]['medium'])
+
+    def test_pod_add_volume_hostpath_no_path_specified(self):
+        name = "yoname"
+        obj = utils.create_pod(name=name)
+        vol = K8sVolume(name=name, mount_path="/var/test", type='hostPath')
+        with self.assertRaises(UnprocessableEntityException):
+            obj.add_volume(vol)
+
+    def test_pod_add_volume_hostpath(self):
+        name = "yoname"
+        obj = utils.create_pod(name=name)
+        vol = K8sVolume(name=name, mount_path="/var/test", type='hostPath')
+        host_path = '/var/lib/docker'
+        vol.set_host_path(host_path)
+        obj.add_volume(vol)
+        self.assertEqual(1, len(obj.model.model['spec']['volumes']))
+        self.assertEqual(1, len(obj.model.pod_spec.model['volumes']))
+        self.assertEqual(name, obj.model.model['spec']['volumes'][0]['name'])
+        self.assertEqual(name, obj.model.pod_spec.model['volumes'][0]['name'])
+        self.assertEqual(host_path, obj.model.model['spec']['volumes'][0][vol.type]['path'])
+        self.assertEqual(host_path, obj.model.pod_spec.model['volumes'][0][vol.type]['path'])
 
     # --------------------------------------------------------------------------------- del pod node name
 
