@@ -165,8 +165,11 @@ def create_service(config=None, name=None):
     return obj
 
 
-def create_volume(name=None, type=None, mount_path=None, read_only=False):
+def create_volume(config=None, name=None, type=None, mount_path=None, read_only=False):
+    if config is None:
+        config = create_config()
     obj = K8sVolume(
+        config=config,
         name=name,
         type=type,
         mount_path=mount_path,
