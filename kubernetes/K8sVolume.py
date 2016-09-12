@@ -12,8 +12,8 @@ from kubernetes.K8sSecret import K8sSecret
 VALID_VOLUME_TYPES = [
     'emptyDir',
     'hostPath',
-    # 'gcePersistentDisk',          .2
-    # 'awsElasticBlockStore',       .1
+    'gcePersistentDisk',
+    'awsElasticBlockStore',
     # 'nfs',                        .3
     # 'iscsi',
     # 'flocker',
@@ -59,6 +59,9 @@ class K8sVolume(K8sObject):
 
         super(K8sVolume, self).__init__(name=name, obj_type='Volume')
 
+        self.aws_volume_id = None  # used with type 'awsElasticBlockStore'
+        self.fs_type = 'ext4'  # used with types 'awsElasticBlockStore' and 'gcePersistentDisk'
+        self.gce_pd_name = None  # used with type 'gcePersistentDisk'
         self.host_path = None  # used with type 'hostPath'
         self.medium = ''  # used with type 'emptyDir'
         self.mount_path = mount_path
@@ -110,4 +113,38 @@ class K8sVolume(K8sObject):
             raise SyntaxError('K8sVolume: secret: [ {0} ] can only be used with type [ secret ]'.format(secret.name))
 
         self.secret_name = secret.name
+        return self
+
+    # -------------------------------------------------------------------------------------  awsElasticBlockStore
+
+    def set_volume_id(self, volume_id=None):
+        if not isinstance(volume_id, str):
+            raise SyntaxError('K8sVolume: volume_id: [ {0} ] must be a string.'.format(volume_id.__class__.__name__))
+        if volume_id is not None and self.type != 'awsElasticBlockStore':
+            raise SyntaxError('K8sVolume: volume_id: [ {0} ] can only be used with type [ awsElasticBlockStore ]'.format(volume_id))
+
+        self.aws_volume_id = volume_id
+        return self
+
+    # -------------------------------------------------------------------------------------  gcePersistentDisk
+
+    def set_pd_name(self, pd_name=None):
+        if not isinstance(pd_name, str):
+            raise SyntaxError('K8sVolume: pd_name: [ {0} ] must be a string.'.format(pd_name.__class__.__name__))
+        if pd_name is not None and self.type != 'gcePersistentDisk':
+            raise SyntaxError('K8sVolume: pd_name: [ {0} ] can only be used with type [ awsElasticBlockStore ]'.format(pd_name))
+
+        self.gce_pd_name = pd_name
+        return self
+
+    # -------------------------------------------------------------------------------------  aws & gce - fs type
+
+    def set_fs_type(self, fs_type=None):
+        if not isinstance(fs_type, str):
+            raise SyntaxError('K8sVolume: fs_type: [ {0} ] must be a string.'.format(fs_type.__class__.__name__))
+        if fs_type is not None and not (self.type == 'awsElasticBlockStore' or self.type == 'gcePersistentDisk'):
+            raise SyntaxError(
+                'K8sVolume: fs_type: [ {0} ] can only be used with type [ awsElasticBlockStore ]'.format(fs_type))
+
+        self.fs_type = fs_type
         return self

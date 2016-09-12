@@ -8,7 +8,9 @@
 
 import unittest
 import utils
+import uuid
 from kubernetes.K8sVolume import K8sVolume
+from kubernetes.K8sExceptions import TimedOutException
 
 
 class K8sVolumeTest(unittest.TestCase):
@@ -161,7 +163,7 @@ class K8sVolumeTest(unittest.TestCase):
         self.assertIsInstance(vol, K8sVolume)
         self.assertEqual(type, vol.type)
 
-    def test_secret_set_name_invalid_secret(self):
+    def test_secret_set_name_invalid_obj(self):
         name = "yoname"
         type = "secret"
         mount_path = "/path/on/container"
@@ -190,6 +192,161 @@ class K8sVolumeTest(unittest.TestCase):
         vol.set_secret_name(secret)
         self.assertEqual(vol.secret_name, secret_name)
 
+    # --------------------------------------------------------------------------------- awsElasticBlockStore
+
+    def test_aws_init(self):
+        name = "yoname"
+        type = "awsElasticBlockStore"
+        mount_path = "/path/on/container"
+        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        self.assertIsNotNone(vol)
+        self.assertIsInstance(vol, K8sVolume)
+        self.assertEqual(type, vol.type)
+
+    def test_aws_set_volume_id_none(self):
+        name = "yoname"
+        type = "awsElasticBlockStore"
+        mount_path = "/path/on/container"
+        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        with self.assertRaises(SyntaxError):
+            vol.set_volume_id()
+
+    def test_aws_set_volume_id_invalid_obj(self):
+        name = "yoname"
+        type = "awsElasticBlockStore"
+        mount_path = "/path/on/container"
+        volume_id = object()
+        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        with self.assertRaises(SyntaxError):
+            vol.set_volume_id(volume_id)
+
+    def test_aws_set_volume_id_invalid_type(self):
+        name = "yoname"
+        type = "emptyDir"
+        mount_path = "/path/on/container"
+        volume_id = "vol-0a89c9040d544a371"
+        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        with self.assertRaises(SyntaxError):
+            vol.set_volume_id(volume_id)
+
+    def test_aws_set_volume_id(self):
+        name = "yoname"
+        type = "awsElasticBlockStore"
+        mount_path = "/path/on/container"
+        volume_id = "vol-0a89c9040d544a371"
+        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        vol.set_volume_id(volume_id)
+        self.assertEqual(vol.aws_volume_id, volume_id)
+
+    # --------------------------------------------------------------------------------- gcePersistentDisk
+
+    def test_gce_init(self):
+        name = "yoname"
+        type = "gcePersistentDisk"
+        mount_path = "/path/on/container"
+        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        self.assertIsNotNone(vol)
+        self.assertIsInstance(vol, K8sVolume)
+        self.assertEqual(type, vol.type)
+
+    def test_gce_set_pd_name_none(self):
+        name = "yoname"
+        type = "gcePersistentDisk"
+        mount_path = "/path/on/container"
+        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        with self.assertRaises(SyntaxError):
+            vol.set_pd_name()
+
+    def test_gce_set_pd_name_invalid_obj(self):
+        name = "yoname"
+        type = "gcePersistentDisk"
+        mount_path = "/path/on/container"
+        pd_name = object()
+        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        with self.assertRaises(SyntaxError):
+            vol.set_volume_id(pd_name)
+
+    def test_gce_set_pd_name_invalid_type(self):
+        name = "yoname"
+        type = "emptyDir"
+        mount_path = "/path/on/container"
+        pd_name = "yopdname"
+        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        with self.assertRaises(SyntaxError):
+            vol.set_volume_id(pd_name)
+
+    def test_gce_set_pd_name(self):
+        name = "yoname"
+        type = "awsElasticBlockStore"
+        mount_path = "/path/on/container"
+        volume_id = "vol-0a89c9040d544a371"
+        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        vol.set_volume_id(volume_id)
+        self.assertEqual(vol.aws_volume_id, volume_id)
+
+    # --------------------------------------------------------------------------------- aws & gce - fs_type
+
+    def test_aws_set_fs_type_none(self):
+        name = "yoname"
+        type = "awsElasticBlockStore"
+        mount_path = "/path/on/container"
+        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        with self.assertRaises(SyntaxError):
+            vol.set_fs_type()
+
+    def test_gce_set_fs_type_none(self):
+        name = "yoname"
+        type = "gcePersistentDisk"
+        mount_path = "/path/on/container"
+        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        with self.assertRaises(SyntaxError):
+            vol.set_fs_type()
+
+    def test_aws_fs_type_invalid_obj(self):
+        name = "yoname"
+        type = "awsElasticBlockStore"
+        mount_path = "/path/on/container"
+        fs_type = object()
+        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        with self.assertRaises(SyntaxError):
+            vol.set_fs_type(fs_type)
+
+    def test_gce_fs_type_invalid_obj(self):
+        name = "yoname"
+        type = "gcePersistentDisk"
+        mount_path = "/path/on/container"
+        fs_type = object()
+        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        with self.assertRaises(SyntaxError):
+            vol.set_fs_type(fs_type)
+
+    def test_fs_type_invalid_type(self):
+        name = "yoname"
+        type = "emptyDir"
+        mount_path = "/path/on/container"
+        fs_type = object()
+        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        with self.assertRaises(SyntaxError):
+            vol.set_fs_type(fs_type)
+
+    def test_aws_set_fs_type(self):
+        name = "yoname"
+        type = "awsElasticBlockStore"
+        mount_path = "/path/on/container"
+        fs_type = "xfs"
+        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        vol.set_fs_type(fs_type)
+        self.assertEqual(vol.fs_type, fs_type)
+
+    def test_gce_set_fs_type(self):
+        name = "yoname"
+        type = "gcePersistentDisk"
+        mount_path = "/path/on/container"
+        fs_type = "xfs"
+        vol = K8sVolume(name=name, type=type, mount_path=mount_path)
+        vol.set_fs_type(fs_type)
+        self.assertEqual(vol.fs_type, fs_type)
+
     # --------------------------------------------------------------------------------- api - pod - emptydir
 
     def test_pod_emptydir(self):
@@ -213,14 +370,17 @@ class K8sVolumeTest(unittest.TestCase):
             vols = pod.model.model['spec']['volumes']
             volnames = [x['name'] for x in vols]
             self.assertIn(vol_name, volnames)
+
             vols = pod.model.pod_spec.model['volumes']
             volnames = [x['name'] for x in vols]
             self.assertIn(vol_name, volnames)
             self.assertEqual(1, len(pod.model.model['spec']['containers']))
+
             mounts = pod.model.model['spec']['containers'][0]['volumeMounts']
             mountnames = [x['name'] for x in mounts]
             self.assertIn(vol_name, mountnames)
             self.assertEqual(1, len(pod.model.pod_spec.model['containers']))
+
             mounts = pod.model.pod_spec.model['containers'][0]['volumeMounts']
             mountnames = [x['name'] for x in mounts]
             self.assertIn(vol_name, mountnames)
@@ -250,14 +410,17 @@ class K8sVolumeTest(unittest.TestCase):
             vols = pod.model.model['spec']['volumes']
             volnames = [x['name'] for x in vols]
             self.assertIn(vol_name, volnames)
+
             vols = pod.model.pod_spec.model['volumes']
             volnames = [x['name'] for x in vols]
             self.assertIn(vol_name, volnames)
             self.assertEqual(1, len(pod.model.model['spec']['containers']))
+
             mounts = pod.model.model['spec']['containers'][0]['volumeMounts']
             mountnames = [x['name'] for x in mounts]
             self.assertIn(vol_name, mountnames)
             self.assertEqual(1, len(pod.model.pod_spec.model['containers']))
+
             mounts = pod.model.pod_spec.model['containers'][0]['volumeMounts']
             mountnames = [x['name'] for x in mounts]
             self.assertIn(vol_name, mountnames)
@@ -293,17 +456,123 @@ class K8sVolumeTest(unittest.TestCase):
             vols = pod.model.model['spec']['volumes']
             volnames = [x['name'] for x in vols]
             self.assertIn(vol_name, volnames)
+
             vols = pod.model.pod_spec.model['volumes']
             volnames = [x['name'] for x in vols]
             self.assertIn(vol_name, volnames)
             self.assertEqual(1, len(pod.model.model['spec']['containers']))
+
             mounts = pod.model.model['spec']['containers'][0]['volumeMounts']
             mountnames = [x['name'] for x in mounts]
             self.assertIn(vol_name, mountnames)
             self.assertEqual(1, len(pod.model.pod_spec.model['containers']))
+
             mounts = pod.model.pod_spec.model['containers'][0]['volumeMounts']
             mountnames = [x['name'] for x in mounts]
             self.assertIn(vol_name, mountnames)
+
+    # --------------------------------------------------------------------------------- api - pod - aws ebs
+
+    def test_pod_aws_ebs(self):
+        # http://kubernetes.io/docs/user-guide/volumes/#awselasticblockstore
+        # - the nodes on which pods are running must be AWS EC2 instances
+        # - those instances need to be in the same region and availability-zone as the EBS volume
+        # - EBS only supports a single EC2 instance mounting a volume
+
+        # Pod creation will timeout waiting for readiness if not on AWS; unschedulable.
+
+        container_name = "nginx"
+        container_image = "nginx:1.7.9"
+        container = utils.create_container(name=container_name, image=container_image)
+
+        volume_id = "vol-0e3056a2"
+        vol_name = "ebs"
+        vol_type = "awsElasticBlockStore"
+        vol_mount = "/test-aws-ebs"
+        volume = utils.create_volume(name=vol_name, type=vol_type, mount_path=vol_mount)
+        volume.set_volume_id(volume_id)
+        container.add_volume_mount(volume)
+
+        pod_name = "nginx-{0}".format(str(uuid.uuid4()))
+        pod = utils.create_pod(name=pod_name)
+        pod.add_volume(volume)
+        pod.add_container(container)
+
+        if utils.is_reachable(pod.config.api_host):
+            try:
+                pod.create()
+
+                vols = pod.model.model['spec']['volumes']
+                volnames = [x['name'] for x in vols]
+                self.assertIn(vol_name, volnames)
+
+                vols = pod.model.pod_spec.model['volumes']
+                volnames = [x['name'] for x in vols]
+                self.assertIn(vol_name, volnames)
+                self.assertEqual(1, len(pod.model.model['spec']['containers']))
+
+                mounts = pod.model.model['spec']['containers'][0]['volumeMounts']
+                mountnames = [x['name'] for x in mounts]
+                self.assertIn(vol_name, mountnames)
+                self.assertEqual(1, len(pod.model.pod_spec.model['containers']))
+
+                mounts = pod.model.pod_spec.model['containers'][0]['volumeMounts']
+                mountnames = [x['name'] for x in mounts]
+                self.assertIn(vol_name, mountnames)
+
+            except Exception as err:
+                self.assertIsInstance(err, TimedOutException)
+
+    # --------------------------------------------------------------------------------- api - pod - gce pd
+
+    def test_pod_gce_pd(self):
+        # http://kubernetes.io/docs/user-guide/volumes/#gcepersistentdisk
+        # - the nodes on which pods are running must be GCE VMs
+        # - those VMs need to be in the same GCE project and zone as the PD
+
+        # Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
+
+        container_name = "nginx"
+        container_image = "nginx:1.7.9"
+        container = utils.create_container(name=container_name, image=container_image)
+
+        pd_name = "kubernetes-py-test-pd"
+        vol_name = "persistent"
+        vol_type = "gcePersistentDisk"
+        vol_mount = "/test-gce-pd"
+        volume = utils.create_volume(name=vol_name, type=vol_type, mount_path=vol_mount)
+        volume.set_pd_name(pd_name)
+        container.add_volume_mount(volume)
+
+        pod_name = "nginx-{0}".format(str(uuid.uuid4()))
+        pod = utils.create_pod(name=pod_name)
+        pod.add_volume(volume)
+        pod.add_container(container)
+
+        if utils.is_reachable(pod.config.api_host):
+            try:
+                pod.create()
+
+                vols = pod.model.model['spec']['volumes']
+                volnames = [x['name'] for x in vols]
+                self.assertIn(vol_name, volnames)
+
+                vols = pod.model.pod_spec.model['volumes']
+                volnames = [x['name'] for x in vols]
+                self.assertIn(vol_name, volnames)
+                self.assertEqual(1, len(pod.model.model['spec']['containers']))
+
+                mounts = pod.model.model['spec']['containers'][0]['volumeMounts']
+                mountnames = [x['name'] for x in mounts]
+                self.assertIn(vol_name, mountnames)
+                self.assertEqual(1, len(pod.model.pod_spec.model['containers']))
+
+                mounts = pod.model.pod_spec.model['containers'][0]['volumeMounts']
+                mountnames = [x['name'] for x in mounts]
+                self.assertIn(vol_name, mountnames)
+
+            except Exception as err:
+                self.assertIsInstance(err, TimedOutException)
 
     # --------------------------------------------------------------------------------- api - rc - emptydir
 
@@ -335,14 +604,17 @@ class K8sVolumeTest(unittest.TestCase):
             vols = rc.model.model['spec']['template']['spec']['volumes']
             volnames = [x['name'] for x in vols]
             self.assertIn(vol_name, volnames)
+
             vols = rc.model.pod_spec.model['volumes']
             volnames = [x['name'] for x in vols]
             self.assertIn(vol_name, volnames)
             self.assertEqual(2, len(rc.model.model['spec']['template']['spec']['containers']))
+
             mounts = rc.model.model['spec']['template']['spec']['containers'][0]['volumeMounts']
             mountnames = [x['name'] for x in mounts]
             self.assertIn(vol_name, mountnames)
             self.assertEqual(2, len(rc.model.pod_spec.model['containers']))
+
             mounts = rc.model.pod_spec.model['containers'][0]['volumeMounts']
             mountnames = [x['name'] for x in mounts]
             self.assertIn(vol_name, mountnames)
@@ -379,14 +651,17 @@ class K8sVolumeTest(unittest.TestCase):
             vols = rc.model.model['spec']['template']['spec']['volumes']
             volnames = [x['name'] for x in vols]
             self.assertIn(vol_name, volnames)
+
             vols = rc.model.pod_spec.model['volumes']
             volnames = [x['name'] for x in vols]
             self.assertIn(vol_name, volnames)
             self.assertEqual(2, len(rc.model.model['spec']['template']['spec']['containers']))
+
             mounts = rc.model.model['spec']['template']['spec']['containers'][0]['volumeMounts']
             mountnames = [x['name'] for x in mounts]
             self.assertIn(vol_name, mountnames)
             self.assertEqual(2, len(rc.model.pod_spec.model['containers']))
+
             mounts = rc.model.pod_spec.model['containers'][0]['volumeMounts']
             mountnames = [x['name'] for x in mounts]
             self.assertIn(vol_name, mountnames)
@@ -429,14 +704,134 @@ class K8sVolumeTest(unittest.TestCase):
             vols = rc.model.model['spec']['template']['spec']['volumes']
             volnames = [x['name'] for x in vols]
             self.assertIn(vol_name, volnames)
+
             vols = rc.model.pod_spec.model['volumes']
             volnames = [x['name'] for x in vols]
             self.assertIn(vol_name, volnames)
             self.assertEqual(2, len(rc.model.model['spec']['template']['spec']['containers']))
+
             mounts = rc.model.model['spec']['template']['spec']['containers'][0]['volumeMounts']
             mountnames = [x['name'] for x in mounts]
             self.assertIn(vol_name, mountnames)
             self.assertEqual(2, len(rc.model.pod_spec.model['containers']))
+
             mounts = rc.model.pod_spec.model['containers'][0]['volumeMounts']
             mountnames = [x['name'] for x in mounts]
             self.assertIn(vol_name, mountnames)
+
+    # --------------------------------------------------------------------------------- api - rc - aws ebs
+
+    def test_rc_aws_ebs(self):
+        # http://kubernetes.io/docs/user-guide/volumes/#awselasticblockstore
+        # - the nodes on which pods are running must be AWS EC2 instances
+        # - those instances need to be in the same region and availability-zone as the EBS volume
+        # - EBS only supports a single EC2 instance mounting a volume
+
+        # Pod creation will timeout waiting for readiness if not on AWS; unschedulable.
+
+        container_name = "nginx"
+        container_image = "nginx:1.7.9"
+        container_nginx = utils.create_container(name=container_name, image=container_image)
+
+        container_name = "redis"
+        container_image = "redis:3.0.7"
+        container_redis = utils.create_container(name=container_name, image=container_image)
+
+        volume_id = "vol-0e3056a2"
+        vol_name = "ebs"
+        vol_type = "awsElasticBlockStore"
+        vol_mount = "/test-aws-ebs"
+        volume = utils.create_volume(name=vol_name, type=vol_type, mount_path=vol_mount)
+        volume.set_volume_id(volume_id)
+        container_nginx.add_volume_mount(volume)
+        container_redis.add_volume_mount(volume)
+
+        rc_name = "nginx-{0}".format(str(uuid.uuid4()))
+        rc = utils.create_rc(name=rc_name)
+        rc.add_volume(volume)
+        rc.add_container(container_nginx)
+        rc.add_container(container_redis)
+        rc.set_replicas(3)
+
+        if utils.is_reachable(rc.config.api_host):
+            try:
+                rc.create()
+
+                vols = rc.model.model['spec']['template']['spec']['volumes']
+                volnames = [x['name'] for x in vols]
+                self.assertIn(vol_name, volnames)
+
+                vols = rc.model.pod_spec.model['volumes']
+                volnames = [x['name'] for x in vols]
+                self.assertIn(vol_name, volnames)
+                self.assertEqual(2, len(rc.model.model['spec']['template']['spec']['containers']))
+
+                mounts = rc.model.model['spec']['template']['spec']['containers'][0]['volumeMounts']
+                mountnames = [x['name'] for x in mounts]
+                self.assertIn(vol_name, mountnames)
+                self.assertEqual(2, len(rc.model.pod_spec.model['containers']))
+
+                mounts = rc.model.pod_spec.model['containers'][0]['volumeMounts']
+                mountnames = [x['name'] for x in mounts]
+                self.assertIn(vol_name, mountnames)
+
+            except Exception as err:
+                self.assertIsInstance(err, TimedOutException)
+
+    # --------------------------------------------------------------------------------- api - rc - gce pd
+
+    def test_rc_gce_pd(self):
+        # http://kubernetes.io/docs/user-guide/volumes/#gcepersistentdisk
+        # - the nodes on which pods are running must be GCE VMs
+        # - those VMs need to be in the same GCE project and zone as the PD
+
+        # Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
+
+        container_name = "nginx"
+        container_image = "nginx:1.7.9"
+        container_nginx = utils.create_container(name=container_name, image=container_image)
+
+        container_name = "redis"
+        container_image = "redis:3.0.7"
+        container_redis = utils.create_container(name=container_name, image=container_image)
+
+        pd_name = "kubernetes-py-test-pd"
+        vol_name = "persistent"
+        vol_type = "gcePersistentDisk"
+        vol_mount = "/test-gce-pd"
+        volume = utils.create_volume(name=vol_name, type=vol_type, mount_path=vol_mount, read_only=True)
+        volume.set_pd_name(pd_name)
+        container_nginx.add_volume_mount(volume)
+        container_redis.add_volume_mount(volume)
+
+        rc_name = "nginx-{0}".format(str(uuid.uuid4()))
+        rc = utils.create_rc(name=rc_name)
+        rc.add_volume(volume)
+        rc.add_container(container_nginx)
+        rc.add_container(container_redis)
+        rc.set_replicas(3)
+
+        if utils.is_reachable(rc.config.api_host):
+            try:
+                rc.create()
+
+                vols = rc.model.model['spec']['volumes']
+                volnames = [x['name'] for x in vols]
+                self.assertIn(vol_name, volnames)
+
+                vols = rc.model.pod_spec.model['volumes']
+                volnames = [x['name'] for x in vols]
+                self.assertIn(vol_name, volnames)
+                self.assertEqual(1, len(rc.model.model['spec']['containers']))
+
+                mounts = rc.model.model['spec']['containers'][0]['volumeMounts']
+                mountnames = [x['name'] for x in mounts]
+                self.assertIn(vol_name, mountnames)
+                self.assertEqual(1, len(rc.model.pod_spec.model['containers']))
+
+                mounts = rc.model.pod_spec.model['containers'][0]['volumeMounts']
+                mountnames = [x['name'] for x in mounts]
+                self.assertIn(vol_name, mountnames)
+
+            except Exception as err:
+                self.assertIsInstance(err, TimedOutException)

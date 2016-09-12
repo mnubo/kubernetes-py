@@ -27,7 +27,6 @@ class PodSpec(BaseModel):
 
             for c in self.model['containers']:
                 self.containers.append(Container(model=c))
-
             if 'volumes' not in self.model.keys():
                 self.model['volumes'] = []
 
@@ -40,7 +39,6 @@ class PodSpec(BaseModel):
 
             if name is not None and not isinstance(name, str):
                 raise SyntaxError('PodSpec: Name should be a string.')
-
             if image is not None and not isinstance(image, str):
                 self.containers.append(Container(name=name, image=image))
 
@@ -93,32 +91,16 @@ class PodSpec(BaseModel):
             vol[volume.type]['path'] = volume.host_path
         if volume.type == 'secret':
             vol[volume.type]['secretName'] = volume.secret_name
+        if volume.type == 'awsElasticBlockStore':
+            vol[volume.type]['volumeID'] = volume.aws_volume_id
+            vol[volume.type]['fsType'] = volume.fs_type
+        if volume.type == 'gcePersistentDisk':
+            vol[volume.type]['pdName'] = volume.gce_pd_name
+            vol[volume.type]['fsType'] = volume.fs_type
+        if volume.read_only is True:
+            vol[volume.type]['readOnly'] = True
 
         self.model['volumes'].append(vol)
-
-    def add_host_volume(self, name=None, path=None):
-        if name is None or path is None:
-            raise SyntaxError('PodSpec: name: [ {0} ] and path: [ {1} ] cannot be None.'.format(name, path))
-        if not isinstance(name, str) or not isinstance(path, str):
-            raise SyntaxError('PodSpec: name: [ {0} ] and path: [ {1} ] must be strings.'.format(name, path))
-        self.model['volumes'].append({
-            "name": name,
-            "hostPath": {
-                "path": path
-            }
-        })
-        return self
-
-    def add_emptydir_volume(self, name=None):
-        if name is None:
-            raise SyntaxError('PodSpec: name: [ {0} ] cannot be None.'.format(name))
-        if not isinstance(name, str):
-            raise SyntaxError('PodSpec: name: [ {0} ] must be a string.'.format(name))
-        self.model['volumes'].append({
-            "name": name,
-            "emptyDir": {}
-        })
-        return self
 
     def add_image_pull_secrets(self, name=None):
         if name is None:
