@@ -44,6 +44,7 @@ class K8sReplicationController(K8sPodBasedObject):
     def create(self):
         super(K8sReplicationController, self).create()
         self.get()
+        self.wait_for_replicas(self.get_replicas())
         return self
 
     def update(self):
