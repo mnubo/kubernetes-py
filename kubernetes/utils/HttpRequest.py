@@ -39,10 +39,12 @@ class HttpRequest:
             http_headers['Content-type'] = 'application/json'
 
         if self.token is not None:
-            http_headers['Authorization'] = 'Bearer {token}'.format(token=self.token)
+            http_headers['Authorization'] = 'Bearer {token}'.format(
+                token=self.token)
 
         if self.data is not None and self.http_method in ['GET']:
-            url = "{orig_url}?{encoded_params}".format(orig_url=self.url, encoded_params=urllib.urlencode(self.data))
+            url = "{orig_url}?{encoded_params}".format(
+                orig_url=self.url, encoded_params=urllib.urlencode(self.data))
             self.url = url
 
         self.url = self.http_host + self.url
