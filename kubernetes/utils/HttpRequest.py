@@ -65,6 +65,7 @@ class HttpRequest:
                     url=self.url,
                     auth=self.auth,
                     cert=self.cert,
+                    headers=http_headers,
                     verify=verify
                 )
             else:
