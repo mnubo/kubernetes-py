@@ -59,26 +59,16 @@ class HttpRequest:
             verify = temp.name
 
         try:
-            if self.data is None:
-                response = requests.request(
-                    method=self.http_method,
-                    url=self.url,
-                    auth=self.auth,
-                    cert=self.cert,
-                    headers=http_headers,
-                    verify=verify
-                )
-            else:
-                json_encoded = json.dumps(self.data)
-                response = requests.request(
-                    method=self.http_method,
-                    url=self.url,
-                    auth=self.auth,
-                    cert=self.cert,
-                    headers=http_headers,
-                    data=json_encoded,
-                    verify=verify
-                )
+
+            response = requests.request(
+                method=self.http_method,
+                url=self.url,
+                auth=self.auth,
+                cert=self.cert,
+                headers=http_headers,
+                data="" if self.data is None else json.dumps(self.data),
+                verify=verify
+            )
 
         except Exception as err:
             raise err
