@@ -39,10 +39,12 @@ class HttpRequest:
             http_headers['Content-type'] = 'application/json'
 
         if self.token is not None:
-            http_headers['Authorization'] = 'Bearer {token}'.format(token=self.token)
+            http_headers['Authorization'] = 'Bearer {token}'.format(
+                token=self.token)
 
         if self.data is not None and self.http_method in ['GET']:
-            url = "{orig_url}?{encoded_params}".format(orig_url=self.url, encoded_params=urllib.urlencode(self.data))
+            url = "{orig_url}?{encoded_params}".format(
+                orig_url=self.url, encoded_params=urllib.urlencode(self.data))
             self.url = url
 
         self.url = self.http_host + self.url
@@ -59,25 +61,16 @@ class HttpRequest:
             verify = temp.name
 
         try:
-            if self.data is None:
-                response = requests.request(
-                    method=self.http_method,
-                    url=self.url,
-                    auth=self.auth,
-                    cert=self.cert,
-                    verify=verify
-                )
-            else:
-                json_encoded = json.dumps(self.data)
-                response = requests.request(
-                    method=self.http_method,
-                    url=self.url,
-                    auth=self.auth,
-                    cert=self.cert,
-                    headers=http_headers,
-                    data=json_encoded,
-                    verify=verify
-                )
+
+            response = requests.request(
+                method=self.http_method,
+                url=self.url,
+                auth=self.auth,
+                cert=self.cert,
+                headers=http_headers,
+                data="" if self.data is None else json.dumps(self.data),
+                verify=verify
+            )
 
         except Exception as err:
             raise err
