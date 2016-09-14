@@ -23,6 +23,7 @@ VALID_HOST_RE = re.compile(r'^(http[s]?\:\/\/)?([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-
 
 
 class K8sConfig(object):
+
     def __init__(self, kubeconfig=DEFAULT_KUBECONFIG, api_host=DEFAULT_API_HOST, auth=None, cert=None,
                  namespace=DEFAULT_NAMESPACE, pull_secret=None, token=None, version=DEFAULT_API_VERSION):
         """
@@ -63,7 +64,9 @@ class K8sConfig(object):
             self.clusters = dotconf['clusters']
             self.contexts = dotconf['contexts']
             self.current_context = dotconf['current-context']
-            self.current_context_dict = [context['context'] for context in self.contexts if context['name'] == self.current_context][0]
+            self.current_context_dict = [context['context']
+                                         for context in self.contexts
+                                         if context['name'] == self.current_context][0]
             self.preferences = dotconf['preferences']
             self.pull_secret = pull_secret
             self.token = None
