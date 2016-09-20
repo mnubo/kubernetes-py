@@ -236,7 +236,7 @@ class K8sReplicationController(K8sPodBasedObject):
     # -------------------------------------------------------------------------------------  resize
 
     @staticmethod
-    def resize(config=None, name=None, replicas=None):
+    def scale(config=None, name=None, replicas=None):
         if name is None:
             raise SyntaxError('ReplicationController: name: [ {0} ] cannot be None.'.format(name))
         if replicas is None:

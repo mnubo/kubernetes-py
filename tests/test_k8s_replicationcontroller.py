@@ -993,9 +993,9 @@ class K8sReplicationControllerTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_wait_for_replicas_timed_out(self):
-        # this test makes no sense without a prior call to resize.
+        # this test makes no sense without a prior call to scale.
         # it'll wait forever on a quantity of pods that does not change.
-        # please see test_resize().
+        # please see test_scale().
         cont_name = "yocontainer"
         container = utils.create_container(name=cont_name)
         name = "yorc-{0}".format(str(uuid.uuid4()))
@@ -1059,53 +1059,53 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     # -------------------------------------------------------------------------------------  resize
 
-    def test_resize_none_args(self):
+    def test_scale_none_args(self):
         try:
-            K8sReplicationController.resize()
+            K8sReplicationController.scale()
             self.fail("Should not fail.")
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
-    def test_resize_invalid_config(self):
+    def test_scale_invalid_config(self):
         config = object()
         name = "yoname"
         replicas = 1
         try:
-            K8sReplicationController.resize(config=config, name=name, replicas=replicas)
+            K8sReplicationController.scale(config=config, name=name, replicas=replicas)
             self.fail("Should not fail.")
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
-    def test_resize_invalid_name(self):
+    def test_scale_invalid_name(self):
         name = object()
         replicas = 1
         try:
-            K8sReplicationController.resize(name=name, replicas=replicas)
+            K8sReplicationController.scale(name=name, replicas=replicas)
             self.fail("Should not fail.")
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
-    def test_resize_invalid_replicas(self):
+    def test_scale_invalid_replicas(self):
         name = "yoname"
         replicas = -99
         try:
-            K8sReplicationController.resize(name=name, replicas=replicas)
+            K8sReplicationController.scale(name=name, replicas=replicas)
             self.fail("Should not fail.")
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
-    def test_resize_nonexistent(self):
+    def test_scale_nonexistent(self):
         name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         replicas = 3
         if utils.is_reachable(rc.config.api_host):
             try:
-                K8sReplicationController.resize(config=rc.config, name=name, replicas=replicas)
+                K8sReplicationController.scale(config=rc.config, name=name, replicas=replicas)
                 self.fail("Should not fail.")
             except Exception as err:
                 self.assertIsInstance(err, NotFoundException)
 
-    def test_resize(self):
+    def test_scale(self):
         cont_name = "yocontainer"
         container = utils.create_container(name=cont_name)
         name = "yorc-{0}".format(str(uuid.uuid4()))
@@ -1114,7 +1114,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         replicas = 3
         if utils.is_reachable(rc.config.api_host):
             rc.create()
-            K8sReplicationController.resize(config=rc.config, name=name, replicas=replicas)
+            K8sReplicationController.scale(config=rc.config, name=name, replicas=replicas)
             result = rc.get()
             self.assertIsInstance(result, K8sReplicationController)
             self.assertEqual(replicas, result.model.model['spec']['replicas'])
@@ -1215,7 +1215,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         rc.add_container(container_2)
         if utils.is_reachable(rc.config.api_host):
             rc.create()
-            K8sReplicationController.resize(
+            K8sReplicationController.scale(
                 config=rc.config,
                 name=name,
                 replicas=count
@@ -1256,7 +1256,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         rc.add_container(container_2)
         if utils.is_reachable(rc.config.api_host):
             rc.create()
-            K8sReplicationController.resize(
+            K8sReplicationController.scale(
                 config=rc.config,
                 name=name,
                 replicas=count
@@ -1355,7 +1355,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
         if utils.is_reachable(rc_1.config.api_host):
             rc_1.create()
-            K8sReplicationController.resize(
+            K8sReplicationController.scale(
                 config=rc_1.config,
                 name=name_1,
                 replicas=count
@@ -1404,7 +1404,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
         if utils.is_reachable(rc_1.config.api_host):
             rc_1.create()
-            K8sReplicationController.resize(
+            K8sReplicationController.scale(
                 config=rc_1.config,
                 name=name_1,
                 replicas=count
