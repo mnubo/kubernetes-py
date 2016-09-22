@@ -9,32 +9,32 @@
 from kubernetes.K8sObject import K8sObject
 from kubernetes.K8sSecret import K8sSecret
 
-VALID_VOLUME_TYPES = [
-    'emptyDir',
-    'hostPath',
-    'gcePersistentDisk',
-    'awsElasticBlockStore',
-    # 'nfs',                        .3
-    # 'iscsi',
-    # 'flocker',
-    # 'glusterfs',
-    # 'rbd',
-    # 'cephfs',
-    # 'gitRepo',                    .4
-    'secret',
-    # 'persistentVolumeClaim',      .5
-    # 'downwardAPI',
-    # 'azureFileVolume',
-    # 'vsphereVolume',
-]
-
-VALID_EMPTYDIR_MEDIA = [
-    '',
-    'Memory'
-]
-
 
 class K8sVolume(K8sObject):
+
+    VALID_VOLUME_TYPES = [
+        'emptyDir',
+        'hostPath',
+        'gcePersistentDisk',
+        'awsElasticBlockStore',
+        # 'nfs',                        .3
+        # 'iscsi',
+        # 'flocker',
+        # 'glusterfs',
+        # 'rbd',
+        # 'cephfs',
+        # 'gitRepo',                    .4
+        'secret',
+        # 'persistentVolumeClaim',      .5
+        # 'downwardAPI',
+        # 'azureFileVolume',
+        # 'vsphereVolume',
+    ]
+
+    VALID_EMPTYDIR_MEDIA = [
+        '',
+        'Memory'
+    ]
 
     def __init__(self, config=None, name=None, type=None, mount_path=None, read_only=False):
         if name is None:
@@ -44,8 +44,8 @@ class K8sVolume(K8sObject):
 
         if type is None:
             type = 'hostPath'
-        if type is not None and type not in VALID_VOLUME_TYPES:
-            raise SyntaxError('K8sVolume: volume_type: [ {0} ] is invalid. Must be in: [ {1} ]'.format(type, VALID_VOLUME_TYPES))
+        if type is not None and type not in K8sVolume.VALID_VOLUME_TYPES:
+            raise SyntaxError('K8sVolume: volume_type: [ {0} ] is invalid. Must be in: [ {1} ]'.format(type, K8sVolume.VALID_VOLUME_TYPES))
 
         if mount_path is not None:
             if not isinstance(mount_path, str):
