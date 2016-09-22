@@ -164,8 +164,8 @@ class ReplicationController(PodBasedModel):
             raise SyntaxError('ReplicationController: name: [ {0} ] cannot be None.'.format(name))
         if not isinstance(name, str):
             raise SyntaxError('ReplicationController: dico: [ {0} ] must be a string.'.format(name))
-        self.rc_metadata.set_namespace(name=name)
-        self.pod_metadata.set_namespace(name=name)
+        self.rc_metadata.set_namespace(namespace=name)
+        self.pod_metadata.set_namespace(namespace=name)
         return self
 
     def set_replicas(self, replicas=None):

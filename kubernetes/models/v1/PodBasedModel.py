@@ -119,32 +119,32 @@ class PodBasedModel(BaseModel):
 
     # ------------------------------------------------------------------------------------- set
 
-    def set_active_deadline(self, seconds):
+    def set_active_deadline(self, seconds=None):
         self.pod_spec.set_active_deadline(seconds)
         self._update_model()
         return self
 
-    def set_dns_policy(self, policy):
-        self.pod_spec.set_dns_policy(policy=policy)
+    def set_dns_policy(self, policy=None):
+        self.pod_spec.set_dns_policy(policy)
         self._update_model()
         return self
 
-    def set_pod_annotations(self, new_dict):
-        self.pod_metadata.set_annotations(dico=new_dict)
+    def set_pod_annotations(self, annotations=None):
+        self.pod_metadata.set_annotations(annotations)
         self._update_model()
         return self
 
-    def set_pod_generate_name(self, mode, name):
+    def set_pod_generate_name(self, mode=None, name=None):
         self.pod_metadata.set_generate_name(mode=mode, name=name)
         self._update_model()
         return self
 
-    def set_pod_labels(self, labels):
-        self.pod_metadata.set_labels(labels=labels)
+    def set_pod_labels(self, labels=None):
+        self.pod_metadata.set_labels(labels)
         self._update_model()
         return self
 
-    def set_pod_image(self, name, image):
+    def set_pod_image(self, name=None, image=None):
         self.pod_spec.set_container_image(name=name, image=image)
         self._update_model()
 
@@ -153,32 +153,32 @@ class PodBasedModel(BaseModel):
         self._update_model()
         return self
 
-    def set_pod_namespace(self, name=None):
-        self.pod_metadata.set_namespace(name=name)
+    def set_pod_namespace(self, namespace=None):
+        self.pod_metadata.set_namespace(namespace)
         self._update_model()
         return self
 
-    def set_pod_node_name(self, name):
-        self.pod_spec.set_node_name(name=name)
+    def set_pod_node_name(self, name=None):
+        self.pod_spec.set_node_name(name)
         self._update_model()
         return self
 
-    def set_pod_node_selector(self, new_dict):
-        self.pod_spec.set_node_selector(dico=new_dict)
+    def set_pod_node_selector(self, selector=None):
+        self.pod_spec.set_node_selector(selector)
         self._update_model()
         return self
 
-    def set_pod_restart_policy(self, policy):
-        self.pod_spec.set_restart_policy(policy=policy)
+    def set_pod_restart_policy(self, policy=None):
+        self.pod_spec.set_restart_policy(policy)
         self._update_model()
         return self
 
-    def set_service_account(self, name):
-        self.pod_spec.set_service_account(name=name)
+    def set_service_account(self, name=None):
+        self.pod_spec.set_service_account(name)
         self._update_model()
         return self
 
     def set_termination_grace_period(self, seconds=None):
-        self.pod_spec.set_termination_grace_period(seconds=seconds)
+        self.pod_spec.set_termination_grace_period(seconds)
         self._update_model()
         return self

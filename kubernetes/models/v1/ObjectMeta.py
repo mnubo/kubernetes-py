@@ -292,12 +292,12 @@ class ObjectMeta(BaseModel):
             self.model['labels']['name'] = name
         return self
 
-    def set_namespace(self, name=None):
-        if name is None:
-            raise SyntaxError('ObjectMeta: name: [ {0} ] cannot be None.'.format(name))
-        if not isinstance(name, str):
-            raise SyntaxError('ObjectMeta: name: [ {0} ] must be a string.'.format(name.__class__.__name__))
-        self.model['namespace'] = name
+    def set_namespace(self, namespace=None):
+        if namespace is None:
+            raise SyntaxError('ObjectMeta: name: [ {0} ] cannot be None.'.format(namespace))
+        if not isinstance(namespace, str):
+            raise SyntaxError('ObjectMeta: name: [ {0} ] must be a string.'.format(namespace.__class__.__name__))
+        self.model['namespace'] = namespace
         return self
 
     def set_resource_version(self, ver=None):

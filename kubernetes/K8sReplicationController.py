@@ -143,7 +143,7 @@ class K8sReplicationController(K8sPodBasedObject):
         return self
 
     def set_pod_annotations(self, annotations=None):
-        self.model.set_pod_annotations(new_dict=annotations)
+        self.model.set_pod_annotations(annotations=annotations)
         return self
 
     def set_pod_labels(self, labels=None):
