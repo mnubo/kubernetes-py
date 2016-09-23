@@ -1489,7 +1489,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         if utils.is_reachable(config.api_host):
             for i in range(0, count):
                 name = "yorc-{0}".format(str(uuid.uuid4()))
-                rc = utils.create_rc(config, name)
+                rc = utils.create_rc(config, name, replicas=1)
                 rc.add_container(container)
                 result = rc.create()
                 self.assertIsInstance(result, K8sReplicationController)

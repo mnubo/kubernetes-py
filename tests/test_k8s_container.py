@@ -151,7 +151,7 @@ class K8sContainerTest(unittest.TestCase):
         volhostpath = "/path/on/host"
         config = utils.create_config()
         vol = K8sVolume(config=config, name=volname, type=voltype, mount_path=volmount)
-        vol.set_host_path(volhostpath)
+        vol.set_path(volhostpath)
         c.add_volume_mount(vol)
         self.assertIn('volumeMounts', c.model.model)
         self.assertIsInstance(c.model.model['volumeMounts'], list)

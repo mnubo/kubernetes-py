@@ -32,10 +32,10 @@ class K8sVolume(K8sObject):
         self.model.set_medium(medium)
         return self
 
-    # -------------------------------------------------------------------------------------  hostPath
+    # -------------------------------------------------------------------------------------  hostPath & nfs - path
 
-    def set_host_path(self, path=None):
-        self.model.set_host_path(path)
+    def set_path(self, path=None):
+        self.model.set_path(path)
         return self
 
     # -------------------------------------------------------------------------------------  secret
@@ -60,4 +60,10 @@ class K8sVolume(K8sObject):
 
     def set_fs_type(self, fs_type=None):
         self.model.set_fs_type(fs_type)
+        return self
+
+    # -------------------------------------------------------------------------------------  nfs
+
+    def set_server(self, server=None):
+        self.model.set_server(server)
         return self

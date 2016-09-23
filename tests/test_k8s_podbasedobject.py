@@ -372,7 +372,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         config = utils.create_config()
         vol = K8sVolume(config=config, name=name, mount_path="/var/test", type='hostPath')
         host_path = '/var/lib/docker'
-        vol.set_host_path(host_path)
+        vol.set_path(host_path)
         obj.add_volume(vol)
         self.assertEqual(1, len(obj.model.model['spec']['volumes']))
         self.assertEqual(1, len(obj.model.pod_spec.model['volumes']))
