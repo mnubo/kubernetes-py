@@ -14,7 +14,7 @@ from kubernetes.models.v1.ObjectMeta import ObjectMeta
 class ReplicationController(PodBasedModel):
 
     def __init__(self, name=None, image=None, namespace='default', replicas=1, model=None):
-        PodBasedModel.__init__(self)
+        super(ReplicationController, self).__init__()
 
         if model is not None:
             self.model = model
