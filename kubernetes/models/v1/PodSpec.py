@@ -78,30 +78,9 @@ class PodSpec(BaseModel):
         if volume.name in volnames:
             raise AlreadyExistsException('PodSpec: volume: [ {0} ] already exists.'.format(volume.name))
 
-        if volume.type == "hostPath" and volume.host_path is None:
-            msg = 'PodSpec: volume: [ {0} ] cannot be added; please set a hostPath.'.format(volume.name)
-            raise UnprocessableEntityException(msg)
-
-        vol = {
-            'name': volume.name,
-            '{0}'.format(volume.type): {}
-        }
-
-        if volume.type == 'emptyDir' and volume.medium != '':
-            vol[volume.type]['medium'] = volume.medium
-        if volume.type == 'hostPath':
-            vol[volume.type]['path'] = volume.host_path
-        if volume.type == 'secret':
-            vol[volume.type]['secretName'] = volume.secret_name
-        if volume.type == 'awsElasticBlockStore':
-            vol[volume.type]['volumeID'] = volume.aws_volume_id
-            vol[volume.type]['fsType'] = volume.fs_type
-        if volume.type == 'gcePersistentDisk':
-            vol[volume.type]['pdName'] = volume.gce_pd_name
-            vol[volume.type]['fsType'] = volume.fs_type
-        if volume.read_only is True:
-            vol[volume.type]['readOnly'] = True
-
+        vol = volume.model.model['volume']
+        if 'volumes' not in self.model:
+            self.model['volumes'] = []
         self.model['volumes'].append(vol)
 
     def add_image_pull_secrets(self, name=None):

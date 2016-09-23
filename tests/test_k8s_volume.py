@@ -59,9 +59,10 @@ class K8sVolumeTest(unittest.TestCase):
 
     def test_init(self):
         name = "yoname"
+        type = 'hostPath'
         mount_path = "/path/on/container"
         config = utils.create_config()
-        vol = K8sVolume(config=config, name=name, mount_path=mount_path)
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         self.assertIsNotNone(vol)
         self.assertIsInstance(vol, K8sVolume)
         self.assertEqual('hostPath', vol.type)
@@ -104,7 +105,7 @@ class K8sVolumeTest(unittest.TestCase):
         config = utils.create_config()
         vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_medium()
-        self.assertEqual('', vol.medium)
+        self.assertEqual('', vol.model.medium)
 
     def test_emptydir_set_medium_emptystring(self):
         name = "yoname"
@@ -113,7 +114,7 @@ class K8sVolumeTest(unittest.TestCase):
         config = utils.create_config()
         vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_medium('')
-        self.assertEqual('', vol.medium)
+        self.assertEqual('', vol.model.medium)
 
     def test_emptydir_set_medium_memory(self):
         name = "yoname"
@@ -123,7 +124,7 @@ class K8sVolumeTest(unittest.TestCase):
         config = utils.create_config()
         vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_medium(medium)
-        self.assertEqual(medium, vol.medium)
+        self.assertEqual(medium, vol.model.medium)
 
     # --------------------------------------------------------------------------------- hostPath
 
@@ -164,7 +165,7 @@ class K8sVolumeTest(unittest.TestCase):
         config = utils.create_config()
         vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_host_path(host_path)
-        self.assertEqual(host_path, vol.host_path)
+        self.assertEqual(host_path, vol.model.path)
 
     # --------------------------------------------------------------------------------- secret
 
@@ -208,7 +209,7 @@ class K8sVolumeTest(unittest.TestCase):
         config = utils.create_config()
         vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_secret_name(secret)
-        self.assertEqual(vol.secret_name, secret_name)
+        self.assertEqual(vol.model.secret_name, secret_name)
 
     # --------------------------------------------------------------------------------- awsElasticBlockStore
 
@@ -259,7 +260,7 @@ class K8sVolumeTest(unittest.TestCase):
         config = utils.create_config()
         vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_volume_id(volume_id)
-        self.assertEqual(vol.aws_volume_id, volume_id)
+        self.assertEqual(vol.model.aws_volume_id, volume_id)
 
     # --------------------------------------------------------------------------------- gcePersistentDisk
 
@@ -310,7 +311,7 @@ class K8sVolumeTest(unittest.TestCase):
         config = utils.create_config()
         vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_volume_id(volume_id)
-        self.assertEqual(vol.aws_volume_id, volume_id)
+        self.assertEqual(vol.model.aws_volume_id, volume_id)
 
     # --------------------------------------------------------------------------------- aws & gce - fs_type
 
@@ -370,7 +371,7 @@ class K8sVolumeTest(unittest.TestCase):
         config = utils.create_config()
         vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_fs_type(fs_type)
-        self.assertEqual(vol.fs_type, fs_type)
+        self.assertEqual(vol.model.fs_type, fs_type)
 
     def test_gce_set_fs_type(self):
         name = "yoname"
@@ -380,7 +381,7 @@ class K8sVolumeTest(unittest.TestCase):
         config = utils.create_config()
         vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_fs_type(fs_type)
-        self.assertEqual(vol.fs_type, fs_type)
+        self.assertEqual(vol.model.fs_type, fs_type)
 
     # --------------------------------------------------------------------------------- api - pod - emptydir
 
