@@ -22,9 +22,11 @@ Documentation is currently work in progress. Please find some code snippets to h
 ### Configuration
 
 By default, the module attempts to load existing configuration from `~/.kube/config`. You are welcome to specify
-another location from where to load a kubeconfig file.
+another location from where to load a kubeconfig file. 
 
-Otherwise, kubeconfig parameters can be overridden piecemeal. Please see `K8sConfig.py` for more information.
+Otherwise, individual configuration parameters can be overridden piecemeal. In this case you must 
+specify `kubeconfig=None` when initializing a K8sConfig object, otherwise the `~/kube/.config` file 
+takes precedence if it exists.
     
     from kubernetes import K8sConfig
     
