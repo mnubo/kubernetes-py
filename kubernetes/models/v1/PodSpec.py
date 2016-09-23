@@ -18,7 +18,8 @@ class PodSpec(BaseModel):
         self.containers = list()
 
         if model is not None:
-            assert isinstance(model, dict)
+            if not isinstance(model, dict):
+                raise SyntaxError('PodSpec: model: [ {0} ] must be a dict.'.format(model.__class__.__name__))
 
             if 'status' in self.model:
                 self.model.pop('status', None)
