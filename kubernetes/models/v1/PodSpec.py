@@ -7,7 +7,7 @@
 #
 
 from kubernetes.K8sVolume import K8sVolume
-from kubernetes.K8sExceptions import AlreadyExistsException, UnprocessableEntityException
+from kubernetes.K8sExceptions import AlreadyExistsException
 from kubernetes.models.v1.BaseModel import BaseModel
 from kubernetes.models.v1.Container import Container
 
