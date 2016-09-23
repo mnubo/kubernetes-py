@@ -20,14 +20,14 @@ class PodSpec(BaseModel):
         if model is not None:
             assert isinstance(model, dict)
 
-            if 'status' in self.model.keys():
+            if 'status' in self.model:
                 self.model.pop('status', None)
 
             self.model = model
 
             for c in self.model['containers']:
                 self.containers.append(Container(model=c))
-            if 'volumes' not in self.model.keys():
+            if 'volumes' not in self.model:
                 self.model['volumes'] = []
 
         else:
@@ -38,12 +38,13 @@ class PodSpec(BaseModel):
             }
 
             if name is not None and not isinstance(name, str):
-                raise SyntaxError('PodSpec: Name should be a string.')
+                raise SyntaxError('PodSpec: name: [ {0} ] must be a string.'.format(name.__class__.__name__))
             if image is not None and not isinstance(image, str):
                 self.containers.append(Container(name=name, image=image))
 
             if pull_secret is not None:
-                assert isinstance(pull_secret, str)
+                if not isinstance(pull_secret, str):
+                    raise SyntaxError('PodSpec: pull_secret: [ {0} ] must be a string.'.format(pull_secret.__class__.__name__))
                 self.add_image_pull_secrets(name=pull_secret)
 
             self._update_model()
