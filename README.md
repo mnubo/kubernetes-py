@@ -267,6 +267,8 @@ We currently support:
 - `hostPath`
 - `awsElasticBlockStore`
 - `gcePersistentDisk`
+- `nfs`
+- `gitRepo`
 
 Mounting an AWS EBS volume inside a Pod:
     
