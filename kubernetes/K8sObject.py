@@ -59,7 +59,7 @@ class K8sObject(object):
             raise Exception('Could not set BaseUrl for type: [ {0} ]'.format(obj_type))
 
     def __str__(self):
-        return "[ {0} ] named [ {1} ]. Model: [ {2} ]".format(self.obj_type, self.name, self.model.get())
+        return "{0}".format(self.model.get())
 
     def __eq__(self, other):
         # see https://github.com/kubernetes/kubernetes/blob/release-1.3/docs/design/identifiers.md
