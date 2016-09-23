@@ -64,7 +64,7 @@ class K8sVolumeTest(unittest.TestCase):
         vol = K8sVolume(config=config, name=name, mount_path=mount_path)
         self.assertIsNotNone(vol)
         self.assertIsInstance(vol, K8sVolume)
-        self.assertEqual('emptyDir', vol.type)
+        self.assertEqual('hostPath', vol.type)
 
     # --------------------------------------------------------------------------------- emptyDir
 

@@ -78,8 +78,8 @@ class K8sPodBasedObject(K8sObject):
         self.model.set_pod_node_name(name=name)
         return self
 
-    def set_pod_node_selector(self, new_dict=None):
-        self.model.set_pod_node_selector(selector=new_dict)
+    def set_pod_node_selector(self, selector=None):
+        self.model.set_pod_node_selector(selector=selector)
         return self
 
     def set_pod_restart_policy(self, policy=None):

@@ -84,7 +84,7 @@ class K8sVolume(K8sObject):
             medium = ''
         if medium is not None and self.type != 'emptyDir':
             raise SyntaxError('K8sVolume: medium: [ {0} ] can only be used with type [ emptyDir ]'. format(medium))
-        if medium not in VALID_EMPTYDIR_MEDIA:
+        if medium not in K8sVolume.VALID_EMPTYDIR_MEDIA:
             raise SyntaxError('K8sVolume: medium: [ {0} ] is invalid. Must be in: [ {1} ] '.format(medium, VALID_EMPTYDIR_MEDIA))
 
         self.medium = medium
