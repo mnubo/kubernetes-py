@@ -11,6 +11,7 @@ from kubernetes.models.v1 import BaseModel
 
 
 class Volume(BaseModel):
+
     VALID_VOLUME_TYPES = [
         'emptyDir',
         'hostPath',
@@ -22,7 +23,7 @@ class Volume(BaseModel):
         # 'glusterfs',
         # 'rbd',
         # 'cephfs',
-        # 'gitRepo',
+        'gitRepo',
         'secret',
         # 'persistentVolumeClaim',
         # 'downwardAPI',
@@ -56,10 +57,12 @@ class Volume(BaseModel):
         self.aws_volume_id = None  # used with type 'awsElasticBlockStore'
         self.fs_type = 'ext4'  # used with types 'awsElasticBlockStore' and 'gcePersistentDisk'
         self.gce_pd_name = None  # used with type 'gcePersistentDisk'
-        self.path = None  # used with type 'hostPath' and 'nfs'
+        self.git_repo = None  # used with type 'gitRepo'
+        self.git_revision = None  # used with type 'gitRepo'
         self.medium = ''  # used with type 'emptyDir'
         self.mount_path = mount_path
         self.name = name
+        self.path = None  # used with type 'hostPath' and 'nfs'
         self.read_only = read_only
         self.secret_name = None  # used with type 'secret'
         self.server = None  # used with type 'nfs
@@ -70,8 +73,7 @@ class Volume(BaseModel):
 
     @staticmethod
     def _is_valid_path(path=None):
-        # Ugh. What a PITA. # TODO: validate path for unix and windows.
-        #
+        # TODO: validate path for unix and windows.
         # re_match = re.match(r'^(([a-zA-Z]:)|((\\|/){1,2}\w+)\$?)((\\|/)(\w[\w ]*.*))+\.([a-zA-Z0-9]+)$', path)
         # if re_match is None:
         #     return False
@@ -94,21 +96,32 @@ class Volume(BaseModel):
 
         if self.read_only is True:
             self.model['volumeMount']['readOnly'] = True
+            self.model['volume'][self.type]['readOnly'] = True
+
         if self.type == 'emptyDir' and self.medium != '':
             self.model['volume'][self.type]['medium'] = self.medium
+
         if self.type == 'hostPath':
             self.model['volume'][self.type]['path'] = self.path
+
         if self.type == 'secret':
             self.model['volume'][self.type]['secretName'] = self.secret_name
+
         if self.type == 'awsElasticBlockStore':
             self.model['volume'][self.type]['volumeID'] = self.aws_volume_id
             self.model['volume'][self.type]['fsType'] = self.fs_type
+
         if self.type == 'gcePersistentDisk':
             self.model['volume'][self.type]['pdName'] = self.gce_pd_name
             self.model['volume'][self.type]['fsType'] = self.fs_type
+
         if self.type == 'nfs':
             self.model['volume'][self.type]['server'] = self.server
             self.model['volume'][self.type]['path'] = self.path
+
+        if self.type == 'gitRepo':
+            self.model['volume'][self.type]['repository'] = self.git_repo
+            self.model['volume'][self.type]['revision'] = self.git_revision
 
     # -------------------------------------------------------------------------------------  emptyDir
 
@@ -193,5 +206,25 @@ class Volume(BaseModel):
         if server is not None and not (self.type == 'nfs'):
             raise SyntaxError('Volume: server: [ {0} ] can only be used with type [ nfs ]'.format(server))
         self.server = server
+        self._update_model()
+        return self
+
+    # -------------------------------------------------------------------------------------  gitRepo
+
+    def set_git_repository(self, repo=None):
+        if not isinstance(repo, str):
+            raise SyntaxError('Volume: repository: [ {0} ] must be a string.'.format(repo.__class__.__name__))
+        if repo is not None and not (self.type == 'gitRepo'):
+            raise SyntaxError('Volume: repository: [ {0} ] can only be used with type [ gitRepo ]'.format(repo))
+        self.git_repo = repo
+        self._update_model()
+        return self
+
+    def set_git_revision(self, revision=None):
+        if not isinstance(revision, str):
+            raise SyntaxError('Volume: revision: [ {0} ] must be a string.'.format(revision.__class__.__name__))
+        if revision is not None and not (self.type == 'gitRepo'):
+            raise SyntaxError('Volume: revision: [ {0} ] can only be used with type [ gitRepo ]'.format(revision))
+        self.git_revision = revision
         self._update_model()
         return self

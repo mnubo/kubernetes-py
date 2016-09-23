@@ -67,3 +67,13 @@ class K8sVolume(K8sObject):
     def set_server(self, server=None):
         self.model.set_server(server)
         return self
+
+    # -------------------------------------------------------------------------------------  gitRepo
+
+    def set_git_repository(self, repo=None):
+        self.model.set_git_repository(repo)
+        return self
+
+    def set_git_revision(self, revision=None):
+        self.model.set_git_revision(revision)
+        return self
