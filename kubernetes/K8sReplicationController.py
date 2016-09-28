@@ -130,32 +130,32 @@ class K8sReplicationController(K8sPodBasedObject):
 
     # -------------------------------------------------------------------------------------  set
 
-    def set_annotations(self, dico=None):
-        self.model.set_annotations(dico=dico)
+    def set_annotations(self, annotations=None):
+        self.model.set_annotations(dico=annotations)
         return self
 
-    def set_labels(self, dico=None):
-        self.model.set_labels(dico=dico)
+    def set_labels(self, labels=None):
+        self.model.set_labels(dico=labels)
         return self
 
     def set_namespace(self, name=None):
         self.model.set_namespace(name=name)
         return self
 
-    def set_pod_annotations(self, dico=None):
-        self.model.set_pod_annotations(new_dict=dico)
+    def set_pod_annotations(self, annotations=None):
+        self.model.set_pod_annotations(annotations=annotations)
         return self
 
-    def set_pod_labels(self, dico=None):
-        self.model.set_pod_labels(labels=dico)
+    def set_pod_labels(self, labels=None):
+        self.model.set_pod_labels(labels=labels)
         return self
 
     def set_replicas(self, replicas=None):
         self.model.set_replicas(replicas=replicas)
         return self
 
-    def set_selector(self, dico=None):
-        self.model.set_selector(dico=dico)
+    def set_selector(self, selector=None):
+        self.model.set_selector(dico=selector)
         return self
 
     # -------------------------------------------------------------------------------------  wait for replicas
@@ -236,7 +236,7 @@ class K8sReplicationController(K8sPodBasedObject):
     # -------------------------------------------------------------------------------------  resize
 
     @staticmethod
-    def resize(config=None, name=None, replicas=None):
+    def scale(config=None, name=None, replicas=None):
         if name is None:
             raise SyntaxError('ReplicationController: name: [ {0} ] cannot be None.'.format(name))
         if replicas is None:
@@ -335,7 +335,7 @@ class K8sReplicationController(K8sPodBasedObject):
             rc_next.set_name(name=name_next)
             rc_next.add_pod_label(k='name', v=name)
             rc_next.add_pod_label(k='rc_version', v=my_version)
-            rc_next.set_selector(dico=dict(name=name, rc_version=my_version))
+            rc_next.set_selector(selector=dict(name=name, rc_version=my_version))
             rc_next.set_replicas(replicas=0)
             rc_next.set_pod_generate_name(mode=True, name=name)
             rc_next.create()

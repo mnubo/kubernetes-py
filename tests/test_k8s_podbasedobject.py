@@ -363,8 +363,10 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         obj = utils.create_pod(name=name)
         config = utils.create_config()
         vol = K8sVolume(config=config, name=name, mount_path="/var/test", type='hostPath')
-        with self.assertRaises(UnprocessableEntityException):
-            obj.add_volume(vol)
+        if utils.is_reachable(config.api_host):
+            with self.assertRaises(UnprocessableEntityException):
+                obj.add_volume(vol)
+                obj.create()
 
     def test_pod_add_volume_hostpath(self):
         name = "yoname"
@@ -372,7 +374,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         config = utils.create_config()
         vol = K8sVolume(config=config, name=name, mount_path="/var/test", type='hostPath')
         host_path = '/var/lib/docker'
-        vol.set_host_path(host_path)
+        vol.set_path(host_path)
         obj.add_volume(vol)
         self.assertEqual(1, len(obj.model.model['spec']['volumes']))
         self.assertEqual(1, len(obj.model.pod_spec.model['volumes']))
@@ -521,7 +523,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         name = "yoname"
         obj = utils.create_pod(name=name)
         s_in = {"disktype": "ssd"}
-        obj.set_pod_node_selector(new_dict=s_in)
+        obj.set_pod_node_selector(selector=s_in)
         s_out = obj.get_pod_node_selector()
         self.assertEqual(s_in, s_out)
 
@@ -529,7 +531,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         name = "yorc"
         obj = utils.create_rc(name=name)
         s_in = {"disktype": "ssd"}
-        obj.set_pod_node_selector(new_dict=s_in)
+        obj.set_pod_node_selector(selector=s_in)
         s_out = obj.get_pod_node_selector()
         self.assertEqual(s_in, s_out)
 
@@ -738,7 +740,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         obj = utils.create_pod(name=name)
         s_in = None
         try:
-            obj.set_pod_node_selector(new_dict=s_in)
+            obj.set_pod_node_selector(selector=s_in)
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
@@ -747,7 +749,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         obj = utils.create_rc(name=name)
         s_in = None
         try:
-            obj.set_pod_node_selector(new_dict=s_in)
+            obj.set_pod_node_selector(selector=s_in)
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
@@ -756,7 +758,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         obj = utils.create_pod(name=name)
         s_in = "yoselector"
         try:
-            obj.set_pod_node_selector(new_dict=s_in)
+            obj.set_pod_node_selector(selector=s_in)
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
@@ -765,7 +767,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         obj = utils.create_rc(name=name)
         s_in = "yoselector"
         try:
-            obj.set_pod_node_selector(new_dict=s_in)
+            obj.set_pod_node_selector(selector=s_in)
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
 
@@ -773,7 +775,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         name = "yoname"
         obj = utils.create_pod(name=name)
         s = {"disktype": "ssd"}
-        obj.set_pod_node_selector(new_dict=s)
+        obj.set_pod_node_selector(selector=s)
 
         podspec = obj.model.model['spec']
         self.assertIn('nodeSelector', podspec)
@@ -788,7 +790,7 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         name = "yorc"
         obj = utils.create_rc(name=name)
         s = {"disktype": "ssd"}
-        obj.set_pod_node_selector(new_dict=s)
+        obj.set_pod_node_selector(selector=s)
 
         podspec = obj.model.model['spec']['template']['spec']
         self.assertIn('nodeSelector', podspec)

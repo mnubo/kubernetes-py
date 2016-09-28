@@ -136,7 +136,7 @@ class K8sContainerTest(unittest.TestCase):
         self.assertIsInstance(c.model.model['volumeMounts'], list)
         self.assertEqual(1, len(c.model.model['volumeMounts']))
         self.assertIsInstance(c.model.model['volumeMounts'][0], dict)
-        for i in ['mountPath', 'name', 'readOnly']:
+        for i in ['mountPath', 'name']:
             self.assertIn(i, c.model.model['volumeMounts'][0])
         self.assertEqual(volname, c.model.model['volumeMounts'][0]['name'])
         self.assertEqual(volmount, c.model.model['volumeMounts'][0]['mountPath'])
@@ -151,13 +151,13 @@ class K8sContainerTest(unittest.TestCase):
         volhostpath = "/path/on/host"
         config = utils.create_config()
         vol = K8sVolume(config=config, name=volname, type=voltype, mount_path=volmount)
-        vol.set_host_path(volhostpath)
+        vol.set_path(volhostpath)
         c.add_volume_mount(vol)
         self.assertIn('volumeMounts', c.model.model)
         self.assertIsInstance(c.model.model['volumeMounts'], list)
         self.assertEqual(1, len(c.model.model['volumeMounts']))
         self.assertIsInstance(c.model.model['volumeMounts'][0], dict)
-        for i in ['mountPath', 'name', 'readOnly']:
+        for i in ['mountPath', 'name']:
             self.assertIn(i, c.model.model['volumeMounts'][0])
         self.assertEqual(volname, c.model.model['volumeMounts'][0]['name'])
         self.assertEqual(volmount, c.model.model['volumeMounts'][0]['mountPath'])

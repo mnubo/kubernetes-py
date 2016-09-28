@@ -253,7 +253,7 @@ class Service(BaseModel):
         return self
 
     def set_namespace(self, name):
-        self.svc_metadata.set_namespace(name=name)
+        self.svc_metadata.set_namespace(namespace=name)
         return self
 
     def set_session_affinity(self, affinity_type=None):

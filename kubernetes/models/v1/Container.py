@@ -86,19 +86,9 @@ class Container(BaseModel):
     def add_volume_mount(self, volume=None):
         if not isinstance(volume, K8sVolume):
             raise SyntaxError('Container: volume: [ {0} ] must be a K8sVolume.'.format(volume.__class__.__name__))
-
+        vol = volume.model.model['volumeMount']
         if 'volumeMounts' not in self.model:
             self.model['volumeMounts'] = []
-
-        vol = {
-            'mountPath': volume.mount_path,
-            'name': volume.name,
-            'readOnly': False
-        }
-
-        if volume.read_only is True:
-            vol['readOnly'] = True
-
         self.model['volumeMounts'].append(vol)
         return self
 

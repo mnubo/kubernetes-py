@@ -40,6 +40,16 @@ class K8sConfig(object):
 
         super(K8sConfig, self).__init__()
 
+        self.api_host = None
+        self.auth = None
+        self.ca_cert = None
+        self.ca_cert_data = None
+        self.cert = None
+        self.client_certificate = None
+        self.client_key = None
+        self.pull_secret = None
+        self.token = None
+
         dotconf = None
         if kubeconfig is not None:
             if not isfile(kubeconfig):
@@ -53,19 +63,11 @@ class K8sConfig(object):
         if dotconf is not None:
             # we're pulling configuration from a kubeconfig file
 
-            self.api_host = None
-            self.auth = None
-            self.ca_cert = None
-            self.ca_cert_data = None
-            self.cert = None
-            self.client_certificate = None
-            self.client_key = None
             self.clusters = dotconf['clusters']
             self.contexts = dotconf['contexts']
             self.current_context = dotconf['current-context']
             self.preferences = dotconf['preferences']
             self.pull_secret = pull_secret
-            self.token = None
             self.users = dotconf['users']
             self.version = dotconf['apiVersion']
 

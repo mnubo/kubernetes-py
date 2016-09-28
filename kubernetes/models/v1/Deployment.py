@@ -97,8 +97,8 @@ class Deployment(PodBasedModel):
         if not isinstance(name, str):
             raise SyntaxError('Deployment: dico: [ {0} ] must be a string.'.format(name))
 
-        self.deployment_metadata.set_namespace(name=name)
-        self.pod_metadata.set_namespace(name=name)
+        self.deployment_metadata.set_namespace(namespace=name)
+        self.pod_metadata.set_namespace(namespace=name)
         return self
 
     def set_replicas(self, replicas=None):

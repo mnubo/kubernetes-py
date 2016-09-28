@@ -24,13 +24,15 @@ class K8sVolumeTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- init
 
     def test_init_no_args(self):
+        config = utils.create_config()
         with self.assertRaises(SyntaxError):
-            K8sVolume()
+            K8sVolume(config=config)
 
     def test_init_invalid_name(self):
         name = object()
+        config = utils.create_config()
         with self.assertRaises(SyntaxError):
-            K8sVolume(name=name)
+            K8sVolume(config=config, name=name)
 
     def test_init_invalid_type(self):
         name = "yoname"
@@ -59,12 +61,13 @@ class K8sVolumeTest(unittest.TestCase):
 
     def test_init(self):
         name = "yoname"
+        type = 'hostPath'
         mount_path = "/path/on/container"
         config = utils.create_config()
-        vol = K8sVolume(config=config, name=name, mount_path=mount_path)
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         self.assertIsNotNone(vol)
         self.assertIsInstance(vol, K8sVolume)
-        self.assertEqual('emptyDir', vol.type)
+        self.assertEqual('hostPath', vol.type)
 
     # --------------------------------------------------------------------------------- emptyDir
 
@@ -104,7 +107,7 @@ class K8sVolumeTest(unittest.TestCase):
         config = utils.create_config()
         vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_medium()
-        self.assertEqual('', vol.medium)
+        self.assertEqual('', vol.model.medium)
 
     def test_emptydir_set_medium_emptystring(self):
         name = "yoname"
@@ -113,7 +116,7 @@ class K8sVolumeTest(unittest.TestCase):
         config = utils.create_config()
         vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_medium('')
-        self.assertEqual('', vol.medium)
+        self.assertEqual('', vol.model.medium)
 
     def test_emptydir_set_medium_memory(self):
         name = "yoname"
@@ -123,7 +126,7 @@ class K8sVolumeTest(unittest.TestCase):
         config = utils.create_config()
         vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_medium(medium)
-        self.assertEqual(medium, vol.medium)
+        self.assertEqual(medium, vol.model.medium)
 
     # --------------------------------------------------------------------------------- hostPath
 
@@ -145,7 +148,7 @@ class K8sVolumeTest(unittest.TestCase):
         config = utils.create_config()
         vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         with self.assertRaises(SyntaxError):
-            vol.set_host_path(host_path)
+            vol.set_path(host_path)
 
     def test_hostpath_set_path_none(self):
         name = "yoname"
@@ -154,7 +157,7 @@ class K8sVolumeTest(unittest.TestCase):
         config = utils.create_config()
         vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         with self.assertRaises(SyntaxError):
-            vol.set_host_path()
+            vol.set_path()
 
     def test_hostpath_set_path(self):
         name = "yoname"
@@ -163,8 +166,8 @@ class K8sVolumeTest(unittest.TestCase):
         mount_path = "/path/on/container"
         config = utils.create_config()
         vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
-        vol.set_host_path(host_path)
-        self.assertEqual(host_path, vol.host_path)
+        vol.set_path(host_path)
+        self.assertEqual(host_path, vol.model.path)
 
     # --------------------------------------------------------------------------------- secret
 
@@ -208,7 +211,7 @@ class K8sVolumeTest(unittest.TestCase):
         config = utils.create_config()
         vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_secret_name(secret)
-        self.assertEqual(vol.secret_name, secret_name)
+        self.assertEqual(vol.model.secret_name, secret_name)
 
     # --------------------------------------------------------------------------------- awsElasticBlockStore
 
@@ -259,7 +262,7 @@ class K8sVolumeTest(unittest.TestCase):
         config = utils.create_config()
         vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_volume_id(volume_id)
-        self.assertEqual(vol.aws_volume_id, volume_id)
+        self.assertEqual(vol.model.aws_volume_id, volume_id)
 
     # --------------------------------------------------------------------------------- gcePersistentDisk
 
@@ -310,7 +313,7 @@ class K8sVolumeTest(unittest.TestCase):
         config = utils.create_config()
         vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_volume_id(volume_id)
-        self.assertEqual(vol.aws_volume_id, volume_id)
+        self.assertEqual(vol.model.aws_volume_id, volume_id)
 
     # --------------------------------------------------------------------------------- aws & gce - fs_type
 
@@ -370,7 +373,7 @@ class K8sVolumeTest(unittest.TestCase):
         config = utils.create_config()
         vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_fs_type(fs_type)
-        self.assertEqual(vol.fs_type, fs_type)
+        self.assertEqual(vol.model.fs_type, fs_type)
 
     def test_gce_set_fs_type(self):
         name = "yoname"
@@ -380,7 +383,148 @@ class K8sVolumeTest(unittest.TestCase):
         config = utils.create_config()
         vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
         vol.set_fs_type(fs_type)
-        self.assertEqual(vol.fs_type, fs_type)
+        self.assertEqual(vol.model.fs_type, fs_type)
+
+    # --------------------------------------------------------------------------------- nfs
+
+    def test_nfs_init(self):
+        name = "yoname"
+        type = "nfs"
+        mount_path = "/path/on/container"
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
+        self.assertIsNotNone(vol)
+        self.assertIsInstance(vol, K8sVolume)
+        self.assertEqual(type, vol.type)
+
+    def test_nfs_set_server_none(self):
+        name = "yoname"
+        type = "nfs"
+        mount_path = "/path/on/container"
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
+        with self.assertRaises(SyntaxError):
+            vol.set_server()
+
+    def test_nfs_set_server_invalid(self):
+        name = "yoname"
+        type = "nfs"
+        mount_path = "/path/on/container"
+        server = object()
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
+        with self.assertRaises(SyntaxError):
+            vol.set_server(server)
+
+    def test_nfs_set_server_invalid_type(self):
+        name = "yoname"
+        type = "emptyDir"
+        mount_path = "/path/on/container"
+        server = "nfs.company.com"
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
+        with self.assertRaises(SyntaxError):
+            vol.set_server(server)
+
+    def test_nfs_set_server(self):
+        name = "yoname"
+        type = "nfs"
+        mount_path = "/path/on/container"
+        server = "nfs.company.com"
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
+        vol.set_server(server)
+        self.assertEqual(vol.model.server, server)
+
+    # --------------------------------------------------------------------------------- gitRepo
+
+    def test_git_repo_init(self):
+        name = "yoname"
+        type = "gitRepo"
+        mount_path = "/path/on/container"
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
+        self.assertIsNotNone(vol)
+        self.assertIsInstance(vol, K8sVolume)
+        self.assertEqual(type, vol.type)
+
+    def test_git_repo_set_repo_none(self):
+        name = "yoname"
+        type = "gitRepo"
+        mount_path = "/path/on/container"
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
+        with self.assertRaises(SyntaxError):
+            vol.set_git_repository()
+
+    def test_git_repo_set_repo_invalid(self):
+        name = "yoname"
+        type = "gitRepo"
+        mount_path = "/path/on/container"
+        repo = object()
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
+        with self.assertRaises(SyntaxError):
+            vol.set_git_repository(repo=repo)
+
+    def test_nfs_set_repo_invalid_type(self):
+        name = "yoname"
+        type = "emptyDir"
+        mount_path = "/path/on/container"
+        repo = "git@somewhere:me/my-git-repository.git"
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
+        with self.assertRaises(SyntaxError):
+            vol.set_git_repository(repo)
+
+    def test_git_repo_set_revision_none(self):
+        name = "yoname"
+        type = "gitRepo"
+        mount_path = "/path/on/container"
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
+        with self.assertRaises(SyntaxError):
+            vol.set_git_revision()
+
+    def test_git_repo_set_revision_invalid(self):
+        name = "yoname"
+        type = "gitRepo"
+        mount_path = "/path/on/container"
+        rev = object()
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
+        with self.assertRaises(SyntaxError):
+            vol.set_git_revision(revision=rev)
+
+    def test_nfs_set_revision_invalid_type(self):
+        name = "yoname"
+        type = "emptyDir"
+        mount_path = "/path/on/container"
+        rev = "22f1d8406d464b0c0874075539c1f2e96c253775"
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
+        with self.assertRaises(SyntaxError):
+            vol.set_git_revision(rev)
+
+    def test_git_repo_set_repository(self):
+        name = "yoname"
+        type = "gitRepo"
+        mount_path = "/path/on/container"
+        repo = "git@somewhere:me/my-git-repository.git"
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
+        vol.set_git_repository(repo)
+        self.assertEqual(vol.model.git_repo, repo)
+
+    def test_git_repo_set_revision(self):
+        name = "yoname"
+        type = "gitRepo"
+        mount_path = "/path/on/container"
+        rev = "22f1d8406d464b0c0874075539c1f2e96c253775"
+        config = utils.create_config()
+        vol = K8sVolume(config=config, name=name, type=type, mount_path=mount_path)
+        vol.set_git_revision(rev)
+        self.assertEqual(vol.model.git_revision, rev)
 
     # --------------------------------------------------------------------------------- api - pod - emptydir
 
@@ -432,7 +576,7 @@ class K8sVolumeTest(unittest.TestCase):
         vol_mount = "/test-hostpath"
         host_path = "/var/lib/docker"
         volume = utils.create_volume(name=vol_name, type=vol_type, mount_path=vol_mount)
-        volume.set_host_path(host_path)
+        volume.set_path(host_path)
         container.add_volume_mount(volume)
 
         pod_name = "nginx"
@@ -609,6 +753,100 @@ class K8sVolumeTest(unittest.TestCase):
             except Exception as err:
                 self.assertIsInstance(err, TimedOutException)
 
+    # --------------------------------------------------------------------------------- api - pod - nfs
+
+    def test_pod_nfs(self):
+        container_name = "nginx"
+        container_image = "nginx:1.7.9"
+        container = utils.create_container(name=container_name, image=container_image)
+
+        vol_name = "nfs"
+        vol_type = "nfs"
+        vol_mount = "/test-nfs"
+        server = "howard.mtl.mnubo.com"
+        path = "/fs1/test-nfs"
+        volume = utils.create_volume(name=vol_name, type=vol_type, mount_path=vol_mount)
+        volume.set_server(server)
+        volume.set_path(path)
+        container.add_volume_mount(volume)
+
+        pod_name = "nginx-{0}".format(str(uuid.uuid4()))
+        pod = utils.create_pod(name=pod_name)
+        pod.add_volume(volume)
+        pod.add_container(container)
+
+        if utils.is_reachable(pod.config.api_host):
+            try:
+                pod.create()
+
+                vols = pod.model.model['spec']['volumes']
+                volnames = [x['name'] for x in vols]
+                self.assertIn(vol_name, volnames)
+
+                vols = pod.model.pod_spec.model['volumes']
+                volnames = [x['name'] for x in vols]
+                self.assertIn(vol_name, volnames)
+                self.assertEqual(1, len(pod.model.model['spec']['containers']))
+
+                mounts = pod.model.model['spec']['containers'][0]['volumeMounts']
+                mountnames = [x['name'] for x in mounts]
+                self.assertIn(vol_name, mountnames)
+                self.assertEqual(1, len(pod.model.pod_spec.model['containers']))
+
+                mounts = pod.model.pod_spec.model['containers'][0]['volumeMounts']
+                mountnames = [x['name'] for x in mounts]
+                self.assertIn(vol_name, mountnames)
+
+            except Exception as err:
+                self.assertIsInstance(err, TimedOutException)
+
+    # --------------------------------------------------------------------------------- api - pod - gitRepo
+
+    def test_pod_git_repo(self):
+        container_name = "nginx"
+        container_image = "nginx:1.7.9"
+        container = utils.create_container(name=container_name, image=container_image)
+
+        vol_name = "git-repo"
+        vol_type = "gitRepo"
+        vol_mount = "/test-git-repo"
+        repo = "https://user:pass@git-lab1.mtl.mnubo.com/ops/traffic-analyzer.git"
+        revision = "e42d3dca1541ba085f34ce282feda1109a707c7b"
+        volume = utils.create_volume(name=vol_name, type=vol_type, mount_path=vol_mount)
+        volume.set_git_repository(repo)
+        volume.set_git_revision(revision)
+        container.add_volume_mount(volume)
+
+        pod_name = "nginx-{0}".format(str(uuid.uuid4()))
+        pod = utils.create_pod(name=pod_name)
+        pod.add_volume(volume)
+        pod.add_container(container)
+
+        if utils.is_reachable(pod.config.api_host):
+            try:
+                pod.create()
+
+                vols = pod.model.model['spec']['volumes']
+                volnames = [x['name'] for x in vols]
+                self.assertIn(vol_name, volnames)
+
+                vols = pod.model.pod_spec.model['volumes']
+                volnames = [x['name'] for x in vols]
+                self.assertIn(vol_name, volnames)
+                self.assertEqual(1, len(pod.model.model['spec']['containers']))
+
+                mounts = pod.model.model['spec']['containers'][0]['volumeMounts']
+                mountnames = [x['name'] for x in mounts]
+                self.assertIn(vol_name, mountnames)
+                self.assertEqual(1, len(pod.model.pod_spec.model['containers']))
+
+                mounts = pod.model.pod_spec.model['containers'][0]['volumeMounts']
+                mountnames = [x['name'] for x in mounts]
+                self.assertIn(vol_name, mountnames)
+
+            except Exception as err:
+                self.assertIsInstance(err, TimedOutException)
+
     # --------------------------------------------------------------------------------- api - rc - emptydir
 
     def test_rc_emptydir(self):
@@ -670,7 +908,7 @@ class K8sVolumeTest(unittest.TestCase):
         vol_mount = "/test-hostpath"
         hostpath = "/var/lib/docker"
         volume = utils.create_volume(name=vol_name, type=vol_type, mount_path=vol_mount)
-        volume.set_host_path(hostpath)
+        volume.set_path(hostpath)
         container_nginx.add_volume_mount(volume)
         container_redis.add_volume_mount(volume)
 
@@ -836,6 +1074,114 @@ class K8sVolumeTest(unittest.TestCase):
         vol_mount = "/test-gce-pd"
         volume = utils.create_volume(name=vol_name, type=vol_type, mount_path=vol_mount, read_only=True)
         volume.set_pd_name(pd_name)
+        container_nginx.add_volume_mount(volume)
+        container_redis.add_volume_mount(volume)
+
+        rc_name = "nginx-{0}".format(str(uuid.uuid4()))
+        rc = utils.create_rc(name=rc_name)
+        rc.add_volume(volume)
+        rc.add_container(container_nginx)
+        rc.add_container(container_redis)
+        rc.set_replicas(3)
+
+        if utils.is_reachable(rc.config.api_host):
+            try:
+                rc.create()
+
+                vols = rc.model.model['spec']['volumes']
+                volnames = [x['name'] for x in vols]
+                self.assertIn(vol_name, volnames)
+
+                vols = rc.model.pod_spec.model['volumes']
+                volnames = [x['name'] for x in vols]
+                self.assertIn(vol_name, volnames)
+                self.assertEqual(1, len(rc.model.model['spec']['containers']))
+
+                mounts = rc.model.model['spec']['containers'][0]['volumeMounts']
+                mountnames = [x['name'] for x in mounts]
+                self.assertIn(vol_name, mountnames)
+                self.assertEqual(1, len(rc.model.pod_spec.model['containers']))
+
+                mounts = rc.model.pod_spec.model['containers'][0]['volumeMounts']
+                mountnames = [x['name'] for x in mounts]
+                self.assertIn(vol_name, mountnames)
+
+            except Exception as err:
+                self.assertIsInstance(err, TimedOutException)
+
+    # --------------------------------------------------------------------------------- api - rc - nfs
+
+    def test_rc_nfs(self):
+        container_name = "nginx"
+        container_image = "nginx:1.7.9"
+        container_nginx = utils.create_container(name=container_name, image=container_image)
+
+        container_name = "redis"
+        container_image = "redis:3.0.7"
+        container_redis = utils.create_container(name=container_name, image=container_image)
+
+        vol_name = "nfs"
+        vol_type = "nfs"
+        vol_mount = "/test-nfs"
+        server = "howard.mtl.mnubo.com"
+        path = "/fs1/test-nfs"
+        volume = utils.create_volume(name=vol_name, type=vol_type, mount_path=vol_mount)
+        volume.set_server(server)
+        volume.set_path(path)
+        container_nginx.add_volume_mount(volume)
+        container_redis.add_volume_mount(volume)
+
+        rc_name = "nginx-{0}".format(str(uuid.uuid4()))
+        rc = utils.create_rc(name=rc_name)
+        rc.add_volume(volume)
+        rc.add_container(container_nginx)
+        rc.add_container(container_redis)
+        rc.set_replicas(3)
+
+        if utils.is_reachable(rc.config.api_host):
+            try:
+                rc.create()
+
+                vols = rc.model.model['spec']['volumes']
+                volnames = [x['name'] for x in vols]
+                self.assertIn(vol_name, volnames)
+
+                vols = rc.model.pod_spec.model['volumes']
+                volnames = [x['name'] for x in vols]
+                self.assertIn(vol_name, volnames)
+                self.assertEqual(1, len(rc.model.model['spec']['containers']))
+
+                mounts = rc.model.model['spec']['containers'][0]['volumeMounts']
+                mountnames = [x['name'] for x in mounts]
+                self.assertIn(vol_name, mountnames)
+                self.assertEqual(1, len(rc.model.pod_spec.model['containers']))
+
+                mounts = rc.model.pod_spec.model['containers'][0]['volumeMounts']
+                mountnames = [x['name'] for x in mounts]
+                self.assertIn(vol_name, mountnames)
+
+            except Exception as err:
+                self.assertIsInstance(err, TimedOutException)
+
+    # --------------------------------------------------------------------------------- api - rc - gitRepo
+
+    def test_rc_git_repo(self):
+        container_name = "nginx"
+        container_image = "nginx:1.7.9"
+        container_nginx = utils.create_container(name=container_name, image=container_image)
+
+        container_name = "redis"
+        container_image = "redis:3.0.7"
+        container_redis = utils.create_container(name=container_name, image=container_image)
+
+        vol_name = "git-repo"
+        vol_type = "gitRepo"
+        vol_mount = "/test-git-repo"
+        repo = "https://user:pass@git-lab1.mtl.mnubo.com/ops/traffic-analyzer.git"
+        revision = "e42d3dca1541ba085f34ce282feda1109a707c7b"
+        volume = utils.create_volume(name=vol_name, type=vol_type, mount_path=vol_mount)
+        volume.set_git_repository(repo)
+        volume.set_git_revision(revision)
         container_nginx.add_volume_mount(volume)
         container_redis.add_volume_mount(volume)
 

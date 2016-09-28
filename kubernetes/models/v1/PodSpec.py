@@ -7,7 +7,7 @@
 #
 
 from kubernetes.K8sVolume import K8sVolume
-from kubernetes.K8sExceptions import AlreadyExistsException, UnprocessableEntityException
+from kubernetes.K8sExceptions import AlreadyExistsException
 from kubernetes.models.v1.BaseModel import BaseModel
 from kubernetes.models.v1.Container import Container
 
@@ -18,16 +18,17 @@ class PodSpec(BaseModel):
         self.containers = list()
 
         if model is not None:
-            assert isinstance(model, dict)
+            if not isinstance(model, dict):
+                raise SyntaxError('PodSpec: model: [ {0} ] must be a dict.'.format(model.__class__.__name__))
 
-            if 'status' in self.model.keys():
+            if 'status' in self.model:
                 self.model.pop('status', None)
 
             self.model = model
 
             for c in self.model['containers']:
                 self.containers.append(Container(model=c))
-            if 'volumes' not in self.model.keys():
+            if 'volumes' not in self.model:
                 self.model['volumes'] = []
 
         else:
@@ -38,12 +39,13 @@ class PodSpec(BaseModel):
             }
 
             if name is not None and not isinstance(name, str):
-                raise SyntaxError('PodSpec: Name should be a string.')
+                raise SyntaxError('PodSpec: name: [ {0} ] must be a string.'.format(name.__class__.__name__))
             if image is not None and not isinstance(image, str):
                 self.containers.append(Container(name=name, image=image))
 
             if pull_secret is not None:
-                assert isinstance(pull_secret, str)
+                if not isinstance(pull_secret, str):
+                    raise SyntaxError('PodSpec: pull_secret: [ {0} ] must be a string.'.format(pull_secret.__class__.__name__))
                 self.add_image_pull_secrets(name=pull_secret)
 
             self._update_model()
@@ -76,30 +78,9 @@ class PodSpec(BaseModel):
         if volume.name in volnames:
             raise AlreadyExistsException('PodSpec: volume: [ {0} ] already exists.'.format(volume.name))
 
-        if volume.type == "hostPath" and volume.host_path is None:
-            msg = 'PodSpec: volume: [ {0} ] cannot be added; please set a hostPath.'.format(volume.name)
-            raise UnprocessableEntityException(msg)
-
-        vol = {
-            'name': volume.name,
-            '{0}'.format(volume.type): {}
-        }
-
-        if volume.type == 'emptyDir' and volume.medium != '':
-            vol[volume.type]['medium'] = volume.medium
-        if volume.type == 'hostPath':
-            vol[volume.type]['path'] = volume.host_path
-        if volume.type == 'secret':
-            vol[volume.type]['secretName'] = volume.secret_name
-        if volume.type == 'awsElasticBlockStore':
-            vol[volume.type]['volumeID'] = volume.aws_volume_id
-            vol[volume.type]['fsType'] = volume.fs_type
-        if volume.type == 'gcePersistentDisk':
-            vol[volume.type]['pdName'] = volume.gce_pd_name
-            vol[volume.type]['fsType'] = volume.fs_type
-        if volume.read_only is True:
-            vol[volume.type]['readOnly'] = True
-
+        vol = volume.model.model['volume']
+        if 'volumes' not in self.model:
+            self.model['volumes'] = []
         self.model['volumes'].append(vol)
 
     def add_image_pull_secrets(self, name=None):

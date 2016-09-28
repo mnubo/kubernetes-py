@@ -109,16 +109,16 @@ class K8sPod(K8sPodBasedObject):
 
     # ------------------------------------------------------------------------------------- set
 
-    def set_annotations(self, dico=None):
-        self.model.set_pod_annotations(new_dict=dico)
+    def set_annotations(self, annotations=None):
+        self.model.set_pod_annotations(annotations)
         return self
 
-    def set_labels(self, dico=None):
-        self.model.set_pod_labels(labels=dico)
+    def set_labels(self, labels=None):
+        self.model.set_pod_labels(labels)
         return self
 
-    def set_namespace(self, name=None):
-        self.model.set_pod_namespace(name=name)
+    def set_namespace(self, namespace=None):
+        self.model.set_pod_namespace(namespace)
         return self
 
     # ------------------------------------------------------------------------------------- filtering
