@@ -11,39 +11,52 @@ from kubernetes.models.v1.ContainerStatus import ContainerStatus
 
 
 class PodStatus(BaseModel):
+
     def __init__(self, model=None):
         BaseModel.__init__(self)
-        if model is not None:
-            assert isinstance(model, dict)
-            self.model = model
 
-    def get_pod_phase(self):
-        return self.model.get('phase', None)
+        self._conditions = []
+        self._container_statuses = []
 
-    def get_pod_conditions(self):
-        return self.model.get('conditions', list())
+        self.phase = None
+        self.message = None
+        self.reason = None
+        self.host_ip = None
+        self.pod_ip = None
+        self.start_time = None
 
-    def get_message(self):
-        return self.model.get('message', '')
+    # ------------------------------------------------------------------------------------- add
 
-    def get_reason(self):
-        return self.model.get('reason', '')
+    def add_container_status(self, status=None):
+        if not isinstance(status, ContainerStatus):
+            raise SyntaxError('PodStatus: status: [ {0} ] is invalid.'.format(status))
+        self._container_statuses.append(status)
 
-    def get_host_ip(self):
-        return self.model.get('hostIP', None)
+    # ------------------------------------------------------------------------------------- conditions
 
-    def get_pod_ip(self):
-        return self.model.get('podIP', None)
+    @property
+    def conditions(self):
+        return self._conditions
 
-    def get_start_time(self):
-        return self.model.get('startTime', None)
+    @conditions.setter
+    def conditions(self, conditions=None):
+        msg = 'PodStatus: conditions: [ {0} ] is invalid.'.format(conditions)
+        if not isinstance(conditions, list):
+            raise SyntaxError(msg)
+        self._conditions = conditions
 
-    def get_container_statuses(self):
-        my_list = list()
-        model_list = self.model.get('containerStatuses', list())
+    # ------------------------------------------------------------------------------------- container status
 
-        if len(model_list) > 0:
-            for status in model_list:
-                my_list.append(ContainerStatus(model=status))
+    @property
+    def container_statuses(self):
+        return self._container_statuses
 
-        return my_list
+    @container_statuses.setter
+    def container_statuses(self, statuses=None):
+        msg = 'PodStatus: statuses: [ {0} ] is invalid.'.format(statuses)
+        if not isinstance(statuses, list):
+            raise SyntaxError(msg)
+        for x in statuses:
+            if not isinstance(x, ContainerStatus):
+                raise SyntaxError(msg)
+        self._container_statuses = statuses

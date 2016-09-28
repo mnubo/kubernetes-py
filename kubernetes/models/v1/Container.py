@@ -8,30 +8,109 @@
 
 from kubernetes.K8sVolume import K8sVolume
 from kubernetes.models.v1.BaseModel import BaseModel
+from kubernetes.models.v1.ContainerPort import ContainerPort
 from kubernetes.models.v1.Probe import Probe
+from kubernetes.models.v1.ResourceRequirements import ResourceRequirements
 
 
 class Container(BaseModel):
+
     def __init__(self, name=None, image=None, model=None):
-        BaseModel.__init__(self)
-        self.readiness_probe = None
+        super(Container, self).__init__()
+
+        self._args = []
+        self._command = []
+        self._ports = []
+
+        self.name = name
+        self.image = image
         self.liveness_probe = None
+        self.readiness_probe = None
+        self.working_dir = None
+        self.resources = None
+        self.volume_mounts = None
+
+    # ------------------------------------------------------------------------------------- args
+
+    @property
+    def args(self):
+        return self._args
+
+    @args.setter
+    def args(self, args=None):
+        msg = 'Container: args: [ {0} ] is invalid.'.format(args)
+        if not isinstance(args, list):
+            raise SyntaxError(msg)
+        for x in args:
+            if not isinstance(x, str):
+                raise SyntaxError(msg)
+        self._args = args
+
+    # ------------------------------------------------------------------------------------- command
+
+    @property
+    def command(self):
+        return self._command
+
+    @command.setter
+    def command(self, command=None):
+        msg = 'Container: command: [ {0} ] is invalid.'.format(command)
+        if not isinstance(command, list):
+            raise SyntaxError(msg)
+        for x in command:
+            if not isinstance(x, str):
+                raise SyntaxError(msg)
+        self._command = command
+
+    # ------------------------------------------------------------------------------------- ports
+
+    @property
+    def ports(self):
+        return self._ports
+
+    @ports.setter
+    def ports(self, ports=None):
+        msg = 'Container: ports: [ {0} ] is invalid.'.format(ports)
+        if not isinstance(ports, list):
+            raise SyntaxError(msg)
+        for x in ports:
+            if not isinstance(x, ContainerPort):
+                raise SyntaxError(msg)
+        self._ports = ports
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         if model is not None:
             assert isinstance(model, dict)
             self.model = model
-            if 'status' in self.model.keys():
+            if 'status' in self.model:
                 self.model.pop('status', None)
-            if 'livenessProbe' in self.model.keys():
+            if 'livenessProbe' in self.model:
                 self.liveness_probe = Probe(model=self.model['livenessProbe'])
-            if 'readinessProbe' in self.model.keys():
+            if 'readinessProbe' in self.model:
                 self.readiness_probe = Probe(model=self.model['readinessProbe'])
-            if 'privileged' not in self.model.keys():
+            if 'privileged' not in self.model:
                 self.model['privileged'] = False
-            if 'hostNetwork' not in self.model.keys():
+            if 'hostNetwork' not in self.model:
                 self.model['hostNetwork'] = False
+
         else:
             if name is None or image is None:
                 raise SyntaxError("name: [ {0} ] and image: [ {1} ] cannot be None.".format(name, image))
+
             self.model = {
                 "name": name,
                 "image": image,

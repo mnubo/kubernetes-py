@@ -7,91 +7,56 @@
 #
 
 from kubernetes.models.v1.BaseModel import BaseModel
+from kubernetes.models.v1.ExecAction import ExecAction
+from kubernetes.models.v1.HTTPGetAction import HTTPGetAction
+from kubernetes.models.v1.TCPSocketAction import TCPSocketAction
 
 
 class Probe(BaseModel):
-    def __init__(self, **kwargs):
-        BaseModel.__init__(self)
-        model = kwargs.get('model', None)
-        handler = kwargs.get('handler', None)
-        initial_delay_s = kwargs.get('initial_delay_s', 1)
-        timeout_s = kwargs.get('timeout_s', 3)
-        period_s = kwargs.get('period_s', 15)
-        success_threshold = kwargs.get('success_threshold', 1)
-        failure_threshold = kwargs.get('failure_threshold', 2)
 
-        self.valid_handlers = ['exec', 'httpGet', 'tcpSocket']
-        if model is not None:
-            assert isinstance(model, dict)
-            self.model = model
-            if 'status' in self.model.keys():
-                self.model.pop('status', None)
-            for h in self.valid_handlers:
-                if h in self.model.keys():
-                    self.handler = h
-                    break
-        else:
-            self.model = dict()
-            self.handler = handler
-            self.set_handler(**kwargs)
-            self.model['initialDelaySeconds'] = initial_delay_s
-            self.model['timeoutSeconds'] = timeout_s
-            self.model['periodSeconds'] = period_s
-            self.model['successThreshold'] = success_threshold
-            self.model['failureThreshold'] = failure_threshold
+    VALID_HANDLERS = ['exec', 'httpGet', 'tcpSocket']
 
-    def get_handler(self):
-        my_handler = None
-        if self.handler in self.model.keys():
-            my_handler = self.model[self.handler]
-        return my_handler
+    def __init__(self, model=None, handler=None):
+        super(Probe, self).__init__()
 
-    def get_failure_threshold(self):
-        return self.model['failureThreshold']
+        if handler not in Probe.VALID_HANDLERS:
+            raise SyntaxError('Probe: handler: [ {0} ] is invalid.'.format(handler))
+        self.handler = handler
 
-    def get_initial_delay(self):
-        return self.model['initialDelaySeconds']
-
-    def get_period(self):
-        return self.model['periodSeconds']
-
-    def get_success_threshold(self):
-        return self.model['successThreshold']
-
-    def get_timeout(self):
-        return self.model['timeoutSeconds']
-
-    def set_handler(self, **kwargs):
-        handler = kwargs.get('handler', None)
-
-        if handler is None or not isinstance(handler, str) or handler not in self.valid_handlers:
-            raise SyntaxError('Probe: handler must be: {my_list}'.format(my_list=', '.join(self.valid_handlers)))
-
-        if self.handler is None:
-            self.handler = handler
-
-        if handler != self.handler:
-            self.model.pop(self.handler, None)
-            self.handler = handler
-
-        # Creating a new one.
-        self.model[handler] = dict()
+        self.exec_action = None
+        self.http_get_action = None
+        self.tcp_socket_action = None
         if handler == 'exec':
-            if 'command' not in kwargs.keys():
-                raise SyntaxError('Probe: command must be given when using an exec handler.')
-            self.model[handler]['command'] = kwargs.get('command')
-        elif handler == 'httpGet':
-            if 'port' not in kwargs.keys():
-                raise SyntaxError('Probe: port must be given when using an httpGet handler.')
-            self.model[handler]['port'] = int(kwargs.get('port'))
-            if 'path' in kwargs.keys():
-                self.model[handler]['path'] = kwargs.get('path')
-            if 'host' in kwargs.keys():
-                self.model[handler]['host'] = kwargs.get('host')
-            if 'scheme' in kwargs.keys():
-                self.model[handler]['scheme'] = kwargs.get('scheme')
-        elif handler == 'tcpSocket':
-            if 'port' not in kwargs.keys():
-                raise SyntaxError('Probe: port must be given when using a tcpSocket handler.')
-            self.model[handler]['port'] = int(kwargs.get('port'))
-        return self
+            self.exec_action = ExecAction()
+        if handler == 'httpGet':
+            self.http_get_action = HTTPGetAction()
+        if handler == 'tcpSocket':
+            self.tcp_socket_action = TCPSocketAction()
+
+        self.initial_delay_seconds = 15
+        self.timeout_seconds = 1
+        self.period_seconds = 10
+        self.success_threshold = 1
+        self.failure_threshold = 3
+
+    # ------------------------------------------------------------------------------------- serialize
+
+    def json(self):
+        data = {}
+        if self.handler == 'exec':
+            data[self.handler] = self.exec_action.json()
+        if self.handler == 'httpGet':
+            data[self.handler] = self.http_get_action.json()
+        if self.handler == 'tcpSocket':
+            data[self.handler] = self.tcp_socket_action.json()
+        if self.initial_delay_seconds:
+            data['initialDelaySeconds'] = self.initial_delay_seconds
+        if self.timeout_seconds:
+            data['timeoutSeconds'] = self.timeout_seconds
+        if self.period_seconds:
+            data['periodSeconds'] = self.period_seconds
+        if self.success_threshold:
+            data['successThreshold'] = self.success_threshold
+        if self.failure_threshold:
+            data['failureThreshold'] = self.failure_threshold
+        return data

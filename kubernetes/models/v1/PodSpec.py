@@ -6,192 +6,191 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.K8sVolume import K8sVolume
-from kubernetes.K8sExceptions import AlreadyExistsException
 from kubernetes.models.v1.BaseModel import BaseModel
 from kubernetes.models.v1.Container import Container
+from kubernetes.models.v1.Volume import Volume
 
 
 class PodSpec(BaseModel):
-    def __init__(self, name=None, image=None, model=None, pull_secret=None):
+
+    VALID_DNS_POLICIES = ['ClusterFirst', 'Default']
+    VALID_RESTART_POLICIES = ['Always', 'OnFailure', 'Never']
+
+    def __init__(self, model=None):
         BaseModel.__init__(self)
-        self.containers = list()
 
-        if model is not None:
-            if not isinstance(model, dict):
-                raise SyntaxError('PodSpec: model: [ {0} ] must be a dict.'.format(model.__class__.__name__))
+        self._containers = []
+        self._dns_policy = 'ClusterFirst'
+        self._image_pull_secrets = []
+        self._node_selector = {}
+        self._restart_policy = 'Always'
+        self._volumes = []
 
-            if 'status' in self.model:
-                self.model.pop('status', None)
+        self.active_deadline_seconds = None
+        self.host_ipc = False
+        self.host_network = False
+        self.host_pid = False
+        self.hostname = None
+        self.node_name = None
 
-            self.model = model
-
-            for c in self.model['containers']:
-                self.containers.append(Container(model=c))
-            if 'volumes' not in self.model:
-                self.model['volumes'] = []
-
-        else:
-            self.model = {
-                "containers": [],
-                "dnsPolicy": "Default",
-                "volumes": []
-            }
-
-            if name is not None and not isinstance(name, str):
-                raise SyntaxError('PodSpec: name: [ {0} ] must be a string.'.format(name.__class__.__name__))
-            if image is not None and not isinstance(image, str):
-                self.containers.append(Container(name=name, image=image))
-
-            if pull_secret is not None:
-                if not isinstance(pull_secret, str):
-                    raise SyntaxError('PodSpec: pull_secret: [ {0} ] must be a string.'.format(pull_secret.__class__.__name__))
-                self.add_image_pull_secrets(name=pull_secret)
-
-            self._update_model()
-
-    # ------------------------------------------------------------------------------------- private methods
-
-    def _update_model(self):
-        self.model['containers'] = []
-        for c in self.containers:
-            assert isinstance(c, Container)
-            self.model['containers'].append(c.get())
+        self.service_account_name = None
+        self.subdomain = None
+        self.termination_grace_period_seconds = 30
 
     # ------------------------------------------------------------------------------------- add
 
     def add_container(self, container=None):
-        if container is None or not isinstance(container, Container):
-            raise SyntaxError('PodSpec: container should be a container object.')
-        else:
-            self.containers.append(container)
-            self._update_model()
+        if not isinstance(container, Container):
+            raise SyntaxError('PodSpec: container: [ {0} ] is invalid.'.format(container.__class__.__name__))
+        self._containers.append(container)
         return self
 
     def add_volume(self, volume=None):
-        if volume is None:
-            raise SyntaxError('PodSpec: volume: [ {0} ] cannot be None.'.format(volume))
-        if not isinstance(volume, K8sVolume):
-            raise SyntaxError('PodSpec: volume: [ {0} ] must be a K8sVolume'.format(volume))
-
-        volnames = [x['name'] for x in self.model['volumes']]
-        if volume.name in volnames:
-            raise AlreadyExistsException('PodSpec: volume: [ {0} ] already exists.'.format(volume.name))
-
-        vol = volume.model.model['volume']
-        if 'volumes' not in self.model:
-            self.model['volumes'] = []
-        self.model['volumes'].append(vol)
+        if not isinstance(volume, Volume):
+            raise SyntaxError('PodSpec: volume: [ {0} ] is invalid'.format(volume))
+        self._volumes.append(volume)
 
     def add_image_pull_secrets(self, name=None):
-        if name is None:
-            raise SyntaxError('PodSpec: name: [ {0} ] cannot be None.'.format(name))
-        if name is None or not isinstance(name, str):
-            raise SyntaxError('PodSpec: name: [ {0} ] should be a string.'.format(name))
-        if 'imagePullSecrets' not in self.model:
-            self.model['imagePullSecrets'] = list()
-        self.model['imagePullSecrets'].append(dict(name=name))
+        if not isinstance(name, str):
+            raise SyntaxError('PodSpec: name: [ {0} ] is invalid.'.format(name))
+        self._image_pull_secrets.append(name)
         return self
 
-    # ------------------------------------------------------------------------------------- del
+    # ------------------------------------------------------------------------------------- containers
 
-    def del_node_name(self):
-        self.model.pop('nodeName', None)
-        return self
+    @property
+    def containers(self):
+        return self._containers
 
-    # ------------------------------------------------------------------------------------- get
-
-    def get_containers(self):
-        return self.containers
-
-    def get_node_name(self):
-        return self.model.get('nodeName', None)
-
-    def get_node_selector(self):
-        return self.model.get('nodeSelector', None)
-
-    def get_restart_policy(self):
-        return self.model.get('restartPolicy', None)
-
-    def get_service_account(self):
-        return self.model.get('serviceAccountName', None)
-
-    def get_termination_grace_period(self):
-        return self.model.get('terminationGracePeriodSeconds', None)
-
-    # ------------------------------------------------------------------------------------- set
-
-    def set_active_deadline(self, seconds=None):
-        if seconds is None:
-            raise SyntaxError('PodSpec: seconds: [ {0} ] cannot be None.'.format(seconds))
-        if not isinstance(seconds, int) or seconds < 0:
-            raise SyntaxError('PodSpec: seconds: [ {0} ] should be a positive integer.'.format(seconds))
-
-        self.model['activeDeadlineSeconds'] = seconds
-        return self
+    @containers.setter
+    def containers(self, containers=None):
+        msg = 'PodSpec: containers: [ {0} ] is invalid.'.format(containers)
+        if not isinstance(containers, list):
+            raise SyntaxError(msg)
+        try:
+            for x in containers:
+                assert isinstance(x, Container)
+        except AssertionError:
+            raise SyntaxError(msg)
+        self._containers = containers
 
     def set_container_image(self, name=None, image=None):
-        if image is None or not isinstance(image, str):
-            raise SyntaxError('PodSpec: image should be a string.')
         if name is None or not isinstance(name, str):
-            raise SyntaxError('PodSpec: name should be a string.')
+            raise SyntaxError('PodSpec: name: [ {0} ] is invalid.')
+        if image is None or not isinstance(image, str):
+            raise SyntaxError('PodSpec: image: [ {0} ] is invalid.')
         for c in self.containers:
-            assert isinstance(c, Container)
-            if c.get_name() == name:
-                c.set_image(image=image)
+            if c.name == name:
+                c.image(image=image)
                 break
         return self
 
-    def set_dns_policy(self, policy='Default'):
-        if policy in ['Default', 'ClusterFirst']:
-            self.model['dnsPolicy'] = policy
-        else:
-            raise SyntaxError('PodSpec: policy should be one of: Default, ClusterFirst')
-        return self
+    # ------------------------------------------------------------------------------------- DNS policy
 
-    def set_node_selector(self, dico=None):
-        if dico is None:
-            raise SyntaxError('PodSpec: Node selector: [ {0} ] cannot be None.'.format(dico))
-        if not isinstance(dico, dict):
-            raise SyntaxError('PodSpec: Node selector: [ {0} ] must be a dict.'.format(dico))
+    @property
+    def dns_policy(self):
+        return self._dns_policy
 
-        self.model['nodeSelector'] = dico
-        return self
+    @dns_policy.setter
+    def dns_policy(self, dns_policy=None):
+        if dns_policy not in PodSpec.VALID_DNS_POLICIES:
+            raise SyntaxError('PodSpec: dns_policy: [ {0} ] is invalid.'.format(dns_policy))
+        self._dns_policy = dns_policy
 
-    def set_restart_policy(self, policy=None):
-        if policy is None:
-            raise SyntaxError('PodSpec: policy: [ {0} ] cannot be None.'.format(policy))
-        if not isinstance(policy, str):
-            raise SyntaxError('PodSpec: policy: [ {0} ] must be a string.'.format(policy))
-        if policy not in ['Always', 'OnFailure', 'Never']:
-            raise SyntaxError('PodSpec: policy: [ {0} ] must be in: [ \'Always\', \'OnFailure\', \'Never\' ]')
+    # ------------------------------------------------------------------------------------- image pull secrets
 
-        self.model['restartPolicy'] = policy
-        return self
+    @property
+    def image_pull_secrets(self):
+        return self._image_pull_secrets
 
-    def set_service_account(self, name=None):
-        if name is None or not isinstance(name, str):
-            raise SyntaxError('PodSpec: name: [ {0} ] cannot be None.'.format(name))
-        if not isinstance(name, str):
-            raise SyntaxError('PodSpec: name: [ {0} ] must be a string.'.format(name))
+    @image_pull_secrets.setter
+    def image_pull_secrets(self, secrets=None):
+        msg = 'PodSpec: secrets: [ {0} ] is invalid.'.format(secrets)
+        if not isinstance(secrets, list):
+            raise SyntaxError(msg)
+        for s in secrets:
+            if not isinstance(s, str):
+                raise SyntaxError(msg)
+        self._image_pull_secrets = secrets
 
-        self.model['serviceAccountName'] = name
-        return self
+    # ------------------------------------------------------------------------------------- node selector
 
-    def set_node_name(self, name=None):
-        if name is None:
-            raise SyntaxError('PodSpec: name: [ {0} ] cannot be None.'.format(name))
-        if not isinstance(name, str):
-            raise SyntaxError('PodSpec: name: [ {0} ] must be a string.'.format(name))
+    @property
+    def node_selector(self):
+        return self._node_selector
 
-        self.model['nodeName'] = name
-        return self
+    @node_selector.setter
+    def node_selector(self, selector=None):
+        if not isinstance(selector, dict):
+            raise SyntaxError('PodSpec: Node selector: [ {0} ] is invalid.'.format(selector))
+        self.node_selector = selector
 
-    def set_termination_grace_period(self, seconds=None):
-        if seconds is None:
-            raise SyntaxError('PodSpec: seconds: [ {0} ] cannot be None.'.format(seconds))
-        if not isinstance(seconds, int) or not seconds > 0:
-            raise SyntaxError('PodSpec: seconds: [ {0} ] must be a positive integer.'.format(seconds))
+    # ------------------------------------------------------------------------------------- restart policy
 
-        self.model['terminationGracePeriodSeconds'] = seconds
-        return self
+    @property
+    def restart_policy(self):
+        return self._restart_policy
+
+    @restart_policy.setter
+    def restart_policy(self, policy=None):
+        if policy not in PodSpec.VALID_RESTART_POLICIES:
+            raise SyntaxError('PodSpec: policy: [ {0} ] is invalid.'.format(policy))
+        self._restart_policy = policy
+
+    # ------------------------------------------------------------------------------------- volumes
+
+    @property
+    def volumes(self):
+        return self._containers
+
+    @volumes.setter
+    def volumes(self, volumes=None):
+        msg = 'PodSpec: volumes: [ {0} ] is invalid.'.format(volumes)
+        if not isinstance(volumes, list):
+            raise SyntaxError(msg)
+        try:
+            for x in volumes:
+                assert isinstance(x, Volume)
+        except AssertionError:
+            raise SyntaxError(msg)
+        self._volumes = volumes
+
+    # ------------------------------------------------------------------------------------- serialize
+
+    def json(self):
+        data = {}
+        if self.active_deadline_seconds:
+            data['activeDeadlineSeconds'] = self.active_deadline_seconds
+        if self.containers:
+            data['containers'] = []
+            for c in self.containers:
+                data['containers'].append(c.json())
+        if self.dns_policy:
+            data['dnsPolicy'] = self.dns_policy
+        if self.host_ipc:
+            data['hostIPC'] = self.host_ipc
+        if self.host_network:
+            data['hostNetwork'] = self.host_network
+        if self.host_pid:
+            data['hostPID'] = self.host_pid
+        if self.hostname:
+            data['hostname'] = self.hostname
+        if self.image_pull_secrets:
+            data['imagePullSecrets'] = self.image_pull_secrets
+        if self.node_name:
+            data['nodeName'] = self.node_name
+        if self.node_selector:
+            data['nodeSelector'] = self.node_selector
+        if self.restart_policy:
+            data['restartPolicy'] = self.restart_policy
+        if self.service_account_name:
+            data['serviceAccountName'] = self.service_account_name
+        if self.subdomain:
+            data['subdomain'] = self.subdomain
+        if self.termination_grace_period_seconds:
+            data['terminationGracePeriodSeconds'] = self.termination_grace_period_seconds
+        if self.volumes:
+            data['volumes'] = []
+            for v in self.volumes:
+                data['volumes'].append(v.json())
+        return data
