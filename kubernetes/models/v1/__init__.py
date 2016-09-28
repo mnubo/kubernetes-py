@@ -5,7 +5,6 @@ from ContainerStatus import ContainerStatus
 from DeleteOptions import DeleteOptions
 from Deployment import Deployment
 from ObjectMeta import ObjectMeta
-from PersistentVolume import PersistentVolume
 from Pod import Pod
 from PodBasedModel import PodBasedModel
 from PodSpec import PodSpec
