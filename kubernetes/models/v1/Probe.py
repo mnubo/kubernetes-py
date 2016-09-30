@@ -10,30 +10,51 @@ from kubernetes.models.v1.BaseModel import BaseModel
 
 
 class Probe(BaseModel):
+
+    VALID_HANDLERS = ['exec', 'httpGet', 'tcpSocket']
+
     def __init__(self, **kwargs):
         BaseModel.__init__(self)
         model = kwargs.get('model', None)
-        handler = kwargs.get('handler', None)
-        initial_delay_s = kwargs.get('initial_delay_s', 1)
-        timeout_s = kwargs.get('timeout_s', 3)
-        period_s = kwargs.get('period_s', 15)
-        success_threshold = kwargs.get('success_threshold', 1)
-        failure_threshold = kwargs.get('failure_threshold', 2)
 
-        self.valid_handlers = ['exec', 'httpGet', 'tcpSocket']
+        if model is not None:
+            filtered = filter(lambda x: x in Probe.VALID_HANDLERS, model.keys())
+        else:
+            filtered = filter(lambda x: x in Probe.VALID_HANDLERS, kwargs)
+
+        if not filtered:
+            raise SyntaxError('Probe: Valid handler not found. (eg. {0} )'.format(Probe.VALID_HANDLERS))
+        if len(filtered) > 1:
+            raise SyntaxError('Probe: More than one handler found: [ {0} ]'.format(filtered))
+        handler = filtered[0]  # there can be only one.
+
+        if model is not None:
+            initial_delay_s = model.get('initialDelaySeconds', 1)
+            timeout_s = model.get('timeoutSeconds', 3)
+            period_s = model.get('periodSeconds', 15)
+            success_threshold = model.get('successThreshold', 1)
+            failure_threshold = model.get('failureThreshold', 2)
+        else:
+            initial_delay_s = kwargs.get('initialDelaySeconds', 1)
+            timeout_s = kwargs.get('timeoutSeconds', 3)
+            period_s = kwargs.get('periodSeconds', 15)
+            success_threshold = kwargs.get('successThreshold', 1)
+            failure_threshold = kwargs.get('failureThreshold', 2)
+
         if model is not None:
             assert isinstance(model, dict)
             self.model = model
             if 'status' in self.model.keys():
                 self.model.pop('status', None)
-            for h in self.valid_handlers:
+            for h in Probe.VALID_HANDLERS:
                 if h in self.model.keys():
                     self.handler = h
                     break
         else:
             self.model = dict()
             self.handler = handler
-            self.set_handler(**kwargs)
+            handler_dict = kwargs[handler]
+            self.set_handler(handler_dict)
             self.model['initialDelaySeconds'] = initial_delay_s
             self.model['timeoutSeconds'] = timeout_s
             self.model['periodSeconds'] = period_s
@@ -61,37 +82,30 @@ class Probe(BaseModel):
     def get_timeout(self):
         return self.model['timeoutSeconds']
 
-    def set_handler(self, **kwargs):
-        handler = kwargs.get('handler', None)
-
-        if handler is None or not isinstance(handler, str) or handler not in self.valid_handlers:
-            raise SyntaxError('Probe: handler must be: {my_list}'.format(my_list=', '.join(self.valid_handlers)))
-
-        if self.handler is None:
-            self.handler = handler
-
-        if handler != self.handler:
-            self.model.pop(self.handler, None)
-            self.handler = handler
+    def set_handler(self, handler_dict=None):
 
         # Creating a new one.
-        self.model[handler] = dict()
-        if handler == 'exec':
-            if 'command' not in kwargs.keys():
+        self.model[self.handler] = dict()
+
+        if self.handler == 'exec':
+            if 'command' not in handler_dict:
                 raise SyntaxError('Probe: command must be given when using an exec handler.')
-            self.model[handler]['command'] = kwargs.get('command')
-        elif handler == 'httpGet':
-            if 'port' not in kwargs.keys():
+            self.model[self.handler]['command'] = handler_dict.get('command')
+
+        if self.handler == 'httpGet':
+            if 'port' not in handler_dict:
                 raise SyntaxError('Probe: port must be given when using an httpGet handler.')
-            self.model[handler]['port'] = int(kwargs.get('port'))
-            if 'path' in kwargs.keys():
-                self.model[handler]['path'] = kwargs.get('path')
-            if 'host' in kwargs.keys():
-                self.model[handler]['host'] = kwargs.get('host')
-            if 'scheme' in kwargs.keys():
-                self.model[handler]['scheme'] = kwargs.get('scheme')
-        elif handler == 'tcpSocket':
-            if 'port' not in kwargs.keys():
+            self.model[self.handler]['port'] = int(handler_dict.get('port'))
+            if 'path' in handler_dict:
+                self.model[self.handler]['path'] = handler_dict.get('path')
+            if 'host' in handler_dict:
+                self.model[self.handler]['host'] = handler_dict.get('host')
+            if 'scheme' in handler_dict:
+                self.model[self.handler]['scheme'] = handler_dict.get('scheme')
+
+        if self.handler == 'tcpSocket':
+            if 'port' not in handler_dict:
                 raise SyntaxError('Probe: port must be given when using a tcpSocket handler.')
-            self.model[handler]['port'] = int(kwargs.get('port'))
+            self.model[self.handler]['port'] = int(handler_dict.get('port'))
+
         return self
