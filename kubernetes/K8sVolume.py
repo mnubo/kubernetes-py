@@ -12,6 +12,8 @@ from kubernetes.K8sObject import K8sObject
 
 class K8sVolume(K8sObject):
 
+    VALID_VOLUME_TYPES = Volume.VALID_VOLUME_TYPES
+
     def __init__(self, config=None, model=None, name=None, type=None, mount_path=None, read_only=False):
 
         super(K8sVolume, self).__init__(config=config, name=name, obj_type='Volume')

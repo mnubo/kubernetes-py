@@ -29,7 +29,9 @@ setup(
     ],
     install_requires=[
         'importlib>=1.0.3',
-        'uuid>=1.30'
+        'uuid>=1.30',
+        'PyYAML>=3.11',
+        'requests>=2.10.0',
     ],
     scripts=[],
     test_suite='nose.collector',
@@ -40,4 +42,3 @@ setup(
     include_package_data=True,
     zip_safe=False
 )
-
