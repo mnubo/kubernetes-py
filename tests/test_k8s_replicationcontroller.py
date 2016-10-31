@@ -1570,7 +1570,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
             self.assertIsInstance(result, K8sReplicationController)
             dico = result.get_labels()
             self.assertIsInstance(dico, dict)
-            for k, v in labels.iteritems():
+            for k, v in labels.items():
                 self.assertEqual(dico[k], v)
 
     def test_update_add_container_succeeds(self):
