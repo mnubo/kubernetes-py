@@ -10,10 +10,13 @@ from kubernetes.models.v1.BaseModel import BaseModel
 
 
 class ContainerPort(BaseModel):
-
+    """
+    http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_containerport
+    """
+    
     VALID_PROTOCOLS = ['TCP', 'UDP']
 
-    def __init__(self, model=None):
+    def __init__(self):
         super(ContainerPort, self).__init__()
 
         self._container_port = None
@@ -23,6 +26,14 @@ class ContainerPort(BaseModel):
         self.name = None
         self.host_ip = None
 
+    @staticmethod
+    def _is_valid_port(port=None):
+        if not isinstance(port, int):
+            return False
+        if not 0 < port < 65536:
+            return False
+        return True
+
     # ------------------------------------------------------------------------------------- container port
 
     @property
@@ -31,11 +42,8 @@ class ContainerPort(BaseModel):
 
     @container_port.setter
     def container_port(self, port=None):
-        msg = 'ContainerPort: port: [ {0} ] is invalid.'.format(port)
-        if not isinstance(port, int):
-            raise SyntaxError(msg)
-        if not 1 < port < 65535:
-            raise SyntaxError(msg)
+        if not ContainerPort._is_valid_port(port):
+            raise SyntaxError('ContainerPort: container_port: [ {0} ] is invalid.'.format(port))
         self._container_port = port
 
     # ------------------------------------------------------------------------------------- host port
@@ -46,11 +54,8 @@ class ContainerPort(BaseModel):
 
     @host_port.setter
     def host_port(self, port=None):
-        msg = 'ContainerPort: port: [ {0} ] is invalid.'.format(port)
-        if not isinstance(port, int):
-            raise SyntaxError(msg)
-        if not 1 < port < 65535:
-            raise SyntaxError(msg)
+        if not ContainerPort._is_valid_port(port):
+            raise SyntaxError('ContainerPort: host_port: [ {0} ] is invalid.'.format(port))
         self.host_port = port
 
     # ------------------------------------------------------------------------------------- protocol

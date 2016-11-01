@@ -10,6 +10,9 @@ from kubernetes.models.v1.BaseModel import BaseModel
 
 
 class ResourceRequirements(BaseModel):
+    """
+    http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_resourcerequirements
+    """
 
     VALID_RESOURCES = ['cpu', 'memory']
 

@@ -6,10 +6,14 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1.BaseModel import BaseModel
+from kubernetes.models.v1 import BaseModel
+from kubernetes.utils import is_valid_list
 
 
 class ExecAction(BaseModel):
+    """
+    http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_execaction
+    """
 
     def __init__(self):
         super(ExecAction, self).__init__()
@@ -21,13 +25,10 @@ class ExecAction(BaseModel):
 
     @command.setter
     def command(self, command=None):
-        msg = 'ExecAction: command: [ {0} ] is invalid.'.format(command)
-        if not isinstance(command, list):
-            raise SyntaxError(msg)
-        for x in command:
-            if not isinstance(x, str):
-                raise SyntaxError(msg)
+        if not is_valid_list(command, str):
+            raise SyntaxError('ExecAction: command: [ {0} ] is invalid.'.format(command))
         self._command = command
 
     def json(self):
         return {'command': self.command}
+

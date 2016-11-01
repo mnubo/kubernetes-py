@@ -6,29 +6,41 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.K8sVolume import K8sVolume
-from kubernetes.models.v1.BaseModel import BaseModel
-from kubernetes.models.v1.ContainerPort import ContainerPort
-from kubernetes.models.v1.Probe import Probe
-from kubernetes.models.v1.ResourceRequirements import ResourceRequirements
+from kubernetes.models.v1 import (
+    BaseModel,
+    ContainerPort,
+    Probe,
+    ResourceRequirements,
+    SecurityContext,
+    VolumeMount,
+)
+from kubernetes.utils import is_valid_list, is_valid_dict
 
 
 class Container(BaseModel):
+    """
+    http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_container
+    """
 
-    def __init__(self, name=None, image=None, model=None):
+    VALID_PULL_POLICIES = ['Always', 'Never', 'IFNotPresent']
+
+    def __init__(self, name=None, image=None):
         super(Container, self).__init__()
 
-        self._args = []
-        self._command = []
-        self._ports = []
+        self._args = None
+        self._command = None
+        self._env = None
+        self._image_pull_policy = 'IfNotPresent'
+        self._liveness_probe = None
+        self._ports = None
+        self._readiness_probe = None
+        self._resources = None
+        self._security_context = None
+        self._volume_mounts = None
 
-        self.name = name
         self.image = image
-        self.liveness_probe = None
-        self.readiness_probe = None
+        self.name = name
         self.working_dir = None
-        self.resources = None
-        self.volume_mounts = None
 
     # ------------------------------------------------------------------------------------- args
 
@@ -38,12 +50,8 @@ class Container(BaseModel):
 
     @args.setter
     def args(self, args=None):
-        msg = 'Container: args: [ {0} ] is invalid.'.format(args)
-        if not isinstance(args, list):
-            raise SyntaxError(msg)
-        for x in args:
-            if not isinstance(x, str):
-                raise SyntaxError(msg)
+        if not is_valid_list(args, str):
+            raise SyntaxError('Container: args: [ {0} ] is invalid.'.format(args))
         self._args = args
 
     # ------------------------------------------------------------------------------------- command
@@ -54,13 +62,49 @@ class Container(BaseModel):
 
     @command.setter
     def command(self, command=None):
-        msg = 'Container: command: [ {0} ] is invalid.'.format(command)
-        if not isinstance(command, list):
-            raise SyntaxError(msg)
-        for x in command:
-            if not isinstance(x, str):
-                raise SyntaxError(msg)
+        if not is_valid_list(command, str):
+            raise SyntaxError('Container: command: [ {0} ] is invalid.'.format(command))
         self._command = command
+
+    # ------------------------------------------------------------------------------------- env
+
+    @property
+    def env(self):
+        return self._env
+
+    @env.setter
+    def env(self, env=None):
+        msg = "Container: env: [ {0} ] is invalid.".format(env)
+        if not is_valid_list(env, dict):
+            raise SyntaxError(msg)
+        for x in env:
+            if not is_valid_dict(x, ['name', 'value']):
+                raise SyntaxError(msg)
+        self._env = env
+
+    # ------------------------------------------------------------------------------------- image pull policy
+
+    @property
+    def image_pull_policy(self):
+        return self._image_pull_policy
+
+    @image_pull_policy.setter
+    def image_pull_policy(self, policy=None):
+        if policy not in Container.VALID_PULL_POLICIES:
+            raise SyntaxError('Container: image_pull_policy: [ {0} ] is invalid.'.format(policy))
+        self._image_pull_policy = policy
+
+    # ------------------------------------------------------------------------------------- liveness probe
+
+    @property
+    def liveness_probe(self):
+        return self._liveness_probe
+
+    @liveness_probe.setter
+    def liveness_probe(self, probe=None):
+        if not isinstance(probe, Probe):
+            raise SyntaxError('Container: liveness_probe: [ {0} ] is invalid.'.format(probe))
+        self._liveness_probe = probe
 
     # ------------------------------------------------------------------------------------- ports
 
@@ -70,194 +114,86 @@ class Container(BaseModel):
 
     @ports.setter
     def ports(self, ports=None):
-        msg = 'Container: ports: [ {0} ] is invalid.'.format(ports)
-        if not isinstance(ports, list):
-            raise SyntaxError(msg)
-        for x in ports:
-            if not isinstance(x, ContainerPort):
-                raise SyntaxError(msg)
+        if not is_valid_list(ports, ContainerPort):
+            raise SyntaxError('Container: ports: [ {0} ] is invalid.'.format(ports))
         self._ports = ports
 
+    # ------------------------------------------------------------------------------------- readiness probe
 
+    @property
+    def readiness_probe(self):
+        return self._readiness_probe
 
+    @readiness_probe.setter
+    def readiness_probe(self, probe=None):
+        if not isinstance(probe, Probe):
+            raise SyntaxError('Container: readiness_probe: [ {0} ] is invalid.'.format(probe))
+        self._readiness_probe = probe
 
+    # ------------------------------------------------------------------------------------- resource requirements
 
+    @property
+    def resources(self):
+        return self._resources
 
+    @resources.setter
+    def resources(self, resources=None):
+        if not isinstance(resources, ResourceRequirements):
+            raise SyntaxError('Container: resources: [ {0} ] is invalid.'.format(resources))
+        self._resources = resources
 
+    # ------------------------------------------------------------------------------------- security context
 
+    @property
+    def security_context(self):
+        return self._security_context
 
+    @security_context.setter
+    def security_context(self, context=None):
+        if not isinstance(context, SecurityContext):
+            raise SyntaxError('Container: security_context: [ {0} ] is invalid.'.format(context))
+        self._security_context = context
 
+    # ------------------------------------------------------------------------------------- volume mounts
 
+    @property
+    def volume_mounts(self):
+        return self._volume_mounts
 
+    @volume_mounts.setter
+    def volume_mounts(self, mounts=None):
+        if not is_valid_list(mounts, VolumeMount):
+            raise SyntaxError('Container: volume_mounts: [ {0} ] is invalid.'.format(mounts))
+        self._volume_mounts = mounts
 
+    # ------------------------------------------------------------------------------------- serialize
 
-
-
-        if model is not None:
-            assert isinstance(model, dict)
-            self.model = model
-            if 'status' in self.model:
-                self.model.pop('status', None)
-            if 'livenessProbe' in self.model:
-                self.liveness_probe = Probe(model=self.model['livenessProbe'])
-            if 'readinessProbe' in self.model:
-                self.readiness_probe = Probe(model=self.model['readinessProbe'])
-            if 'privileged' not in self.model:
-                self.model['privileged'] = False
-            if 'hostNetwork' not in self.model:
-                self.model['hostNetwork'] = False
-
-        else:
-            if name is None or image is None:
-                raise SyntaxError("name: [ {0} ] and image: [ {1} ] cannot be None.".format(name, image))
-
-            self.model = {
-                "name": name,
-                "image": image,
-                "imagePullPolicy": 'IfNotPresent',
-                "privileged": False,
-                "hostNetwork": False,
-                "terminationMessagePath": "/dev/termination-log",
-                "resources": {
-                    "requests": {
-                        "cpu": "100m",
-                        "memory": "32M"
-                    }
-                }
-            }
-
-    def _update_model(self):
+    def json(self):
+        data = {}
+        if self.args is not None:
+            data['args'] = self.args
+        if self.command is not None:
+            data['command'] = self.command
+        if self.env is not None:
+            data['env'] = self.env
+        if self.image is not None:
+            data['image'] = self.image
+        if self.image_pull_policy is not None:
+            data['imagePullPolicy'] = self.image_pull_policy
         if self.liveness_probe is not None:
-            self.model['livenessProbe'] = self.liveness_probe.get()
+            data['livenessProbe'] = self.liveness_probe.json()
+        if self.name is not None:
+            data['name'] = self.name
+        if self.ports is not None:
+            data['ports'] = [x.json() for x in self.ports]
+        if self.resources is not None:
+            data['resources'] = self.resources.json()
         if self.readiness_probe is not None:
-            self.model['readinessProbe'] = self.readiness_probe.get()
-        return self
-
-    def add_port(self, container_port, host_port=None, protocol=None, name=None, host_ip=None):
-        portdef = dict()
-        if 0 < container_port < 65536:
-            portdef['containerPort'] = int(container_port)
-            if name is not None:
-                portdef['name'] = name
-            if host_port is not None and (0 < host_port < 65536):
-                portdef['hostPort'] = int(host_port)
-            if host_ip is not None:
-                portdef['hostIP'] = host_ip
-            if protocol is not None and protocol in ['TCP', 'UDP']:
-                portdef['protocol'] = protocol
-            # Now assign the newly defined port.
-            if 'ports' not in self.model.keys():
-                self.model['ports'] = []
-            self.model['ports'].append(portdef)
-        else:
-            raise SyntaxError('container_port should be: 0 < container_port < 65536.')
-        return self
-
-    def add_env(self, name=None, value=None):
-        if name is None or value is None:
-            raise SyntaxError('name and value should be strings.')
-        else:
-            if 'env' not in self.model.keys():
-                self.model['env'] = []
-            self.model['env'].append({"name": name, "value": value})
-        return self
-
-    def add_volume_mount(self, volume=None):
-        if not isinstance(volume, K8sVolume):
-            raise SyntaxError('Container: volume: [ {0} ] must be a K8sVolume.'.format(volume.__class__.__name__))
-        vol = volume.model.model['volumeMount']
-        if 'volumeMounts' not in self.model:
-            self.model['volumeMounts'] = []
-        self.model['volumeMounts'].append(vol)
-        return self
-
-    def get_liveness_probe(self):
-        return self.liveness_probe
-
-    def get_name(self):
-        return self.model['name']
-
-    def get_image(self):
-        return self.model['image']
-
-    def get_readiness_probe(self):
-        return self.readiness_probe
-
-    def set_arguments(self, args=None):
-        if args is None:
-            args = []
-        else:
-            if not isinstance(args, list):
-                raise SyntaxError('args should be a list.')
-        if 'args' not in self.model.keys():
-            self.model['args'] = []
-        self.model['args'] = args
-        return self
-
-    def set_command(self, cmd=None):
-        if cmd is None:
-            cmd = []
-        else:
-            if not isinstance(cmd, list):
-                raise SyntaxError('cmd should be a list.')
-        if 'command' not in self.model.keys():
-            self.model['command'] = []
-        self.model['command'] = cmd
-        return self
-
-    def set_host_network(self, mode=True):
-        if not isinstance(mode, bool):
-            raise SyntaxError('mode should be True or False')
-        self.model['hostNetwork'] = mode
-        return self
-
-    def set_image(self, image=None):
-        self.model['image'] = image
-        return self
-
-    def set_liveness_probe(self, **kwargs):
-        self.liveness_probe = Probe(**kwargs)
-        return self
-
-    def set_name(self, name=None):
-        if name is None:
-            raise SyntaxError('name should be a string.')
-        else:
-            self.model['name'] = name
-        return self
-
-    def set_pull_policy(self, policy='IfNotPresent'):
-        if not isinstance(policy, str):
-            raise SyntaxError('Policy should be one of: Always, Never, IfNotPresent')
-        if policy in ['Always', 'Never', 'IfNotPresent']:
-            self.model['imagePullPolicy'] = policy
-        else:
-            raise SyntaxError
-        return self
-
-    def set_privileged(self, mode=True):
-        if not isinstance(mode, bool):
-            raise SyntaxError('mode should be True or False')
-        self.model['privileged'] = mode
-        return self
-
-    def set_readiness_probe(self, **kwargs):
-        self.readiness_probe = Probe(**kwargs)
-        return self
-
-    def set_requested_resources(self, cpu='100m', mem='32M'):
-        if not isinstance(cpu, str) or not isinstance(mem, str):
-            raise SyntaxError('cpu should be a string like 100m for 0.1 CPU and mem should be a string like 32M, 1G')
-        self.model['resources']['requests']['cpu'] = cpu
-        self.model['resources']['requests']['memory'] = mem
-        return self
-
-    def set_limit_resources(self, cpu='100m', mem='32M'):
-        if not isinstance(cpu, str) or not isinstance(mem, str):
-            raise SyntaxError('cpu should be a string like 100m for 0.1 CPU and mem should be a string like 32M, 1G')
-        assert isinstance(self.model['resources'], dict)
-        if 'limits' not in self.model['resources'].keys():
-            self.model['resources']['limits'] = dict()
-        self.model['resources']['limits']['cpu'] = cpu
-        self.model['resources']['limits']['memory'] = mem
-        return self
+            data['readinessProbe'] = self.readiness_probe.json()
+        if self.security_context is not None:
+            data['securityContext'] = self.security_context.json()
+        if self.volume_mounts is not None:
+            data['volumeMounts'] = [x.json() for x in self.volume_mounts]
+        if self.working_dir is not None:
+            data['workingDir'] = self.working_dir
+        return data
