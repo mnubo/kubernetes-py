@@ -16,7 +16,7 @@ class PodSpec(BaseModel):
     VALID_DNS_POLICIES = ['ClusterFirst', 'Default']
     VALID_RESTART_POLICIES = ['Always', 'OnFailure', 'Never']
 
-    def __init__(self, model=None):
+    def __init__(self):
         BaseModel.__init__(self)
 
         self._containers = []

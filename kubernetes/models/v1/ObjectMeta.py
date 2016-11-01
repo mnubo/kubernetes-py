@@ -10,43 +10,19 @@ from kubernetes.models.v1.BaseModel import BaseModel
 
 
 class ObjectMeta(BaseModel):
-    def __init__(self, model=None, name=None, generate_name=None, namespace='default'):
-        BaseModel.__init__(self)
+    """
+    http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_objectmeta
+    """
 
-        self.name = name
-        self.generate_name = generate_name
-        self.namespace = namespace
-        self.labels = {}
-        self.annotations = {}
+    def __init__(self):
+        super(ObjectMeta, self).__init__()
 
-        if model is not None and isinstance(model, dict):
-            self.name = model.get('name', None)
-            self.generate_name = model.get('generate_name', None)
-            self.namespace = model.get('namespace', None)
-            self.labels = model.get('labels', {})
-            self.annotations = model.get('annotations', {})
-
-    # ------------------------------------------------------------------------------------- add
-
-    def add_annotation(self, k=None, v=None):
-        self.annotations[str(k)] = str(v)
-        return self
-
-    def add_label(self, k=None, v=None):
-        self.labels[str(k)] = str(v)
-        return self
-
-    # ------------------------------------------------------------------------------------- delete
-
-    def del_annotation(self, k=None):
-        if k in self.annotations:
-            self.annotations.pop(k)
-        return self
-
-    def del_label(self, k=None):
-        if k in self.labels:
-            self.labels.pop(k)
-        return self
+        self.name = None
+        self.generate_name = None
+        self.namespace = None
+        self.deletion_grace_period_seconds = None
+        self.labels = None
+        self.annotations = None
 
     # ------------------------------------------------------------------------------------- serialize
 

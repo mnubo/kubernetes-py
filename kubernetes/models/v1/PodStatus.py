@@ -6,11 +6,18 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1.BaseModel import BaseModel
-from kubernetes.models.v1.ContainerStatus import ContainerStatus
+from kubernetes.models.v1 import (
+    BaseModel,
+    ContainerStatus,
+    PodCondition
+)
+from kubernetes.utils import is_valid_list
 
 
 class PodStatus(BaseModel):
+    """
+    http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_podstatus
+    """
 
     def __init__(self, model=None):
         BaseModel.__init__(self)
@@ -40,9 +47,8 @@ class PodStatus(BaseModel):
 
     @conditions.setter
     def conditions(self, conditions=None):
-        msg = 'PodStatus: conditions: [ {0} ] is invalid.'.format(conditions)
-        if not isinstance(conditions, list):
-            raise SyntaxError(msg)
+        if not is_valid_list(conditions, PodCondition):
+            raise SyntaxError('PodStatus: conditions: [ {0} ] is invalid.'.format(conditions))
         self._conditions = conditions
 
     # ------------------------------------------------------------------------------------- container status
@@ -53,10 +59,28 @@ class PodStatus(BaseModel):
 
     @container_statuses.setter
     def container_statuses(self, statuses=None):
-        msg = 'PodStatus: statuses: [ {0} ] is invalid.'.format(statuses)
-        if not isinstance(statuses, list):
-            raise SyntaxError(msg)
-        for x in statuses:
-            if not isinstance(x, ContainerStatus):
-                raise SyntaxError(msg)
+        if not is_valid_list(statuses, ContainerStatus):
+            raise SyntaxError('PodStatus: container_statuses: [ {0} ] is invalid.'.format(statuses))
         self._container_statuses = statuses
+
+    # ------------------------------------------------------------------------------------- serialize
+
+    def json(self):
+        data = {}
+        if self.phase is not None:
+            data['phase'] = self.phase
+        if self.conditions:
+            data['conditions'] = [x.json() for x in self.conditions]
+        if self.message is not None:
+            data['message'] = self.message
+        if self.reason is not None:
+            data['reason'] = self.reason
+        if self.host_ip is not None:
+            data['hostIP'] = self.host_ip
+        if self.pod_ip is not None:
+            data['podIP'] = self.pod_ip
+        if self.start_time is not None:
+            data['startTime'] = self.start_time
+        if self.container_statuses:
+            data['containerStatuses'] = [x.json() for x in self.container_statuses]
+        return data
