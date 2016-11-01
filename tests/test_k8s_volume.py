@@ -24,13 +24,15 @@ class K8sVolumeTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- init
 
     def test_init_no_args(self):
+        config = utils.create_config()
         with self.assertRaises(SyntaxError):
-            K8sVolume()
+            K8sVolume(config=config)
 
     def test_init_invalid_name(self):
         name = object()
+        config = utils.create_config()
         with self.assertRaises(SyntaxError):
-            K8sVolume(name=name)
+            K8sVolume(config=config, name=name)
 
     def test_init_invalid_type(self):
         name = "yoname"

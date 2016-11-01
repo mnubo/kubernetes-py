@@ -122,6 +122,18 @@ class K8sObject(object):
         state = self.request(method='GET')
         if not state.get('status'):
             raise Exception('K8sObject: Could not fetch list of objects of type: [ {0} ]'.format(self.obj_type))
+        if not state.get('success'):
+            status = state.get('status', '')
+            state_data = state.get('data', dict())
+            reason = state_data['message'] if 'message' in state_data else state_data
+            message = 'K8sObject: CREATE failed : HTTP {0} : {1}'.format(status, reason)
+            if int(status) == 401:
+                raise UnauthorizedException(message)
+            if int(status) == 409:
+                raise AlreadyExistsException(message)
+            if int(status) == 422:
+                raise UnprocessableEntityException(message)
+            raise BadRequestException(message)
         return state.get('data', dict()).get('items', list())
 
     def get_model(self):
@@ -169,7 +181,6 @@ class K8sObject(object):
             if int(status) == 422:
                 raise UnprocessableEntityException(message)
             raise BadRequestException(message)
-
         return self
 
     def update(self):

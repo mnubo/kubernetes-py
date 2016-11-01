@@ -2,7 +2,7 @@
 
 # see https://github.com/kubernetes/minikube/releases
 
-MINIKUBE_VERSION="0.10.0"
+MINIKUBE_VERSION="0.12.0"
 
 OS="$(uname)"
 case ${OS} in

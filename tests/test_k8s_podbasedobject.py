@@ -363,8 +363,10 @@ class K8sPodBasedObjectTest(unittest.TestCase):
         obj = utils.create_pod(name=name)
         config = utils.create_config()
         vol = K8sVolume(config=config, name=name, mount_path="/var/test", type='hostPath')
-        with self.assertRaises(UnprocessableEntityException):
-            obj.add_volume(vol)
+        if utils.is_reachable(config.api_host):
+            with self.assertRaises(UnprocessableEntityException):
+                obj.add_volume(vol)
+                obj.create()
 
     def test_pod_add_volume_hostpath(self):
         name = "yoname"
