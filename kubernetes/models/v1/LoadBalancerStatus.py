@@ -7,13 +7,12 @@
 #
 
 from kubernetes.models.v1 import (
-    BaseModel,
     LoadBalancerIngress
 )
 from kubernetes.utils import is_valid_list
 
 
-class LoadBalancerStatus(BaseModel):
+class LoadBalancerStatus(object):
     """
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_loadbalancerstatus
     """

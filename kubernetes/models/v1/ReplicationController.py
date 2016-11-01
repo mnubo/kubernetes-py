@@ -7,14 +7,13 @@
 #
 
 from kubernetes.models.v1 import (
-    BaseModel,
     ObjectMeta,
     ReplicationControllerSpec,
     ReplicationControllerStatus
 )
 
 
-class ReplicationController(BaseModel):
+class ReplicationController(object):
     """
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_replicationcontroller
     """

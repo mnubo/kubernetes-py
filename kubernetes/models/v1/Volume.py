@@ -7,10 +7,9 @@
 #
 
 from kubernetes.K8sSecret import K8sSecret
-from kubernetes.models.v1 import BaseModel
 
 
-class Volume(BaseModel):
+class Volume(object):
 
     VALID_VOLUME_TYPES = [
         'emptyDir',

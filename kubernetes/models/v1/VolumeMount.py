@@ -6,10 +6,8 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1 import BaseModel
 
-
-class VolumeMount(BaseModel):
+class VolumeMount(object):
     """
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_volumemount
     """

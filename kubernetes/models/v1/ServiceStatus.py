@@ -7,12 +7,11 @@
 #
 
 from kubernetes.models.v1 import (
-    BaseModel,
     LoadBalancerStatus
 )
 
 
-class ServiceStatus(BaseModel):
+class ServiceStatus(object):
 
     def __init__(self):
         super(ServiceStatus, self).__init__()

@@ -7,20 +7,19 @@
 #
 
 from kubernetes.models.v1 import (
-    BaseModel,
     ContainerStatus,
     PodCondition
 )
 from kubernetes.utils import is_valid_list
 
 
-class PodStatus(BaseModel):
+class PodStatus(object):
     """
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_podstatus
     """
 
     def __init__(self, model=None):
-        BaseModel.__init__(self)
+        super(PodStatus, self).__init__()
 
         self._conditions = []
         self._container_statuses = []

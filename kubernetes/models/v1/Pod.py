@@ -7,14 +7,13 @@
 #
 
 from kubernetes.models.v1 import (
-    BaseModel,
     ObjectMeta,
     PodSpec,
     PodStatus,
 )
 
 
-class Pod(BaseModel):
+class Pod(object):
     """
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_pod
     """

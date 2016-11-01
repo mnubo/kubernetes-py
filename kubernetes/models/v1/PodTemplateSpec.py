@@ -7,13 +7,12 @@
 #
 
 from kubernetes.models.v1 import (
-    BaseModel,
     ObjectMeta,
     PodSpec
 )
 
 
-class PodTemplateSpec(BaseModel):
+class PodTemplateSpec(object):
     """
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_podtemplatespec
     """

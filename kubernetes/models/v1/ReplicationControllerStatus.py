@@ -6,12 +6,8 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1 import (
-    BaseModel
-)
 
-
-class ReplicationControllerStatus(BaseModel):
+class ReplicationControllerStatus(object):
     """
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_replicationcontrollerstatus
     """

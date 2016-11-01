@@ -7,7 +7,6 @@
 #
 
 from kubernetes.models.v1 import (
-    BaseModel,
     ContainerPort,
     Probe,
     ResourceRequirements,
@@ -17,7 +16,7 @@ from kubernetes.models.v1 import (
 from kubernetes.utils import is_valid_list, is_valid_dict
 
 
-class Container(BaseModel):
+class Container(object):
     """
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_container
     """

@@ -6,11 +6,10 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1 import BaseModel
 from kubernetes.utils import is_valid_list, is_valid_dict, is_valid_string
 
 
-class HTTPGetAction(BaseModel):
+class HTTPGetAction(object):
 
     VALID_SCHEMES = ['HTTP', 'HTTPS']
 

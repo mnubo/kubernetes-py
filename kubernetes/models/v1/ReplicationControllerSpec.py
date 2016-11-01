@@ -7,13 +7,12 @@
 #
 
 from kubernetes.models.v1 import (
-    BaseModel,
     PodTemplateSpec,
 )
 from kubernetes.utils import is_valid_dict
 
 
-class ReplicationControllerSpec(BaseModel):
+class ReplicationControllerSpec(object):
     """
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_replicationcontrollerspec
     """
