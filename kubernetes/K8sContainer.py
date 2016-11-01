@@ -6,13 +6,12 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1.Container import Container
+from kubernetes.models.v1 import Container
 
 
 class K8sContainer(object):
     """
     The K8sContainer object currently supports the default Kubernetes container runtime, ie. Docker.
-
     """
 
     def __init__(self, model=None, name=None, image=None):
