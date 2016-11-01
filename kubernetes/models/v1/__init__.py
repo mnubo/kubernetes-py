@@ -4,6 +4,8 @@ from Container import Container
 from ContainerStatus import ContainerStatus
 from DeleteOptions import DeleteOptions
 from Deployment import Deployment
+from LoadBalancerIngress import LoadBalancerIngress
+from LoadBalancerStatus import LoadBalancerStatus
 from ObjectMeta import ObjectMeta
 from PersistentVolumeSpec import PersistentVolumeSpec
 from Pod import Pod
@@ -15,6 +17,9 @@ from ReplicaSet import ReplicaSet
 from ReplicationController import ReplicationController
 from Secret import Secret
 from Service import Service
+from ServicePort import ServicePort
+from ServiceSpec import ServiceSpec
+from ServiceStatus import ServiceStatus
 from Volume import Volume
 
 __all__ = [
