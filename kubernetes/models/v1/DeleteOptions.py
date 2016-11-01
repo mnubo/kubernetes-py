@@ -6,12 +6,11 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1.BaseModel import BaseModel
 
-
-class DeleteOptions(BaseModel):
+class DeleteOptions(object):
     def __init__(self, kind, grace_period_seconds=30, model=None):
-        BaseModel.__init__(self)
+        super(DeleteOptions, self).__init__()
+
         if model is not None:
             assert isinstance(model, dict)
             self.model = model

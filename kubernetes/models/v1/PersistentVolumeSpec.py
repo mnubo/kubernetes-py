@@ -6,11 +6,10 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1.BaseModel import BaseModel
 from kubernetes.models.v1.Volume import Volume
 
 
-class PersistentVolumeSpec(BaseModel):
+class PersistentVolumeSpec(object):
 
     VALID_CAPACITY_PARAMS = [
         'storage'
@@ -29,7 +28,7 @@ class PersistentVolumeSpec(BaseModel):
     ]
 
     def __init__(self, model=None, capacity=None, access_modes=None, reclaim_policy=None, volume=None):
-        BaseModel.__init__(self)
+        super(PersistentVolumeSpec, self).__init__()
 
         if model is not None:
             if not isinstance(model, dict):

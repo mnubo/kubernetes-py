@@ -6,18 +6,17 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1.BaseModel import BaseModel
 from kubernetes.models.v1.Container import Container
 from kubernetes.models.v1.Volume import Volume
 
 
-class PodSpec(BaseModel):
+class PodSpec(object):
 
     VALID_DNS_POLICIES = ['ClusterFirst', 'Default']
     VALID_RESTART_POLICIES = ['Always', 'OnFailure', 'Never']
 
     def __init__(self):
-        BaseModel.__init__(self)
+        super(PodSpec, self).__init__()
 
         self._containers = []
         self._dns_policy = 'ClusterFirst'

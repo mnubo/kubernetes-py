@@ -6,17 +6,16 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.K8sVolume import K8sVolume
-from kubernetes.models.v1.BaseModel import BaseModel
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.models.v1.PodSpec import PodSpec
 from kubernetes.models.v1.Container import Container
 
 
-class PodBasedModel(BaseModel):
+class PodBasedModel(object):
     
     def __init__(self):
-        BaseModel.__init__(self)
+        super(PodBasedModel, self).__init__()
+
         self.pod_spec = PodSpec()
         self.pod_metadata = ObjectMeta()
         self.pod_status = None

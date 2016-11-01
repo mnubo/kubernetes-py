@@ -6,14 +6,12 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1.BaseModel import BaseModel
 
+class TCPSocketAction(object):
 
-class TCPSocketAction(BaseModel):
-
-    def __init__(self, model=None):
+    def __init__(self):
         super(TCPSocketAction, self).__init__()
-        self._port = model.get('port', None)
+        self._port = None
 
     # ------------------------------------------------------------------------------------- port
 

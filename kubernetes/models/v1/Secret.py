@@ -6,15 +6,14 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1.BaseModel import BaseModel
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.K8sExceptions import *
 import base64
 
 
-class Secret(BaseModel):
+class Secret(object):
     def __init__(self, name=None, namespace='default', model=None):
-        BaseModel.__init__(self)
+        super(Secret, self).__init__()
 
         if name is None:
             raise SyntaxError('Secret: name: [ {0} ] cannot be None.'.format(name))

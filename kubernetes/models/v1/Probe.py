@@ -6,17 +6,18 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1.BaseModel import BaseModel
-from kubernetes.models.v1.ExecAction import ExecAction
-from kubernetes.models.v1.HTTPGetAction import HTTPGetAction
-from kubernetes.models.v1.TCPSocketAction import TCPSocketAction
+from kubernetes.models.v1 import (
+    ExecAction,
+    HTTPGetAction,
+    TCPSocketAction,
+)
 
 
-class Probe(BaseModel):
+class Probe(object):
 
     VALID_HANDLERS = ['exec', 'httpGet', 'tcpSocket']
 
-    def __init__(self, model=None, handler=None):
+    def __init__(self, handler=None):
         super(Probe, self).__init__()
 
         if handler not in Probe.VALID_HANDLERS:
@@ -26,6 +27,7 @@ class Probe(BaseModel):
         self.exec_action = None
         self.http_get_action = None
         self.tcp_socket_action = None
+
         if handler == 'exec':
             self.exec_action = ExecAction()
         if handler == 'httpGet':

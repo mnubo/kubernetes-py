@@ -6,12 +6,11 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1.BaseModel import BaseModel
 
-
-class ContainerStatus(BaseModel):
+class ContainerStatus(object):
     def __init__(self, model=None):
-        BaseModel.__init__(self)
+        super(ContainerStatus, self).__init__()
+
         if model is not None:
             assert isinstance(model, dict)
             self.model = model

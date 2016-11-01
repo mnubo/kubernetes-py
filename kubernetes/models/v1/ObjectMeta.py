@@ -6,10 +6,8 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1.BaseModel import BaseModel
 
-
-class ObjectMeta(BaseModel):
+class ObjectMeta(object):
     """
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_objectmeta
     """

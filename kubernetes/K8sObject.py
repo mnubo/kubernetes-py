@@ -8,7 +8,6 @@
 
 from kubernetes.utils import HttpRequest
 from kubernetes.models.v1.BaseUrls import BaseUrls
-from kubernetes.models.v1.BaseModel import BaseModel
 from kubernetes.models.v1.DeleteOptions import DeleteOptions
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sExceptions import *
@@ -51,7 +50,6 @@ class K8sObject(object):
 
         self.obj_type = obj_type
         self.name = name
-        self.model = BaseModel()
 
         try:
             urls = BaseUrls(api_version=self.config.version, namespace=self.config.namespace)
