@@ -6,12 +6,11 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.utils import HttpRequest
-from kubernetes.models.v1.BaseUrls import BaseUrls
-from kubernetes.models.v1.DeleteOptions import DeleteOptions
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sExceptions import *
-import json
+from kubernetes.models.v1.BaseUrls import BaseUrls
+from kubernetes.models.v1.DeleteOptions import DeleteOptions
+from kubernetes.utils import HttpRequest
 
 VALID_K8s_OBJS = [
     'Deployment',
@@ -26,7 +25,6 @@ VALID_K8s_OBJS = [
 
 
 class K8sObject(object):
-
     def __init__(self, config=None, name=None, obj_type=None):
         super(K8sObject, self).__init__()
 
@@ -50,6 +48,7 @@ class K8sObject(object):
 
         self.obj_type = obj_type
         self.name = name
+        self.model = None
 
         try:
             urls = BaseUrls(api_version=self.config.version, namespace=self.config.namespace)
@@ -68,14 +67,6 @@ class K8sObject(object):
                    and self.name == other.name
         return NotImplemented
 
-    # ------------------------------------------------------------------------------------- representations
-
-    def as_dict(self):
-        return self.model.get()
-
-    def as_json(self):
-        return json.dumps(self.model.get())
-
     # ------------------------------------------------------------------------------------- set name
 
     def set_name(self, name):
@@ -85,6 +76,23 @@ class K8sObject(object):
             if callable(meth):
                 meth(name=name)
         return self
+
+    # ------------------------------------------------------------------------------------- serialize
+
+    def serialize(self):
+        if self.model is None:
+            return {}
+        return self.model.serialize()
+
+    def as_json(self):
+        if self.model is None:
+            return ""
+        return self.model.as_json()
+
+    def as_yaml(self):
+        if self.model is None:
+            return ""
+        return self.model.as_yaml()
 
     # ------------------------------------------------------------------------------------- remote API calls
 
@@ -144,7 +152,8 @@ class K8sObject(object):
         if not state.get('success'):
             status = state.get('status', '')
             reason = state.get('data', dict()).get('message', None)
-            message = 'K8sObject: GET [ {0}:{1} ] failed: HTTP {2} : {3} '.format(self.obj_type, self.name, status, reason)
+            message = 'K8sObject: GET [ {0}:{1} ] failed: HTTP {2} : {3} '.format(self.obj_type, self.name, status,
+                                                                                  reason)
             raise NotFoundException(message)
 
         model = state.get('data')
@@ -165,7 +174,7 @@ class K8sObject(object):
             raise SyntaxError('K8sObject: name: [ {0} ] must be set to CREATE the object.'.format(self.name))
 
         url = '{base}'.format(base=self.base_url)
-        state = self.request(method='POST', url=url, data=self.model.get())
+        state = self.request(method='POST', url=url, data=self.serialize())
 
         if not state.get('success'):
             status = state.get('status', '')
@@ -186,7 +195,7 @@ class K8sObject(object):
             raise SyntaxError('K8sObject: name: [ {0} ] must be set to UPDATE the object.'.format(self.name))
 
         url = '{base}/{name}'.format(base=self.base_url, name=self.name)
-        state = self.request(method='PUT', url=url, data=self.model.get())
+        state = self.request(method='PUT', url=url, data=self.serialize())
 
         if not state.get('success'):
             status = state.get('status', '')
@@ -205,8 +214,7 @@ class K8sObject(object):
             raise SyntaxError('K8sObject: name: [ {0} ] must be set to DELETE the object.'.format(self.name))
 
         url = '{base}/{name}'.format(base=self.base_url, name=self.name)
-        self.model = DeleteOptions(kind='DeleteOptions')
-        state = self.request(method='DELETE', url=url, data=self.model.get())
+        state = self.request(method='DELETE', url=url, data=DeleteOptions().serialize())
 
         if not state.get('success'):
             status = state.get('status', '')
