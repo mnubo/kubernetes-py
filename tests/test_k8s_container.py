@@ -6,15 +6,16 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+import json
+import yaml
 import unittest
-import utils
+
 from kubernetes.K8sContainer import K8sContainer
 from kubernetes.models.v1 import Container
 from kubernetes.models.v1.VolumeMount import VolumeMount
 
 
 class K8sContainerTest(unittest.TestCase):
-
     def setUp(self):
         pass
 
@@ -71,7 +72,7 @@ class K8sContainerTest(unittest.TestCase):
         name = "yomama"
         image = "redis:latest"
         c = K8sContainer(name=name, image=image)
-        j = c.json()
+        j = c.serialize()
         self.assertIsInstance(j, dict)
         for i in ['image', 'imagePullPolicy', 'name']:
             self.assertIn(i, j)
@@ -112,3 +113,42 @@ class K8sContainerTest(unittest.TestCase):
         self.assertIsInstance(mount, VolumeMount)
         self.assertEqual(volname, mount.name)
         self.assertEqual(volmount, mount.mount_path)
+
+    # ------------------------------------------------------------------------------------- serialize
+
+    def test_serialize(self):
+        name = "redis"
+        image = "redis:3.0.7"
+        c = K8sContainer(name=name, image=image)
+        volname = "vol1"
+        volmount = "/path/on/container"
+        c.add_volume_mount(name=volname, mount_path=volmount)
+
+        data = c.serialize()
+        self.assertIsInstance(data, dict)
+
+    def test_as_json(self):
+        name = "redis"
+        image = "redis:3.0.7"
+        c = K8sContainer(name=name, image=image)
+        volname = "vol1"
+        volmount = "/path/on/container"
+        c.add_volume_mount(name=volname, mount_path=volmount)
+
+        j = c.as_json()
+        self.assertIsInstance(j, str)
+        d = json.loads(j)
+        self.assertIsInstance(d, dict)
+
+    def test_as_yaml(self):
+        name = "redis"
+        image = "redis:3.0.7"
+        c = K8sContainer(name=name, image=image)
+        volname = "vol1"
+        volmount = "/path/on/container"
+        c.add_volume_mount(name=volname, mount_path=volmount)
+
+        y = c.as_yaml()
+        self.assertIsInstance(y, str)
+        d = yaml.load(y)
+        self.assertIsInstance(d, dict)

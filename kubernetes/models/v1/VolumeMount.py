@@ -73,7 +73,7 @@ class VolumeMount(object):
 
     # ------------------------------------------------------------------------------------- serialize
 
-    def json(self):
+    def serialize(self):
         data = {}
         if self.name:
             data['name'] = self.name

@@ -6,6 +6,8 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+import json
+import yaml
 from kubernetes.models.v1.Container import Container
 from kubernetes.models.v1.ContainerPort import ContainerPort
 from kubernetes.models.v1.VolumeMount import VolumeMount
@@ -62,5 +64,15 @@ class K8sContainer(object):
 
     # -------------------------------------------------------------------------------------  serialize
 
-    def json(self):
-        return self.model.json()
+    def serialize(self):
+        return self.model.serialize()
+
+    def as_json(self):
+        data = self.serialize()
+        dump = json.dumps(data, indent=4)
+        return dump
+
+    def as_yaml(self):
+        data = self.serialize()
+        dump = yaml.dump(data, default_flow_style=False)
+        return dump

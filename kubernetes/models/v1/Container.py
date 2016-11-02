@@ -198,7 +198,7 @@ class Container(object):
 
     # ------------------------------------------------------------------------------------- serialize
 
-    def json(self):
+    def serialize(self):
         data = {}
         if self.args is not None:
             data['args'] = self.args
@@ -211,19 +211,19 @@ class Container(object):
         if self.image_pull_policy is not None:
             data['imagePullPolicy'] = self.image_pull_policy
         if self.liveness_probe is not None:
-            data['livenessProbe'] = self.liveness_probe.json()
+            data['livenessProbe'] = self.liveness_probe.serialize()
         if self.name is not None:
             data['name'] = self.name
         if self.ports is not None:
-            data['ports'] = [x.json() for x in self.ports]
+            data['ports'] = [x.serialize() for x in self.ports]
         if self.resources is not None:
-            data['resources'] = self.resources.json()
+            data['resources'] = self.resources.serialize()
         if self.readiness_probe is not None:
-            data['readinessProbe'] = self.readiness_probe.json()
+            data['readinessProbe'] = self.readiness_probe.serialize()
         if self.security_context is not None:
-            data['securityContext'] = self.security_context.json()
+            data['securityContext'] = self.security_context.serialize()
         if self.volume_mounts is not None:
-            data['volumeMounts'] = [x.json() for x in self.volume_mounts]
+            data['volumeMounts'] = [x.serialize() for x in self.volume_mounts]
         if self.working_dir is not None:
             data['workingDir'] = self.working_dir
         return data
