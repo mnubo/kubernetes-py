@@ -9,8 +9,8 @@
 import unittest
 import utils
 from kubernetes.K8sContainer import K8sContainer
-from kubernetes.K8sVolume import K8sVolume
 from kubernetes.models.v1 import Container
+from kubernetes.models.v1.VolumeMount import VolumeMount
 
 
 class K8sContainerTest(unittest.TestCase):
@@ -19,7 +19,8 @@ class K8sContainerTest(unittest.TestCase):
         pass
 
     def tearDown(self):
-        utils.cleanup_objects()
+        # utils.cleanup_objects()
+        pass
 
     # ------------------------------------------------------------------------------------- init
 
@@ -52,58 +53,28 @@ class K8sContainerTest(unittest.TestCase):
         c = K8sContainer(name=name, image=image)
         self.assertIsNotNone(c)
         self.assertIsInstance(c, K8sContainer)
-        self.assertEqual(c.model.get_name(), name)
-        self.assertEqual(c.model.get_image(), image)
+        self.assertEqual(c.model.name, name)
+        self.assertEqual(c.model.image, image)
 
     # ------------------------------------------------------------------------------------- struct
 
     def test_struct_k8scontainer(self):
         name = "yomama"
-        image = "redis"
+        image = "redis:latest"
         c = K8sContainer(name=name, image=image)
         self.assertIsNotNone(c)
         self.assertIsInstance(c, K8sContainer)
         self.assertIsNotNone(c.model)
         self.assertIsInstance(c.model, Container)
 
-    def test_struct_container(self):
+    def test_struct_json(self):
         name = "yomama"
-        image = "redis"
+        image = "redis:latest"
         c = K8sContainer(name=name, image=image)
-        self.assertIsInstance(c.model, Container)
-        self.assertIsNone(c.model.liveness_probe)
-        self.assertIsNone(c.model.readiness_probe)
-        self.assertIsNotNone(c.model.model)
-
-    def test_struct_container_model(self):
-        name = "yomama"
-        image = "redis"
-        c = K8sContainer(name=name, image=image)
-        model = c.model.model
-        self.assertIsInstance(model, dict)
-        self.assertEqual(7, len(model))
-        self.assertIn('hostNetwork', model)
-        self.assertIsInstance(model['hostNetwork'], bool)
-        self.assertIn('image', model)
-        self.assertIsInstance(model['image'], str)
-        self.assertIn('imagePullPolicy', model)
-        self.assertIsInstance(model['imagePullPolicy'], str)
-        self.assertIn('name', model)
-        self.assertIsInstance(model['name'], str)
-        self.assertEqual(model['name'], name)
-        self.assertIn('privileged', model)
-        self.assertIsInstance(model['privileged'], bool)
-        self.assertIn('resources', model)
-        self.assertIsInstance(model['resources'], dict)
-        self.assertEqual(1, len(model['resources']))
-        self.assertIn('requests', model['resources'])
-        self.assertIsInstance(model['resources']['requests'], dict)
-        self.assertEqual(2, len(model['resources']['requests']))
-        self.assertIn('cpu', model['resources']['requests'])
-        self.assertIsInstance(model['resources']['requests']['cpu'], str)
-        self.assertIn('memory', model['resources']['requests'])
-        self.assertIsInstance(model['resources']['requests']['memory'], str)
-        self.assertIn('terminationMessagePath', model)
+        j = c.json()
+        self.assertIsInstance(j, dict)
+        for i in ['image', 'imagePullPolicy', 'name']:
+            self.assertIn(i, j)
 
     # ------------------------------------------------------------------------------------- add volume mount
 
@@ -114,50 +85,30 @@ class K8sContainerTest(unittest.TestCase):
         with self.assertRaises(SyntaxError):
             c.add_volume_mount()
 
-    def test_add_volume_mount_invalid_volume(self):
+    def test_add_volume_mount_invalid_args(self):
         name = "yomama"
         image = "redis"
-        volume = object()
+        vname = object()
+        vmount = object()
         c = K8sContainer(name=name, image=image)
         with self.assertRaises(SyntaxError):
-            c.add_volume_mount(volume)
+            c.add_volume_mount(name=vname)
+        with self.assertRaises(SyntaxError):
+            c.add_volume_mount(name=name, mount_path=vmount)
 
-    def test_add_volume_emptydir(self):
+    def test_add_volume_mount(self):
         name = "redis"
         image = "redis:3.0.7"
         c = K8sContainer(name=name, image=image)
-        volname = "vol1"
-        voltype = "emptyDir"
-        volmount = "/path/on/container"
-        config = utils.create_config()
-        vol = K8sVolume(config=config, name=volname, type=voltype, mount_path=volmount)
-        c.add_volume_mount(vol)
-        self.assertIn('volumeMounts', c.model.model)
-        self.assertIsInstance(c.model.model['volumeMounts'], list)
-        self.assertEqual(1, len(c.model.model['volumeMounts']))
-        self.assertIsInstance(c.model.model['volumeMounts'][0], dict)
-        for i in ['mountPath', 'name']:
-            self.assertIn(i, c.model.model['volumeMounts'][0])
-        self.assertEqual(volname, c.model.model['volumeMounts'][0]['name'])
-        self.assertEqual(volmount, c.model.model['volumeMounts'][0]['mountPath'])
 
-    def test_add_volume_hostpath(self):
-        name = "redis"
-        image = "redis:3.0.7"
-        c = K8sContainer(name=name, image=image)
         volname = "vol1"
-        voltype = "hostPath"
         volmount = "/path/on/container"
-        volhostpath = "/path/on/host"
-        config = utils.create_config()
-        vol = K8sVolume(config=config, name=volname, type=voltype, mount_path=volmount)
-        vol.set_path(volhostpath)
-        c.add_volume_mount(vol)
-        self.assertIn('volumeMounts', c.model.model)
-        self.assertIsInstance(c.model.model['volumeMounts'], list)
-        self.assertEqual(1, len(c.model.model['volumeMounts']))
-        self.assertIsInstance(c.model.model['volumeMounts'][0], dict)
-        for i in ['mountPath', 'name']:
-            self.assertIn(i, c.model.model['volumeMounts'][0])
-        self.assertEqual(volname, c.model.model['volumeMounts'][0]['name'])
-        self.assertEqual(volmount, c.model.model['volumeMounts'][0]['mountPath'])
+        c.add_volume_mount(name=volname, mount_path=volmount)
+        self.assertTrue(hasattr(c.model, 'volume_mounts'))
+        self.assertIsInstance(c.model.volume_mounts, list)
+        self.assertEqual(1, len(c.model.volume_mounts))
+
+        mount = c.model.volume_mounts[0]
+        self.assertIsInstance(mount, VolumeMount)
+        self.assertEqual(volname, mount.name)
+        self.assertEqual(volmount, mount.mount_path)

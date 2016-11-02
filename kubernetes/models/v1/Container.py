@@ -6,14 +6,12 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1 import (
-    ContainerPort,
-    Probe,
-    ResourceRequirements,
-    SecurityContext,
-    VolumeMount,
-)
-from kubernetes.utils import is_valid_list, is_valid_dict
+from kubernetes.models.v1.ContainerPort import ContainerPort
+from kubernetes.models.v1.Probe import Probe
+from kubernetes.models.v1.ResourceRequirements import ResourceRequirements
+from kubernetes.models.v1.SecurityContext import SecurityContext
+from kubernetes.models.v1.VolumeMount import VolumeMount
+from kubernetes.utils import is_valid_list, is_valid_dict, is_valid_string
 
 
 class Container(object):
@@ -25,21 +23,19 @@ class Container(object):
 
     def __init__(self, name=None, image=None):
         super(Container, self).__init__()
-
         self._args = None
         self._command = None
         self._env = None
+        self._image = None
         self._image_pull_policy = 'IfNotPresent'
         self._liveness_probe = None
+        self._name = name
         self._ports = None
         self._readiness_probe = None
         self._resources = None
         self._security_context = None
         self._volume_mounts = None
-
-        self.image = image
-        self.name = name
-        self.working_dir = None
+        self._working_dir = None
 
     # ------------------------------------------------------------------------------------- args
 
@@ -81,6 +77,18 @@ class Container(object):
                 raise SyntaxError(msg)
         self._env = env
 
+    # ------------------------------------------------------------------------------------- image
+
+    @property
+    def image(self):
+        return self._image
+
+    @image.setter
+    def image(self, image=None):
+        if not is_valid_string(image):
+            raise SyntaxError('Container: image: [ {0} ] is invalid.'.format(image))
+        self._image = image
+
     # ------------------------------------------------------------------------------------- image pull policy
 
     @property
@@ -104,6 +112,18 @@ class Container(object):
         if not isinstance(probe, Probe):
             raise SyntaxError('Container: liveness_probe: [ {0} ] is invalid.'.format(probe))
         self._liveness_probe = probe
+
+    # ------------------------------------------------------------------------------------- name
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, name=None):
+        if not is_valid_string(name):
+            raise SyntaxError('Container: name: [ {0} ] is invalid.'.format(name))
+        self._name = name
 
     # ------------------------------------------------------------------------------------- ports
 
@@ -164,6 +184,17 @@ class Container(object):
         if not is_valid_list(mounts, VolumeMount):
             raise SyntaxError('Container: volume_mounts: [ {0} ] is invalid.'.format(mounts))
         self._volume_mounts = mounts
+
+    # ------------------------------------------------------------------------------------- working dir
+    @property
+    def working_dir(self):
+        return self._working_dir
+
+    @working_dir.setter
+    def working_dir(self, wdir=None):
+        if not is_valid_string(wdir):
+            raise SyntaxError('Container: working_dir: [ {0} ] is invalid.'.format(wdir))
+        self._working_dir = wdir
 
     # ------------------------------------------------------------------------------------- serialize
 
