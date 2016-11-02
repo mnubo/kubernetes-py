@@ -298,6 +298,7 @@ class K8sReplicationController(K8sPodBasedObject):
         ann_desired_replicas = 'desired-replicas'
 
         name_next = "{0}-next".format(name)
+        name_old = "{0}-old".format(name)
 
         rc_current = None
         rc_next = None
@@ -340,18 +341,19 @@ class K8sReplicationController(K8sPodBasedObject):
 
                 rc_next.set_container_image(name=container_name, image=image)
 
-            my_version = str(uuid.uuid4())
+            rc_current.delete()
 
-            rc_next.set_name(name=name_next)
-            rc_next.add_pod_label(k='name', v=name)
-            rc_next.add_pod_label(k='rc_version', v=my_version)
-            rc_next.set_selector(selector=dict(name=name, rc_version=my_version))
-            rc_next.set_replicas(replicas=0)
-            rc_next.set_pod_generate_name(mode=True, name=name)
+            rc_next.set_name(name=name_old)
             rc_next.create()
 
-            rc_current.add_annotation(k=ann_update_partner, v=name_next)
-            rc_current.update()
+            new_version = str(uuid.uuid4())
+            rc_current = copy.deepcopy(rc_next)
+            rc_current.set_name(name=name)
+            rc_current.set_replicas(0)
+            rc_current.add_pod_label(k='name', v=name)
+            rc_current.add_pod_label(k='rc_version', v=new_version)
+            rc_current.set_selector(selector=dict(name=name, rc_version=new_version))
+            rc_current.create()
 
             phase = 'rollout'
 
@@ -367,38 +369,27 @@ class K8sReplicationController(K8sPodBasedObject):
         if phase == 'rollout':
             desired_replicas = rc_next.get_annotation(k=ann_desired_replicas)
 
-            while rc_next.get_replicas() < int(desired_replicas):
+            while rc_current.get_replicas() < int(desired_replicas):
 
-                next_replicas = rc_next.get_replicas() + 1
-                rc_next.set_replicas(replicas=next_replicas)
-                rc_next.update()
-                rc_next.wait_for_replicas(replicas=next_replicas, labels=rc_next.get_pod_labels())
-
-                if rc_current.get_replicas() > 0:
-                    current_replicas = rc_current.get_replicas() - 1
-                    rc_current.set_replicas(replicas=current_replicas)
-                    rc_current.update()
-                    rc_current.wait_for_replicas(replicas=current_replicas, labels=rc_current.get_pod_labels())
-
-            if rc_current.get_replicas() > 0:
-                rc_current.set_replicas(replicas=0)
+                current_replicas = rc_current.get_replicas() + 1
+                rc_current.set_replicas(replicas=current_replicas)
                 rc_current.update()
-                rc_current.wait_for_replicas(replicas=0, labels=rc_current.get_pod_labels())
+                rc_current.wait_for_replicas(replicas=current_replicas, labels=rc_current.get_pod_labels())
+
+                if rc_next.get_replicas() > 0:
+                    next_replicas = rc_next.get_replicas() - 1
+                    rc_next.set_replicas(replicas=next_replicas)
+                    rc_next.update()
+                    rc_next.wait_for_replicas(replicas=next_replicas, labels=rc_next.get_pod_labels())
+
+            if rc_next.get_replicas() > 0:
+                rc_next.set_replicas(replicas=0)
+                rc_next.update()
+                rc_next.wait_for_replicas(replicas=0, labels=rc_next.get_pod_labels())
 
             phase = 'rename'
 
         if phase == 'rename':
-            rc_current.delete()
-            new_version = str(uuid.uuid4())
-            rc_current = copy.deepcopy(rc_next)
-            rc_current.set_name(name=name)
-            rc_current.add_pod_label(k='name', v=name)
-            rc_current.add_pod_label(k='rc_version', v=new_version)
-            rc_current.set_selector(selector=dict(name=name, rc_version=new_version))
-            rc_current.del_annotation(k=ann_update_partner)
-            rc_current.del_annotation(k=ann_desired_replicas)
-            rc_current.create()
-            rc_next.scale(config=rc_next.config, name=rc_next.name, replicas=0)
             rc_next.delete()
 
         return rc_current
