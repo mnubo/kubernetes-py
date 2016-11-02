@@ -14,6 +14,9 @@ from kubernetes.models.v1 import (
 
 
 class Probe(object):
+    """
+    http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_probe
+    """
 
     VALID_HANDLERS = ['exec', 'httpGet', 'tcpSocket']
 
