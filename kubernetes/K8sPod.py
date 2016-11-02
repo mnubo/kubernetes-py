@@ -13,7 +13,7 @@ from kubernetes.models.v1.PodStatus import PodStatus
 from kubernetes.K8sExceptions import NotFoundException, TimedOutException
 from kubernetes import K8sConfig
 
-POD_READY_TIMEOUT_SECONDS = 60
+POD_READY_TIMEOUT_SECONDS = 300  # 5 mins.
 
 
 class K8sPod(K8sPodBasedObject):

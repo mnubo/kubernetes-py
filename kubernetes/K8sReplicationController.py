@@ -17,7 +17,7 @@ from kubernetes.K8sPod import K8sPod
 from kubernetes.K8sPodBasedObject import K8sPodBasedObject
 from kubernetes.models.v1.ReplicationController import ReplicationController
 
-SCALE_WAIT_TIMEOUT_SECONDS = 60
+SCALE_WAIT_TIMEOUT_SECONDS = 300  # 5 mins.
 
 
 class K8sReplicationController(K8sPodBasedObject):

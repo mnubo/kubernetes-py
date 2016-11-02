@@ -14,7 +14,7 @@ from kubernetes.models.v1.Deployment import Deployment
 from kubernetes.K8sExceptions import TimedOutException, NotFoundException, BadRequestException
 
 API_VERSION = 'extensions/v1beta1'
-SCALE_WAIT_TIMEOUT_SECONDS = 60
+SCALE_WAIT_TIMEOUT_SECONDS = 300 # 5 mins.
 
 
 class K8sDeployment(K8sPodBasedObject):
