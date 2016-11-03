@@ -7,23 +7,35 @@
 #
 
 import time
-from kubernetes.K8sPodBasedObject import K8sPodBasedObject
-from kubernetes.models.v1.Pod import Pod
-from kubernetes.models.v1.PodStatus import PodStatus
-from kubernetes.K8sExceptions import NotFoundException, TimedOutException
+import json
+import yaml
+
 from kubernetes import K8sConfig
+from kubernetes.K8sExceptions import NotFoundException, TimedOutException
+from kubernetes.K8sObject import K8sObject
+from kubernetes.models.v1.ObjectMeta import ObjectMeta
+from kubernetes.models.v1.Pod import Pod
+from kubernetes.models.v1.PodSpec import PodSpec
+from kubernetes.models.v1.PodStatus import PodStatus
 
 POD_READY_TIMEOUT_SECONDS = 60
 
 
-class K8sPod(K8sPodBasedObject):
-
+class K8sPod(K8sObject):
     def __init__(self, config=None, name=None):
         super(K8sPod, self).__init__(config=config, obj_type='Pod', name=name)
 
-        self.model = Pod(name=name, namespace=self.config.namespace)
+        self.model = Pod()
+
+        self.model.metadata = ObjectMeta()
+        self.model.metadata.name = name
+        self.model.metadata.namespace = config.namespace
+
+        self.model.spec = PodSpec()
+        self.model.status = PodStatus()
+
         if self.config.pull_secret is not None:
-            self.model.add_image_pull_secrets(name=self.config.pull_secret)
+            self.add_image_pull_secret(self.config.pull_secret)
 
     # -------------------------------------------------------------------------------------  override
 
@@ -50,21 +62,66 @@ class K8sPod(K8sPodBasedObject):
     # -------------------------------------------------------------------------------------  add
 
     def add_annotation(self, k=None, v=None):
-        self.model.add_pod_annotation(k=k, v=v)
+        data = {k: v}
+        annotations = self.model.metadata.annotations
+        if annotations is None:
+            annotations = []
+        if data not in annotations:
+            annotations.append(data)
+            self.model.metadata.annotations = annotations
+        return self
+
+    def add_container(self, container=None):
+        containers = self.model.spec.containers
+        if container not in containers:
+            containers.append(container)
+            self.model.spec.continers = containers
         return self
 
     def add_label(self, k=None, v=None):
-        self.model.add_pod_label(k=k, v=v)
+        data = {k: v}
+        labels = self.model.metadata.labels
+        if labels is None:
+            labels = []
+        if data not in labels:
+            labels.append(data)
+            self.model.metadata.labels = labels
+        return self
+
+    def add_image_pull_secret(self, name=None):
+        secrets = self.model.spec.image_pull_secrets
+        if secrets is None:
+            secrets = []
+        if name not in secrets:
+            secrets.append(name)
+            self.model.spec.image_pull_secrets = secrets
+        return self
+
+    def add_volume(self, volume=None):
+        volumes = self.model.spec.volumes
+        if volume not in volumes:
+            volumes.append(volume)
+            self.model.spec.volumes = volumes
         return self
 
     # ------------------------------------------------------------------------------------- delete
 
     def del_annotation(self, k=None):
-        self.model.del_pod_annotation(k=k)
+        orig = self.model.metadata.annotations
+        new = filter(lambda x: k not in x, orig)
+        if orig != new:
+            self.model.metadata.annotations = new
         return self
 
     def del_label(self, k=None):
-        self.model.del_pod_label(k=k)
+        orig = self.model.metadata.labels
+        new = filter(lambda x: k not in x, orig)
+        if orig != new:
+            self.model.metadata.labels = new
+        return self
+
+    def del_node_name(self):
+        self.model.spec.node_name = None
         return self
 
     # ------------------------------------------------------------------------------------- get
@@ -74,16 +131,20 @@ class K8sPod(K8sPodBasedObject):
         return self
 
     def get_annotation(self, k=None):
-        return self.model.get_pod_annotation(k=k)
+        ann = filter(lambda x: k in x, self.model.metadata.annotations)
+        return ann
 
     def get_annotations(self):
-        return self.model.get_pod_annotations()
+        return self.model.metadata.annotations
 
     def get_label(self, k=None):
-        return self.model.get_pod_label(k=k)
+        label = filter(lambda x: k in x, self.model.metadata.labels)
+        if label:
+            return label[0][k]
+        return None
 
     def get_labels(self):
-        return self.model.get_pod_labels()
+        return self.model.metadata.labels
 
     def get_namespace(self):
         return self.model.get_pod_namespace()
@@ -91,6 +152,24 @@ class K8sPod(K8sPodBasedObject):
     def get_status(self):
         self.get()
         return self.model.get_pod_status()
+
+    def get_pod_containers(self):
+        return self.model.get_pod_containers()
+
+    def get_pod_node_name(self):
+        return self.model.get_pod_node_name()
+
+    def get_pod_node_selector(self):
+        return self.model.get_pod_node_selector()
+
+    def get_pod_restart_policy(self):
+        return self.model.get_pod_restart_policy()
+
+    def get_service_account(self):
+        return self.model.get_service_account()
+
+    def get_termination_grace_period(self):
+        return self.model.get_termination_grace_period()
 
     # ------------------------------------------------------------------------------------- polling readiness
 
@@ -119,6 +198,42 @@ class K8sPod(K8sPodBasedObject):
 
     def set_namespace(self, namespace=None):
         self.model.set_pod_namespace(namespace)
+        return self
+
+    def set_active_deadline(self, seconds=None):
+        self.model.set_active_deadline(seconds=seconds)
+        return self
+
+    def set_container_image(self, name, image=None):
+        self.model.set_pod_image(name=name, image=image)
+        return self
+
+    def set_dns_policy(self, policy=None):
+        self.model.set_dns_policy(policy=policy)
+        return self
+
+    def set_pod_generate_name(self, mode=None, name=None):
+        self.model.set_pod_generate_name(mode=mode, name=name)
+        return self
+
+    def set_pod_node_name(self, name=None):
+        self.model.set_pod_node_name(name=name)
+        return self
+
+    def set_pod_node_selector(self, selector=None):
+        self.model.set_pod_node_selector(selector=selector)
+        return self
+
+    def set_pod_restart_policy(self, policy=None):
+        self.model.set_pod_restart_policy(policy=policy)
+        return self
+
+    def set_service_account(self, name=None):
+        self.model.set_service_account(name=name)
+        return self
+
+    def set_termination_grace_period(self, seconds=None):
+        self.model.set_termination_grace_period(seconds=seconds)
         return self
 
     # ------------------------------------------------------------------------------------- filtering
@@ -167,3 +282,18 @@ class K8sPod(K8sPodBasedObject):
                 pass
 
         return pod_list
+
+    # ------------------------------------------------------------------------------------- serialize
+
+    def serialize(self):
+        return self.model.serialize()
+
+    def as_json(self):
+        data = self.serialize()
+        j = json.dumps(data, indent=4)
+        return j
+
+    def as_yaml(self):
+        data = self.serialize()
+        y = yaml.dump(data, default_flow_style=False)
+        return y

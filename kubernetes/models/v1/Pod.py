@@ -6,11 +6,10 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1 import (
-    ObjectMeta,
-    PodSpec,
-    PodStatus,
-)
+from kubernetes.models.v1.ObjectMeta import ObjectMeta
+from kubernetes.models.v1.PodSpec import PodSpec
+from kubernetes.models.v1.PodStatus import PodStatus
+from kubernetes.utils import filter_model
 
 
 class Pod(object):
@@ -18,15 +17,30 @@ class Pod(object):
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_pod
     """
 
-    def __init__(self):
+    def __init__(self, model=None):
         super(Pod, self).__init__()
-
         self._metadata = None
         self._spec = None
         self._status = None
-
         self.kind = 'Pod'
         self.api_version = 'v1'
+
+        if model is not None:
+            m = filter_model(model)
+            self._build_with_model(m)
+
+    def _build_with_model(self, model=None):
+        self.kind = model['kind']
+        self.api_version = model['apiVersion']
+        if 'metadata' in model:
+            metadata = ObjectMeta(model=model['metadata'])
+            self.metadata = metadata
+        if 'spec' in model:
+            spec = PodSpec(model=model['spec'])
+            self.spec = spec
+        if 'status' in model:
+            status = PodStatus(model=model['status'])
+            self.status = status
 
     # ------------------------------------------------------------------------------------- metadata
 
@@ -66,16 +80,16 @@ class Pod(object):
 
     # ------------------------------------------------------------------------------------- serialize
 
-    def json(self):
+    def serialize(self):
         data = {}
         if self.kind:
             data['kind'] = self.kind
         if self.api_version:
             data['api_version'] = self.api_version
         if self.metadata is not None:
-            data['metadata'] = self.metadata.json()
+            data['metadata'] = self.metadata.serialize()
         if self.spec is not None:
-            data['spec'] = self.spec.json()
+            data['spec'] = self.spec.serialize()
         if self.status is not None:
-            data['status'] = self.status.json()
+            data['status'] = self.status.serialize()
         return data

@@ -6,224 +6,193 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.K8sSecret import K8sSecret
+from kubernetes.utils import is_valid_string, filter_model
+from kubernetes.models.v1.AWSElasticBlockStoreVolumeSource import AWSElasticBlockStoreVolumeSource
+from kubernetes.models.v1.EmptyDirVolumeSource import EmptyDirVolumeSource
+from kubernetes.models.v1.GCEPersistentDiskVolumeSource import GCEPersistentDiskVolumeSource
+from kubernetes.models.v1.GitRepoVolumeSource import GitRepoVolumeSource
+from kubernetes.models.v1.HostPathVolumeSource import HostPathVolumeSource
+from kubernetes.models.v1.NFSVolumeSource import NFSVolumeSource
+from kubernetes.models.v1.SecretVolumeSource import SecretVolumeSource
 
 
 class Volume(object):
+    """
+    http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_volume
+    """
 
     VALID_VOLUME_TYPES = [
-        'emptyDir',
-        'hostPath',
-        'gcePersistentDisk',
         'awsElasticBlockStore',
-        'nfs',
-        # 'iscsi',
-        # 'flocker',
-        # 'glusterfs',
-        # 'rbd',
-        # 'cephfs',
+        'emptyDir',
+        'gcePersistentDisk',
         'gitRepo',
+        'hostPath',
+        'nfs',
         'secret',
-        # 'persistentVolumeClaim',
-        # 'downwardAPI',
-        # 'azureFileVolume',
-        # 'vsphereVolume',
     ]
 
-    VALID_EMPTYDIR_MEDIA = [
-        '',
-        'Memory'
-    ]
+    def __init__(self, model=None):
 
-    def __init__(self, name=None, type=None, mount_path=None, read_only=False):
+        # TODO(froch): add support for the below
+        # self._iscsi = None
+        # self._glusterfs = None
+        # self._persistent_volume_claim = None
+        # self._rbd = None
+        # self._flex_volume = None
+        # self._cinder = None
+        # self._cephfs = None
+        # self._flocker = None
+        # self._downward_api = None
+        # self._fc = None
+        # self._azure_file = None
+        # self._config_map = None
+        # self._vsphere_volume
+        # self._quobyte = None
+        # self._azuredisk = None
 
-        super(Volume, self).__init__()
+        self._aws_elastic_block_store = None
+        self._empty_dir = None
+        self._gce_persistent_disk = None
+        self._git_repo = None
+        self._host_path = None
+        self._name = None
+        self._nfs = None
+        self._secret = None
 
-        if name is None:
-            raise SyntaxError('Volume: name: [ {0} ] cannot be None.'.format(name))
-        if not isinstance(name, str):
-            raise SyntaxError('Volume: name: [ {0} ] must be a string.'.format(name.__class__.__name__))
+        if model is not None:
+            m = filter_model(model)
+            self._build_with_model(m)
 
-        if type not in Volume.VALID_VOLUME_TYPES:
-            raise SyntaxError('Volume: type: [ {0} ] is invalid.'.format(type))
+    def _build_with_model(self, model=None):
+        if 'awsElasticBlockStore' in model:
+            self.aws_elastic_block_store = AWSElasticBlockStoreVolumeSource(model=model['awsElasticBlockStore'])
+        if 'emptyDir' in model:
+            self.empty_dir = EmptyDirVolumeSource(model=model['emptyDir'])
+        if 'gcePersistentDisk' in model:
+            self.gce_persistent_disk = GCEPersistentDiskVolumeSource(model=model['gcePersistentDisk'])
+        if 'gitRepo' in model:
+            self.git_repo = GitRepoVolumeSource(model=model['gitRepo'])
+        if 'hostPath' in model:
+            self.host_path = HostPathVolumeSource(model=model['hostPath'])
+        if 'name' in model:
+            self.name = model['name']
+        if 'nfs' in model:
+            self.nfs = NFSVolumeSource(model=model['nfs'])
+        if 'secret' in model:
+            self.secret = SecretVolumeSource(model=model['secret'])
 
-        if not Volume._is_valid_path(mount_path):
-            raise SyntaxError('Volume: mount_path: [ {0} ] is invalid.'.format(mount_path))
+    # ------------------------------------------------------------------------------------- aws ebs
 
-        if not isinstance(read_only, bool):
-            raise SyntaxError('Volume: read_only: [ {0} ] must be a boolean.'.format(read_only.__class__.__name__))
+    @property
+    def aws_elastic_block_store(self):
+        return self._aws_elastic_block_store
 
-        self.aws_volume_id = None  # used with type 'awsElasticBlockStore'
-        self.fs_type = 'ext4'  # used with types 'awsElasticBlockStore' and 'gcePersistentDisk'
-        self.gce_pd_name = None  # used with type 'gcePersistentDisk'
-        self.git_repo = None  # used with type 'gitRepo'
-        self.git_revision = None  # used with type 'gitRepo'
-        self.medium = ''  # used with type 'emptyDir'
-        self.mount_path = mount_path
-        self.name = name
-        self.path = None  # used with type 'hostPath' and 'nfs'
-        self.read_only = read_only
-        self.secret_name = None  # used with type 'secret'
-        self.server = None  # used with type 'nfs
-        self.type = type
-        self._update_model()
+    @aws_elastic_block_store.setter
+    def aws_elastic_block_store(self, ebs=None):
+        if not isinstance(ebs, AWSElasticBlockStoreVolumeSource):
+            raise SyntaxError('Volume: aws_elastic_block_store: [ {0} ] is invalid.'.format(ebs))
+        self._aws_elastic_block_store = ebs
 
-    # -------------------------------------------------------------------------------------  utils
+    # ------------------------------------------------------------------------------------- emptyDir
 
-    @staticmethod
-    def _is_valid_path(path=None):
-        # TODO: validate path for unix and windows.
-        # re_match = re.match(r'^(([a-zA-Z]:)|((\\|/){1,2}\w+)\$?)((\\|/)(\w[\w ]*.*))+\.([a-zA-Z0-9]+)$', path)
-        # if re_match is None:
-        #     return False
-        if not isinstance(path, str):
-            return False
-        return True
+    @property
+    def empty_dir(self):
+        return self._empty_dir
 
-    def _update_model(self):
+    @empty_dir.setter
+    def empty_dir(self, edir=None):
+        if not isinstance(edir, EmptyDirVolumeSource):
+            raise SyntaxError('Volume: empty_dir: [ {0} ] is invalid.'.format(edir))
+        self._empty_dir = edir
 
-        self.model = {
-            'volumeMount': {
-                'name': self.name,
-                'mountPath': self.mount_path,
-            },
-            'volume': {
-                'name': self.name,
-                self.type: {}
-            }
-        }
+    # ------------------------------------------------------------------------------------- gce pd
 
-        if self.read_only is True:
-            self.model['volumeMount']['readOnly'] = True
-            self.model['volume'][self.type]['readOnly'] = True
+    @property
+    def gce_persistent_disk(self):
+        return self._gce_persistent_disk
 
-        if self.type == 'emptyDir' and self.medium != '':
-            self.model['volume'][self.type]['medium'] = self.medium
+    @gce_persistent_disk.setter
+    def gce_persistent_disk(self, pd=None):
+        if not isinstance(pd, GCEPersistentDiskVolumeSource):
+            raise SyntaxError('Volume: gce_persistent_disk: [ {0} ] is invalid.'.format(pd))
+        self._gce_persistent_disk = pd
 
-        if self.type == 'hostPath':
-            self.model['volume'][self.type]['path'] = self.path
+    # ------------------------------------------------------------------------------------- gitRepo
 
-        if self.type == 'secret':
-            self.model['volume'][self.type]['secretName'] = self.secret_name
+    @property
+    def git_repo(self):
+        return self._git_repo
 
-        if self.type == 'awsElasticBlockStore':
-            self.model['volume'][self.type]['volumeID'] = self.aws_volume_id
-            self.model['volume'][self.type]['fsType'] = self.fs_type
+    @git_repo.setter
+    def git_repo(self, repo=None):
+        if not isinstance(repo, GitRepoVolumeSource):
+            raise SyntaxError('Volume: git_repo: [ {0} ] is invalid.'.format(repo))
+        self._git_repo = repo
 
-        if self.type == 'gcePersistentDisk':
-            self.model['volume'][self.type]['pdName'] = self.gce_pd_name
-            self.model['volume'][self.type]['fsType'] = self.fs_type
+    # ------------------------------------------------------------------------------------- hostPath
 
-        if self.type == 'nfs':
-            self.model['volume'][self.type]['server'] = self.server
-            self.model['volume'][self.type]['path'] = self.path
+    @property
+    def host_path(self):
+        return self._host_path
 
-        if self.type == 'gitRepo':
-            self.model['volume'][self.type]['repository'] = self.git_repo
-            self.model['volume'][self.type]['revision'] = self.git_revision
+    @host_path.setter
+    def host_path(self, hp=None):
+        if not isinstance(hp, HostPathVolumeSource):
+            raise SyntaxError('Volume: host_path: [ {0} ] is invalid.'.format(hp))
+        self._host_path = hp
 
-    # -------------------------------------------------------------------------------------  emptyDir
+    # ------------------------------------------------------------------------------------- nfs
 
-    def set_medium(self, medium=None):
-        if medium is None:
-            medium = ''
-        if medium not in Volume.VALID_EMPTYDIR_MEDIA:
-            raise SyntaxError(
-                'Volume: medium: [ {0} ] is invalid. Must be in: [ {1} ] '.format(medium, Volume.VALID_EMPTYDIR_MEDIA))
-        if medium is not None and self.type != 'emptyDir':
-            raise SyntaxError('Volume: medium: [ {0} ] can only be used with type [ emptyDir ]'.format(medium))
-        self.medium = medium
-        self._update_model()
-        return self
+    @property
+    def name(self):
+        return self._name
 
-    # -------------------------------------------------------------------------------------  hostPath & nfs - path
+    @name.setter
+    def name(self, name=None):
+        if not is_valid_string(name):
+            raise SyntaxError('Volume: name: [ {0} ] is invalid.'.format(name))
+        self._name = name
 
-    def set_path(self, path=None):
-        if path is None:
-            raise SyntaxError("Volume: path: [ {0} ] cannot be None.".format(path))
-        if not self._is_valid_path(path):
-            raise SyntaxError("Volume: path: [ {0} ] is invalid.".format(path))
-        if path is not None and self.type not in ['hostPath', 'nfs']:
-            raise SyntaxError(
-                'Volume: path: [ {0} ] can only be used with types [ \'hostPath\', \'nfs\' ]'.format(path))
-        self.path = path
-        self._update_model()
-        return self
+    # ------------------------------------------------------------------------------------- nfs
 
-    # -------------------------------------------------------------------------------------  secret
+    @property
+    def nfs(self):
+        return self._nfs
 
-    def set_secret_name(self, secret=None):
-        if not isinstance(secret, K8sSecret):
-            raise SyntaxError('Volume: secret: [ {0} ] must be a K8sSecret.'.format(secret.__class__.__name__))
-        if secret is not None and self.type != 'secret':
-            raise SyntaxError('Volume: secret: [ {0} ] can only be used with type [ secret ]'.format(secret.name))
-        self.secret_name = secret.name
-        self._update_model()
-        return self
+    @nfs.setter
+    def nfs(self, nfs=None):
+        if not isinstance(nfs, NFSVolumeSource):
+            raise SyntaxError('Volume: nfs: [ {0} ] is invalid.'.format(nfs))
+        self._nfs = nfs
 
-    # -------------------------------------------------------------------------------------  awsElasticBlockStore
+    # ------------------------------------------------------------------------------------- secret
 
-    def set_volume_id(self, volume_id=None):
-        if not isinstance(volume_id, str):
-            raise SyntaxError('Volume: volume_id: [ {0} ] must be a string.'.format(volume_id.__class__.__name__))
-        if volume_id is not None and self.type != 'awsElasticBlockStore':
-            raise SyntaxError('Volume: volume_id: [ {0} ] can only be used with '
-                              'type [ awsElasticBlockStore ]'.format(volume_id))
-        self.aws_volume_id = volume_id
-        self._update_model()
-        return self
+    @property
+    def secret(self):
+        return self._secret
 
-    # -------------------------------------------------------------------------------------  gcePersistentDisk
+    @secret.setter
+    def secret(self, secret=None):
+        if not isinstance(secret, SecretVolumeSource):
+            raise SyntaxError('Volume: secret: [ {0} ] is invalid.'.format(secret))
+        self._secret = secret
 
-    def set_pd_name(self, pd_name=None):
-        if not isinstance(pd_name, str):
-            raise SyntaxError('Volume: pd_name: [ {0} ] must be a string.'.format(pd_name.__class__.__name__))
-        if pd_name is not None and self.type != 'gcePersistentDisk':
-            raise SyntaxError('Volume: pd_name: [ {0} ] can only be used with '
-                              'type [ gcePersistentDisk ]'.format(pd_name))
-        self.gce_pd_name = pd_name
-        self._update_model()
-        return self
+    # ------------------------------------------------------------------------------------- serialize
 
-    # -------------------------------------------------------------------------------------  aws & gce - fs type
-
-    def set_fs_type(self, fs_type=None):
-        if not isinstance(fs_type, str):
-            raise SyntaxError('Volume: fs_type: [ {0} ] must be a string.'.format(fs_type.__class__.__name__))
-        if fs_type is not None and not (self.type == 'awsElasticBlockStore' or self.type == 'gcePersistentDisk'):
-            raise SyntaxError('Volume: fs_type: [ {0} ] can only be used with type [ awsElasticBlockStore ] '
-                              'or [ gcePersistentDisk ]'.format(fs_type))
-        self.fs_type = fs_type
-        self._update_model()
-        return self
-
-    # -------------------------------------------------------------------------------------  nfs
-
-    def set_server(self, server=None):
-        if not isinstance(server, str):
-            raise SyntaxError('Volume: server: [ {0} ] must be a string.'.format(server.__class__.__name__))
-        if server is not None and not (self.type == 'nfs'):
-            raise SyntaxError('Volume: server: [ {0} ] can only be used with type [ nfs ]'.format(server))
-        self.server = server
-        self._update_model()
-        return self
-
-    # -------------------------------------------------------------------------------------  gitRepo
-
-    def set_git_repository(self, repo=None):
-        if not isinstance(repo, str):
-            raise SyntaxError('Volume: repository: [ {0} ] must be a string.'.format(repo.__class__.__name__))
-        if repo is not None and not (self.type == 'gitRepo'):
-            raise SyntaxError('Volume: repository: [ {0} ] can only be used with type [ gitRepo ]'.format(repo))
-        self.git_repo = repo
-        self._update_model()
-        return self
-
-    def set_git_revision(self, revision=None):
-        if not isinstance(revision, str):
-            raise SyntaxError('Volume: revision: [ {0} ] must be a string.'.format(revision.__class__.__name__))
-        if revision is not None and not (self.type == 'gitRepo'):
-            raise SyntaxError('Volume: revision: [ {0} ] can only be used with type [ gitRepo ]'.format(revision))
-        self.git_revision = revision
-        self._update_model()
-        return self
+    def serialize(self):
+        data = {}
+        if self.aws_elastic_block_store is not None:
+            data['awsElasticBlockStore'] = self.aws_elastic_block_store.serialize()
+        if self.empty_dir is not None:
+            data['emptyDir'] = self.empty_dir.serialize()
+        if self.gce_persistent_disk is not None:
+            data['gcePersistentDisk'] = self.gce_persistent_disk.serialize()
+        if self.git_repo is not None:
+            data['gitRepo'] = self.git_repo.serialize()
+        if self.host_path is not None:
+            data['hostPath'] = self.host_path.serialize()
+        if self.nfs is not None:
+            data['nfs'] = self.nfs.serialize()
+        if self.secret is not None:
+            data['secret'] = self.secret.serialize()
+        return data

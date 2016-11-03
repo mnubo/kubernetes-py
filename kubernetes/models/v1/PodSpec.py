@@ -7,15 +7,20 @@
 #
 
 from kubernetes.models.v1.Container import Container
+from kubernetes.models.v1.PodSecurityContext import PodSecurityContext
 from kubernetes.models.v1.Volume import Volume
+from kubernetes.utils import is_valid_list, filter_model
 
 
 class PodSpec(object):
+    """
+    http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_podspec
+    """
 
     VALID_DNS_POLICIES = ['ClusterFirst', 'Default']
     VALID_RESTART_POLICIES = ['Always', 'OnFailure', 'Never']
 
-    def __init__(self):
+    def __init__(self, model=None):
         super(PodSpec, self).__init__()
 
         self._containers = []
@@ -23,6 +28,7 @@ class PodSpec(object):
         self._image_pull_secrets = []
         self._node_selector = {}
         self._restart_policy = 'Always'
+        self._security_context = None
         self._volumes = []
 
         self.active_deadline_seconds = None
@@ -32,9 +38,42 @@ class PodSpec(object):
         self.hostname = None
         self.node_name = None
 
+        self.service_account = None  # deprecated
         self.service_account_name = None
         self.subdomain = None
         self.termination_grace_period_seconds = 30
+
+        if model is not None:
+            m = filter_model(model)
+            self._build_with_model(m)
+
+    def _build_with_model(self, model=None):
+        if 'containers' in model:
+            containers = []
+            for c in model['containers']:
+                container = Container(model=c)
+                containers.append(container)
+            self.containers = containers
+        if 'dnsPolicy' in model:
+            self.dns_policy = model['dnsPolicy']
+        if 'nodeName' in model:
+            self.node_name = model['nodeName']
+        if 'restartPolicy' in model:
+            self.restart_policy = model['restartPolicy']
+        if 'securityContext' in model:
+            self.security_context = PodSecurityContext(model=model['securityContext'])
+        if 'serviceAccount' in model:
+            self.service_account = model['serviceAccount']
+        if 'serviceAccountName' in model:
+            self.service_account_name = model['serviceAccountName']
+        if 'terminationGracePeriodSeconds' in model:
+            self.termination_grace_period_seconds = model['terminationGracePeriodSeconds']
+        if 'volumes' in model:
+            volumes = []
+            for v in model['volumes']:
+                volume = Volume(model=v)
+                volumes.append(volume)
+            self.volumes = volumes
 
     # ------------------------------------------------------------------------------------- add
 
@@ -104,12 +143,8 @@ class PodSpec(object):
 
     @image_pull_secrets.setter
     def image_pull_secrets(self, secrets=None):
-        msg = 'PodSpec: secrets: [ {0} ] is invalid.'.format(secrets)
-        if not isinstance(secrets, list):
-            raise SyntaxError(msg)
-        for s in secrets:
-            if not isinstance(s, str):
-                raise SyntaxError(msg)
+        if not is_valid_list(secrets, str):
+            raise SyntaxError('PodSpec: image_pull_secrets: [ {0} ] is invalid.'.format(secrets))
         self._image_pull_secrets = secrets
 
     # ------------------------------------------------------------------------------------- node selector
@@ -121,7 +156,7 @@ class PodSpec(object):
     @node_selector.setter
     def node_selector(self, selector=None):
         if not isinstance(selector, dict):
-            raise SyntaxError('PodSpec: Node selector: [ {0} ] is invalid.'.format(selector))
+            raise SyntaxError('PodSpec: node_selector: [ {0} ] is invalid.'.format(selector))
         self.node_selector = selector
 
     # ------------------------------------------------------------------------------------- restart policy
@@ -136,6 +171,18 @@ class PodSpec(object):
             raise SyntaxError('PodSpec: policy: [ {0} ] is invalid.'.format(policy))
         self._restart_policy = policy
 
+    # ------------------------------------------------------------------------------------- security context
+
+    @property
+    def security_context(self):
+        return self._security_context
+
+    @security_context.setter
+    def security_context(self, context=None):
+        if not isinstance(context, PodSecurityContext):
+            raise SyntaxError('PodSpec: pod_security_context: [ {0} ] is invalid.'.format(context))
+        self._security_context = context
+
     # ------------------------------------------------------------------------------------- volumes
 
     @property
@@ -144,26 +191,20 @@ class PodSpec(object):
 
     @volumes.setter
     def volumes(self, volumes=None):
-        msg = 'PodSpec: volumes: [ {0} ] is invalid.'.format(volumes)
-        if not isinstance(volumes, list):
-            raise SyntaxError(msg)
-        try:
-            for x in volumes:
-                assert isinstance(x, Volume)
-        except AssertionError:
-            raise SyntaxError(msg)
+        if not is_valid_list(volumes, Volume):
+            raise SyntaxError('PodSpec: volumes: [ {0} ] is invalid.'.format(volumes))
         self._volumes = volumes
 
     # ------------------------------------------------------------------------------------- serialize
 
-    def json(self):
+    def serialize(self):
         data = {}
         if self.active_deadline_seconds:
             data['activeDeadlineSeconds'] = self.active_deadline_seconds
         if self.containers:
             data['containers'] = []
             for c in self.containers:
-                data['containers'].append(c.json())
+                data['containers'].append(c.serialize())
         if self.dns_policy:
             data['dnsPolicy'] = self.dns_policy
         if self.host_ipc:
@@ -191,5 +232,5 @@ class PodSpec(object):
         if self.volumes:
             data['volumes'] = []
             for v in self.volumes:
-                data['volumes'].append(v.json())
+                data['volumes'].append(v.serialize())
         return data

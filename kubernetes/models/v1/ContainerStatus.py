@@ -6,36 +6,40 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+from kubernetes.utils import is_valid_string, filter_model
+
 
 class ContainerStatus(object):
+    """
+    http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_containerstatus
+    """
+
     def __init__(self, model=None):
         super(ContainerStatus, self).__init__()
+        self._name = None
+        self._state = None
+        self._last_state = None
+        self._ready = False
+        self._restart_count = 0
+        self._image = None
+        self._image_id = None
+        self._container_id = None
 
         if model is not None:
-            assert isinstance(model, dict)
-            self.model = model
+            m = filter_model(model)
+            self._build_with_model(m)
 
-    def get_name(self):
-        return self.model.get('name', '')
+    def _build_with_model(self, model=None):
+        pass
 
-    def get_state(self):
-        return self.model.get('state', dict())
+    # ------------------------------------------------------------------------------------- name
 
-    def get_last_state(self):
-        return self.model.get('lastState', dict())
+    @property
+    def name(self):
+        return self._name
 
-    def get_restart_count(self):
-        return self.model.get('restartCount', -1)
-
-    def get_image(self):
-        return self.model.get('image', None)
-
-    def get_image_id(self):
-        return self.model.get('imageID', None)
-
-    def get_container_id(self):
-        return self.model.get('containerID', None)
-
-    def is_ready(self):
-        return self.model.get('ready', False)
-
+    @name.setter
+    def name(self, name=None):
+        if not is_valid_string(name):
+            raise SyntaxError('ContainerStatus: name: [ {0} ] is invalid'.format(name))
+        self._name = name

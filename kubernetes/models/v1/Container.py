@@ -11,7 +11,7 @@ from kubernetes.models.v1.Probe import Probe
 from kubernetes.models.v1.ResourceRequirements import ResourceRequirements
 from kubernetes.models.v1.SecurityContext import SecurityContext
 from kubernetes.models.v1.VolumeMount import VolumeMount
-from kubernetes.utils import is_valid_list, is_valid_dict, is_valid_string
+from kubernetes.utils import is_valid_list, is_valid_dict, is_valid_string, filter_model
 
 
 class Container(object):
@@ -19,9 +19,10 @@ class Container(object):
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_container
     """
 
-    VALID_PULL_POLICIES = ['Always', 'Never', 'IFNotPresent']
+    VALID_PULL_POLICIES = ['Always', 'Never', 'IfNotPresent']
 
-    def __init__(self, name=None, image=None):
+    def __init__(self, name=None, image=None, model=None):
+
         super(Container, self).__init__()
         self._args = None
         self._command = None
@@ -29,13 +30,60 @@ class Container(object):
         self._image = None
         self._image_pull_policy = 'IfNotPresent'
         self._liveness_probe = None
-        self._name = name
+        self._name = None
         self._ports = None
         self._readiness_probe = None
-        self._resources = None
+        self._resources = ResourceRequirements()
         self._security_context = None
         self._volume_mounts = None
         self._working_dir = None
+
+        if name is not None:
+            self.name = name
+        if image is not None:
+            self.image = image
+        if model is not None:
+            m = filter_model(model)
+            self._build_with_model(m)
+
+    def _build_with_model(self, model=None):
+        if 'args' in model:
+            self.args = model['args']
+        if 'command' in model:
+            self.command = model['command']
+        if 'env' in model:
+            self.env = model['env']
+        if 'image' in model:
+            self.image = model['image']
+        if 'imagePullPolicy' in model:
+            self.image_pull_policy = model['imagePullPolicy']
+        if 'livenessProbe' in model:
+            self.liveness_probe = Probe(model=model['livenessProbe'])
+        if 'name' in model:
+            self.name = model['name']
+        if 'ports' in model:
+            ports = []
+            for p in model['ports']:
+                port = ContainerPort(model=p)
+                ports.append(port)
+            self.ports = ports
+        if 'readinessProbe' in model:
+            self.readiness_probe = Probe(model=model['readinessProbe'])
+        if 'resources' in model:
+            r = ResourceRequirements(model=model['resources'])
+            self.resources = r
+        if 'securityContext' in model:
+            self.security_context = SecurityContext(model=model['securityContext'])
+        if 'terminationMessagePath' in model:
+            self.termination_message_path = model['terminationMessagePath']
+        if 'volumeMounts' in model:
+            mounts = []
+            for v in model['volumeMounts']:
+                mount = VolumeMount(model=v)
+                mounts.append(mount)
+            self.volume_mounts = mounts
+        if 'workingDir' in model:
+            self.working_dir = model['workingDir']
 
     # ------------------------------------------------------------------------------------- args
 

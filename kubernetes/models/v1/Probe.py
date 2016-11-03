@@ -6,11 +6,10 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1 import (
-    ExecAction,
-    HTTPGetAction,
-    TCPSocketAction,
-)
+from kubernetes.models.v1.ExecAction import ExecAction
+from kubernetes.models.v1.HTTPGetAction import HTTPGetAction
+from kubernetes.models.v1.TCPSocketAction import TCPSocketAction
+from kubernetes.utils import filter_model
 
 
 class Probe(object):
@@ -20,7 +19,7 @@ class Probe(object):
 
     VALID_HANDLERS = ['exec', 'httpGet', 'tcpSocket']
 
-    def __init__(self, handler=None):
+    def __init__(self, handler=None, model=None):
         super(Probe, self).__init__()
 
         if handler not in Probe.VALID_HANDLERS:
@@ -44,9 +43,16 @@ class Probe(object):
         self.success_threshold = 1
         self.failure_threshold = 3
 
+        if model is not None:
+            m = filter_model(model)
+            self._build_with_model(m)
+
+    def _build_with_model(self, model=None):
+        pass
+
     # ------------------------------------------------------------------------------------- serialize
 
-    def json(self):
+    def serialize(self):
         data = {}
         if self.handler == 'exec':
             data[self.handler] = self.exec_action.json()

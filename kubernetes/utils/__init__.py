@@ -4,6 +4,7 @@ from TypeCheck import (
     is_valid_dict,
     is_valid_list,
     is_valid_string,
+    filter_model
 )
 
 __all__ = [
@@ -11,5 +12,6 @@ __all__ = [
     'HttpRequest',
     'is_valid_dict',
     'is_valid_list',
-    'is_valid_string'
+    'is_valid_string',
+    'filter_model'
 ]

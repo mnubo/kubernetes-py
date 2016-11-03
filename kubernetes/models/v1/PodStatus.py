@@ -6,11 +6,9 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1 import (
-    ContainerStatus,
-    PodCondition
-)
-from kubernetes.utils import is_valid_list
+from kubernetes.models.v1.ContainerStatus import ContainerStatus
+from kubernetes.models.v1.PodCondition import PodCondition
+from kubernetes.utils import is_valid_list, is_valid_string, filter_model
 
 
 class PodStatus(object):
@@ -20,16 +18,44 @@ class PodStatus(object):
 
     def __init__(self, model=None):
         super(PodStatus, self).__init__()
-
         self._conditions = []
         self._container_statuses = []
+        self._phase = None
+        self._message = None
+        self._reason = None
+        self._host_ip = None
+        self._pod_ip = None
+        self._start_time = None
 
-        self.phase = None
-        self.message = None
-        self.reason = None
-        self.host_ip = None
-        self.pod_ip = None
-        self.start_time = None
+        if model is not None:
+            m = filter_model(model)
+            self._build_with_model(m)
+
+    def _build_with_model(self, model=None):
+        if 'conditions' in model:
+            conditions = []
+            for c in model['conditions']:
+                condition = PodCondition(model=c)
+                conditions.append(condition)
+            self.conditions = conditions
+        if 'containerStatuses' in model:
+            statuses = []
+            for s in model['containerStatuses']:
+                status = ContainerStatus(model=s)
+                statuses.append(status)
+            self.container_statuses = statuses
+        if 'phase' in model:
+            self.phase = model['phase']
+        if 'message' in model:
+            self.message = model['message']
+        if 'reason' in model:
+            self.reason = model['reason']
+        if 'hostIP' in model:
+            self.host_ip = model['hostIP']
+        if 'podIP' in model:
+            self.host_ip = model['podIP']
+        if 'startTime' in model:
+            self.start_time = model['startTime']
 
     # ------------------------------------------------------------------------------------- add
 
@@ -62,14 +88,86 @@ class PodStatus(object):
             raise SyntaxError('PodStatus: container_statuses: [ {0} ] is invalid.'.format(statuses))
         self._container_statuses = statuses
 
+    # ------------------------------------------------------------------------------------- phase
+
+    @property
+    def phase(self):
+        return self._phase
+
+    @phase.setter
+    def phase(self, phase=None):
+        if not is_valid_string(phase):
+            raise SyntaxError('PodStatus: container_statuses: [ {0} ] is invalid.'.format(phase))
+        self._phase = phase
+
+    # ------------------------------------------------------------------------------------- phase
+
+    @property
+    def message(self):
+        return self._message
+
+    @message.setter
+    def message(self, message=None):
+        if not is_valid_string(message):
+            raise SyntaxError('PodStatus: message: [ {0} ] is invalid.'.format(message))
+        self._message = message
+
+    # ------------------------------------------------------------------------------------- reason
+
+    @property
+    def reason(self):
+        return self._reason
+
+    @reason.setter
+    def reason(self, reason=None):
+        if not is_valid_string(reason):
+            raise SyntaxError('PodStatus: reason: [ {0} ] is invalid.'.format(reason))
+        self._reason = reason
+
+    # ------------------------------------------------------------------------------------- hostIP
+
+    @property
+    def host_ip(self):
+        return self._host_ip
+
+    @host_ip.setter
+    def host_ip(self, ip=None):
+        if not is_valid_string(ip):
+            raise SyntaxError('PodStatus: host_ip: [ {0} ] is invalid.'.format(ip))
+        self._host_ip = ip
+
+    # ------------------------------------------------------------------------------------- podIP
+
+    @property
+    def pod_ip(self):
+        return self._pod_ip
+
+    @pod_ip.setter
+    def pod_ip(self, ip=None):
+        if not is_valid_string(ip):
+            raise SyntaxError('PodStatus: pod_ip: [ {0} ] is invalid.'.format(ip))
+        self._pod_ip = ip
+
+    # ------------------------------------------------------------------------------------- start time
+
+    @property
+    def start_time(self):
+        return self._start_time
+
+    @start_time.setter
+    def start_time(self, time=None):
+        if not is_valid_string(time):
+            raise SyntaxError('PodStatus: start_time: [ {0} ] is invalid.'.format(time))
+        self._start_time = time
+
     # ------------------------------------------------------------------------------------- serialize
 
-    def json(self):
+    def serialize(self):
         data = {}
         if self.phase is not None:
             data['phase'] = self.phase
         if self.conditions:
-            data['conditions'] = [x.json() for x in self.conditions]
+            data['conditions'] = [x.serialize() for x in self.conditions]
         if self.message is not None:
             data['message'] = self.message
         if self.reason is not None:
@@ -81,5 +179,5 @@ class PodStatus(object):
         if self.start_time is not None:
             data['startTime'] = self.start_time
         if self.container_statuses:
-            data['containerStatuses'] = [x.json() for x in self.container_statuses]
+            data['containerStatuses'] = [x.serialize() for x in self.container_statuses]
         return data

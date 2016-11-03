@@ -6,13 +6,15 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+from kubernetes.utils import filter_model
+
 
 class SecurityContext(object):
     """
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_securitycontext
     """
 
-    def __init__(self):
+    def __init__(self, model=None):
         super(SecurityContext, self).__init__()
 
         # TODO(froch): add support for the below.
@@ -23,6 +25,13 @@ class SecurityContext(object):
         self.run_as_user = None
         self.run_as_non_root = False
         self.read_only_root_file_system = False
+
+        if model is not None:
+            m = filter_model(model)
+            self._build_with_model(m)
+
+    def _build_with_model(self, model=None):
+        pass
 
     # ------------------------------------------------------------------------------------- serialize
 

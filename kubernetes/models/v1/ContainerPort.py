@@ -6,6 +6,7 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+from kubernetes.utils import filter_model
 
 class ContainerPort(object):
     """
@@ -14,7 +15,7 @@ class ContainerPort(object):
     
     VALID_PROTOCOLS = ['TCP', 'UDP']
 
-    def __init__(self):
+    def __init__(self, model=None):
         super(ContainerPort, self).__init__()
 
         self._container_port = None
@@ -23,6 +24,13 @@ class ContainerPort(object):
 
         self.name = None
         self.host_ip = None
+
+        if model is not None:
+            m = filter_model(model)
+            self._build_with_model(m)
+
+    def _build_with_model(self, model=None):
+        pass
 
     @staticmethod
     def _is_valid_port(port=None):

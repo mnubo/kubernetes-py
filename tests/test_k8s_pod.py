@@ -21,7 +21,8 @@ class K8sPodTest(unittest.TestCase):
         pass
 
     def tearDown(self):
-        utils.cleanup_objects()
+        # utils.cleanup_objects()
+        pass
 
     # ------------------------------------------------------------------------------------- init
 
@@ -149,17 +150,11 @@ class K8sPodTest(unittest.TestCase):
     def test_add_annotation(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-
         k = "yokey"
         v = "yovalue"
         pod.add_annotation(k, v)
-
-        meta = pod.model.model['metadata']
-        self.assertIn('annotations', meta)
-        self.assertIn(k, meta['annotations'])
-        meta = pod.model.pod_metadata.model
-        self.assertIn('annotations', meta)
-        self.assertIn(k, meta['annotations'])
+        self.assertEqual(1, len(pod.model.metadata.annotations))
+        self.assertIn({k: v}, pod.model.metadata.annotations)
 
     # ------------------------------------------------------------------------------------- add label
 

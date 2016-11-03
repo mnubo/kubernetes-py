@@ -6,6 +6,8 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+from kubernetes.utils import filter_model
+
 
 class ResourceRequirements(object):
     """
@@ -14,7 +16,7 @@ class ResourceRequirements(object):
 
     VALID_RESOURCES = ['cpu', 'memory']
 
-    def __init__(self):
+    def __init__(self, model=None):
         super(ResourceRequirements, self).__init__()
 
         self._limits = {}
@@ -22,6 +24,16 @@ class ResourceRequirements(object):
             'cpu': '100m',
             'memory': '32M'
         }
+
+        if model is not None:
+            m = filter_model(model)
+            self._build_with_model(m)
+
+    def _build_with_model(self, model):
+        if 'requests' in model:
+            self.requests = model['requests']
+        if 'limits' in model:
+            self.limits = model['limits']
 
     def _filter(self, data=None):
         msg = 'ResourceRequirements: data: [ {0} ] is invalid.'.format(data)
@@ -54,7 +66,7 @@ class ResourceRequirements(object):
 
     # ------------------------------------------------------------------------------------- serialize
 
-    def json(self):
+    def serialize(self):
         data = {}
         if self.limits:
             data['limits'] = self.limits

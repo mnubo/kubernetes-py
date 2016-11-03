@@ -6,6 +6,8 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+import copy
+
 
 def is_valid_string(target=None):
     if target is None:
@@ -38,3 +40,11 @@ def is_valid_dict(target=None, keys=None):
                 if y not in x:
                     return False
     return True
+
+
+def filter_model(model=None):
+    mutable = copy.deepcopy(model)
+    for key in model:
+        if model[key] is None:
+            mutable.pop(key)
+    return mutable

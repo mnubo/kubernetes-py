@@ -6,7 +6,7 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.utils import is_valid_string
+from kubernetes.utils import is_valid_string, filter_model
 
 
 class VolumeMount(object):
@@ -14,12 +14,26 @@ class VolumeMount(object):
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_volumemount
     """
 
-    def __init__(self, name=None, mount_path=None, read_only=False, sub_path=None):
+    def __init__(self, name=None, mount_path=None, read_only=False, sub_path=None, model=None):
         super(VolumeMount, self).__init__()
         self._name = name
         self._mount_path = mount_path
         self._read_only = read_only
         self._sub_path = sub_path
+
+        if model is not None:
+            m = filter_model(model)
+            self._build_with_model(m)
+
+    def _build_with_model(self, model):
+        if 'mountPath' in model:
+            self.mount_path = model['mountPath']
+        if 'name' in model:
+            self.name = model['name']
+        if 'readOnly' in model:
+            self.read_only = model['readOnly']
+        if 'subPath' in model:
+            self.sub_path = model['subPath']
 
     # ------------------------------------------------------------------------------------- name
 
