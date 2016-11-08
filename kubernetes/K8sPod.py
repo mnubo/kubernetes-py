@@ -11,12 +11,14 @@ import json
 import yaml
 
 from kubernetes import K8sConfig
+from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sExceptions import NotFoundException, TimedOutException
 from kubernetes.K8sObject import K8sObject
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.models.v1.Pod import Pod
 from kubernetes.models.v1.PodSpec import PodSpec
 from kubernetes.models.v1.PodStatus import PodStatus
+from kubernetes.utils import is_valid_dict, is_valid_string
 
 POD_READY_TIMEOUT_SECONDS = 60
 
@@ -29,13 +31,14 @@ class K8sPod(K8sObject):
 
         self.model.metadata = ObjectMeta()
         self.model.metadata.name = name
+        self.model.metadata.labels['name'] = name
         self.model.metadata.namespace = config.namespace
 
         self.model.spec = PodSpec()
         self.model.status = PodStatus()
 
         if self.config.pull_secret is not None:
-            self.add_image_pull_secret(self.config.pull_secret)
+            self.add_image_pull_secrets(self.config.pull_secret)
 
     # -------------------------------------------------------------------------------------  override
 
@@ -62,33 +65,41 @@ class K8sPod(K8sObject):
     # -------------------------------------------------------------------------------------  add
 
     def add_annotation(self, k=None, v=None):
-        data = {k: v}
+        if not is_valid_string(k) or not is_valid_string(v):
+            raise SyntaxError('K8sPod.add_annotation(): annotation: [ {0}: {1} ] is invalid'.format(k, v))
         annotations = self.model.metadata.annotations
         if annotations is None:
-            annotations = []
-        if data not in annotations:
-            annotations.append(data)
-            self.model.metadata.annotations = annotations
+            annotations = {}
+        if k not in annotations:
+            annotations.update({k: v})
+        else:
+            annotations[k] = v
+        self.model.metadata.annotations = annotations
         return self
 
     def add_container(self, container=None):
+        if not isinstance(container, K8sContainer):
+            raise SyntaxError('K8sPod.add_container() container: [ {0} ] is invalid.'.format(container))
         containers = self.model.spec.containers
         if container not in containers:
-            containers.append(container)
-            self.model.spec.continers = containers
+            containers.append(container.model)
+            self.model.spec.containers = containers
         return self
 
     def add_label(self, k=None, v=None):
-        data = {k: v}
+        if not is_valid_string(k) or not is_valid_string(v):
+            raise SyntaxError('K8sPod.add_label(): label: [ {0}: {1} ] is invalid'.format(k, v))
         labels = self.model.metadata.labels
         if labels is None:
-            labels = []
-        if data not in labels:
-            labels.append(data)
-            self.model.metadata.labels = labels
+            labels = {}
+        if k not in labels:
+            labels[k] = v
+        else:
+            labels.update({k: v})
+        self.model.metadata.labels = labels
         return self
 
-    def add_image_pull_secret(self, name=None):
+    def add_image_pull_secrets(self, name=None):
         secrets = self.model.spec.image_pull_secrets
         if secrets is None:
             secrets = []
@@ -108,16 +119,16 @@ class K8sPod(K8sObject):
 
     def del_annotation(self, k=None):
         orig = self.model.metadata.annotations
-        new = filter(lambda x: k not in x, orig)
-        if orig != new:
-            self.model.metadata.annotations = new
+        if k in orig:
+            orig.pop(k)
+            self.model.metadata.annotations = orig
         return self
 
     def del_label(self, k=None):
         orig = self.model.metadata.labels
-        new = filter(lambda x: k not in x, orig)
-        if orig != new:
-            self.model.metadata.labels = new
+        if k in orig:
+            orig.pop(k)
+            self.model.metadata.labels = orig
         return self
 
     def del_node_name(self):
@@ -131,56 +142,24 @@ class K8sPod(K8sObject):
         return self
 
     def get_annotation(self, k=None):
-        ann = filter(lambda x: k in x, self.model.metadata.annotations)
-        return ann
-
-    def get_annotations(self):
-        return self.model.metadata.annotations
-
-    def get_label(self, k=None):
-        label = filter(lambda x: k in x, self.model.metadata.labels)
-        if label:
-            return label[0][k]
+        if k in self.model.metadata.annotations:
+            return self.model.metadata.annotations[k]
         return None
 
-    def get_labels(self):
-        return self.model.metadata.labels
-
-    def get_namespace(self):
-        return self.model.get_pod_namespace()
-
-    def get_status(self):
-        self.get()
-        return self.model.get_pod_status()
-
-    def get_pod_containers(self):
-        return self.model.get_pod_containers()
-
-    def get_pod_node_name(self):
-        return self.model.get_pod_node_name()
-
-    def get_pod_node_selector(self):
-        return self.model.get_pod_node_selector()
-
-    def get_pod_restart_policy(self):
-        return self.model.get_pod_restart_policy()
-
-    def get_service_account(self):
-        return self.model.get_service_account()
-
-    def get_termination_grace_period(self):
-        return self.model.get_termination_grace_period()
+    def get_label(self, k=None):
+        if k in self.model.metadata.labels:
+            return self.model.metadata.labels[k]
+        return None
 
     # ------------------------------------------------------------------------------------- polling readiness
 
     def is_ready(self):
-        status = self.get_status()
-        if status is not None and isinstance(status, PodStatus):
-            pod_phase = status.get_pod_phase()
-            conditions = status.get_pod_conditions()
+        if self.status is not None and isinstance(self.status, PodStatus):
+            pod_phase = self.status.phase
+            conditions = self.status.conditions
             conditions_ok = 0
             for cond in conditions:
-                if cond.get('status', 'False') == 'True':
+                if cond.status == 'True':
                     conditions_ok += 1
             if pod_phase == 'Running' and len(conditions) == conditions_ok:
                 return True
@@ -188,73 +167,168 @@ class K8sPod(K8sObject):
 
     # ------------------------------------------------------------------------------------- set
 
-    def set_annotations(self, annotations=None):
-        self.model.set_pod_annotations(annotations)
+    def set_container_image(self, name=None, image=None):
+        containers = []
+        for c in self.model.spec.containers:
+            if c.name == name:
+                c.image = image
+            containers.append(c)
+        self.model.spec.containers = containers
         return self
 
-    def set_labels(self, labels=None):
-        self.model.set_pod_labels(labels)
-        return self
+    # ------------------------------------------------------------------------------------- activeDeadline
 
-    def set_namespace(self, namespace=None):
-        self.model.set_pod_namespace(namespace)
-        return self
+    @property
+    def active_deadline(self):
+        return self.model.spec.active_deadline_seconds
 
-    def set_active_deadline(self, seconds=None):
-        self.model.set_active_deadline(seconds=seconds)
-        return self
+    @active_deadline.setter
+    def active_deadline(self, secs=None):
+        self.model.spec.active_deadline_seconds = secs
 
-    def set_container_image(self, name, image=None):
-        self.model.set_pod_image(name=name, image=image)
-        return self
+    # ------------------------------------------------------------------------------------- annotations
 
-    def set_dns_policy(self, policy=None):
-        self.model.set_dns_policy(policy=policy)
-        return self
+    @property
+    def annotations(self):
+        return self.model.metadata.annotations
 
-    def set_pod_generate_name(self, mode=None, name=None):
-        self.model.set_pod_generate_name(mode=mode, name=name)
-        return self
+    @annotations.setter
+    def annotations(self, anns=None):
+        self.model.metadata.annotations = anns
 
-    def set_pod_node_name(self, name=None):
-        self.model.set_pod_node_name(name=name)
-        return self
+    # ------------------------------------------------------------------------------------- containers
 
-    def set_pod_node_selector(self, selector=None):
-        self.model.set_pod_node_selector(selector=selector)
-        return self
+    @property
+    def containers(self):
+        _list = []
+        for c in self.model.spec.containers:
+            k8scontainer = K8sContainer(model=c)
+            _list.append(k8scontainer)
+        return _list
 
-    def set_pod_restart_policy(self, policy=None):
-        self.model.set_pod_restart_policy(policy=policy)
-        return self
+    @containers.setter
+    def containers(self, containers=None):
+        self.model.spec.containers = containers
 
-    def set_service_account(self, name=None):
-        self.model.set_service_account(name=name)
-        return self
+    # ------------------------------------------------------------------------------------- dnsPolicy
 
-    def set_termination_grace_period(self, seconds=None):
-        self.model.set_termination_grace_period(seconds=seconds)
-        return self
+    @property
+    def dns_policy(self):
+        return self.model.spec.dns_policy
+
+    @dns_policy.setter
+    def dns_policy(self, policy=None):
+        self.model.spec.dns_policy = policy
+
+    # ------------------------------------------------------------------------------------- generateName
+
+    @property
+    def generate_name(self):
+        return self.model.metadata.generate_name
+
+    @generate_name.setter
+    def generate_name(self, name=None):
+        self.model.metadata.generate_name = name
+
+    # ------------------------------------------------------------------------------------- labels
+
+    @property
+    def labels(self):
+        return self.model.metadata.labels
+
+    @labels.setter
+    def labels(self, labels=None):
+        self.model.metadata.labels = labels
+
+    # ------------------------------------------------------------------------------------- namespace
+
+    @property
+    def namespace(self):
+        return self.model.metadata.namespace
+
+    @namespace.setter
+    def namespace(self, nspace=None):
+        self.model.metadata.namespace = nspace
+
+    # ------------------------------------------------------------------------------------- nodeName
+
+    @property
+    def node_name(self):
+        return self.model.spec.node_name
+
+    @node_name.setter
+    def node_name(self, name=None):
+        self.model.spec.node_name = name
+
+    # ------------------------------------------------------------------------------------- nodeSelector
+
+    @property
+    def node_selector(self):
+        return self.model.spec.node_selector
+
+    @node_selector.setter
+    def node_selector(self, selector=None):
+        self.model.spec.node_selector = selector
+
+    # ------------------------------------------------------------------------------------- restartPolicy
+
+    @property
+    def restart_policy(self):
+        return self.model.spec.restart_policy
+
+    @restart_policy.setter
+    def restart_policy(self, policy=None):
+        self.model.spec.restart_policy = policy
+
+    # ------------------------------------------------------------------------------------- serviceAccountName
+
+    @property
+    def service_account_name(self):
+        return self.model.spec.service_account_name
+
+    @service_account_name.setter
+    def service_account_name(self, name=None):
+        self.model.spec.service_account_name = name
+
+    # ------------------------------------------------------------------------------------- status
+
+    @property
+    def status(self):
+        self.get()
+        return self.model.status
+
+    @status.setter
+    def status(self, status=None):
+        self.model.status = status
+
+    # ------------------------------------------------------------------------------------- terminationGracePeriod
+
+    @property
+    def termination_grace_period(self):
+        return self.model.spec.termination_grace_period_seconds
+
+    @termination_grace_period.setter
+    def termination_grace_period(self, secs=None):
+        self.model.spec.termination_grace_period_seconds = secs
 
     # ------------------------------------------------------------------------------------- filtering
 
     @staticmethod
     def get_by_name(config=None, name=None):
-        if name is None:
-            raise SyntaxError('K8sPod: name: [ {0} ] cannot be None.'.format(name))
-        if not isinstance(name, str):
-            raise SyntaxError('K8sPod: name: [ {0} ] must be a string.'.format(name))
         if config is None:
             config = K8sConfig()
+        if not is_valid_string(name):
+            raise SyntaxError('K8sPod.get_by_name(): name: [ {0} ] is invalid.'.format(name))
 
-        pod_list = list()
+        pod_list = []
         data = {'labelSelector': 'name={0}'.format(name)}
         pods = K8sPod(config=config, name=name).get_with_params(data=data)
 
         for pod in pods:
             try:
-                pod_name = Pod(model=pod).get_pod_name()
-                pod_list.append(K8sPod(config=config, name=pod_name).get())
+                p = Pod(model=pod)
+                k8s_pod = K8sPod(config=config, name=p.metadata.name).get()
+                pod_list.append(k8s_pod)
             except NotFoundException:
                 pass
 
@@ -262,22 +336,22 @@ class K8sPod(K8sObject):
 
     @staticmethod
     def get_by_labels(config=None, labels=None):
-        if labels is None:
-            raise SyntaxError('K8sPod: labels: [ {0} ] cannot be None.'.format(labels))
-        if not isinstance(labels, dict):
-            raise SyntaxError('K8sPod: labels: [ {0} ] must be a dict.'.format(labels))
         if config is None:
             config = K8sConfig()
+        if not is_valid_dict(labels):
+            raise SyntaxError('K8sPod.get_by_labels(): labels: [ {} ] is invalid.'.format(labels))
 
-        pod_list = list()
-        my_labels = ",".join(['%s=%s' % (key, value) for (key, value) in labels.items()])
-        data = dict(labelSelector="{labels}".format(labels=my_labels))
-        pods = K8sPod(config=config, name=labels.get('name')).get_with_params(data=data)
+        pod_list = []
+        selector = ",".join(['%s=%s' % (key, value) for (key, value) in labels.items()])
+        data = {'labelSelector': selector}
+        p = K8sPod(config=config, name=labels['name'])
+        pods = p.get_with_params(data=data)
 
         for pod in pods:
             try:
-                pod_name = Pod(model=pod).get_pod_name()
-                pod_list.append(K8sPod(config=config, name=pod_name).get())
+                p = Pod(model=pod)
+                k8s_pod = K8sPod(config=config, name=p.metadata.name).get()
+                pod_list.append(k8s_pod)
             except NotFoundException:
                 pass
 

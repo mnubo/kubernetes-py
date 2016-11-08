@@ -46,6 +46,13 @@ class Container(object):
             m = filter_model(model)
             self._build_with_model(m)
 
+    def __eq__(self, other):
+        # see https://github.com/kubernetes/kubernetes/blob/release-1.3/docs/design/identifiers.md
+        if isinstance(other, self.__class__):
+            # Uniquely name (via a name) an object across space.
+            return self.name == other.name
+        return NotImplemented
+
     def _build_with_model(self, model=None):
         if 'args' in model:
             self.args = model['args']

@@ -25,7 +25,7 @@ class Service(object):
         self._spec = None
         self._status = None
 
-        self.kind = 'Pod'
+        self.kind = 'Service'
         self.api_version = 'v1'
 
     # ------------------------------------------------------------------------------------- metadata

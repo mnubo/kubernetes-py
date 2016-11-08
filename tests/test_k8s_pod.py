@@ -8,21 +8,19 @@
 
 import unittest
 import uuid
-import time
-from kubernetes import K8sPod, K8sConfig
-from kubernetes.models.v1 import Pod, ObjectMeta, PodSpec, PodStatus
+
+from kubernetes import K8sPod, K8sConfig, K8sContainer
 from kubernetes.K8sExceptions import *
+from kubernetes.models.v1 import Pod, ObjectMeta, PodSpec, PodStatus
 from tests import utils
 
 
 class K8sPodTest(unittest.TestCase):
-
     def setUp(self):
         pass
 
     def tearDown(self):
-        # utils.cleanup_objects()
-        pass
+        utils.cleanup_pods()
 
     # ------------------------------------------------------------------------------------- init
 
@@ -89,43 +87,10 @@ class K8sPodTest(unittest.TestCase):
     def test_struct_pod(self):
         name = "yomama"
         pod = utils.create_pod(name=name)
-        model = pod.model
-        self.assertIsInstance(model.model, dict)
-        self.assertIsInstance(model.pod_metadata, ObjectMeta)
-        self.assertIsInstance(model.pod_spec, PodSpec)
-        self.assertIsNone(model.pod_status)
-
-    def test_struct_pod_model(self):
-        name = "yomama"
-        pod = utils.create_pod(name=name)
-        model = pod.model.model
-        self.assertIsNotNone(model)
-        self.assertIsInstance(model, dict)
-        self.assertIn('apiVersion', model)
-        self.assertIsInstance(model['apiVersion'], str)
-        self.assertIn('kind', model)
-        self.assertIsInstance(model['kind'], str)
-        self.assertIn('metadata', model)
-        self.assertIsInstance(model['metadata'], dict)
-        self.assertIn('labels', model['metadata'])
-        self.assertIsInstance(model['metadata']['labels'], dict)
-        self.assertIn('name', model['metadata']['labels'])
-        self.assertEqual(model['metadata']['labels']['name'], name)
-        self.assertIn('name', model['metadata'])
-        self.assertIsInstance(model['metadata']['name'], str)
-        self.assertEqual(model['metadata']['name'], name)
-        self.assertIn('namespace', model['metadata'])
-        self.assertIsInstance(model['metadata']['namespace'], str)
-        self.assertIn('spec', model)
-        self.assertIsInstance(model['spec'], dict)
-        self.assertIn('containers', model['spec'])
-        self.assertIsInstance(model['spec']['containers'], list)
-        self.assertIn('dnsPolicy', model['spec'])
-        self.assertIsInstance(model['spec']['dnsPolicy'], str)
-        self.assertIn('restartPolicy', model['spec'])
-        self.assertIsInstance(model['spec']['restartPolicy'], str)
-        self.assertIn('volumes', model['spec'])
-        self.assertIsInstance(model['spec']['volumes'], list)
+        self.assertIsInstance(pod.model, Pod)
+        self.assertIsInstance(pod.model.metadata, ObjectMeta)
+        self.assertIsInstance(pod.model.spec, PodSpec)
+        self.assertIsInstance(pod.model.status, PodStatus)
 
     # ------------------------------------------------------------------------------------- add annotation
 
@@ -154,27 +119,44 @@ class K8sPodTest(unittest.TestCase):
         v = "yovalue"
         pod.add_annotation(k, v)
         self.assertEqual(1, len(pod.model.metadata.annotations))
-        self.assertIn({k: v}, pod.model.metadata.annotations)
+        self.assertIn(k, pod.model.metadata.annotations)
+        self.assertEqual(v, pod.model.metadata.annotations[k])
+
+    # --------------------------------------------------------------------------------- add container
+
+    def test_pod_add_container_invalid(self):
+        name = "yoname"
+        obj = utils.create_pod(name=name)
+        c = object()
+        with self.assertRaises(SyntaxError):
+            obj.add_container(c)
+
+    def test_pod_add_container(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        self.assertEqual(0, len(pod.model.spec.containers))
+        name = "yopod"
+        image = "redis"
+        c = K8sContainer(name=name, image=image)
+        pod.add_container(c)
+        self.assertEqual(1, len(pod.model.spec.containers))
+        self.assertEqual(c.model, pod.model.spec.containers[0])
 
     # ------------------------------------------------------------------------------------- add label
 
     def test_add_label_none_args(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-        try:
+        with self.assertRaises(SyntaxError):
             pod.add_label()
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_add_label_invalid_args(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
         k = object()
         v = object()
-        try:
+        with self.assertRaises(SyntaxError):
             pod.add_label(k, v)
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_add_label(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
@@ -185,164 +167,196 @@ class K8sPodTest(unittest.TestCase):
         v_out = pod.get_label(k)
         self.assertEqual(v_in, v_out)
 
+    # --------------------------------------------------------------------------------- add pull secret
+
+    def test_pod_add_image_pull_secrets_none_arg(self):
+        name = "yoname"
+        obj = utils.create_pod(name=name)
+        secretname = None
+        try:
+            obj.add_image_pull_secrets(name=secretname)
+            self.fail("Should not fail.")
+        except Exception as err:
+            self.assertIsInstance(err, SyntaxError)
+
+    def test_pod_add_image_pull_secrets_invalid_arg(self):
+        name = "yoname"
+        obj = utils.create_pod(name=name)
+        secretname = 666
+        try:
+            obj.add_image_pull_secrets(name=secretname)
+            self.fail("Should not fail.")
+        except Exception as err:
+            self.assertIsInstance(err, SyntaxError)
+
+    def test_pod_add_image_pull_secrets(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        secretname = "yosecret"
+        pod.add_image_pull_secrets(name=secretname)
+        self.assertEqual(1, len(pod.model.spec.image_pull_secrets))
+        self.assertEqual(secretname, pod.model.spec.image_pull_secrets[0])
+
+    # --------------------------------------------------------------------------------- add volume
+
+    # def test_pod_add_volume_invalid(self):
+    #     name = "yoname"
+    #     obj = utils.create_pod(name=name)
+    #     vol = object()
+    #     with self.assertRaises(SyntaxError):
+    #         obj.add_volume(vol)
+    #
+    # def test_pod_add_volume_emptydir(self):
+    #     name = "yoname"
+    #     obj = utils.create_pod(name=name)
+    #     config = utils.create_config()
+    #     vol = K8sVolume(config=config, name=name, mount_path="/var/test", type='emptyDir')
+    #     obj.add_volume(vol)
+    #     self.assertEqual(1, len(obj.model.model['spec']['volumes']))
+    #     self.assertEqual(1, len(obj.model.pod_spec.model['volumes']))
+    #     self.assertEqual(name, obj.model.model['spec']['volumes'][0]['name'])
+    #     self.assertEqual(name, obj.model.pod_spec.model['volumes'][0]['name'])
+    #
+    # def test_pod_add_volume_emptydir_with_medium(self):
+    #     name = "yoname"
+    #     obj = utils.create_pod(name=name)
+    #     config = utils.create_config()
+    #     vol = K8sVolume(config=config, name=name, mount_path="/var/test", type='emptyDir')
+    #     vol.set_medium('Memory')
+    #     obj.add_volume(vol)
+    #     self.assertEqual(1, len(obj.model.model['spec']['volumes']))
+    #     self.assertEqual(1, len(obj.model.pod_spec.model['volumes']))
+    #     self.assertEqual(name, obj.model.model['spec']['volumes'][0]['name'])
+    #     self.assertEqual(name, obj.model.pod_spec.model['volumes'][0]['name'])
+    #     self.assertEqual('Memory', obj.model.model['spec']['volumes'][0][vol.type]['medium'])
+    #     self.assertEqual('Memory', obj.model.pod_spec.model['volumes'][0][vol.type]['medium'])
+    #
+    # def test_pod_add_volume_hostpath_no_path_specified(self):
+    #     name = "yoname"
+    #     obj = utils.create_pod(name=name)
+    #     config = utils.create_config()
+    #     vol = K8sVolume(config=config, name=name, mount_path="/var/test", type='hostPath')
+    #     if utils.is_reachable(config.api_host):
+    #         with self.assertRaises(UnprocessableEntityException):
+    #             obj.add_volume(vol)
+    #             obj.create()
+    #
+    # def test_pod_add_volume_hostpath(self):
+    #     name = "yoname"
+    #     obj = utils.create_pod(name=name)
+    #     config = utils.create_config()
+    #     vol = K8sVolume(config=config, name=name, mount_path="/var/test", type='hostPath')
+    #     host_path = '/var/lib/docker'
+    #     vol.set_path(host_path)
+    #     obj.add_volume(vol)
+    #     self.assertEqual(1, len(obj.model.model['spec']['volumes']))
+    #     self.assertEqual(1, len(obj.model.pod_spec.model['volumes']))
+    #     self.assertEqual(name, obj.model.model['spec']['volumes'][0]['name'])
+    #     self.assertEqual(name, obj.model.pod_spec.model['volumes'][0]['name'])
+    #     self.assertEqual(host_path, obj.model.model['spec']['volumes'][0][vol.type]['path'])
+    #     self.assertEqual(host_path, obj.model.pod_spec.model['volumes'][0][vol.type]['path'])
+
     # ------------------------------------------------------------------------------------- delete annotation
 
     def test_del_annotation_none_arg(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-        try:
-            pod.del_annotation()
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        pod.del_annotation()
+        self.assertEqual({}, pod.annotations)
 
     def test_del_annotation_invalid_arg(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
         k = object()
-        try:
-            pod.del_annotation(k)
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        pod.del_annotation(k)
+        self.assertNotIn(k, pod.annotations)
 
     def test_del_annotation_none_yet(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-
         k = "yokey"
+        self.assertEqual({}, pod.annotations)
         pod.del_annotation(k)
-
-        meta = pod.model.model['metadata']
-        self.assertNotIn('annotations', meta)
-        meta = pod.model.pod_metadata.model
-        self.assertNotIn('annotations', meta)
+        self.assertEqual({}, pod.annotations)
 
     def test_del_annotation(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-
         k = "yokey"
         v = "yovalue"
         pod.add_annotation(k, v)
-
-        meta = pod.model.model['metadata']
-        self.assertIn('annotations', meta)
-        self.assertIn(k, meta['annotations'])
-        meta = pod.model.pod_metadata.model
-        self.assertIn('annotations', meta)
-        self.assertIn(k, meta['annotations'])
-
+        self.assertTrue(hasattr(pod.model.metadata, 'annotations'))
+        self.assertIn(k, pod.model.metadata.annotations)
+        self.assertEqual(v, pod.model.metadata.annotations[k])
         pod.del_annotation(k)
-
-        meta = pod.model.model['metadata']
-        self.assertIn('annotations', meta)
-        self.assertNotIn(k, meta['annotations'])
-        meta = pod.model.pod_metadata.model
-        self.assertIn('annotations', meta)
-        self.assertNotIn(k, meta['annotations'])
+        self.assertTrue(hasattr(pod.model.metadata, 'annotations'))
+        self.assertNotIn(k, pod.model.metadata.annotations)
 
     def test_del_annotation_does_not_exist(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-
-        k_1 = "yokey"
-        v_1 = "yovalue"
+        k1 = "yokey"
         k_2 = "yonotexists"
-        pod.add_annotation(k_1, v_1)
-
-        meta = pod.model.model['metadata']
-        self.assertIn('annotations', meta)
-        self.assertIn(k_1, meta['annotations'])
-        self.assertNotIn(k_2, meta['annotations'])
-        meta = pod.model.pod_metadata.model
-        self.assertIn('annotations', meta)
-        self.assertIn(k_1, meta['annotations'])
-        self.assertNotIn(k_2, meta['annotations'])
-
+        v = "yovalue"
+        pod.add_annotation(k1, v)
+        self.assertTrue(hasattr(pod.model.metadata, 'annotations'))
+        self.assertIn(k1, pod.model.metadata.annotations)
+        self.assertNotIn(k_2, pod.model.metadata.annotations)
         pod.del_annotation(k_2)
-
-        meta = pod.model.model['metadata']
-        self.assertNotIn(k_2, meta)
-        meta = pod.model.pod_metadata.model
-        self.assertNotIn(k_2, meta)
+        self.assertTrue(hasattr(pod.model.metadata, 'annotations'))
+        self.assertIn(k1, pod.model.metadata.annotations)
+        self.assertNotIn(k_2, pod.model.metadata.annotations)
 
     # ------------------------------------------------------------------------------------- delete label
 
     def test_del_label_none_arg(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-        try:
-            pod.del_label()
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        pod.del_label()
+        self.assertEqual(1, len(pod.labels))
+        self.assertIn('name', pod.labels)
 
     def test_del_label_invalid_arg(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
         k = object()
-        try:
-            pod.del_label(k)
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        pod.del_label(k)
+        self.assertNotIn(k, pod.labels)
 
     def test_del_label_none_yet(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-
         k = "yokey"
+        self.assertNotIn(k, pod.model.metadata.labels)
         pod.del_label(k)
-
-        meta = pod.model.model['metadata']
-        self.assertIn('labels', meta)
-        meta = pod.model.pod_metadata.model
-        self.assertIn('labels', meta)
+        self.assertNotIn(k, pod.model.metadata.labels)
 
     def test_del_label(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-
         k = "yokey"
         v = "yovalue"
         pod.add_label(k, v)
-
-        meta = pod.model.model['metadata']
-        self.assertIn('labels', meta)
-        self.assertIn(k, meta['labels'])
-        meta = pod.model.pod_metadata.model
-        self.assertIn('labels', meta)
-        self.assertIn(k, meta['labels'])
-
+        self.assertTrue(hasattr(pod.model.metadata, 'labels'))
+        self.assertIn(k, pod.model.metadata.labels)
         pod.del_label(k)
-
-        meta = pod.model.model['metadata']
-        self.assertIn('labels', meta)
-        self.assertNotIn(k, meta['labels'])
-        meta = pod.model.pod_metadata.model
-        self.assertIn('labels', meta)
-        self.assertNotIn(k, meta['labels'])
+        self.assertTrue(hasattr(pod.model.metadata, 'labels'))
+        self.assertNotIn(k, pod.model.metadata.labels)
 
     def test_del_label_does_not_exist(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-
         k_1 = "yokey"
-        v_1 = "yovalue"
         k_2 = "yonotexists"
-        pod.add_label(k_1, v_1)
-
-        meta = pod.model.model['metadata']
-        self.assertIn('labels', meta)
-        self.assertIn(k_1, meta['labels'])
-        self.assertNotIn(k_2, meta['labels'])
-        meta = pod.model.pod_metadata.model
-        self.assertIn('labels', meta)
-        self.assertIn(k_1, meta['labels'])
-        self.assertNotIn(k_2, meta['labels'])
-
+        v = "yovalue"
+        pod.add_label(k_1, v)
+        self.assertTrue(hasattr(pod.model.metadata, 'labels'))
+        self.assertIn(k_1, pod.model.metadata.labels)
+        self.assertNotIn(k_2, pod.model.metadata.labels)
         pod.del_label(k_2)
-        meta = pod.model.model['metadata']
-        self.assertNotIn(k_2, meta)
-        meta = pod.model.pod_metadata.model
-        self.assertNotIn(k_2, meta)
+        self.assertTrue(hasattr(pod.model.metadata, 'labels'))
+        self.assertIn(k_1, pod.model.metadata.labels)
+        self.assertNotIn(k_2, pod.model.metadata.labels)
 
     # ------------------------------------------------------------------------------------- get
 
@@ -350,11 +364,8 @@ class K8sPodTest(unittest.TestCase):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
         if utils.is_reachable(pod.config.api_host):
-            try:
+            with self.assertRaises(NotFoundException):
                 pod.get()
-                self.fail("Should not fail.")
-            except Exception as err:
-                self.assertIsInstance(err, NotFoundException)
 
     def test_get(self):
         name = "yocontainer"
@@ -374,26 +385,19 @@ class K8sPodTest(unittest.TestCase):
     def test_get_annotation_none_args(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-
-        try:
-            pod.get_annotation()
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        ann = pod.get_annotation()
+        self.assertIsNone(ann)
 
     def test_get_annotation_invalid_args(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-
         k = object()
-        try:
-            pod.get_annotation(k)
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        ann = pod.get_annotation(k)
+        self.assertIsNone(ann)
 
     def test_get_annotation_doesnt_exist(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-
         k = "yonotexists"
         ann = pod.get_annotation(k)
         self.assertIsNone(ann)
@@ -401,11 +405,9 @@ class K8sPodTest(unittest.TestCase):
     def test_get_annotation(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-
         k = "yokey"
         v_in = "yovalue"
         pod.add_annotation(k, v_in)
-
         v_out = pod.get_annotation(k)
         self.assertEqual(v_in, v_out)
 
@@ -414,21 +416,18 @@ class K8sPodTest(unittest.TestCase):
     def test_get_annotations_none(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-        anns = pod.get_annotations()
-        self.assertIsNone(anns)
+        anns = pod.annotations
+        self.assertEqual({}, anns)
 
     def test_get_annotations(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-
         count = 4
         for i in range(0, count):
             k = "key_{0}".format(i)
             v = "value_{0}".format(i)
             pod.add_annotation(k, v)
-
-        anns = pod.get_annotations()
-
+        anns = pod.annotations
         self.assertIsNotNone(anns)
         self.assertIsInstance(anns, dict)
         self.assertEqual(count, len(anns))
@@ -440,26 +439,19 @@ class K8sPodTest(unittest.TestCase):
     def test_get_label_none_args(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-
-        try:
-            pod.get_annotation()
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        ann = pod.get_annotation()
+        self.assertIsNone(ann)
 
     def test_get_label_invalid_args(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-
         k = object()
-        try:
-            pod.get_label(k)
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        ann = pod.get_label(k)
+        self.assertIsNone(ann)
 
     def test_get_label_doesnt_exist(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-
         k = "yonotexists"
         l = pod.get_label(k)
         self.assertIsNone(l)
@@ -467,11 +459,9 @@ class K8sPodTest(unittest.TestCase):
     def test_get_label(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-
         k = "yokey"
         v_in = "yovalue"
         pod.add_label(k, v_in)
-
         v_out = pod.get_label(k)
         self.assertEqual(v_in, v_out)
 
@@ -480,39 +470,115 @@ class K8sPodTest(unittest.TestCase):
     def test_get_labels_none(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-        labels = pod.get_labels()
+        labels = pod.labels
         self.assertIsNotNone(labels)
         self.assertIn('name', labels)
 
     def test_get_labels(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-
         count = 4
         for i in range(0, count):
             k = "key_{0}".format(i)
             v = "value_{0}".format(i)
             pod.add_label(k, v)
-
-        labels = pod.get_labels()
-
+        labels = pod.labels
         self.assertIsNotNone(labels)
         self.assertIsInstance(labels, dict)
         self.assertLessEqual(count, len(labels))  # 'name' already exists as a label
         for i in range(0, count):
             self.assertIn("key_{0}".format(i), labels)
 
+    # --------------------------------------------------------------------------------- get pod containers
+
+    def test_pod_get_pod_containers_empty(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        self.assertEqual(0, len(pod.containers))
+
+    def test_get_containers(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+
+        count = 3
+        for i in range(0, 3):
+            name = "yocontainer_{0}".format(i)
+            image = "redis"
+            c = K8sContainer(name=name, image=image)
+            pod.add_container(c)
+
+        self.assertIsNotNone(pod.containers)
+        self.assertEqual(count, len(pod.containers))
+        [self.assertIsInstance(x, K8sContainer) for x in pod.containers]
+
+    # --------------------------------------------------------------------------------- get node name
+
+    def test_get_node_name_none(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        self.assertIsNone(pod.node_name)
+
+    def test_get_node_name(self):
+        name = "yoname"
+        nodename = "yonodename"
+        pod = utils.create_pod(name=name)
+        pod.node_name = nodename
+        self.assertEqual(nodename, pod.node_name)
+        self.assertEqual(nodename, pod.model.spec.node_name)
+
+    # --------------------------------------------------------------------------------- get pod node selector
+
+    def test_get_node_selector_none(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        self.assertEqual({}, pod.node_selector)
+
+    def test_get_node_selector(self):
+        name = "yoname"
+        s_in = {"disktype": "ssd"}
+        pod = utils.create_pod(name=name)
+        pod.node_selector = s_in
+        s_out = pod.node_selector
+        self.assertEqual(s_in, s_out)
+
+    # --------------------------------------------------------------------------------- get pod restart policy
+
+    def test_get_restart_policy_none(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        self.assertEqual('Always', pod.restart_policy)  # set to 'Always' by default
+
+    def test_get_restart_policy(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        p = 'OnFailure'
+        pod.restart_policy = p
+        self.assertEqual(p, pod.restart_policy)
+
+    # --------------------------------------------------------------------------------- get service account
+
+    def test_pod_get_service_account_none(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        with self.assertRaises(SyntaxError):
+            pod.service_account_name = None
+
+    def test_pod_get_service_account(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        name_in = "yoservice"
+        pod.service_account_name = name_in
+        name_out = pod.service_account_name
+        self.assertEqual(name_in, name_out)
+
     # ------------------------------------------------------------------------------------- get pod status
 
     def test_get_pod_status_nonexistent(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
-        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         pod = utils.create_pod(name=name)
         if utils.is_reachable(pod.config.api_host):
-            try:
-                pod.get_status()
-            except Exception as err:
-                self.assertIsInstance(err, NotFoundException)
+            with self.assertRaises(NotFoundException):
+                pod.status
 
     def test_get_pod_status(self):
         name = "yocontainer"
@@ -522,11 +588,10 @@ class K8sPodTest(unittest.TestCase):
         pod.add_container(container)
         if utils.is_reachable(pod.config.api_host):
             p = pod.create()
-            time.sleep(3)  # let creation happen
-            result = p.get_status()
+            result = p.status
             self.assertIsInstance(result, PodStatus)
-            for i in ['conditions', 'containerStatuses', 'hostIP', 'phase', 'podIP', 'startTime']:
-                self.assertIn(i, result.model)
+            for i in ['conditions', 'container_statuses', 'host_ip', 'phase', 'pod_ip', 'reason', 'start_time']:
+                self.assertTrue(hasattr(result, i))
 
     # ------------------------------------------------------------------------------------- is_ready
 
@@ -534,11 +599,9 @@ class K8sPodTest(unittest.TestCase):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
         if utils.is_reachable(pod.config.api_host):
-            try:
+            with self.assertRaises(NotFoundException):
                 pod.is_ready()
                 self.fail("Should not fail.")
-            except Exception as err:
-                self.assertIsInstance(err, NotFoundException)
 
     def test_is_ready(self):
         name = "yocontainer"
@@ -550,109 +613,225 @@ class K8sPodTest(unittest.TestCase):
             p = pod.create()
             self.assertTrue(p.is_ready())
 
+    # --------------------------------------------------------------------------------- set active deadline
+
+    def test_pod_set_active_deadline_none_arg(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        d = None
+        with self.assertRaises(SyntaxError):
+            pod.active_deadline = d
+
+    def test_pod_set_active_deadline_invalid_arg(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        d = "yodeadline"
+        with self.assertRaises(SyntaxError):
+            pod.active_deadline = d
+
+    def test_pod_set_active_deadline(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        d = 600
+        pod.active_deadline = d
+        self.assertEqual(d, pod.active_deadline)
+
     # ------------------------------------------------------------------------------------- set annotations
 
     def test_set_annotations_none_args(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-        try:
-            pod.set_annotations()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            pod.annotations = None
 
     def test_set_annotations_invalid_args(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
         anns = object()
-        try:
-            pod.set_annotations(anns)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            pod.annotations = anns
 
     def test_set_annotations(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-        anns_in = {'key': 'value'}
-        pod.set_annotations(anns_in)
-        anns_out = pod.get_annotations()
-        self.assertEqual(anns_in, anns_out)
+        anns = {'key': 'value'}
+        pod.annotations = anns
+        self.assertEqual(anns, pod.annotations)
 
     # ------------------------------------------------------------------------------------- set labels
 
     def test_set_labels_none_args(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-        try:
-            pod.set_labels()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            pod.labels = None
 
     def test_set_labels_invalid_args(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
         labels = object()
-        try:
-            pod.set_labels(labels)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            pod.labels = labels
 
     def test_set_labels(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
         labels_in = {'key': 'value'}
-        pod.set_labels(labels_in)
-        labels_out = pod.get_labels()
-        self.assertEqual(labels_in, labels_out)
+        pod.labels = labels_in
+        self.assertEqual(pod.labels, labels_in)
 
     # ------------------------------------------------------------------------------------- set namespace
 
     def test_set_namespace_none_args(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-        try:
-            pod.set_namespace()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            pod.namespace = None
 
     def test_set_namespace_invalid_args(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
         nspace = object()
-        try:
-            pod.set_namespace(nspace)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            pod.namespace = nspace
 
     def test_set_namespace(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-        nspace_in = "yonamespace"
-        pod.set_namespace(nspace_in)
-        nspace_out = pod.get_namespace()
-        self.assertEqual(nspace_in, nspace_out)
+        nspace = "yonamespace"
+        pod.namespace = nspace
+        self.assertEqual(nspace, pod.namespace)
+
+    # --------------------------------------------------------------------------------- set pod node name
+
+    def test_pod_set_pod_node_name_none_arg(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        nn = None
+        with self.assertRaises(SyntaxError):
+            pod.node_name = nn
+
+    def test_pod_set_pod_node_name_invalid_arg(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        nn = 666
+        with self.assertRaises(SyntaxError):
+            pod.node_name = nn
+
+    def test_pod_set_pod_node_name(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        nn = "yonodename"
+        pod.node_name = nn
+        self.assertEqual(nn, pod.node_name)
+
+    # --------------------------------------------------------------------------------- set pod node selector
+
+    def test_pod_set_pod_node_selector_none_arg(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        s = None
+        with self.assertRaises(SyntaxError):
+            pod.node_selector = s
+
+    def test_pod_set_pod_node_selector_invalid_arg(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        s = "yoselector"
+        with self.assertRaises(SyntaxError):
+            pod.node_selector = s
+
+    def test_pod_set_pod_node_selector(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        s = {"disktype": "ssd"}
+        pod.node_selector = s
+        self.assertEqual(s, pod.node_selector)
+
+    # --------------------------------------------------------------------------------- set pod restart policy
+
+    def test_pod_set_pod_restart_policy_none(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        p = None
+        with self.assertRaises(SyntaxError):
+            pod.restart_policy = p
+
+    def test_pod_set_pod_restart_policy_not_a_string(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        p = 666
+        with self.assertRaises(SyntaxError):
+            pod.restart_policy = p
+
+    def test_pod_set_pod_restart_policy_invalid_string(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        p = 'yopolicy'
+        with self.assertRaises(SyntaxError):
+            pod.restart_policy = p
+
+    def test_pod_set_pod_restart_policy(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        p = 'Always'
+        pod.restart_policy = p
+        self.assertEqual(p, pod.restart_policy)
+
+    # --------------------------------------------------------------------------------- set pod service account
+
+    def test_pod_set_service_account_none_arg(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        with self.assertRaises(SyntaxError):
+            pod.service_account_name = None
+
+    def test_pod_set_service_account_invalid_arg(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        n = 666
+        with self.assertRaises(SyntaxError):
+            pod.service_account_name = n
+
+    def test_pod_set_service_account(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        n = "yoservice"
+        pod.service_account_name = n
+        self.assertEqual(pod.service_account_name, n)
+
+    # --------------------------------------------------------------------------------- set termination grace period
+
+    def test_pod_set_termination_grace_period_none_arg(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        with self.assertRaises(SyntaxError):
+            pod.termination_grace_period = None
+
+    def test_pod_set_termination_grace_period_invalid_arg(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        secs = -666
+        with self.assertRaises(SyntaxError):
+            pod.termination_grace_period = secs
+
+    def test_pod_set_termination_grace_period(self):
+        name = "yoname"
+        pod = utils.create_pod(name=name)
+        secs = 1234
+        pod.termination_grace_period = secs
+        self.assertEqual(secs, pod.termination_grace_period)
 
     # ------------------------------------------------------------------------------------- get by name
 
     def test_get_by_name_none_args(self):
-        try:
+        with self.assertRaises(SyntaxError):
             K8sPod.get_by_name()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_get_by_name_invalid_args(self):
         name = object()
-        try:
+        with self.assertRaises(SyntaxError):
             K8sPod.get_by_name(name=name)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_get_by_name_nonexistent(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
@@ -677,19 +856,13 @@ class K8sPodTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------- get by labels
 
     def test_get_by_labels_none_args(self):
-        try:
+        with self.assertRaises(SyntaxError):
             K8sPod.get_by_labels()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_get_by_labels_invalid_args(self):
         name = object()
-        try:
+        with self.assertRaises(SyntaxError):
             K8sPod.get_by_labels(labels=name)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_get_by_labels_nonexistent(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
@@ -710,6 +883,7 @@ class K8sPodTest(unittest.TestCase):
             pods = K8sPod.get_by_labels(config=pod.config, labels={'name': name})
             self.assertIsInstance(pods, list)
             self.assertEqual(1, len(pods))
+            self.assertEqual(pod, pods[0])
 
     # ------------------------------------------------------------------------------------- api - create
 
@@ -717,11 +891,8 @@ class K8sPodTest(unittest.TestCase):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
         if utils.is_reachable(pod.config.api_host):
-            try:
+            with self.assertRaises(UnprocessableEntityException):
                 pod.create()
-                self.fail("Should not fail.")
-            except Exception as err:
-                self.assertIsInstance(err, UnprocessableEntityException)
 
     def test_create_already_exists(self):
         name = "yocontainer"
@@ -730,13 +901,11 @@ class K8sPodTest(unittest.TestCase):
         pod = utils.create_pod(name=name)
         pod.add_container(c)
         if utils.is_reachable(pod.config.api_host):
-            try:
+            with self.assertRaises(AlreadyExistsException):
                 result = pod.create()
                 self.assertIsInstance(result, K8sPod)
                 self.assertEqual(pod, result)
                 pod.create()
-            except Exception as err:
-                self.assertIsInstance(err, AlreadyExistsException)
 
     def test_create_with_container(self):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
@@ -788,11 +957,8 @@ class K8sPodTest(unittest.TestCase):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
         if utils.is_reachable(pod.config.api_host):
-            try:
+            with self.assertRaises(NotFoundException):
                 pod.update()
-                self.fail("Should not fail.")
-            except Exception as err:
-                self.assertIsInstance(err, NotFoundException)
 
     def test_update_name_fails(self):
         name = "yocontainer"
@@ -808,11 +974,8 @@ class K8sPodTest(unittest.TestCase):
             self.assertEqual(1, len(result))
             self.assertIsInstance(result[0], K8sPod)
             result[0].name = name2
-            try:
+            with self.assertRaises(BadRequestException):
                 result[0].update()
-                self.fail("Should not fail.")
-            except Exception as err:
-                self.assertIsInstance(err, BadRequestException)
 
     def test_update_namespace_fails(self):
         name = "yocontainer"
@@ -828,31 +991,28 @@ class K8sPodTest(unittest.TestCase):
             self.assertEqual(1, len(result))
             pod2 = result[0]
             self.assertIsInstance(pod2, K8sPod)
-            self.assertNotEqual(pod2.get_namespace(), nspace)
+            self.assertNotEqual(pod2.namespace, nspace)
             self.assertEqual(pod1, pod2)
-            pod2.set_namespace(nspace)
-            try:
+            pod2.namespace = nspace
+            with self.assertRaises(BadRequestException):
                 pod2.update()
-                self.fail("Should not fail.")
-            except Exception as err:
-                self.assertIsInstance(err, BadRequestException)
 
     def test_update_labels(self):
         name = "yocontainer"
         container = utils.create_container(name=name)
         name = "yopod-{0}".format(str(uuid.uuid4()))
-        pod1 = utils.create_pod(name=name)
-        pod1.add_container(container)
-        if utils.is_reachable(pod1.config.api_host):
-            pod1.create()
-            labels = pod1.get_labels()
+        pod = utils.create_pod(name=name)
+        pod.add_container(container)
+        if utils.is_reachable(pod.config.api_host):
+            pod.create()
+            labels = pod.labels
             labels['yomama'] = 'sofat'
-            pods = K8sPod.get_by_labels(config=pod1.config, labels=labels)
+            pods = K8sPod.get_by_labels(config=pod.config, labels=labels)
             self.assertIsInstance(pods, list)
             self.assertEqual(0, len(pods))
-            pod1.set_labels(labels)
-            pod1.update()
-            pods = K8sPod.get_by_labels(config=pod1.config, labels=labels)
+            pod.labels = labels
+            pod.update()
+            pods = K8sPod.get_by_labels(config=pod.config, labels=labels)
             self.assertIsInstance(pods, list)
             self.assertEqual(1, len(pods))
 
@@ -866,11 +1026,8 @@ class K8sPodTest(unittest.TestCase):
             pod.create()
             container = utils.create_container(name=cont_names[1])
             pod.add_container(container)
-            try:
+            with self.assertRaises(UnprocessableEntityException):
                 pod.update()
-                self.fail("Should not fail.")
-            except Exception as err:
-                self.assertIsInstance(err, UnprocessableEntityException)
 
     # TODO: this is the first of two update operations that are allowed
     def test_update_container_image(self):
@@ -886,11 +1043,8 @@ class K8sPodTest(unittest.TestCase):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
         if utils.is_reachable(pod.config.api_host):
-            try:
+            with self.assertRaises(NotFoundException):
                 pod.delete()
-                self.fail("Should not fail.")
-            except Exception as err:
-                self.assertIsInstance(err, NotFoundException)
 
     def test_delete(self):
         name = "yocontainer"

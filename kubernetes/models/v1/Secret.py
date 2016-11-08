@@ -34,6 +34,13 @@ class Secret(object):
             self.secret_metadata = ObjectMeta(name=name, namespace=namespace)
             self._update_model()
 
+    def __eq__(self, other):
+        # see https://github.com/kubernetes/kubernetes/blob/release-1.3/docs/design/identifiers.md
+        if isinstance(other, self.__class__):
+            # Uniquely name (via a name) an object across space.
+            return self.name == other.name
+        return NotImplemented
+
     def _update_model(self):
         self.model['metadata'] = self.secret_metadata.get()
         return self

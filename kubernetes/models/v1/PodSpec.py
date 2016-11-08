@@ -9,7 +9,7 @@
 from kubernetes.models.v1.Container import Container
 from kubernetes.models.v1.PodSecurityContext import PodSecurityContext
 from kubernetes.models.v1.Volume import Volume
-from kubernetes.utils import is_valid_list, filter_model
+from kubernetes.utils import is_valid_list, filter_model, is_valid_string
 
 
 class PodSpec(object):
@@ -23,31 +23,32 @@ class PodSpec(object):
     def __init__(self, model=None):
         super(PodSpec, self).__init__()
 
+        self._active_deadline_seconds = None
         self._containers = []
         self._dns_policy = 'ClusterFirst'
         self._image_pull_secrets = []
+        self._node_name = None
         self._node_selector = {}
         self._restart_policy = 'Always'
         self._security_context = None
+        self._service_account = None  # deprecated
+        self._service_account_name = None
+        self._termination_grace_period_seconds = 30
         self._volumes = []
 
-        self.active_deadline_seconds = None
         self.host_ipc = False
         self.host_network = False
         self.host_pid = False
         self.hostname = None
-        self.node_name = None
-
-        self.service_account = None  # deprecated
-        self.service_account_name = None
         self.subdomain = None
-        self.termination_grace_period_seconds = 30
 
         if model is not None:
             m = filter_model(model)
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
+        if 'activeDeadlineSeconds' in model:
+            self.active_deadline_seconds = model['activeDeadlineSeconds']
         if 'containers' in model:
             containers = []
             for c in model['containers']:
@@ -58,6 +59,8 @@ class PodSpec(object):
             self.dns_policy = model['dnsPolicy']
         if 'nodeName' in model:
             self.node_name = model['nodeName']
+        if 'nodeSelector' in model:
+            self.node_selector = model['nodeSelector']
         if 'restartPolicy' in model:
             self.restart_policy = model['restartPolicy']
         if 'securityContext' in model:
@@ -94,6 +97,18 @@ class PodSpec(object):
         self._image_pull_secrets.append(name)
         return self
 
+    # ------------------------------------------------------------------------------------- active deadline seconds
+
+    @property
+    def active_deadline_seconds(self):
+        return self._active_deadline_seconds
+
+    @active_deadline_seconds.setter
+    def active_deadline_seconds(self, secs=None):
+        if not isinstance(secs, int):
+            raise SyntaxError('PodSpec: active_deadline_seconds: [ {0} ] is invalid.'.format(secs))
+        self._active_deadline_seconds = secs
+
     # ------------------------------------------------------------------------------------- containers
 
     @property
@@ -102,20 +117,14 @@ class PodSpec(object):
 
     @containers.setter
     def containers(self, containers=None):
-        msg = 'PodSpec: containers: [ {0} ] is invalid.'.format(containers)
-        if not isinstance(containers, list):
-            raise SyntaxError(msg)
-        try:
-            for x in containers:
-                assert isinstance(x, Container)
-        except AssertionError:
-            raise SyntaxError(msg)
+        if not is_valid_list(containers, Container):
+            raise SyntaxError('PodSpec: containers: [ {0} ] is invalid.'.format(containers))
         self._containers = containers
 
     def set_container_image(self, name=None, image=None):
-        if name is None or not isinstance(name, str):
+        if not is_valid_string(name):
             raise SyntaxError('PodSpec: name: [ {0} ] is invalid.')
-        if image is None or not isinstance(image, str):
+        if not is_valid_string(image):
             raise SyntaxError('PodSpec: image: [ {0} ] is invalid.')
         for c in self.containers:
             if c.name == name:
@@ -157,7 +166,19 @@ class PodSpec(object):
     def node_selector(self, selector=None):
         if not isinstance(selector, dict):
             raise SyntaxError('PodSpec: node_selector: [ {0} ] is invalid.'.format(selector))
-        self.node_selector = selector
+        self._node_selector = selector
+
+    # ------------------------------------------------------------------------------------- node name
+
+    @property
+    def node_name(self):
+        return self._node_name
+
+    @node_name.setter
+    def node_name(self, name=None):
+        if not is_valid_string(name):
+            raise SyntaxError('PodSpec: node_name: [ {0} ] is invalid.'.format(name))
+        self._node_name = name
 
     # ------------------------------------------------------------------------------------- restart policy
 
@@ -183,11 +204,51 @@ class PodSpec(object):
             raise SyntaxError('PodSpec: pod_security_context: [ {0} ] is invalid.'.format(context))
         self._security_context = context
 
+    # ------------------------------------------------------------------------------------- service account name
+
+    # TODO(froch): remove 'service_account' since it's deprecated.
+    # We're leaving this in until 'serviceAccount' is rejected by the Kubernetes API server.
+    # You should be using 'serviceAccountName'. We're forcing use of it under the hood.
+
+    @property
+    def service_account(self):
+        return self._service_account_name
+
+    @service_account.setter
+    def service_account(self, san=None):
+        if not is_valid_string(san):
+            raise SyntaxError('PodSpec: service_account: [ {0} ] is invalid.'.format(san))
+        self._service_account_name = san
+        self._service_account = san
+
+    @property
+    def service_account_name(self):
+        return self._service_account_name
+
+    @service_account_name.setter
+    def service_account_name(self, san=None):
+        if not is_valid_string(san):
+            raise SyntaxError('PodSpec: service_account_name: [ {0} ] is invalid.'.format(san))
+        self._service_account_name = san
+        self._service_account = san
+
+    # ------------------------------------------------------------------------------------- termination grace period
+
+    @property
+    def termination_grace_period_seconds(self):
+        return self._termination_grace_period_seconds
+
+    @termination_grace_period_seconds.setter
+    def termination_grace_period_seconds(self, secs=None):
+        if not isinstance(secs, int) or not secs > 0:
+            raise SyntaxError('PodSpec: termination_grace_period_seconds: [ {0} ] is invalid.'.format(secs))
+        self._termination_grace_period_seconds = secs
+
     # ------------------------------------------------------------------------------------- volumes
 
     @property
     def volumes(self):
-        return self._containers
+        return self._volumes
 
     @volumes.setter
     def volumes(self, volumes=None):
@@ -223,6 +284,8 @@ class PodSpec(object):
             data['nodeSelector'] = self.node_selector
         if self.restart_policy:
             data['restartPolicy'] = self.restart_policy
+        if self.service_account:
+            data['serviceAccount'] = self.service_account
         if self.service_account_name:
             data['serviceAccountName'] = self.service_account_name
         if self.subdomain:

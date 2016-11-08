@@ -63,6 +63,13 @@ class Volume(object):
             m = filter_model(model)
             self._build_with_model(m)
 
+    def __eq__(self, other):
+        # see https://github.com/kubernetes/kubernetes/blob/release-1.3/docs/design/identifiers.md
+        if isinstance(other, self.__class__):
+            # Uniquely name (via a name) an object across space.
+            return self.name == other.name
+        return NotImplemented
+
     def _build_with_model(self, model=None):
         if 'awsElasticBlockStore' in model:
             self.aws_elastic_block_store = AWSElasticBlockStoreVolumeSource(model=model['awsElasticBlockStore'])
@@ -191,6 +198,8 @@ class Volume(object):
             data['gitRepo'] = self.git_repo.serialize()
         if self.host_path is not None:
             data['hostPath'] = self.host_path.serialize()
+        if self.name is not None:
+            data['name'] = self.name
         if self.nfs is not None:
             data['nfs'] = self.nfs.serialize()
         if self.secret is not None:

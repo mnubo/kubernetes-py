@@ -8,11 +8,12 @@
 
 from kubernetes.utils import filter_model
 
+
 class ContainerPort(object):
     """
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_containerport
     """
-    
+
     VALID_PROTOCOLS = ['TCP', 'UDP']
 
     def __init__(self, model=None):

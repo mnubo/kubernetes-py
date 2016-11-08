@@ -6,9 +6,9 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1.ContainerStateWaiting import ContainerStateWaiting
 from kubernetes.models.v1.ContainerStateRunning import ContainerStateRunning
 from kubernetes.models.v1.ContainerStateTerminated import ContainerStateTerminated
+from kubernetes.models.v1.ContainerStateWaiting import ContainerStateWaiting
 from kubernetes.utils import filter_model
 
 
@@ -73,7 +73,7 @@ class ContainerState(object):
 
     # ------------------------------------------------------------------------------------- serialized
 
-    def serialized(self):
+    def serialize(self):
         data = {}
         if self.waiting is not None:
             data['waiting'] = self.waiting.serialize()

@@ -10,7 +10,7 @@ from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sExceptions import *
 from kubernetes.models.v1.BaseUrls import BaseUrls
 from kubernetes.models.v1.DeleteOptions import DeleteOptions
-from kubernetes.utils import HttpRequest
+from kubernetes.utils import HttpRequest, is_valid_dict
 
 VALID_K8s_OBJS = [
     'Deployment',
@@ -160,11 +160,8 @@ class K8sObject(object):
         return model
 
     def get_with_params(self, data=None):
-        if data is None:
-            raise SyntaxError('K8sObject: data: [ {0} ] cannot be None.'.format(data))
-        if not isinstance(data, dict):
-            raise SyntaxError('K8sObject: data: [ {0} ] must be a dict.'.format(data.__class__.__name__))
-
+        if not is_valid_dict(data):
+            raise SyntaxError('K8sObject.get_with_params(): data: [ {0} ] is invalid.'.format(data))
         url = '{base}'.format(base=self.base_url)
         state = self.request(method='GET', url=url, data=data)
         return state.get('data', None).get('items', list())

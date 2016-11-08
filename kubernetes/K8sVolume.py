@@ -14,17 +14,14 @@ class K8sVolume(K8sObject):
 
     VALID_VOLUME_TYPES = Volume.VALID_VOLUME_TYPES
 
-    def __init__(self, config=None, model=None, name=None, type=None, mount_path=None, read_only=False):
+    def __init__(self, model=None):
 
         super(K8sVolume, self).__init__(config=config, name=name, obj_type='Volume')
 
         if model is None:
-            self.model = Volume(name=name, type=type, mount_path=mount_path, read_only=read_only)
-            self.type = type
+            self.model = Volume()
 
         if model is not None:
-            if not isinstance(model, Volume):
-                raise SyntaxError('K8sVolume: model: [ {0} ] must be a Volume.'.format(model.__class__.__name__))
             self.model = model
             self.type = self.model.type
 

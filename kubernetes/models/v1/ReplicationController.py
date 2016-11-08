@@ -28,6 +28,14 @@ class ReplicationController(object):
         self.kind = 'ReplicationController'
         self.api_version = 'v1'
 
+    def __eq__(self, other):
+        # see https://github.com/kubernetes/kubernetes/blob/release-1.3/docs/design/identifiers.md
+        if isinstance(other, self.__class__):
+            # Uniquely name (via a name) an object across space.
+            return self.metadata.name == other.metadata.name and \
+                   self.metadata.namespace == other.metadata.namespace
+        return NotImplemented
+
     # ------------------------------------------------------------------------------------- metadata
 
     @property
