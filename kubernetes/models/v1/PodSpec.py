@@ -26,6 +26,10 @@ class PodSpec(object):
         self._active_deadline_seconds = None
         self._containers = []
         self._dns_policy = 'ClusterFirst'
+        self._host_ipc = None
+        self._host_network = None
+        self._host_pid = None
+        self._hostname = None
         self._image_pull_secrets = []
         self._node_name = None
         self._node_selector = {}
@@ -33,14 +37,9 @@ class PodSpec(object):
         self._security_context = None
         self._service_account = None  # deprecated
         self._service_account_name = None
+        self._subdomain = None
         self._termination_grace_period_seconds = 30
         self._volumes = []
-
-        self.host_ipc = False
-        self.host_network = False
-        self.host_pid = False
-        self.hostname = None
-        self.subdomain = None
 
         if model is not None:
             m = filter_model(model)
@@ -57,6 +56,14 @@ class PodSpec(object):
             self.containers = containers
         if 'dnsPolicy' in model:
             self.dns_policy = model['dnsPolicy']
+        if 'hostIPC' in model:
+            self.host_ipc = model['hostIPC']
+        if 'hostNetwork' in model:
+            self.host_network = model['hostNetwork']
+        if 'hostPID' in model:
+            self.host_pid = model['hostPID']
+        if 'hostname' in model:
+            self.hostname = model['hostname']
         if 'nodeName' in model:
             self.node_name = model['nodeName']
         if 'nodeSelector' in model:
@@ -69,6 +76,8 @@ class PodSpec(object):
             self.service_account = model['serviceAccount']
         if 'serviceAccountName' in model:
             self.service_account_name = model['serviceAccountName']
+        if 'subdomain' in model:
+            self.subdomain = model['subdomain']
         if 'terminationGracePeriodSeconds' in model:
             self.termination_grace_period_seconds = model['terminationGracePeriodSeconds']
         if 'volumes' in model:
@@ -132,7 +141,7 @@ class PodSpec(object):
                 break
         return self
 
-    # ------------------------------------------------------------------------------------- DNS policy
+    # ------------------------------------------------------------------------------------- dnsPolicy
 
     @property
     def dns_policy(self):
@@ -143,6 +152,54 @@ class PodSpec(object):
         if dns_policy not in PodSpec.VALID_DNS_POLICIES:
             raise SyntaxError('PodSpec: dns_policy: [ {0} ] is invalid.'.format(dns_policy))
         self._dns_policy = dns_policy
+
+    # ------------------------------------------------------------------------------------- hostIPC
+
+    @property
+    def host_ipc(self):
+        return self._host_ipc
+
+    @host_ipc.setter
+    def host_ipc(self, ipc=None):
+        if not isinstance(ipc, bool):
+            raise SyntaxError('PodSpec: host_ipc: [ {0} ] is invalid.'.format(ipc))
+        self._host_ipc = ipc
+
+    # ------------------------------------------------------------------------------------- hostPID
+
+    @property
+    def host_pid(self):
+        return self._host_pid
+
+    @host_pid.setter
+    def host_pid(self, pid=None):
+        if not isinstance(pid, bool):
+            raise SyntaxError('PodSpec: host_pid: [ {0} ] is invalid.'.format(pid))
+        self._host_pid = pid
+
+    # ------------------------------------------------------------------------------------- hostNetwork
+
+    @property
+    def host_network(self):
+        return self._host_network
+
+    @host_network.setter
+    def host_network(self, hn=None):
+        if not isinstance(hn, bool):
+            raise SyntaxError('PodSpec: host_network: [ {0} ] is invalid.'.format(hn))
+        self._host_network = hn
+
+    # ------------------------------------------------------------------------------------- hostname
+
+    @property
+    def hostname(self):
+        return self._hostname
+
+    @hostname.setter
+    def hostname(self, hn=None):
+        if not is_valid_string(hn):
+            raise SyntaxError('PodSpec: hostname: [ {0} ] is invalid.'.format(hn))
+        self._hostname = hn
 
     # ------------------------------------------------------------------------------------- image pull secrets
 
@@ -232,6 +289,18 @@ class PodSpec(object):
         self._service_account_name = san
         self._service_account = san
 
+    # ------------------------------------------------------------------------------------- subdomain
+
+    @property
+    def subdomain(self):
+        return self._subdomain
+
+    @subdomain.setter
+    def subdomain(self, subdomain=None):
+        if not is_valid_string(subdomain):
+            raise SyntaxError('PodSpec: subdomain: [ {0} ] is invalid.'.format(subdomain))
+        self._subdomain = subdomain
+
     # ------------------------------------------------------------------------------------- termination grace period
 
     @property
@@ -270,12 +339,14 @@ class PodSpec(object):
             data['dnsPolicy'] = self.dns_policy
         if self.host_ipc:
             data['hostIPC'] = self.host_ipc
-        if self.host_network:
+        if self.host_network is not None:
             data['hostNetwork'] = self.host_network
-        if self.host_pid:
+        if self.host_pid is not None:
             data['hostPID'] = self.host_pid
         if self.hostname:
             data['hostname'] = self.hostname
+        if self.host_ipc is not None:
+            data['hostIPC'] = self.host_ipc
         if self.image_pull_secrets:
             data['imagePullSecrets'] = self.image_pull_secrets
         if self.node_name:
