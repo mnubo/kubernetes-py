@@ -6,23 +6,23 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import unittest
-import json
 import base64
+import json
+import unittest
 import uuid
+
 from kubernetes import K8sSecret, K8sConfig
-from kubernetes.models.v1 import Secret, ObjectMeta
 from kubernetes.K8sExceptions import *
+from kubernetes.models.v1 import Secret, ObjectMeta
 from tests import utils
 
 
 class K8sSecretTest(unittest.TestCase):
-
     def setUp(self):
-        pass
+        utils.cleanup_secrets()
 
     def tearDown(self):
-        utils.cleanup_objects()
+        utils.cleanup_secrets()
 
     # --------------------------------------------------------------------------------- init
 
@@ -39,19 +39,13 @@ class K8sSecretTest(unittest.TestCase):
 
     def test_init_with_invalid_config(self):
         config = object()
-        try:
+        with self.assertRaises(SyntaxError):
             K8sSecret(config=config)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_init_with_invalid_name(self):
         name = object()
-        try:
+        with self.assertRaises(SyntaxError):
             utils.create_secret(name=name)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_init_with_name(self):
         name = "yoname"
@@ -85,52 +79,27 @@ class K8sSecretTest(unittest.TestCase):
         self.assertIsInstance(secret.name, str)
         self.assertIsInstance(secret.obj_type, str)
 
-    def test_struct_secret(self):
+    def test_struct(self):
         name = "yoname"
         secret = utils.create_secret(name=name)
         model = secret.model
         self.assertIsInstance(model, Secret)
-        self.assertIsInstance(model.model, dict)
-        self.assertIsInstance(model.secret_metadata, ObjectMeta)
-
-    def test_struct_secret_model(self):
-        name = "yoname"
-        secret = utils.create_secret(name=name)
-        model = secret.model.model
-        self.assertIsInstance(model, dict)
-        self.assertIn('apiVersion', model)
-        self.assertIn('kind', model)
-        self.assertIn('metadata', model)
-        self.assertIsInstance(model['apiVersion'], str)
-        self.assertIsInstance(model['kind'], str)
-        self.assertIsInstance(model['metadata'], dict)
-        self.assertEqual(3, len(model['metadata']))
-        self.assertIn('labels', model['metadata'])
-        self.assertIn('name', model['metadata'])
-        self.assertIn('namespace', model['metadata'])
-        self.assertEqual(name, model['metadata']['name'])
 
     # --------------------------------------------------------------------------------- add annotation
 
     def test_add_annotation_none_args(self):
         name = "yosecret"
         secret = utils.create_secret(name=name)
-        try:
+        with self.assertRaises(SyntaxError):
             secret.add_annotation()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_add_annotation_invalid_args(self):
         name = "yosecret"
         secret = utils.create_secret(name=name)
         k = object()
         v = object()
-        try:
+        with self.assertRaises(SyntaxError):
             secret.add_annotation(k, v)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_add_annotation(self):
         name = "yosecret"
@@ -138,34 +107,24 @@ class K8sSecretTest(unittest.TestCase):
         k = "yokey"
         v = "yovalue"
         secret.add_annotation(k, v)
-        self.assertIn('annotations', secret.model.model['metadata'])
-        self.assertIn(k, secret.model.model['metadata']['annotations'])
-        self.assertEqual(secret.model.model['metadata']['annotations']['yokey'], v)
-        self.assertIn('annotations', secret.model.secret_metadata.model)
-        self.assertIn(k, secret.model.secret_metadata.model['annotations'])
-        self.assertEqual(secret.model.secret_metadata.model['annotations']['yokey'], v)
+        self.assertIn(k, secret.annotations)
+        self.assertEqual(v, secret.annotations[k])
 
     # --------------------------------------------------------------------------------- add label
 
     def test_add_label_none_args(self):
         name = "yosecret"
         secret = utils.create_secret(name=name)
-        try:
+        with self.assertRaises(SyntaxError):
             secret.add_label()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_add_label_invalid_args(self):
         name = "yosecret"
         secret = utils.create_secret(name=name)
         k = object()
         v = object()
-        try:
+        with self.assertRaises(SyntaxError):
             secret.add_label(k, v)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_add_label(self):
         name = "yosecret"
@@ -173,11 +132,8 @@ class K8sSecretTest(unittest.TestCase):
         k = "yokey"
         v = "yovalue"
         secret.add_label(k, v)
-        self.assertIn('labels', secret.model.model['metadata'])
-        self.assertIn(k, secret.model.model['metadata']['labels'])
-        self.assertEqual(secret.model.model['metadata']['labels']['yokey'], v)
-        self.assertIn('labels', secret.model.secret_metadata.model)
-        self.assertIn(k, secret.model.secret_metadata.model['labels'])
+        self.assertIn(k, secret.labels)
+        self.assertEqual(v, secret.labels[k])
 
     # --------------------------------------------------------------------------------- get
 
@@ -208,140 +164,102 @@ class K8sSecretTest(unittest.TestCase):
     def test_set_data_none_args(self):
         name = "yosecret"
         secret = utils.create_secret(name=name)
-        try:
-            secret.set_data()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            secret.data = None
 
     def test_set_data_invalid_key(self):
         name = "yosecret"
         secret = utils.create_secret(name=name)
         k = object()
         v = {'key1': 'value1', 'key2': 'value2'}
-        try:
-            secret.set_data(k, v)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            secret.data = {k: v}
 
     def test_set_data_invalid_value(self):
         name = "yosecret"
         secret = utils.create_secret(name=name)
         k = "yokey"
         v = {'key1': 'value1', 'key2': 'value2'}
-        try:
-            secret.set_data(k, v)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            secret.data = {k: v}
 
     def test_set_data(self):
         name = "yosecret"
         secret = utils.create_secret(name=name)
         k = "yokey"
         v = {'key1': 'value1', 'key2': 'value2'}
-        secret.set_data(k, json.dumps(v))
-        self.assertIn('data', secret.model.model)
-        self.assertIn(k, secret.model.model['data'])
-        self.assertEqual(json.dumps(v), base64.b64decode(secret.model.model['data'][k]))
+        secret.data = {k: json.dumps(v)}
+        self.assertIn(k, secret.data)
+        self.assertEqual(json.dumps(v), secret.data[k])
 
     # --------------------------------------------------------------------------------- set type
 
     def test_set_type_none_arg(self):
         name = "yosecret"
         secret = utils.create_secret(name=name)
-        try:
-            secret.set_type()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            secret.type = None
 
     def test_set_type_invalid_arg(self):
         name = "yosecret"
         secret = utils.create_secret(name=name)
         secret_type = object()
-        try:
-            secret.set_type(secret_type=secret_type)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            secret.type = secret_type
 
     def test_set_type(self):
         name = "yosecret"
         secret = utils.create_secret(name=name)
-        secret_type = "yosecrettype"
-        secret.set_type(secret_type=secret_type)
-        self.assertIn('type', secret.model.model)
-        self.assertEqual(secret_type, secret.model.model['type'])
+        t = "yosecrettype"
+        secret.type = t
+        self.assertEqual(t, secret.type)
 
     # --------------------------------------------------------------------------------- set dockercfg secret
 
     def test_set_dockercfg_secret_none_arg(self):
         name = "yosecret"
         secret = utils.create_secret(name=name)
-        try:
-            secret.set_dockercfg_secret()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            secret.dockercfg = None
 
     def test_set_dockercfg_secret_invalid_arg(self):
         name = "yosecret"
         secret = utils.create_secret(name=name)
         data = object()
-        try:
-            secret.set_dockercfg_secret(data)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            secret.dockercfg = data
 
     def test_set_dockercfg_secret(self):
         name = "yosecret"
         secret = utils.create_secret(name=name)
         data = "yodockercfg"
-        secret.set_dockercfg_secret(data)
-        self.assertIn('data', secret.model.model)
-        self.assertIn('type', secret.model.model)
-        self.assertIsInstance(secret.model.model['data'], dict)
-        self.assertIsInstance(secret.model.model['type'], str)
-        self.assertEqual('kubernetes.io/dockercfg', secret.model.model['type'])
-        self.assertIn('.dockercfg', secret.model.model['data'])
-        self.assertEqual(data, base64.b64decode(secret.model.model['data']['.dockercfg']))
+        secret.dockercfg = data
+        self.assertEqual('kubernetes.io/dockercfg', secret.type)
+        self.assertEqual(data, secret.dockercfg)
 
     # --------------------------------------------------------------------------------- set dockercfg json secret
 
     def test_set_dockercfg_json_secret_none_arg(self):
         name = "yosecret"
         secret = utils.create_secret(name=name)
-        try:
-            secret.set_dockercfg_json_secret()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            secret.dockercfg_json = None
 
     def test_set_dockercfg_json_secret_invalid_arg(self):
         name = "yosecret"
         secret = utils.create_secret(name=name)
         data = object()
-        try:
-            secret.set_dockercfg_json_secret(data)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            secret.dockercfg_json = data
 
     def test_set_dockercfg_json_secret(self):
         name = "yosecret"
         secret = utils.create_secret(name=name)
         data = "yodockercfgjson"
-        secret.set_dockercfg_json_secret(data)
-        self.assertIn('data', secret.model.model)
-        self.assertIn('type', secret.model.model)
-        self.assertIsInstance(secret.model.model['data'], dict)
-        self.assertIsInstance(secret.model.model['type'], str)
-        self.assertEqual('kubernetes.io/dockerconfigjson', secret.model.model['type'])
-        self.assertIn('.dockerconfigjson', secret.model.model['data'])
-        self.assertEqual(data, base64.b64decode(secret.model.model['data']['.dockerconfigjson']))
+        secret.dockercfg_json = data
+        self.assertEqual('kubernetes.io/dockerconfigjson', secret.type)
+        self.assertIn('.dockerconfigjson', secret.data)
+        self.assertEqual(data, secret.dockercfg_json)
 
     # --------------------------------------------------------------------------------- set service account token
 
@@ -390,27 +308,25 @@ class K8sSecretTest(unittest.TestCase):
             cacert=cacert
         )
 
-        self.assertIn('data', secret.model.model)
-        self.assertIn('type', secret.model.model)
-        self.assertIsInstance(secret.model.model['data'], dict)
-        self.assertIsInstance(secret.model.model['type'], str)
-        self.assertEqual('kubernetes.io/service-account-token', secret.model.model['type'])
-        self.assertIn('ca.crt', secret.model.model['data'])
-        self.assertIn('kubernetes.kubeconfig', secret.model.model['data'])
-        self.assertIn('token', secret.model.model['data'])
-        self.assertEqual(cacert, base64.b64decode(secret.model.model['data']['ca.crt']))
-        self.assertEqual(kubecfg_data, base64.b64decode(secret.model.model['data']['kubernetes.kubeconfig']))
-        self.assertEqual(token, base64.b64decode(secret.model.model['data']['token']))
-        self.assertIn('annotations', secret.model.model['metadata'])
-        self.assertIsInstance(secret.model.secret_metadata.model['annotations'], dict)
-        self.assertIn('kubernetes.io/service-account.name', secret.model.model['metadata']['annotations'])
-        self.assertIn('kubernetes.io/service-account.uid', secret.model.model['metadata']['annotations'])
-        self.assertIn('kubernetes.io/service-account.name', secret.model.secret_metadata.model['annotations'])
-        self.assertIn('kubernetes.io/service-account.uid', secret.model.secret_metadata.model['annotations'])
-        self.assertEqual(account_name, secret.model.model['metadata']['annotations']['kubernetes.io/service-account.name'])
-        self.assertEqual(account_uid, secret.model.model['metadata']['annotations']['kubernetes.io/service-account.uid'])
-        self.assertEqual(account_name, secret.model.secret_metadata.model['annotations']['kubernetes.io/service-account.name'])
-        self.assertEqual(account_uid, secret.model.secret_metadata.model['annotations']['kubernetes.io/service-account.uid'])
+        self.assertEqual('kubernetes.io/service-account-token', secret.type)
+
+        self.assertIn('ca.crt', secret.data)
+        self.assertIn('kubernetes.kubeconfig', secret.data)
+        self.assertIn('token', secret.data)
+
+        self.assertEqual(cacert, secret.data['ca.crt'])
+        self.assertEqual(kubecfg_data, secret.data['kubernetes.kubeconfig'])
+        self.assertEqual(token, secret.data['token'])
+
+        self.assertIn('kubernetes.io/service-account.name', secret.annotations)
+        self.assertIn('kubernetes.io/service-account.uid', secret.annotations)
+        self.assertIn('kubernetes.io/service-account.name', secret.annotations)
+        self.assertIn('kubernetes.io/service-account.uid', secret.annotations)
+
+        self.assertEqual(account_name, secret.annotations['kubernetes.io/service-account.name'])
+        self.assertEqual(account_uid, secret.annotations['kubernetes.io/service-account.uid'])
+        self.assertEqual(account_name, secret.annotations['kubernetes.io/service-account.name'])
+        self.assertEqual(account_uid, secret.annotations['kubernetes.io/service-account.uid'])
 
     # --------------------------------------------------------------------------------- api - create
 
@@ -473,12 +389,12 @@ class K8sSecretTest(unittest.TestCase):
         v = "yovalue"
         if utils.is_reachable(secret.config.api_host):
             secret.create()
-            secret.set_data(k=k, v=v)
+            secret.data = {k: v}
             secret.update()
             from_get = secret.get()
-            self.assertEqual('Opaque', from_get.get_type())
-            data = from_get.get_data(k)
-            self.assertEqual(data, v)
+            self.assertEqual('Opaque', from_get.type)
+            d = from_get.data[k]
+            self.assertEqual(d, v)
 
     def test_update_dockercfg_secret_fails(self):
         name = "yosecret-{0}".format(str(uuid.uuid4()))
@@ -486,12 +402,9 @@ class K8sSecretTest(unittest.TestCase):
         v = "yovalue"
         if utils.is_reachable(secret.config.api_host):
             secret.create()
-            secret.set_dockercfg_secret(data=v)
-            try:
+            secret.dockercfg = v
+            with self.assertRaises(UnprocessableEntityException):
                 secret.update()
-                self.fail("Should not fail.")
-            except Exception as err:
-                self.assertIsInstance(err, UnprocessableEntityException)
 
     def test_update_dockercfg_json_secret_fails(self):
         name = "yosecret-{0}".format(str(uuid.uuid4()))
@@ -499,12 +412,9 @@ class K8sSecretTest(unittest.TestCase):
         v = "yovalue"
         if utils.is_reachable(secret.config.api_host):
             secret.create()
-            secret.set_dockercfg_json_secret(data=v)
-            try:
+            secret.dockercfg_json = v
+            with self.assertRaises(UnprocessableEntityException):
                 secret.update()
-                self.fail("Should not fail.")
-            except Exception as err:
-                self.assertIsInstance(err, UnprocessableEntityException)
 
     # --------------------------------------------------------------------------------- api - delete
 

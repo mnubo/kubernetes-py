@@ -228,7 +228,7 @@ def cleanup_secrets():
             for secret in secrets:
                 try:
                     obj = K8sSecret(config=ref.config, name=secret['metadata']['name']).get()
-                    if 'service-account-token' not in obj.model.model['type']:
+                    if 'service-account-token' != obj.type:
                         obj.delete()
                 except NotFoundException:
                     continue
