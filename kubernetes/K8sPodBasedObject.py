@@ -17,24 +17,7 @@ class K8sPodBasedObject(K8sObject):
 
     # ------------------------------------------------------------------------------------- add
 
-    def add_container(self, container=None):
-        assert isinstance(container, K8sContainer)
-        self.model.add_container(container=container.get_model())
-        return self
-
-    def add_image_pull_secrets(self, name=None):
-        self.model.add_image_pull_secrets(name=name)
-        return self
-
-    def add_volume(self, volume=None):
-        self.model.add_volume(volume)
-        return self
-
     # ------------------------------------------------------------------------------------- delete
-
-    def del_pod_node_name(self):
-        self.model.del_pod_node_name()
-        return self
 
     # ------------------------------------------------------------------------------------- get
 

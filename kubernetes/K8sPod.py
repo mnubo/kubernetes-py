@@ -6,17 +6,16 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import time
 import json
+import time
+
 import yaml
 
 from kubernetes import K8sConfig
 from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sExceptions import NotFoundException, TimedOutException
 from kubernetes.K8sObject import K8sObject
-from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.models.v1.Pod import Pod
-from kubernetes.models.v1.PodSpec import PodSpec
 from kubernetes.models.v1.PodStatus import PodStatus
 from kubernetes.utils import is_valid_dict, is_valid_string
 
@@ -25,17 +24,9 @@ POD_READY_TIMEOUT_SECONDS = 60
 
 class K8sPod(K8sObject):
     def __init__(self, config=None, name=None):
-        super(K8sPod, self).__init__(config=config, obj_type='Pod', name=name)
 
         self.model = Pod()
-
-        self.model.metadata = ObjectMeta()
-        self.model.metadata.name = name
-        self.model.metadata.labels['name'] = name
-        self.model.metadata.namespace = config.namespace
-
-        self.model.spec = PodSpec()
-        self.model.status = PodStatus()
+        super(K8sPod, self).__init__(config=config, name=name, obj_type='Pod')
 
         if self.config.pull_secret is not None:
             self.add_image_pull_secrets(self.config.pull_secret)
@@ -239,6 +230,17 @@ class K8sPod(K8sObject):
     @labels.setter
     def labels(self, labels=None):
         self.model.metadata.labels = labels
+
+    # ------------------------------------------------------------------------------------- name
+
+    @property
+    def name(self):
+        return self.model.metadata.name
+
+    @name.setter
+    def name(self, name=None):
+        self.model.metadata.labels['name'] = name
+        self.model.metadata.name = name
 
     # ------------------------------------------------------------------------------------- namespace
 

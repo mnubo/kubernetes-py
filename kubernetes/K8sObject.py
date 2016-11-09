@@ -25,6 +25,7 @@ VALID_K8s_OBJS = [
 
 
 class K8sObject(object):
+
     def __init__(self, config=None, name=None, obj_type=None):
         super(K8sObject, self).__init__()
 
@@ -48,7 +49,6 @@ class K8sObject(object):
 
         self.obj_type = obj_type
         self.name = name
-        self.model = None
 
         try:
             urls = BaseUrls(api_version=self.config.version, namespace=self.config.namespace)
@@ -62,9 +62,7 @@ class K8sObject(object):
     def __eq__(self, other):
         # see https://github.com/kubernetes/kubernetes/blob/release-1.3/docs/design/identifiers.md
         if isinstance(other, self.__class__):
-            # Uniquely name (via a name) an object across space.
-            return self.config.namespace == other.config.namespace \
-                   and self.name == other.name
+            return self.config.namespace == other.config.namespace and self.name == other.name
         return NotImplemented
 
     # ------------------------------------------------------------------------------------- set name
