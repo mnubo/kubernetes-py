@@ -29,11 +29,16 @@ def is_valid_list(target=None, element_class=None):
     return True
 
 
-def is_valid_dict(target=None, keys=None):
+def is_valid_dict(target=None, keys=None, type=None):
     if target is None:
         return False
     if not isinstance(target, dict):
         return False
+    for k, v in target.items():
+        if not isinstance(k, str):
+            return False
+        if type is not None and not isinstance(v, type):
+            return False
     if keys is not None and isinstance(keys, list):
         for x in target:
             for y in keys:
