@@ -19,9 +19,11 @@ class Pod(object):
 
     def __init__(self, model=None):
         super(Pod, self).__init__()
-        self._metadata = None
-        self._spec = None
-        self._status = None
+
+        self._metadata = ObjectMeta()
+        self._spec = PodSpec()
+        self._status = PodStatus()
+
         self.kind = 'Pod'
         self.api_version = 'v1'
 

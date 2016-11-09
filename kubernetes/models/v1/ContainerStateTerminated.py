@@ -34,15 +34,15 @@ class ContainerStateTerminated(object):
         if 'signal' in model:
             self.signal = model['signal']
         if 'reason' in model:
-            self.exit_code = model['reason']
+            self.reason = model['reason']
         if 'message' in model:
-            self.exit_code = model['message']
+            self.message = model['message']
         if 'startedAt' in model:
-            self.exit_code = model['startedAt']
+            self.started_at = model['startedAt']
         if 'finishedAt' in model:
-            self.exit_code = model['finishedAt']
+            self.finished_at = model['finishedAt']
         if 'containerID' in model:
-            self.exit_code = model['containerID']
+            self.container_id = model['containerID']
 
     # ------------------------------------------------------------------------------------- exit code
 

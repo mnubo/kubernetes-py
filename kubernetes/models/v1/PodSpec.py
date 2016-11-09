@@ -106,6 +106,11 @@ class PodSpec(object):
         self._image_pull_secrets.append(name)
         return self
 
+    # ------------------------------------------------------------------------------------- del
+
+    def del_node_name(self):
+        self._node_name = None
+
     # ------------------------------------------------------------------------------------- active deadline seconds
 
     @property

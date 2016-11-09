@@ -91,7 +91,7 @@ class OwnerReference(object):
 
     @controller.setter
     def controller(self, c=None):
-        if not is_valid_string(c):
+        if not isinstance(c, bool):
             raise SyntaxError('OwnerReference: controller: [ {0} ] is invalid.'.format(c))
         self._controller = c
 

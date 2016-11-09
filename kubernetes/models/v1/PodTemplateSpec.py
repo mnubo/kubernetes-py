@@ -6,10 +6,8 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1 import (
-    ObjectMeta,
-    PodSpec
-)
+from kubernetes.models.v1.ObjectMeta import ObjectMeta
+from kubernetes.models.v1.PodSpec import PodSpec
 
 
 class PodTemplateSpec(object):
@@ -17,11 +15,20 @@ class PodTemplateSpec(object):
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_podtemplatespec
     """
 
-    def __init__(self):
+    def __init__(self, model=None):
         super(PodTemplateSpec, self).__init__()
 
-        self._metadata = None
-        self._spec = None
+        self._metadata = ObjectMeta()
+        self._spec = PodSpec()
+
+        if model is not None:
+            self._build_with_model(model)
+
+    def _build_with_model(self, model=None):
+        if 'metadata' in model:
+            self.metadata = ObjectMeta(model=model['metadata'])
+        if 'spec' in model:
+            self.spec = PodSpec(model=model['spec'])
 
     # ------------------------------------------------------------------------------------- metadata
 
@@ -49,10 +56,10 @@ class PodTemplateSpec(object):
 
     # ------------------------------------------------------------------------------------- serialize
 
-    def json(self):
+    def serialize(self):
         data = {}
         if self.metadata is not None:
-            data['metadata'] = self.metadata.json()
+            data['metadata'] = self.metadata.serialize()
         if self.spec is not None:
-            data['spec'] = self.spec.json()
+            data['spec'] = self.spec.serialize()
         return data

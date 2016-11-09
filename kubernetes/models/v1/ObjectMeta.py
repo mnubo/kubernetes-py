@@ -7,7 +7,7 @@
 #
 
 from kubernetes.models.v1.OwnerReference import OwnerReference
-from kubernetes.utils import is_valid_string, filter_model, is_valid_list
+from kubernetes.utils import is_valid_string, filter_model, is_valid_list, is_valid_dict
 
 
 class ObjectMeta(object):
@@ -185,7 +185,7 @@ class ObjectMeta(object):
 
     @property
     def deletion_grace_period_seconds(self):
-        return self._annotations
+        return self._deletion_grace_period_seconds
 
     @deletion_grace_period_seconds.setter
     def deletion_grace_period_seconds(self, secs=None):
@@ -201,7 +201,7 @@ class ObjectMeta(object):
 
     @labels.setter
     def labels(self, labels=None):
-        if not isinstance(labels, dict):
+        if not is_valid_dict(labels, type=str):
             raise SyntaxError('ObjectMeta: labels: [ {0} ] is invalid.'.format(labels))
         self._labels = labels
 
@@ -213,7 +213,7 @@ class ObjectMeta(object):
 
     @annotations.setter
     def annotations(self, anns=None):
-        if not isinstance(anns, dict):
+        if not is_valid_dict(anns, type=str):
             raise SyntaxError('ObjectMeta: annotations: [ {0} ] is invalid.'.format(anns))
         self._annotations = anns
 
