@@ -129,8 +129,9 @@ class ObjectMeta(object):
 
     @uid.setter
     def uid(self, uid=None):
-        if not is_valid_string(uid):
-            raise SyntaxError('ObjectMeta: uid: [ {0} ] is invalid.'.format(uid))
+        if uid is not None:
+            if not is_valid_string(uid):
+                raise SyntaxError('ObjectMeta: uid: [ {0} ] is invalid.'.format(uid))
         self._uid = uid
 
     # ------------------------------------------------------------------------------------- resourceVersion
@@ -141,8 +142,9 @@ class ObjectMeta(object):
 
     @resource_version.setter
     def resource_version(self, v=None):
-        if not is_valid_string(v):
-            raise SyntaxError('ObjectMeta: resource_version: [ {0} ] is invalid.'.format(v))
+        if v is not None:
+            if not isinstance(v, str):
+                raise SyntaxError('ObjectMeta: resource_version: [ {0} ] is invalid.'.format(v))
         self._resource_version = v
 
     # ------------------------------------------------------------------------------------- generation
@@ -267,9 +269,8 @@ class ObjectMeta(object):
             data['selfLink'] = self.self_link
         if self.uid:
             data['uid'] = self.uid
-        # HTTP 500 : resourceVersion may not be set on objects to be created
-        # if self.resource_version:
-        #     data['resourceVersion'] = self.resource_version
+        if self.resource_version:
+            data['resourceVersion'] = self.resource_version
         if self.generation:
             data['generation'] = self.generation
         if self.creation_timestamp:
