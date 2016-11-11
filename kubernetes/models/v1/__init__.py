@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+#
+# This file is subject to the terms and conditions defined in
+# file 'LICENSE.md', which is part of this source code package.
+#
+
 from BaseUrls import BaseUrls
 from Container import Container
 from ContainerPort import ContainerPort
@@ -17,7 +25,6 @@ from PodSpec import PodSpec
 from PodStatus import PodStatus
 from PodTemplateSpec import PodTemplateSpec
 from Probe import Probe
-from ReplicaSet import ReplicaSet
 from ReplicationController import ReplicationController
 from ReplicationControllerSpec import ReplicationControllerSpec
 from ReplicationControllerStatus import ReplicationControllerStatus
