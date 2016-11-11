@@ -7,6 +7,8 @@
 #
 
 import copy
+import socket
+import importlib
 
 
 def is_valid_string(target=None):
@@ -47,9 +49,26 @@ def is_valid_dict(target=None, keys=None, type=None):
     return True
 
 
+def is_reachable(ip=None):
+    if not is_valid_string(ip):
+        return False
+    try:
+        socket.inet_aton(ip)
+        return True
+    except socket.error:
+        return False
+
+
 def filter_model(model=None):
     mutable = copy.deepcopy(model)
     for key in model:
         if model[key] is None:
             mutable.pop(key)
     return mutable
+
+
+def str_to_class(obj_type):
+    _import_path = "kubernetes.models.v1.{}".format(obj_type)
+    _module = importlib.import_module(_import_path)
+    _class = getattr(_module, obj_type)()
+    return _class

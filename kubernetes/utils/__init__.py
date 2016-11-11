@@ -4,7 +4,9 @@ from TypeCheck import (
     is_valid_dict,
     is_valid_list,
     is_valid_string,
-    filter_model
+    filter_model,
+    is_reachable,
+    str_to_class
 )
 
 __all__ = [
@@ -13,5 +15,7 @@ __all__ = [
     'is_valid_dict',
     'is_valid_list',
     'is_valid_string',
-    'filter_model'
+    'filter_model',
+    'is_reachable',
+    'str_to_class',
 ]
