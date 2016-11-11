@@ -97,7 +97,7 @@ class Pod(object):
         if self.kind:
             data['kind'] = self.kind
         if self.api_version:
-            data['api_version'] = self.api_version
+            data['apiVersion'] = self.api_version
         if self.metadata is not None:
             data['metadata'] = self.metadata.serialize()
         if self.spec is not None:
