@@ -58,19 +58,17 @@ class Secret(object):
 
     def add_annotation(self, k=None, v=None):
         anns = self.metadata.annotations
-        if k not in anns:
-            anns[k] = v
-        else:
-            anns.update({k: v})
+        if anns is None:
+            anns = {}
+        anns.update({k: v})
         self.metadata.annotations = anns
         return self
 
     def add_label(self, k=None, v=None):
         labels = self.metadata.labels
-        if k not in labels:
-            labels[k] = v
-        else:
-            labels.update({k: v})
+        if labels is None:
+            labels = {}
+        labels.update({k: v})
         self.metadata.labels = labels
         return self
 
