@@ -10,11 +10,6 @@ from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sExceptions import *
 from kubernetes.models.v1.BaseUrls import BaseUrls
 from kubernetes.models.v1.DeleteOptions import DeleteOptions
-from kubernetes.models.v1.BaseModel import BaseModel
-from kubernetes.models.v1.Pod import Pod
-from kubernetes.models.v1.ReplicationController import ReplicationController
-from kubernetes.models.v1.Secret import Secret
-from kubernetes.models.v1.Service import Service
 from kubernetes.utils import HttpRequest, is_valid_dict, str_to_class
 
 VALID_K8s_OBJS = [
