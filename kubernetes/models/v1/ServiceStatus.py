@@ -13,9 +13,16 @@ from kubernetes.models.v1 import (
 
 class ServiceStatus(object):
 
-    def __init__(self):
+    def __init__(self, model=None):
         super(ServiceStatus, self).__init__()
         self._load_balancer = None
+
+        if model is not None:
+            self._build_with_model(model)
+
+    def _build_with_model(self, model=None):
+        if 'loadBalancer' in model:
+            self.load_balancer = LoadBalancerStatus(model=model['loadBalancer'])
 
     # ------------------------------------------------------------------------------------- load balancer
 
@@ -31,9 +38,9 @@ class ServiceStatus(object):
 
     # ------------------------------------------------------------------------------------- serialize
 
-    def json(self):
+    def serialize(self):
         data = {}
         if self.load_balancer is not None:
-            data['loadBalancer'] = self.load_balancer.json()
+            data['loadBalancer'] = self.load_balancer.serialize()
         return data
 
