@@ -15,6 +15,7 @@ from kubernetes.K8sExceptions import *
 from kubernetes.K8sObject import K8sObject
 from kubernetes.K8sPod import K8sPod
 from kubernetes.K8sContainer import K8sContainer
+
 from kubernetes.models.v1.ReplicationController import ReplicationController
 from kubernetes.utils import is_valid_string
 
@@ -25,8 +26,11 @@ class K8sReplicationController(K8sObject):
 
     def __init__(self, config=None, name=None, replicas=0):
 
-        self.model = ReplicationController()
-        super(K8sReplicationController, self).__init__(config=config, name=name, obj_type='ReplicationController')
+        super(K8sReplicationController, self).__init__(
+            config=config,
+            obj_type='ReplicationController',
+            name=name
+        )
 
         rc_version = str(uuid.uuid4())
         labels = {'name': name, 'rc_version': rc_version}
@@ -43,9 +47,7 @@ class K8sReplicationController(K8sObject):
 
     def create(self):
         super(K8sReplicationController, self).create()
-        self.get()
-        if self.replicas:
-            K8sReplicationController.scale(config=self.config, name=self.name, replicas=self.replicas)
+        self.wait_for_replicas()
         return self
 
     def update(self):
@@ -57,37 +59,33 @@ class K8sReplicationController(K8sObject):
 
     def add_annotation(self, k=None, v=None):
         anns = self.model.metadata.annotations
-        if k not in anns:
-            anns[k] = v
-        else:
-            anns.update({k: v})
+        if anns is None:
+            anns = {}
+        anns.update({k: v})
         self.model.metadata.annotations = anns
         return self
 
     def add_label(self, k=None, v=None):
         labels = self.model.metadata.labels
-        if k not in labels:
-            labels[k] = v
-        else:
-            labels.update({k: v})
+        if labels is None:
+            labels = {}
+        labels.update({k: v})
         self.model.metadata.labels = labels
         return self
 
     def add_pod_annotation(self, k=None, v=None):
         anns = self.model.spec.template.metadata.annotations
-        if k not in anns:
-            anns[k] = v
-        else:
-            anns.update({k: v})
+        if anns is None:
+            anns = {}
+        anns.update({k: v})
         self.model.spec.template.metadata.annotations = anns
         return self
 
     def add_pod_label(self, k=None, v=None):
         labels = self.model.spec.template.metadata.labels
-        if k not in labels:
-            labels[k] = v
-        else:
-            labels.update({k: v})
+        if labels is None:
+            labels = {}
+        labels.update({k: v})
         self.model.spec.template.metadata.labels = labels
         return self
 
@@ -262,6 +260,7 @@ class K8sReplicationController(K8sObject):
     @name.setter
     def name(self, name=None):
         self.model.metadata.name = name
+        self.model.metadata.labels['name'] = name
 
     # -------------------------------------------------------------------------------------  namespace
 
@@ -386,11 +385,9 @@ class K8sReplicationController(K8sObject):
     # -------------------------------------------------------------------------------------  wait for replicas
 
     def wait_for_replicas(self, replicas=None, labels=None):
-        if replicas is None:
-            raise SyntaxError('ReplicationController: replicas: [ {0} ] cannot be None.'.format(replicas))
-        if not isinstance(replicas, int) or replicas < 0:
-            raise SyntaxError('ReplicationController: replicas: [ {0} ] must be a positive integer.'.format(replicas))
 
+        if replicas is None:
+            replicas = self.replicas
         if labels is None:
             labels = self.labels
 
@@ -559,7 +556,7 @@ class K8sReplicationController(K8sObject):
 
             my_version = str(uuid.uuid4())
 
-            rc_next.set_name(name=name_next)
+            rc_next.name = name_next
             rc_next.add_pod_label(k='name', v=name)
             rc_next.add_pod_label(k='rc_version', v=my_version)
             rc_next.selector = {'name': name, 'rc_version': my_version}
