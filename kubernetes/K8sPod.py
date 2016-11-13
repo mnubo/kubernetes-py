@@ -23,11 +23,13 @@ POD_READY_TIMEOUT_SECONDS = 60
 
 
 class K8sPod(K8sObject):
+
     def __init__(self, config=None, name=None):
-
-        self.model = Pod()
-        super(K8sPod, self).__init__(config=config, name=name, obj_type='Pod')
-
+        super(K8sPod, self).__init__(
+            config=config,
+            obj_type='Pod',
+            name=name
+        )
         if self.config.pull_secret is not None:
             self.add_image_pull_secrets(self.config.pull_secret)
 
@@ -61,10 +63,7 @@ class K8sPod(K8sObject):
         annotations = self.model.metadata.annotations
         if annotations is None:
             annotations = {}
-        if k not in annotations:
-            annotations.update({k: v})
-        else:
-            annotations[k] = v
+        annotations.update({k: v})
         self.model.metadata.annotations = annotations
         return self
 
@@ -83,10 +82,7 @@ class K8sPod(K8sObject):
         labels = self.model.metadata.labels
         if labels is None:
             labels = {}
-        if k not in labels:
-            labels[k] = v
-        else:
-            labels.update({k: v})
+        labels.update({k: v})
         self.model.metadata.labels = labels
         return self
 
