@@ -20,15 +20,11 @@ class K8sContainer(object):
     The K8sContainer object currently supports the default Kubernetes container runtime, ie. Docker.
     """
 
-    def __init__(self, model=None, name=None, image=None):
+    def __init__(self, name=None, image=None):
         super(K8sContainer, self).__init__()
-        if model is not None:
-            if not isinstance(model, Container):
-                raise SyntaxError('K8sContainer: model: [ {0} ] is invalid.'.format(model))
-            self.model = model
-
-        else:
-            self.model = Container(name=name, image=image)
+        self.model = Container()
+        self.name = name
+        self.image = image
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -44,7 +40,6 @@ class K8sContainer(object):
         p.name = name
         p.protocol = protocol
         p.host_ip = host_ip
-
         ports = self.model.ports
         if ports is None:
             ports = []
@@ -65,7 +60,6 @@ class K8sContainer(object):
         mount.mount_path = mount_path
         mount.read_only = read_only
         mount.sub_path = sub_path
-
         mounts = self.model.volume_mounts
         if mounts is None:
             mounts = []

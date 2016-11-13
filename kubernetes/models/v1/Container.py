@@ -21,7 +21,7 @@ class Container(object):
 
     VALID_PULL_POLICIES = ['Always', 'Never', 'IfNotPresent']
 
-    def __init__(self, name=None, image=None, model=None):
+    def __init__(self, model=None):
 
         super(Container, self).__init__()
         self._args = None
@@ -38,10 +38,6 @@ class Container(object):
         self._volume_mounts = None
         self._working_dir = None
 
-        if name is not None:
-            self.name = name
-        if image is not None:
-            self.image = image
         if model is not None:
             m = filter_model(model)
             self._build_with_model(m)

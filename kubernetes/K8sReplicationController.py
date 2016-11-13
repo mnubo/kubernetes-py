@@ -192,11 +192,11 @@ class K8sReplicationController(K8sObject):
 
     @property
     def containers(self):
-        models = self.model.spec.template.spec.containers
         objs = []
-        for m in models:
-            obj = K8sContainer(model=m)
-            objs.append(obj)
+        for c in self.model.spec.template.spec.containers:
+            k8scontainer = K8sContainer(name=c.name, image=c.image)
+            k8scontainer.model = c
+            objs.append(k8scontainer)
         return objs
 
     @containers.setter

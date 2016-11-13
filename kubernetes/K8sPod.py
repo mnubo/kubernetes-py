@@ -193,7 +193,8 @@ class K8sPod(K8sObject):
     def containers(self):
         _list = []
         for c in self.model.spec.containers:
-            k8scontainer = K8sContainer(model=c)
+            k8scontainer = K8sContainer(name=c.name, image=c.image)
+            k8scontainer.model = c
             _list.append(k8scontainer)
         return _list
 
