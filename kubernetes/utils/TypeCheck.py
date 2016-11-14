@@ -68,7 +68,11 @@ def filter_model(model=None):
 
 
 def str_to_class(obj_type):
-    _import_path = "kubernetes.models.v1.{}".format(obj_type)
-    _module = importlib.import_module(_import_path)
+    _import_path_v1 = "kubernetes.models.v1.{}".format(obj_type)
+    _import_path_v1beta1 = "kubernetes.models.v1beta1.{}".format(obj_type)
+    try:
+        _module = importlib.import_module(_import_path_v1)
+    except ImportError:
+        _module = importlib.import_module(_import_path_v1beta1)
     _class = getattr(_module, obj_type)()
     return _class
