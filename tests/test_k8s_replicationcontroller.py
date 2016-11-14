@@ -18,6 +18,7 @@ from tests import utils
 
 
 class K8sReplicationControllerTest(unittest.TestCase):
+
     def setUp(self):
         utils.cleanup_rc()
         utils.cleanup_pods()
@@ -548,13 +549,13 @@ class K8sReplicationControllerTest(unittest.TestCase):
     def test_get_replicas_none(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-        self.assertEqual(0, rc.replicas)
+        self.assertEqual(0, rc.desired_replicas)
 
     def test_get_replicas(self):
         name = "yorc"
         count = 10
         rc = utils.create_rc(name=name, replicas=count)
-        self.assertEqual(count, rc.replicas)
+        self.assertEqual(count, rc.desired_replicas)
 
     # --------------------------------------------------------------------------------- get pod restart policy
 
@@ -834,23 +835,23 @@ class K8sReplicationControllerTest(unittest.TestCase):
         name = "yorc"
         rc = utils.create_rc(name=name)
         with self.assertRaises(SyntaxError):
-            rc.replicas = None
+            rc.desired_replicas = None
 
     def test_set_replicas_invalid_arg(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
         count = -99
         with self.assertRaises(SyntaxError):
-            rc.replicas = count
+            rc.desired_replicas = count
 
     def test_set_replicas(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
         count = 10
-        before = rc.replicas
+        before = rc.desired_replicas
         self.assertNotEqual(before, count)
-        rc.replicas = count
-        after = rc.replicas
+        rc.desired_replicas = count
+        after = rc.desired_replicas
         self.assertEqual(count, after)
         self.assertNotEqual(before, after)
 
@@ -900,33 +901,21 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     # -------------------------------------------------------------------------------------  wait for replicas
 
-    def test_wait_for_replicas_none_args(self):
-        name = "yorc"
-        rc = utils.create_rc(name=name)
-        with self.assertRaises(SyntaxError):
-            rc.wait_for_replicas()
-
-    def test_wait_for_replicas_invalid_args(self):
-        name = "yorc"
-        rc = utils.create_rc(name=name)
-        replicas = object()
-        with self.assertRaises(SyntaxError):
-            rc.wait_for_replicas(replicas=replicas)
-
-    def test_wait_for_replicas_timed_out(self):
-        # this test makes no sense without a prior call to scale.
-        # it'll wait forever on a quantity of pods that does not change.
-        # please see test_scale().
+    def test_wait_for_replicas(self):
         cont_name = "yocontainer"
         container = utils.create_container(name=cont_name)
         name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         rc.add_container(container)
-        count = 99
         if utils.is_reachable(rc.config.api_host):
-            with self.assertRaises(TimedOutException):
-                rc.create()
-                rc.wait_for_replicas(replicas=count)
+            rc.create()
+            rc.desired_replicas = 2
+            rc.update()
+            rc.wait_for_replicas()
+            from_get = rc.get()
+            self.assertEqual(rc.desired_replicas, from_get.ready_replicas)
+            self.assertEqual(rc.ready_replicas, from_get.ready_replicas)
+            self.assertEqual(from_get.ready_replicas, from_get.desired_replicas)
 
     # -------------------------------------------------------------------------------------  get by name
 
@@ -1028,7 +1017,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
             K8sReplicationController.scale(config=rc.config, name=name, replicas=replicas)
             result = rc.get()
             self.assertIsInstance(result, K8sReplicationController)
-            self.assertEqual(replicas, result.replicas)
+            self.assertEqual(replicas, result.desired_replicas)
 
     # -------------------------------------------------------------------------------------  rolling update
 
@@ -1438,7 +1427,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
             self.assertEqual(1, len(result))
             self.assertIsInstance(result[0], K8sReplicationController)
             result[0].name = name2
-            with self.assertRaises(BadRequestException):
+            with self.assertRaises(NotFoundException):
                 result[0].update()
 
     def test_update_namespace_fails(self):

@@ -11,15 +11,15 @@ import time
 import uuid
 
 from kubernetes import K8sConfig
+from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sExceptions import *
 from kubernetes.K8sObject import K8sObject
 from kubernetes.K8sPod import K8sPod
-from kubernetes.K8sContainer import K8sContainer
 
 from kubernetes.models.v1.ReplicationController import ReplicationController
 from kubernetes.utils import is_valid_string
 
-SCALE_WAIT_TIMEOUT_SECONDS = 60
+SCALE_WAIT_TIMEOUT_SECONDS = 120
 
 
 class K8sReplicationController(K8sObject):
@@ -38,7 +38,7 @@ class K8sReplicationController(K8sObject):
         self.labels = labels
         self.pod_labels = labels
         self.selector = labels
-        self.replicas = replicas
+        self.desired_replicas = replicas
 
         if self.config.pull_secret is not None:
             self.add_image_pull_secrets(name=self.config.pull_secret)
@@ -332,15 +332,35 @@ class K8sReplicationController(K8sObject):
     def pod_node_name(self, name=None):
         self.model.spec.template.spec.node_name = name
 
-    # -------------------------------------------------------------------------------------  replicas
+    # -------------------------------------------------------------------------------------  desiredReplicas
 
     @property
-    def replicas(self):
+    def desired_replicas(self):
         return self.model.spec.replicas
 
-    @replicas.setter
-    def replicas(self, reps=None):
+    @desired_replicas.setter
+    def desired_replicas(self, reps=None):
         self.model.spec.replicas = reps
+
+    # -------------------------------------------------------------------------------------  observedReplicas
+
+    @property
+    def current_replicas(self):
+        return self.model.status.replicas
+
+    @current_replicas.setter
+    def current_replicas(self, reps=None):
+        self.model.status.replicas = reps
+
+    # -------------------------------------------------------------------------------------  readyReplicas
+
+    @property
+    def ready_replicas(self):
+        return self.model.status.ready_replicas
+
+    @ready_replicas.setter
+    def ready_replicas(self, reps=None):
+        self.model.status.ready_replicas = reps
 
     # -------------------------------------------------------------------------------------  restartPolicy
 
@@ -384,53 +404,33 @@ class K8sReplicationController(K8sObject):
 
     # -------------------------------------------------------------------------------------  wait for replicas
 
-    def wait_for_replicas(self, replicas=None, labels=None):
-
-        if replicas is None:
-            replicas = self.replicas
-        if labels is None:
-            labels = self.labels
-
-        name = labels.get('name', None)
-        pod_list = list()
-        pod_qty = len(pod_list)
-        ready_check = False
+    def wait_for_replicas(self):
         start_time = time.time()
-
-        print('Waiting for replicas to scale to: [ {0} ] with pod labels: [ {1} ]'.format(replicas, labels))
-
-        while not ((pod_qty == replicas) and ready_check):
-            pod_list = self._get_pods(name=name, labels=labels)
-            pod_qty = len(pod_list)
-            if replicas > 0:
-                pods_ready = 0
-                for pod in pod_list:
-                    assert isinstance(pod, K8sPod)
+        is_ready = False
+        print('Scaling RC: [ {0} ] to replica count: [ {1} ]'.format(self.name, self.desired_replicas))
+        self.get()
+        while not is_ready:
+            if self.current_replicas == self.desired_replicas:
+                pods = K8sPod.get_by_labels(config=self.config, labels=self.pod_labels)
+                if pods:
                     try:
-                        if pod.is_ready():
-                            pods_ready += 1
+                        for pod in pods:
+                            if not pod.is_ready():
+                                break
+                            is_ready = True
                     except NotFoundException:
-                        # while scaling down
                         pass
-                if pods_ready >= len(pod_list):
-                    ready_check = True
-            else:
-                ready_check = True
-
-            elapsed_time = time.time() - start_time
-            if elapsed_time >= SCALE_WAIT_TIMEOUT_SECONDS:  # timeout
-                raise TimedOutException(
-                    "Timed out scaling replicas to: [ {0} ] with labels: [ {1} ]".format(replicas, labels)
-                )
-
-            time.sleep(0.2)
+                else:
+                    is_ready = True
+            if not is_ready:
+                elapsed_time = time.time() - start_time
+                if elapsed_time >= SCALE_WAIT_TIMEOUT_SECONDS:  # timeout
+                    raise TimedOutException(
+                        "Timed out scaling RC: [ {0} ] to replica count: [ {1} ]".format(self.name, self.desired_replicas)
+                    )
+                time.sleep(0.2)
+                self.get()
         return self
-
-    def _get_pods(self, name=None, labels=None):
-        if labels is None:
-            return K8sPod.get_by_name(config=self.config, name=name)
-        else:
-            return K8sPod.get_by_labels(config=self.config, labels=labels)
 
     # -------------------------------------------------------------------------------------  get by name
 
@@ -469,12 +469,11 @@ class K8sReplicationController(K8sObject):
         :return: An instance of K8sReplicationController
         """
 
-        current_rc = K8sReplicationController(config=config, name=name).get()
-        current_labels = current_rc.pod_labels
-        current_rc.replicas = replicas
-        current_rc.update()
-        current_rc.wait_for_replicas(replicas=replicas, labels=current_labels)
-        return current_rc
+        rc = K8sReplicationController(config=config, name=name).get()
+        rc.desired_replicas = replicas
+        rc.update()
+        rc.wait_for_replicas()
+        return rc
 
     # -------------------------------------------------------------------------------------  rolling update
 
@@ -508,13 +507,11 @@ class K8sReplicationController(K8sObject):
             )
 
         phase = 'init'
-        ann_update_partner = 'update-partner'
         ann_desired_replicas = 'desired-replicas'
-
-        name_next = "{0}-next".format(name)
+        name_old = "{0}-old".format(name)
 
         rc_current = None
-        rc_next = None
+        rc_old = None
         rc_current_exists = False
         rc_next_exists = False
 
@@ -525,7 +522,7 @@ class K8sReplicationController(K8sObject):
             pass
 
         try:
-            rc_next = K8sReplicationController(config=config, name=name_next).get()
+            rc_old = K8sReplicationController(config=config, name=name_old).get()
             rc_next_exists = True
         except NotFoundException:
             pass
@@ -536,36 +533,37 @@ class K8sReplicationController(K8sObject):
         if rc_current_exists and not rc_next_exists:
 
             if rc_new is not None:
-                rc_next = rc_new
-                rc_next.add_annotation(k=ann_desired_replicas, v=str(rc_current.replicas))
+                rc_old = rc_new
+                rc_old.add_annotation(k=ann_desired_replicas, v=str(rc_current.desired_replicas))
 
             else:
-                rc_next = copy.deepcopy(rc_current)
-                rc_next.add_annotation(k=ann_desired_replicas, v=str(rc_current.replicas))
+                rc_old = copy.deepcopy(rc_current)
+                rc_old.add_annotation(k=ann_desired_replicas, v=str(rc_current.desired_replicas))
 
-                if len(rc_next.containers) > 1 and not container_name:
+                if len(rc_old.containers) > 1 and not container_name:
                     raise UnprocessableEntityException(
                         'K8sReplicationController: unable to determine on which container to perform a rolling_update; '
                         'please specify the target container_name.'
                     )
 
-                if len(rc_next.containers) == 1 and not container_name:
-                    container_name = rc_next.containers[0].model.name
+                if len(rc_old.containers) == 1 and not container_name:
+                    container_name = rc_old.containers[0].name
 
-                rc_next.container_image = (container_name, image)
+                rc_old.container_image = (container_name, image)
 
-            my_version = str(uuid.uuid4())
+            rc_current.delete()
 
-            rc_next.name = name_next
-            rc_next.add_pod_label(k='name', v=name)
-            rc_next.add_pod_label(k='rc_version', v=my_version)
-            rc_next.selector = {'name': name, 'rc_version': my_version}
-            rc_next.replicas = 0
-            rc_next.pod_generate_name = name
-            rc_next.create()
+            rc_old.name = name_old
+            rc_old.create()
 
-            rc_current.add_annotation(k=ann_update_partner, v=name_next)
-            rc_current.update()
+            new_version = str(uuid.uuid4())
+            rc_current = copy.deepcopy(rc_old)
+            rc_current.name = name
+            rc_current.desired_replicas = 0
+            rc_current.add_pod_label(k='name', v=name)
+            rc_current.add_pod_label(k='rc_version', v=new_version)
+            rc_current.selector = {'name': name, 'rc_version': new_version}
+            rc_current.create()
 
             phase = 'rollout'
 
@@ -573,46 +571,42 @@ class K8sReplicationController(K8sObject):
             phase = 'rename'
 
         elif rc_current_exists and rc_next_exists:
-            if not rc_next.get_annotation(k=ann_desired_replicas):
-                rc_next.add_annotation(k=ann_desired_replicas, v=rc_current.replicas)
-                rc_next.update()
+            if not rc_old.get_annotation(k=ann_desired_replicas):
+                rc_old.add_annotation(k=ann_desired_replicas, v=rc_current.desired_replicas)
+                rc_old.update()
             phase = 'rollout'
 
         if phase == 'rollout':
-            desired_replicas = rc_next.get_annotation(k=ann_desired_replicas)
+            desired_replicas = rc_old.get_annotation(k=ann_desired_replicas)
 
-            while rc_next.replicas < int(desired_replicas):
+            while rc_current.current_replicas < int(desired_replicas):
 
-                next_replicas = rc_next.replicas + 1
-                rc_next.replicas = next_replicas
-                rc_next.update()
-                rc_next.wait_for_replicas(replicas=next_replicas, labels=rc_next.pod_labels)
+                K8sReplicationController.scale(
+                    config=rc_current.config,
+                    name=rc_current.name,
+                    replicas=min(rc_current.current_replicas+1, desired_replicas)
+                )
 
-                if rc_current.replicas > 0:
-                    current_replicas = rc_current.replicas - 1
-                    rc_current.replicas = current_replicas
-                    rc_current.update()
-                    rc_current.wait_for_replicas(replicas=current_replicas, labels=rc_current.pod_labels)
+                if rc_old.desired_replicas > 0:
+                    K8sReplicationController.scale(
+                        config=rc_old.config,
+                        name=rc_old.name,
+                        replicas=max(rc_old.current_replicas-1, 0)
+                    )
 
-            if rc_current.replicas > 0:
-                rc_current.replicas = 0
-                rc_current.update()
-                rc_current.wait_for_replicas(replicas=0, labels=rc_current.pod_labels)
+                rc_current.get()
+                rc_old.get()
+
+            if rc_old.desired_replicas > 0:
+                K8sReplicationController.scale(
+                    config=rc_old.config,
+                    name=rc_old.name,
+                    replicas=0
+                )
 
             phase = 'rename'
 
         if phase == 'rename':
-            rc_current.delete()
-            new_version = str(uuid.uuid4())
-            rc_current = copy.deepcopy(rc_next)
-            rc_current.name = name
-            rc_current.add_pod_label(k='name', v=name)
-            rc_current.add_pod_label(k='rc_version', v=new_version)
-            rc_current.selector = {'name': name, 'rc_version': new_version}
-            rc_current.del_annotation(k=ann_update_partner)
-            rc_current.del_annotation(k=ann_desired_replicas)
-            rc_current.create()
-            rc_next.scale(config=rc_next.config, name=rc_next.name, replicas=0)
-            rc_next.delete()
+            rc_old.delete()
 
         return rc_current
