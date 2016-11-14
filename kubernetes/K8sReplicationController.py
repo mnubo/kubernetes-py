@@ -57,22 +57,6 @@ class K8sReplicationController(K8sObject):
 
     # -------------------------------------------------------------------------------------  add
 
-    def add_annotation(self, k=None, v=None):
-        anns = self.model.metadata.annotations
-        if anns is None:
-            anns = {}
-        anns.update({k: v})
-        self.model.metadata.annotations = anns
-        return self
-
-    def add_label(self, k=None, v=None):
-        labels = self.model.metadata.labels
-        if labels is None:
-            labels = {}
-        labels.update({k: v})
-        self.model.metadata.labels = labels
-        return self
-
     def add_pod_annotation(self, k=None, v=None):
         anns = self.model.spec.template.metadata.annotations
         if anns is None:
@@ -108,20 +92,6 @@ class K8sReplicationController(K8sObject):
 
     # -------------------------------------------------------------------------------------  del
 
-    def del_annotation(self, k=None):
-        anns = self.model.metadata.annotations
-        if k in anns:
-            anns.pop(k)
-            self.model.metadata.annotations = anns
-        return self
-
-    def del_label(self, k=None):
-        labels = self.model.metadata.labels
-        if k in labels:
-            labels.pop(k)
-            self.model.metadata.labels = labels
-        return self
-
     def del_pod_annotation(self, k=None):
         anns = self.model.spec.template.metadata.annotations
         if k in anns:
@@ -146,16 +116,6 @@ class K8sReplicationController(K8sObject):
         self.model = ReplicationController(model=self.get_model())
         return self
 
-    def get_annotation(self, k=None):
-        if k in self.annotations:
-            return self.annotations[k]
-        return None
-
-    def get_label(self, k=None):
-        if k in self.labels:
-            return self.labels[k]
-        return None
-
     def get_pod_annotation(self, k=None):
         if k in self.pod_annotations:
             return self.pod_annotations[k]
@@ -165,16 +125,6 @@ class K8sReplicationController(K8sObject):
         if k in self.pod_labels:
             return self.pod_labels[k]
         return None
-
-    # -------------------------------------------------------------------------------------  annotations
-
-    @property
-    def annotations(self):
-        return self.model.metadata.annotations
-
-    @annotations.setter
-    def annotations(self, anns=None):
-        self.model.metadata.annotations = anns
 
     # -------------------------------------------------------------------------------------  activeDeadlineSeconds
 
@@ -240,27 +190,6 @@ class K8sReplicationController(K8sObject):
     @image_pull_secrets.setter
     def image_pull_secrets(self, secrets=None):
         self.model.spec.template.spec.image_pull_secrets = secrets
-
-    # -------------------------------------------------------------------------------------  labels
-
-    @property
-    def labels(self):
-        return self.model.metadata.labels
-
-    @labels.setter
-    def labels(self, labels=None):
-        self.model.metadata.labels = labels
-
-    # -------------------------------------------------------------------------------------  name
-
-    @property
-    def name(self):
-        return self.model.metadata.name
-
-    @name.setter
-    def name(self, name=None):
-        self.model.metadata.name = name
-        self.model.metadata.labels['name'] = name
 
     # -------------------------------------------------------------------------------------  namespace
 

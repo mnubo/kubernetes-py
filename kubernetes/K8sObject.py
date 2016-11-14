@@ -57,6 +57,72 @@ class K8sObject(object):
             return self.config.namespace == other.config.namespace and self.name == other.name
         return NotImplemented
 
+    # ------------------------------------------------------------------------------------- get
+
+    def get_annotation(self, k=None):
+        if k in self.model.metadata.annotations:
+            return self.model.metadata.annotations[k]
+        return None
+
+    def get_label(self, k=None):
+        if k in self.model.metadata.labels:
+            return self.model.metadata.labels[k]
+        return None
+
+    # ------------------------------------------------------------------------------------- add
+
+    def add_annotation(self, k=None, v=None):
+        anns = self.model.metadata.annotations
+        if anns is None:
+            anns = {}
+        anns.update({k: v})
+        self.model.metadata.annotations = anns
+        return self
+
+    def add_label(self, k=None, v=None):
+        labels = self.model.metadata.labels
+        if labels is None:
+            labels = {}
+        labels.update({k: v})
+        self.model.metadata.labels = labels
+        return self
+
+    # ------------------------------------------------------------------------------------- del
+
+    def del_annotation(self, k=None):
+        orig = self.model.metadata.annotations
+        if k in orig:
+            orig.pop(k)
+            self.model.metadata.annotations = orig
+        return self
+
+    def del_label(self, k=None):
+        orig = self.model.metadata.labels
+        if k in orig:
+            orig.pop(k)
+            self.model.metadata.labels = orig
+        return self
+
+    # ------------------------------------------------------------------------------------- annotations
+
+    @property
+    def annotations(self):
+        return self.model.metadata.annotations
+
+    @annotations.setter
+    def annotations(self, anns=None):
+        self.model.metadata.annotations = anns
+
+    # ------------------------------------------------------------------------------------- labels
+
+    @property
+    def labels(self):
+        return self.model.metadata.labels
+
+    @labels.setter
+    def labels(self, labels=None):
+        self.model.metadata.labels = labels
+
     # ------------------------------------------------------------------------------------- name
 
     @property
@@ -65,6 +131,7 @@ class K8sObject(object):
 
     @name.setter
     def name(self, name=None):
+        self.model.metadata.labels['name'] = name
         self.model.metadata.name = name
 
     # ------------------------------------------------------------------------------------- serialize
@@ -165,7 +232,8 @@ class K8sObject(object):
             self.model.metadata.resource_version = None
 
         url = '{base}'.format(base=self.base_url)
-        state = self.request(method='POST', url=url, data=self.serialize())
+        post_data = self.serialize()
+        state = self.request(method='POST', url=url, data=post_data)
 
         if not state.get('success'):
             status = state.get('status', '')

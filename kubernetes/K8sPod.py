@@ -57,16 +57,6 @@ class K8sPod(K8sObject):
 
     # -------------------------------------------------------------------------------------  add
 
-    def add_annotation(self, k=None, v=None):
-        if not is_valid_string(k) or not is_valid_string(v):
-            raise SyntaxError('K8sPod.add_annotation(): annotation: [ {0}: {1} ] is invalid'.format(k, v))
-        annotations = self.model.metadata.annotations
-        if annotations is None:
-            annotations = {}
-        annotations.update({k: v})
-        self.model.metadata.annotations = annotations
-        return self
-
     def add_container(self, container=None):
         if not isinstance(container, K8sContainer):
             raise SyntaxError('K8sPod.add_container() container: [ {0} ] is invalid.'.format(container))
@@ -74,16 +64,6 @@ class K8sPod(K8sObject):
         if container not in containers:
             containers.append(container.model)
             self.model.spec.containers = containers
-        return self
-
-    def add_label(self, k=None, v=None):
-        if not is_valid_string(k) or not is_valid_string(v):
-            raise SyntaxError('K8sPod.add_label(): label: [ {0}: {1} ] is invalid'.format(k, v))
-        labels = self.model.metadata.labels
-        if labels is None:
-            labels = {}
-        labels.update({k: v})
-        self.model.metadata.labels = labels
         return self
 
     def add_image_pull_secrets(self, name=None):
@@ -104,20 +84,6 @@ class K8sPod(K8sObject):
 
     # ------------------------------------------------------------------------------------- delete
 
-    def del_annotation(self, k=None):
-        orig = self.model.metadata.annotations
-        if k in orig:
-            orig.pop(k)
-            self.model.metadata.annotations = orig
-        return self
-
-    def del_label(self, k=None):
-        orig = self.model.metadata.labels
-        if k in orig:
-            orig.pop(k)
-            self.model.metadata.labels = orig
-        return self
-
     def del_node_name(self):
         self.model.spec.node_name = None
         return self
@@ -127,16 +93,6 @@ class K8sPod(K8sObject):
     def get(self):
         self.model = Pod(model=self.get_model())
         return self
-
-    def get_annotation(self, k=None):
-        if k in self.model.metadata.annotations:
-            return self.model.metadata.annotations[k]
-        return None
-
-    def get_label(self, k=None):
-        if k in self.model.metadata.labels:
-            return self.model.metadata.labels[k]
-        return None
 
     # ------------------------------------------------------------------------------------- polling readiness
 
@@ -173,16 +129,6 @@ class K8sPod(K8sObject):
     def active_deadline(self, secs=None):
         self.model.spec.active_deadline_seconds = secs
 
-    # ------------------------------------------------------------------------------------- annotations
-
-    @property
-    def annotations(self):
-        return self.model.metadata.annotations
-
-    @annotations.setter
-    def annotations(self, anns=None):
-        self.model.metadata.annotations = anns
-
     # ------------------------------------------------------------------------------------- containers
 
     @property
@@ -217,27 +163,6 @@ class K8sPod(K8sObject):
     @generate_name.setter
     def generate_name(self, name=None):
         self.model.metadata.generate_name = name
-
-    # ------------------------------------------------------------------------------------- labels
-
-    @property
-    def labels(self):
-        return self.model.metadata.labels
-
-    @labels.setter
-    def labels(self, labels=None):
-        self.model.metadata.labels = labels
-
-    # ------------------------------------------------------------------------------------- name
-
-    @property
-    def name(self):
-        return self.model.metadata.name
-
-    @name.setter
-    def name(self, name=None):
-        self.model.metadata.labels['name'] = name
-        self.model.metadata.name = name
 
     # ------------------------------------------------------------------------------------- namespace
 
