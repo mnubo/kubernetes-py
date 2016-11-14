@@ -974,7 +974,7 @@ class K8sPodTest(unittest.TestCase):
             self.assertEqual(1, len(result))
             self.assertIsInstance(result[0], K8sPod)
             result[0].name = name2
-            with self.assertRaises(BadRequestException):
+            with self.assertRaises(NotFoundException):
                 result[0].update()
 
     def test_update_namespace_fails(self):
