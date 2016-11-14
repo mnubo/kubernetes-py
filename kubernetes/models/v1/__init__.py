@@ -11,7 +11,6 @@ from Container import Container
 from ContainerPort import ContainerPort
 from ContainerStatus import ContainerStatus
 from DeleteOptions import DeleteOptions
-from Deployment import Deployment
 from ExecAction import ExecAction
 from HTTPGetAction import HTTPGetAction
 from LoadBalancerIngress import LoadBalancerIngress
