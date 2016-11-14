@@ -28,7 +28,7 @@ class DeploymentStrategy(object):
         if 'type' in model:
             self.type = model['type']
         if 'rollingUpdate' in model:
-            self.rolling_update = model['rollingUpdate']
+            self.rolling_update = RollingUpdateDeployment(model=model['rollingUpdate'])
 
     # ------------------------------------------------------------------------------------- type
 

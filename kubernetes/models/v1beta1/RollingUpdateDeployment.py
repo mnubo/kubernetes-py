@@ -34,7 +34,7 @@ class RollingUpdateDeployment(object):
 
     @max_unavailable.setter
     def max_unavailable(self, mu=None):
-        if not is_valid_string(mu):
+        if not isinstance(mu, int):
             raise SyntaxError('RollingUpdateDeployment: max_unavailable: [ {} ] is invalid.'.format(mu))
         self._max_unavailable = mu
 
@@ -46,7 +46,7 @@ class RollingUpdateDeployment(object):
 
     @max_surge.setter
     def max_surge(self, ms=None):
-        if not is_valid_string(ms):
+        if not isinstance(ms, int):
             raise SyntaxError('RollingUpdateDeployment: max_surge: [ {} ] is invalid.'.format(ms))
         self._max_surge = ms
 

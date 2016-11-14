@@ -18,8 +18,8 @@ class LabelSelector(object):
     def __init__(self, model=None):
         super(LabelSelector, self).__init__()
 
-        self._match_labels = {}
-        self._match_expressions = []
+        self._match_labels = None
+        self._match_expressions = None
 
         if model is not None:
             self._build_with_model(model)

@@ -21,7 +21,7 @@ class ReplicaSet(object):
         super(ReplicaSet, self).__init__()
 
         self._kind = 'ReplicaSet'
-        self._api_version = 'v1beta1'
+        self._api_version = 'extensions/v1beta1'
         self._metadata = ObjectMeta()
         self._spec = ReplicaSetSpec()
         self._status = ReplicaSetStatus()
