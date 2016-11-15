@@ -83,7 +83,7 @@ class AWSElasticBlockStoreVolumeSource(object):
     def volume_id(self, vid=None):
         if not is_valid_string(vid):
             raise SyntaxError('AWSElasticBlockStoreVolumeSource: volume_id: [ {0} ] is invalid.'.format(vid))
-        self.volume_id = vid
+        self._volume_id = vid
 
     # ------------------------------------------------------------------------------------- serialize
 
