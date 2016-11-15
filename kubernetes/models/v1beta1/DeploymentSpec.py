@@ -27,7 +27,7 @@ class DeploymentSpec(object):
         self._min_ready_seconds = 0
         self._revision_history_limit = None
         self._paused = False
-        self._rollback_to = RollbackConfig()
+        self._rollback_to = None
 
         if model is not None:
             self._build_with_model(model)

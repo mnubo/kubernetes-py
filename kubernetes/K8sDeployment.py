@@ -10,10 +10,12 @@ import time
 
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sContainer import K8sContainer
+from kubernetes.K8sExceptions import BadRequestException
 from kubernetes.K8sExceptions import TimedOutException, NotFoundException
 from kubernetes.K8sObject import K8sObject
 from kubernetes.models.v1beta1.Deployment import Deployment
 from kubernetes.models.v1beta1.LabelSelector import LabelSelector
+from kubernetes.models.v1beta1.DeploymentRollback import DeploymentRollback
 
 SCALE_WAIT_TIMEOUT_SECONDS = 120
 
@@ -266,7 +268,7 @@ class K8sDeployment(K8sObject):
 
     # -------------------------------------------------------------------------------------  rollback
 
-    def rollback(self, revision=None):
+    def rollback(self, revision=None, annotations=None):
         """
         Currently raises an HTTP 400 Error. Unsure what to feed the endpoint
 
@@ -278,43 +280,35 @@ class K8sDeployment(K8sObject):
         :return:
         """
 
-        # if revision is not None and not isinstance(revision, str):
-        #     raise SyntaxError('K8sDeployment: revision: [ {0} ] must be a string.'.format(revision.__class__.__name__))
-        #
-        # data = {
-        #     'kind': self.model.model['kind'],
-        #     'apiversion': self.model.model['apiVersion'],
-        #     'name': self.model.model['metadata']['name'],
-        #     'updatedAnnotations': {
-        #         'label': "1234"
-        #     }
-        # }
-        # if revision is not None:
-        #     data['rollbackTo']['revision'] = revision
-        #
-        # url = '{base}/{name}/rollback'.format(base=self.base_url, name=data['name'])
-        # state = self.request(method='POST', url=url, data=data)
-        #
-        # if not state.get('success'):
-        #     status = state.get('status', '')
-        #     reason = state.get('data', dict()).get('message', None)
-        #     message = 'K8sDeployment: ROLLBACK failed : HTTP {0} : {1}'.format(status, reason)
-        #     raise BadRequestException(message)
-        #
-        # return self
+        rollback = DeploymentRollback()
+        rollback.name = self.name
 
-        raise NotImplementedError()
+        if revision is not None:
+            rollback.rollback_to.revision = revision
+        else:
+            current_revision = int(self.get_annotation('deployment.kubernetes.io/revision'))
+            rev = max(current_revision - 1, 0)
+            rollback.rollback_to.revision = rev
+
+        if annotations is not None:
+            rollback.updated_annotations = annotations
+
+        url = '{base}/{name}/rollback'.format(base=self.base_url, name=self.name)
+        state = self.request(method='POST', url=url, data=rollback.serialize())
+        self._wait_for_desired_replicas()
+        self.get()
+
+        if not state.get('success'):
+            status = state.get('status', '')
+            reason = state.get('data', dict()).get('message', None)
+            message = 'K8sDeployment: ROLLBACK failed : HTTP {0} : {1}'.format(status, reason)
+            raise BadRequestException(message)
+
+        return self
 
     # -------------------------------------------------------------------------------------  scale
 
     def scale(self, replicas=None):
-
-        if replicas is None:
-            raise SyntaxError('K8sDeployment: replicas: [ {0} ] cannot be None.'.format(replicas))
-        if not isinstance(replicas, int) or not replicas > 0:
-            raise SyntaxError('K8sDeployment: replicas: [ {0} ] must be a positive integer.'.format(replicas))
-
-        self.set_replicas(replicas)
+        self.desired_replicas = replicas
         self.update()
-
         return self
