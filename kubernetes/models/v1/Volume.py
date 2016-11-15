@@ -21,15 +21,15 @@ class Volume(object):
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_volume
     """
 
-    VALID_VOLUME_TYPES = [
-        'awsElasticBlockStore',
-        'emptyDir',
-        'gcePersistentDisk',
-        'gitRepo',
-        'hostPath',
-        'nfs',
-        'secret',
-    ]
+    VOLUME_TYPES_TO_SOURCE_MAP = {
+        'awsElasticBlockStore': AWSElasticBlockStoreVolumeSource,
+        'emptyDir': EmptyDirVolumeSource,
+        'gcePersistentDisk': GCEPersistentDiskVolumeSource,
+        'gitRepo': GitRepoVolumeSource,
+        'hostPath': HostPathVolumeSource,
+        'nfs': NFSVolumeSource,
+        'secret': SecretVolumeSource
+    }
 
     def __init__(self, model=None):
 
@@ -50,11 +50,11 @@ class Volume(object):
         # self._quobyte = None
         # self._azuredisk = None
 
-        self._aws_elastic_block_store = None
-        self._empty_dir = None
-        self._gce_persistent_disk = None
-        self._git_repo = None
-        self._host_path = None
+        self._awsElasticBlockStore = None
+        self._emptyDir = None
+        self._gcePersistentDisk = None
+        self._gitRepo = None
+        self._hostPath = None
         self._name = None
         self._nfs = None
         self._secret = None
@@ -72,15 +72,15 @@ class Volume(object):
 
     def _build_with_model(self, model=None):
         if 'awsElasticBlockStore' in model:
-            self.aws_elastic_block_store = AWSElasticBlockStoreVolumeSource(model=model['awsElasticBlockStore'])
+            self.awsElasticBlockStore = AWSElasticBlockStoreVolumeSource(model=model['awsElasticBlockStore'])
         if 'emptyDir' in model:
-            self.empty_dir = EmptyDirVolumeSource(model=model['emptyDir'])
+            self.emptyDir = EmptyDirVolumeSource(model=model['emptyDir'])
         if 'gcePersistentDisk' in model:
-            self.gce_persistent_disk = GCEPersistentDiskVolumeSource(model=model['gcePersistentDisk'])
+            self.gcePersistentDisk = GCEPersistentDiskVolumeSource(model=model['gcePersistentDisk'])
         if 'gitRepo' in model:
-            self.git_repo = GitRepoVolumeSource(model=model['gitRepo'])
+            self.gitRepo = GitRepoVolumeSource(model=model['gitRepo'])
         if 'hostPath' in model:
-            self.host_path = HostPathVolumeSource(model=model['hostPath'])
+            self.hostPath = HostPathVolumeSource(model=model['hostPath'])
         if 'name' in model:
             self.name = model['name']
         if 'nfs' in model:
@@ -88,65 +88,69 @@ class Volume(object):
         if 'secret' in model:
             self.secret = SecretVolumeSource(model=model['secret'])
 
+    @staticmethod
+    def vol_type_to_source(vol_type=None):
+        return Volume.VOLUME_TYPES_TO_SOURCE_MAP[vol_type]()
+
     # ------------------------------------------------------------------------------------- aws ebs
 
     @property
-    def aws_elastic_block_store(self):
-        return self._aws_elastic_block_store
+    def awsElasticBlockStore(self):
+        return self._awsElasticBlockStore
 
-    @aws_elastic_block_store.setter
-    def aws_elastic_block_store(self, ebs=None):
+    @awsElasticBlockStore.setter
+    def awsElasticBlockStore(self, ebs=None):
         if not isinstance(ebs, AWSElasticBlockStoreVolumeSource):
             raise SyntaxError('Volume: aws_elastic_block_store: [ {0} ] is invalid.'.format(ebs))
-        self._aws_elastic_block_store = ebs
+        self._awsElasticBlockStore = ebs
 
     # ------------------------------------------------------------------------------------- emptyDir
 
     @property
-    def empty_dir(self):
-        return self._empty_dir
+    def emptyDir(self):
+        return self._emptyDir
 
-    @empty_dir.setter
-    def empty_dir(self, edir=None):
+    @emptyDir.setter
+    def emptyDir(self, edir=None):
         if not isinstance(edir, EmptyDirVolumeSource):
             raise SyntaxError('Volume: empty_dir: [ {0} ] is invalid.'.format(edir))
-        self._empty_dir = edir
+        self._emptyDir = edir
 
     # ------------------------------------------------------------------------------------- gce pd
 
     @property
-    def gce_persistent_disk(self):
-        return self._gce_persistent_disk
+    def gcePersistentDisk(self):
+        return self._gcePersistentDisk
 
-    @gce_persistent_disk.setter
-    def gce_persistent_disk(self, pd=None):
+    @gcePersistentDisk.setter
+    def gcePersistentDisk(self, pd=None):
         if not isinstance(pd, GCEPersistentDiskVolumeSource):
             raise SyntaxError('Volume: gce_persistent_disk: [ {0} ] is invalid.'.format(pd))
-        self._gce_persistent_disk = pd
+        self._gcePersistentDisk = pd
 
     # ------------------------------------------------------------------------------------- gitRepo
 
     @property
-    def git_repo(self):
-        return self._git_repo
+    def gitRepo(self):
+        return self._gitRepo
 
-    @git_repo.setter
-    def git_repo(self, repo=None):
+    @gitRepo.setter
+    def gitRepo(self, repo=None):
         if not isinstance(repo, GitRepoVolumeSource):
             raise SyntaxError('Volume: git_repo: [ {0} ] is invalid.'.format(repo))
-        self._git_repo = repo
+        self._gitRepo = repo
 
     # ------------------------------------------------------------------------------------- hostPath
 
     @property
-    def host_path(self):
-        return self._host_path
+    def hostPath(self):
+        return self._hostPath
 
-    @host_path.setter
-    def host_path(self, hp=None):
+    @hostPath.setter
+    def hostPath(self, hp=None):
         if not isinstance(hp, HostPathVolumeSource):
             raise SyntaxError('Volume: host_path: [ {0} ] is invalid.'.format(hp))
-        self._host_path = hp
+        self._hostPath = hp
 
     # ------------------------------------------------------------------------------------- nfs
 
@@ -188,16 +192,16 @@ class Volume(object):
 
     def serialize(self):
         data = {}
-        if self.aws_elastic_block_store is not None:
-            data['awsElasticBlockStore'] = self.aws_elastic_block_store.serialize()
-        if self.empty_dir is not None:
-            data['emptyDir'] = self.empty_dir.serialize()
-        if self.gce_persistent_disk is not None:
-            data['gcePersistentDisk'] = self.gce_persistent_disk.serialize()
-        if self.git_repo is not None:
-            data['gitRepo'] = self.git_repo.serialize()
-        if self.host_path is not None:
-            data['hostPath'] = self.host_path.serialize()
+        if self.awsElasticBlockStore is not None:
+            data['awsElasticBlockStore'] = self.awsElasticBlockStore.serialize()
+        if self.emptyDir is not None:
+            data['emptyDir'] = self.emptyDir.serialize()
+        if self.gcePersistentDisk is not None:
+            data['gcePersistentDisk'] = self.gcePersistentDisk.serialize()
+        if self.gitRepo is not None:
+            data['gitRepo'] = self.gitRepo.serialize()
+        if self.hostPath is not None:
+            data['hostPath'] = self.hostPath.serialize()
         if self.name is not None:
             data['name'] = self.name
         if self.nfs is not None:
