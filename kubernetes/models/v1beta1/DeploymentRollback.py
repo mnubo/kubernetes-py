@@ -11,6 +11,9 @@ from kubernetes.utils import is_valid_string, is_valid_dict
 
 
 class DeploymentRollback(object):
+    """
+    http://kubernetes.io/docs/api-reference/extensions/v1beta1/definitions/#_v1beta1_deploymentrollback
+    """
 
     def __init__(self, model=None):
         super(DeploymentRollback, self).__init__()

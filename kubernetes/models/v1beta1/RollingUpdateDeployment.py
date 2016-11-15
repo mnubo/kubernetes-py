@@ -6,10 +6,11 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.utils import is_valid_string
-
 
 class RollingUpdateDeployment(object):
+    """
+    http://kubernetes.io/docs/api-reference/extensions/v1beta1/definitions/#_v1beta1_rollingupdatedeployment
+    """
 
     def __init__(self, model=None):
         super(RollingUpdateDeployment, self).__init__()

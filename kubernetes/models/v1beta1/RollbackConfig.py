@@ -8,6 +8,9 @@
 
 
 class RollbackConfig(object):
+    """
+    http://kubernetes.io/docs/api-reference/extensions/v1beta1/definitions/#_v1beta1_rollbackconfig
+    """
 
     def __init__(self, model=None):
         super(RollbackConfig, self).__init__()
