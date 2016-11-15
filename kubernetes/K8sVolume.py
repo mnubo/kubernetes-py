@@ -136,6 +136,22 @@ class K8sVolume(object):
             raise NotImplementedError()
         self.source.pd_name = pd
 
+    # ------------------------------------------------------------------------------------- read_only (GCE)
+
+    # HTTP 422: GCE PD can only be mounted on multiple machines if it is read-only
+
+    @property
+    def read_only(self):
+        if not hasattr(self.source, 'read_only'):
+            raise NotImplementedError()
+        return self.source.read_only
+
+    @read_only.setter
+    def read_only(self, ro=None):
+        if not hasattr(self.source, 'read_only'):
+            raise NotImplementedError()
+        self.source.read_only = ro
+
     # ------------------------------------------------------------------------------------- fs_type (AWS, GCE)
 
     @property
