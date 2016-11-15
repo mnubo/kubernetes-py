@@ -78,8 +78,8 @@ class K8sPod(K8sObject):
     def add_volume(self, volume=None):
         volumes = self.model.spec.volumes
         if volume not in volumes:
-            volumes.append(volume)
-            self.model.spec.volumes = volumes
+            volumes.append(volume.model)
+        self.model.spec.volumes = volumes
         return self
 
     # ------------------------------------------------------------------------------------- delete
@@ -234,6 +234,16 @@ class K8sPod(K8sObject):
     @termination_grace_period.setter
     def termination_grace_period(self, secs=None):
         self.model.spec.termination_grace_period_seconds = secs
+
+    # ------------------------------------------------------------------------------------- volumes
+
+    @property
+    def volumes(self):
+        return self.model.spec.volumes
+
+    @volumes.setter
+    def volumes(self, v=None):
+        self.model.spec.volumes = v
 
     # ------------------------------------------------------------------------------------- filtering
 
