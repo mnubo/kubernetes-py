@@ -15,6 +15,7 @@ from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sExceptions import *
 from kubernetes.K8sObject import K8sObject
 from kubernetes.K8sPod import K8sPod
+from kubernetes.K8sVolume import K8sVolume
 
 from kubernetes.models.v1.ReplicationController import ReplicationController
 from kubernetes.utils import is_valid_string
@@ -87,7 +88,12 @@ class K8sReplicationController(K8sObject):
         return self
 
     def add_volume(self, volume=None):
-        self.model.add_volume(volume)
+        if not isinstance(volume, K8sVolume):
+            raise SyntaxError('K8sReplicationController.add_volume() volume: [ {0} ] is invalid.'.format(volume))
+        volumes = self.model.spec.template.spec.volumes
+        if volume.model not in volumes:
+            volumes.append(volume.model)
+        self.model.spec.template.spec.volumes = volumes
         return self
 
     # -------------------------------------------------------------------------------------  del
@@ -330,6 +336,16 @@ class K8sReplicationController(K8sObject):
     @termination_grace_period.setter
     def termination_grace_period(self, secs=None):
         self.model.spec.template.spec.termination_grace_period_seconds = secs
+
+    # -------------------------------------------------------------------------------------  volumes
+
+    @property
+    def volumes(self):
+        return self.model.spec.template.spec.volumes
+
+    @volumes.setter
+    def volumes(self, v=None):
+        self.model.spec.template.spec.volumes = v
 
     # -------------------------------------------------------------------------------------  wait for replicas
 
