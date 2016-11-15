@@ -6,6 +6,9 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+import json
+import yaml
+
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sExceptions import *
 from kubernetes.models.v1.BaseUrls import BaseUrls
@@ -137,19 +140,17 @@ class K8sObject(object):
     # ------------------------------------------------------------------------------------- serialize
 
     def serialize(self):
-        if self.model is None:
-            return {}
         return self.model.serialize()
 
     def as_json(self):
-        if self.model is None:
-            return ""
-        return ""
+        data = self.serialize()
+        dump = json.dumps(data, indent=4)
+        return dump
 
     def as_yaml(self):
-        if self.model is None:
-            return ""
-        return ""
+        data = self.serialize()
+        dump = yaml.dump(data, default_flow_style=False)
+        return dump
 
     # ------------------------------------------------------------------------------------- remote API calls
 

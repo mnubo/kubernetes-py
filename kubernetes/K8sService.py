@@ -197,16 +197,3 @@ class K8sService(K8sObject):
             service_name = Service(model=svc).metadata.name
             service_list.append(K8sService(config=config, name=service_name).get())
         return service_list
-
-    # ------------------------------------------------------------------------------------- serialize
-
-    def serialize(self):
-        return self.model.serialize()
-
-    def as_json(self):
-        data = self.serialize()
-        return json.dumps(data, indent=4)
-
-    def as_yaml(self):
-        data = self.serialize()
-        return yaml.dump(data, default_flow_style=False)

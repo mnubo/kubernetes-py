@@ -86,17 +86,4 @@ class K8sContainer(object):
     def image(self, image=None):
         self.model.image = image
 
-    # -------------------------------------------------------------------------------------  serialize
 
-    def serialize(self):
-        return self.model.serialize()
-
-    def as_json(self):
-        data = self.serialize()
-        dump = json.dumps(data, indent=4)
-        return dump
-
-    def as_yaml(self):
-        data = self.serialize()
-        dump = yaml.dump(data, default_flow_style=False)
-        return dump

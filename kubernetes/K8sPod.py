@@ -280,18 +280,3 @@ class K8sPod(K8sObject):
                 pass
 
         return pod_list
-
-    # ------------------------------------------------------------------------------------- serialize
-
-    def serialize(self):
-        return self.model.serialize()
-
-    def as_json(self):
-        data = self.serialize()
-        j = json.dumps(data, indent=4)
-        return j
-
-    def as_yaml(self):
-        data = self.serialize()
-        y = yaml.dump(data, default_flow_style=False)
-        return y
