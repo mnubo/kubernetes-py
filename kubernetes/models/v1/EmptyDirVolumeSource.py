@@ -18,6 +18,7 @@ class EmptyDirVolumeSource(object):
 
     def __init__(self, model=None):
         super(EmptyDirVolumeSource, self).__init__()
+
         self._medium = None
 
         if model is not None:
@@ -36,7 +37,7 @@ class EmptyDirVolumeSource(object):
 
     @medium.setter
     def medium(self, medium=None):
-        if medium not in EmptyDirVolumeSource.VALID_MEDIA:
+        if medium is None or medium not in EmptyDirVolumeSource.VALID_MEDIA:
             raise SyntaxError('EmptyDirVolumeSource: medium: [ {0} ] is invalid.'.format(medium))
         self._medium = medium
 
