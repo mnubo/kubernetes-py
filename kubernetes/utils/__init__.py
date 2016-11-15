@@ -8,7 +8,7 @@
 
 from HttpRequest import HttpRequest
 from ConvertData import convert
-from TypeCheck import (
+from Helpers import (
     is_valid_dict,
     is_valid_list,
     is_valid_string,
