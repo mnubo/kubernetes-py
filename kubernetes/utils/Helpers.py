@@ -67,7 +67,7 @@ def filter_model(model=None):
     return mutable
 
 
-def str_to_class(obj_type):
+def str_to_class(obj_type=None):
     _import_path_v1 = "kubernetes.models.v1.{}".format(obj_type)
     _import_path_v1beta1 = "kubernetes.models.v1beta1.{}".format(obj_type)
     try:
