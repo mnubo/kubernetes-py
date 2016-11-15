@@ -19,7 +19,7 @@ from kubernetes.models.v1.Pod import Pod
 from kubernetes.models.v1.PodStatus import PodStatus
 from kubernetes.utils import is_valid_dict, is_valid_string
 
-POD_READY_TIMEOUT_SECONDS = 60
+POD_READY_TIMEOUT_SECONDS = 120
 
 
 class K8sPod(K8sObject):
