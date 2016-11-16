@@ -11,6 +11,7 @@ import uuid
 
 from kubernetes.K8sExceptions import TimedOutException
 from kubernetes.K8sVolume import K8sVolume
+from kubernetes.K8sVolumeMount import K8sVolumeMount
 from kubernetes.models.v1.AWSElasticBlockStoreVolumeSource import AWSElasticBlockStoreVolumeSource
 from kubernetes.models.v1.EmptyDirVolumeSource import EmptyDirVolumeSource
 from kubernetes.models.v1.GCEPersistentDiskVolumeSource import GCEPersistentDiskVolumeSource
@@ -434,6 +435,11 @@ class K8sVolumeTest(unittest.TestCase):
         vol_type = "emptyDir"
         volume = utils.create_volume(name=vol_name, type=vol_type)
 
+        mount_name = vol_name
+        mount_path = '/test-emptydir'
+        mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
+        container.add_volume_mount(mount)
+
         pod_name = "nginx"
         pod = utils.create_pod(name=pod_name)
         pod.add_volume(volume)
@@ -456,6 +462,11 @@ class K8sVolumeTest(unittest.TestCase):
         host_path = "/var/lib/docker"
         volume = utils.create_volume(name=vol_name, type=vol_type)
         volume.host_path = host_path
+
+        mount_name = vol_name
+        mount_path = '/test-hostpath'
+        mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
+        container.add_volume_mount(mount)
 
         pod_name = "nginx"
         pod = utils.create_pod(name=pod_name)
@@ -485,6 +496,11 @@ class K8sVolumeTest(unittest.TestCase):
         volume = utils.create_volume(name=vol_name, type=vol_type)
         volume.secret_name = secret_name
 
+        mount_name = vol_name
+        mount_path = '/test-secret'
+        mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
+        container.add_volume_mount(mount)
+
         pod_name = "nginx"
         pod = utils.create_pod(name=pod_name)
         pod.add_volume(volume)
@@ -508,6 +524,11 @@ class K8sVolumeTest(unittest.TestCase):
         vol_type = "awsElasticBlockStore"
         volume = utils.create_volume(name=vol_name, type=vol_type)
         volume.volume_id = volume_id
+
+        mount_name = vol_name
+        mount_path = '/test-aws'
+        mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
+        container.add_volume_mount(mount)
 
         pod_name = "nginx-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=pod_name)
@@ -534,6 +555,11 @@ class K8sVolumeTest(unittest.TestCase):
         vol_type = "gcePersistentDisk"
         volume = utils.create_volume(name=vol_name, type=vol_type)
         volume.pd_name = pd_name
+
+        mount_name = vol_name
+        mount_path = '/test-gce'
+        mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
+        container.add_volume_mount(mount)
 
         pod_name = "nginx-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=pod_name)
@@ -563,6 +589,11 @@ class K8sVolumeTest(unittest.TestCase):
         volume.nfs_server = server
         volume.nfs_path = nfs_path
 
+        mount_name = vol_name
+        mount_path = '/test-nfs'
+        mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
+        container.add_volume_mount(mount)
+
         pod_name = "nginx-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=pod_name)
         pod.add_volume(volume)
@@ -590,6 +621,11 @@ class K8sVolumeTest(unittest.TestCase):
         volume = utils.create_volume(name=vol_name, type=vol_type)
         volume.git_repository = repo
         volume.git_revision = revision
+
+        mount_name = vol_name
+        mount_path = '/test-git'
+        mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
+        container.add_volume_mount(mount)
 
         pod_name = "nginx-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=pod_name)
@@ -619,6 +655,12 @@ class K8sVolumeTest(unittest.TestCase):
         vol_type = "emptyDir"
         volume = utils.create_volume(name=vol_name, type=vol_type)
 
+        mount_name = vol_name
+        mount_path = '/test-emptydir'
+        mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
+        container_nginx.add_volume_mount(mount)
+        container_redis.add_volume_mount(mount)
+
         rc_name = "app"
         rc = utils.create_rc(name=rc_name)
         rc.add_volume(volume)
@@ -647,6 +689,12 @@ class K8sVolumeTest(unittest.TestCase):
         hostpath = "/var/lib/docker"
         volume = utils.create_volume(name=vol_name, type=vol_type)
         volume.host_path = hostpath
+
+        mount_name = vol_name
+        mount_path = '/test-hostpath'
+        mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
+        container_nginx.add_volume_mount(mount)
+        container_redis.add_volume_mount(mount)
 
         rc_name = "app"
         rc = utils.create_rc(name=rc_name)
@@ -681,6 +729,12 @@ class K8sVolumeTest(unittest.TestCase):
         vol_type = "secret"
         volume = utils.create_volume(name=vol_name, type=vol_type)
         volume.secret_name = secret_name
+
+        mount_name = vol_name
+        mount_path = '/test-secret'
+        mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
+        container_nginx.add_volume_mount(mount)
+        container_redis.add_volume_mount(mount)
 
         rc_name = "app"
         rc = utils.create_rc(name=rc_name)
@@ -718,6 +772,12 @@ class K8sVolumeTest(unittest.TestCase):
         vol_type = "awsElasticBlockStore"
         volume = utils.create_volume(name=vol_name, type=vol_type)
         volume.volume_id = volume_id
+
+        mount_name = vol_name
+        mount_path = '/test-aws'
+        mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
+        container_nginx.add_volume_mount(mount)
+        container_redis.add_volume_mount(mount)
 
         rc_name = "nginx-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=rc_name)
@@ -758,6 +818,12 @@ class K8sVolumeTest(unittest.TestCase):
         volume.pd_name = pd_name
         volume.read_only = True  # HTTP 422: GCE PD can only be mounted on multiple machines if it is read-only
 
+        mount_name = vol_name
+        mount_path = '/test-gce'
+        mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
+        container_nginx.add_volume_mount(mount)
+        container_redis.add_volume_mount(mount)
+
         rc_name = "nginx-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=rc_name)
         rc.add_volume(volume)
@@ -792,6 +858,12 @@ class K8sVolumeTest(unittest.TestCase):
         volume.nfs_server = server
         volume.nfs_path = path
 
+        mount_name = vol_name
+        mount_path = '/test-nfs'
+        mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
+        container_nginx.add_volume_mount(mount)
+        container_redis.add_volume_mount(mount)
+
         rc_name = "nginx-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=rc_name)
         rc.add_volume(volume)
@@ -825,6 +897,12 @@ class K8sVolumeTest(unittest.TestCase):
         volume = utils.create_volume(name=vol_name, type=vol_type)
         volume.git_repository = repo
         volume.git_revision = revision
+
+        mount_name = vol_name
+        mount_path = '/test-git'
+        mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
+        container_nginx.add_volume_mount(mount)
+        container_redis.add_volume_mount(mount)
 
         rc_name = "nginx-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=rc_name)
