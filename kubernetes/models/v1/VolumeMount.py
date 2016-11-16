@@ -14,12 +14,13 @@ class VolumeMount(object):
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_volumemount
     """
 
-    def __init__(self, name=None, mount_path=None, read_only=False, sub_path=None, model=None):
+    def __init__(self, model=None):
         super(VolumeMount, self).__init__()
-        self._name = name
-        self._mount_path = mount_path
-        self._read_only = read_only
-        self._sub_path = sub_path
+
+        self._name = None
+        self._mount_path = None
+        self._read_only = None
+        self._sub_path = None
 
         if model is not None:
             m = filter_model(model)
