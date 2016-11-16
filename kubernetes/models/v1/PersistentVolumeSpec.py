@@ -6,81 +6,270 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1.Volume import Volume
+from kubernetes.models.v1.ObjectReference import ObjectReference
+from kubernetes.models.v1.AWSElasticBlockStoreVolumeSource import AWSElasticBlockStoreVolumeSource
+from kubernetes.models.v1.EmptyDirVolumeSource import EmptyDirVolumeSource
+from kubernetes.models.v1.GCEPersistentDiskVolumeSource import GCEPersistentDiskVolumeSource
+from kubernetes.models.v1.GitRepoVolumeSource import GitRepoVolumeSource
+from kubernetes.models.v1.HostPathVolumeSource import HostPathVolumeSource
+from kubernetes.models.v1.NFSVolumeSource import NFSVolumeSource
+from kubernetes.models.v1.SecretVolumeSource import SecretVolumeSource
+from kubernetes.utils import is_valid_string, is_valid_dict, is_valid_list
 
 
 class PersistentVolumeSpec(object):
+    """
+    http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_persistentvolumespec
+    """
 
-    VALID_CAPACITY_PARAMS = [
-        'storage'
-    ]
+    VALID_CAPACITY_PARAMS = ['storage']
+    VALID_ACCESS_MODES = ['ReadWriteOnce', 'ReadOnlyMany', 'ReadWriteMany']
+    VALID_RECLAIM_POLICIES = ['Retain', 'Recycle', 'Delete']
 
-    VALID_ACCESS_MODES = [
-        'ReadWriteOnce',
-        'ReadOnlyMany',
-        'ReadWriteMany'
-    ]
+    VOLUME_TYPES_TO_SOURCE_MAP = {
+        'awsElasticBlockStore': AWSElasticBlockStoreVolumeSource,
+        'emptyDir': EmptyDirVolumeSource,
+        'gcePersistentDisk': GCEPersistentDiskVolumeSource,
+        'gitRepo': GitRepoVolumeSource,
+        'hostPath': HostPathVolumeSource,
+        'nfs': NFSVolumeSource,
+        'secret': SecretVolumeSource
+    }
 
-    VALID_RECLAIM_POLICIES = [
-        'Retain',
-        'Recycle',
-        'Delete'
-    ]
-
-    def __init__(self, model=None, capacity=None, access_modes=None, reclaim_policy=None, volume=None):
+    def __init__(self, model=None):
         super(PersistentVolumeSpec, self).__init__()
 
+        # TODO(froch): add support for the below
+        # self._iscsi = None
+        # self._glusterfs = None
+        # self._persistent_volume_claim = None
+        # self._rbd = None
+        # self._flex_volume = None
+        # self._cinder = None
+        # self._cephfs = None
+        # self._flocker = None
+        # self._downward_api = None
+        # self._fc = None
+        # self._azure_file = None
+        # self._config_map = None
+        # self._vsphere_volume
+        # self._quobyte = None
+        # self._azuredisk = None
+
+        self._awsElasticBlockStore = None
+        self._emptyDir = None
+        self._gcePersistentDisk = None
+        self._gitRepo = None
+        self._hostPath = None
+        self._name = None
+        self._nfs = None
+        self._secret = None
+
+        self._capacity = None
+        self._access_modes = None
+        self._claim_ref = None
+        self._reclaim_policy = None
+
         if model is not None:
-            if not isinstance(model, dict):
-                raise SyntaxError('PersistentVolumeSpec: model: [ {0} ] must be a dict.'.format(model.__class__.__name__))
-            self.model = model
+            self._build_with_model(model)
 
-        else:
-            self.model = {
-                'capacity': {'storage': '10Gi'},
-                'accessModes': ['ReadOnlyMany'],
-                'persistentVolumeReclaimPolicy': 'Recycle'
-            }
+    def _build_with_model(self, model=None):
+        if 'awsElasticBlockStore' in model:
+            self.awsElasticBlockStore = AWSElasticBlockStoreVolumeSource(model=model['awsElasticBlockStore'])
+        if 'emptyDir' in model:
+            self.emptyDir = EmptyDirVolumeSource(model=model['emptyDir'])
+        if 'gcePersistentDisk' in model:
+            self.gcePersistentDisk = GCEPersistentDiskVolumeSource(model=model['gcePersistentDisk'])
+        if 'gitRepo' in model:
+            self.gitRepo = GitRepoVolumeSource(model=model['gitRepo'])
+        if 'hostPath' in model:
+            self.hostPath = HostPathVolumeSource(model=model['hostPath'])
+        if 'name' in model:
+            self.name = model['name']
+        if 'nfs' in model:
+            self.nfs = NFSVolumeSource(model=model['nfs'])
+        if 'secret' in model:
+            self.secret = SecretVolumeSource(model=model['secret'])
+        if 'capacity' in model:
+            self.capacity = model['capacity']
+        if 'accessModes' in model:
+            self.access_modes = model['accessModes']
+        if 'claimRef' in model:
+            self.claim_ref = model['claimRef']
+        if 'persistentVolumeReclaimPolicy' in model:
+            self.reclaim_policy = model['persistentVolumeReclaimPolicy']
 
-            if capacity:
-                self.set_capacity(capacity)
-            if access_modes:
-                self.set_access_modes(access_modes)
-            if reclaim_policy:
-                self.set_reclaim_policy(reclaim_policy)
-            if volume:
-                self.set_volume(volume)
+    # ------------------------------------------------------------------------------------- aws ebs
 
-    # -------------------------------------------------------------------------------------  capacity
+    @property
+    def awsElasticBlockStore(self):
+        return self._awsElasticBlockStore
 
-    def set_capacity(self, capacity=None):
-        if not isinstance(capacity, dict):
-            raise SyntaxError('PersistentVolumeSpec: capacity: [ {0} ] must be a dict.'.format(capacity.__class__.__name__))
-        for k, v in capacity.items():
-            if k not in PersistentVolumeSpec.VALID_CAPACITY_PARAMS:
-                capacity.pop(k)
-        self.model['capacity'].update(capacity)
+    @awsElasticBlockStore.setter
+    def awsElasticBlockStore(self, ebs=None):
+        if not isinstance(ebs, AWSElasticBlockStoreVolumeSource):
+            raise SyntaxError('PersistentVolumeSpec: aws_elastic_block_store: [ {0} ] is invalid.'.format(ebs))
+        self._awsElasticBlockStore = ebs
 
-    # -------------------------------------------------------------------------------------  access_mode
+    # ------------------------------------------------------------------------------------- emptyDir
 
-    def set_access_modes(self, access_modes=None):
-        if not isinstance(access_modes, list):
-            raise SyntaxError(
-                'PersistentVolumeSpec: access_modes: [ {0} ] must be a list.'.format(access_modes.__class__.__name__))
-        access_modes = filter(lambda x: x in PersistentVolumeSpec.VALID_ACCESS_MODES, access_modes)
-        self.model['accessModes'] = access_modes
+    @property
+    def emptyDir(self):
+        return self._emptyDir
 
-    # -------------------------------------------------------------------------------------  reclaim_policy
+    @emptyDir.setter
+    def emptyDir(self, edir=None):
+        if not isinstance(edir, EmptyDirVolumeSource):
+            raise SyntaxError('PersistentVolumeSpec: empty_dir: [ {0} ] is invalid.'.format(edir))
+        self._emptyDir = edir
 
-    def set_reclaim_policy(self, reclaim_policy=None):
-        if reclaim_policy not in PersistentVolumeSpec.VALID_RECLAIM_POLICIES:
-            raise SyntaxError('PersistentVolumeSpec: reclaim_policy: [ {0} ] is invalid.'.format(reclaim_policy))
-        if reclaim_policy in PersistentVolumeSpec.VALID_RECLAIM_POLICIES:
-            self.model['persistentVolumeReclaimPolicy'] = reclaim_policy
+    # ------------------------------------------------------------------------------------- gce pd
 
-    # -------------------------------------------------------------------------------------  volume
+    @property
+    def gcePersistentDisk(self):
+        return self._gcePersistentDisk
 
-    def set_volume(self, volume=None):
-        if not isinstance(volume, Volume):
-            raise SyntaxError('PersistentVolumeSpec: volume: [ {0} ] must be a Volume.'.format(volume))
-        self.model['volume'] = volume['volume']
+    @gcePersistentDisk.setter
+    def gcePersistentDisk(self, pd=None):
+        if not isinstance(pd, GCEPersistentDiskVolumeSource):
+            raise SyntaxError('PersistentVolumeSpec: gce_persistent_disk: [ {0} ] is invalid.'.format(pd))
+        self._gcePersistentDisk = pd
+
+    # ------------------------------------------------------------------------------------- gitRepo
+
+    @property
+    def gitRepo(self):
+        return self._gitRepo
+
+    @gitRepo.setter
+    def gitRepo(self, repo=None):
+        if not isinstance(repo, GitRepoVolumeSource):
+            raise SyntaxError('PersistentVolumeSpec: git_repo: [ {0} ] is invalid.'.format(repo))
+        self._gitRepo = repo
+
+    # ------------------------------------------------------------------------------------- hostPath
+
+    @property
+    def hostPath(self):
+        return self._hostPath
+
+    @hostPath.setter
+    def hostPath(self, hp=None):
+        if not isinstance(hp, HostPathVolumeSource):
+            raise SyntaxError('PersistentVolumeSpec: host_path: [ {0} ] is invalid.'.format(hp))
+        self._hostPath = hp
+
+    # ------------------------------------------------------------------------------------- name
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, name=None):
+        if not is_valid_string(name):
+            raise SyntaxError('PersistentVolumeSpec: name: [ {0} ] is invalid.'.format(name))
+        self._name = name
+
+    # ------------------------------------------------------------------------------------- nfs
+
+    @property
+    def nfs(self):
+        return self._nfs
+
+    @nfs.setter
+    def nfs(self, nfs=None):
+        if not isinstance(nfs, NFSVolumeSource):
+            raise SyntaxError('PersistentVolumeSpec: nfs: [ {0} ] is invalid.'.format(nfs))
+        self._nfs = nfs
+
+    # ------------------------------------------------------------------------------------- secret
+
+    @property
+    def secret(self):
+        return self._secret
+
+    @secret.setter
+    def secret(self, secret=None):
+        if not isinstance(secret, SecretVolumeSource):
+            raise SyntaxError('PersistentVolumeSpec: secret: [ {0} ] is invalid.'.format(secret))
+        self._secret = secret
+
+    # ------------------------------------------------------------------------------------- capacity
+
+    @property
+    def capacity(self):
+        return self._capacity
+
+    @capacity.setter
+    def capacity(self, c=None):
+        if not is_valid_dict(c, PersistentVolumeSpec.VALID_CAPACITY_PARAMS):
+            raise SyntaxError('PersistentVolumeSpec: capacity: [ {} ] is invalid.'.format(c))
+        self._capacity = c
+
+    # ------------------------------------------------------------------------------------- accessModes
+
+    @property
+    def access_modes(self):
+        return self._access_modes
+
+    @access_modes.setter
+    def access_modes(self, modes=None):
+        if not is_valid_list(modes, str):
+            raise SyntaxError('PersistentVolumeSpec: access_modes: [ {} ] is invalid.'.format(modes))
+        filtered = filter(lambda x: x in PersistentVolumeSpec.VALID_ACCESS_MODES, modes)
+        self._access_modes = filtered
+
+    # ------------------------------------------------------------------------------------- claimRef
+
+    @property
+    def claim_ref(self):
+        return self._claim_ref
+
+    @claim_ref.setter
+    def claim_ref(self, ref=None):
+        if not isinstance(ref, ObjectReference):
+            raise SyntaxError('PersistentVolumeSpec: claim_ref: [ {} ] is invalid.'.format(ref))
+        self._claim_ref = ref
+
+    # ------------------------------------------------------------------------------------- reclaimPolicy
+
+    @property
+    def reclaim_policy(self):
+        return self._reclaim_policy
+
+    @reclaim_policy.setter
+    def reclaim_policy(self, policy=None):
+        if policy not in PersistentVolumeSpec.VALID_RECLAIM_POLICIES:
+            raise SyntaxError('PersistentVolumeSpec: reclaim_policy: [ {} ] is invalid.'.format(policy))
+        self._reclaim_policy = policy
+
+    # ------------------------------------------------------------------------------------- serialize
+
+    def serialize(self):
+        data = {}
+        if self.awsElasticBlockStore is not None:
+            data['awsElasticBlockStore'] = self.awsElasticBlockStore.serialize()
+        if self.emptyDir is not None:
+            data['emptyDir'] = self.emptyDir.serialize()
+        if self.gcePersistentDisk is not None:
+            data['gcePersistentDisk'] = self.gcePersistentDisk.serialize()
+        if self.gitRepo is not None:
+            data['gitRepo'] = self.gitRepo.serialize()
+        if self.hostPath is not None:
+            data['hostPath'] = self.hostPath.serialize()
+        if self.name is not None:
+            data['name'] = self.name
+        if self.nfs is not None:
+            data['nfs'] = self.nfs.serialize()
+        if self.secret is not None:
+            data['secret'] = self.secret.serialize()
+        if self.capacity is not None:
+            data['capacity'] = self.capacity
+        if self.access_modes is not None:
+            data['accessModes'] = self.access_modes
+        if self.claim_ref is not None:
+            data['claimRef'] = self.claim_ref.serialize()
+        if self.reclaim_policy is not None:
+            data['persistentVolumeReclaimPolicy'] = self.reclaim_policy
+        return data
