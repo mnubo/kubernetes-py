@@ -6,7 +6,6 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.utils import is_valid_string, filter_model
 from kubernetes.models.v1.AWSElasticBlockStoreVolumeSource import AWSElasticBlockStoreVolumeSource
 from kubernetes.models.v1.EmptyDirVolumeSource import EmptyDirVolumeSource
 from kubernetes.models.v1.GCEPersistentDiskVolumeSource import GCEPersistentDiskVolumeSource
@@ -14,6 +13,7 @@ from kubernetes.models.v1.GitRepoVolumeSource import GitRepoVolumeSource
 from kubernetes.models.v1.HostPathVolumeSource import HostPathVolumeSource
 from kubernetes.models.v1.NFSVolumeSource import NFSVolumeSource
 from kubernetes.models.v1.SecretVolumeSource import SecretVolumeSource
+from kubernetes.utils import is_valid_string, filter_model
 
 
 class Volume(object):
@@ -152,7 +152,7 @@ class Volume(object):
             raise SyntaxError('Volume: host_path: [ {0} ] is invalid.'.format(hp))
         self._hostPath = hp
 
-    # ------------------------------------------------------------------------------------- nfs
+    # ------------------------------------------------------------------------------------- name
 
     @property
     def name(self):
