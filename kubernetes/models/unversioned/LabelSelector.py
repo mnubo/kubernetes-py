@@ -6,7 +6,7 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1beta1.LabelSelectorRequirement import LabelSelectorRequirement
+from kubernetes.models.unversioned.LabelSelectorRequirement import LabelSelectorRequirement
 from kubernetes.utils import is_valid_dict, is_valid_list
 
 

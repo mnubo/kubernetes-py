@@ -10,8 +10,6 @@ from Deployment import Deployment
 from DeploymentSpec import DeploymentSpec
 from DeploymentStatus import DeploymentStatus
 from DeploymentStrategy import DeploymentStrategy
-from LabelSelector import LabelSelector
-from LabelSelectorRequirement import LabelSelectorRequirement
 from ReplicaSet import ReplicaSet
 from ReplicaSetSpec import ReplicaSetSpec
 from ReplicaSetStatus import ReplicaSetStatus

@@ -13,8 +13,8 @@ from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sExceptions import BadRequestException
 from kubernetes.K8sExceptions import TimedOutException, NotFoundException
 from kubernetes.K8sObject import K8sObject
+from kubernetes.models.unversioned.LabelSelector import LabelSelector
 from kubernetes.models.v1beta1.Deployment import Deployment
-from kubernetes.models.v1beta1.LabelSelector import LabelSelector
 from kubernetes.models.v1beta1.DeploymentRollback import DeploymentRollback
 
 SCALE_WAIT_TIMEOUT_SECONDS = 120
