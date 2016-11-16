@@ -7,12 +7,13 @@
 #
 
 import json
-import yaml
 import unittest
 
+import yaml
+
 from kubernetes.K8sContainer import K8sContainer
+from kubernetes.K8sVolumeMount import K8sVolumeMount
 from kubernetes.models.v1 import Container
-from kubernetes.models.v1.VolumeMount import VolumeMount
 
 
 class K8sContainerTest(unittest.TestCase):
@@ -82,28 +83,21 @@ class K8sContainerTest(unittest.TestCase):
         image = "redis"
         vname = object()
         vmount = object()
-        c = K8sContainer(name=name, image=image)
         with self.assertRaises(SyntaxError):
-            c.add_volume_mount(name=vname)
-        with self.assertRaises(SyntaxError):
-            c.add_volume_mount(name=name, mount_path=vmount)
+            mount = K8sVolumeMount(name=vname, mount_path=vmount)
+            c = K8sContainer(name=name, image=image)
+            c.add_volume_mount(mount)
 
     def test_add_volume_mount(self):
         name = "redis"
         image = "redis:3.0.7"
         c = K8sContainer(name=name, image=image)
-
         volname = "vol1"
-        volmount = "/path/on/container"
-        c.add_volume_mount(name=volname, mount_path=volmount)
-        self.assertTrue(hasattr(c.model, 'volume_mounts'))
-        self.assertIsInstance(c.model.volume_mounts, list)
-        self.assertEqual(1, len(c.model.volume_mounts))
-
-        mount = c.model.volume_mounts[0]
-        self.assertIsInstance(mount, VolumeMount)
-        self.assertEqual(volname, mount.name)
-        self.assertEqual(volmount, mount.mount_path)
+        volpath = "/path/on/container"
+        mount = K8sVolumeMount(name=volname, mount_path=volpath)
+        c.add_volume_mount(mount)
+        self.assertEqual(1, len(c.volume_mounts))
+        self.assertIn(mount.model, c.volume_mounts)
 
     # ------------------------------------------------------------------------------------- serialize
 
@@ -112,9 +106,9 @@ class K8sContainerTest(unittest.TestCase):
         image = "redis:3.0.7"
         c = K8sContainer(name=name, image=image)
         volname = "vol1"
-        volmount = "/path/on/container"
-        c.add_volume_mount(name=volname, mount_path=volmount)
-
+        volpath = "/path/on/container"
+        mount = K8sVolumeMount(name=volname, mount_path=volpath)
+        c.add_volume_mount(mount)
         data = c.serialize()
         self.assertIsInstance(data, dict)
 
@@ -123,9 +117,9 @@ class K8sContainerTest(unittest.TestCase):
         image = "redis:3.0.7"
         c = K8sContainer(name=name, image=image)
         volname = "vol1"
-        volmount = "/path/on/container"
-        c.add_volume_mount(name=volname, mount_path=volmount)
-
+        volpath = "/path/on/container"
+        mount = K8sVolumeMount(name=volname, mount_path=volpath)
+        c.add_volume_mount(mount)
         j = c.as_json()
         self.assertIsInstance(j, str)
         d = json.loads(j)
@@ -136,9 +130,9 @@ class K8sContainerTest(unittest.TestCase):
         image = "redis:3.0.7"
         c = K8sContainer(name=name, image=image)
         volname = "vol1"
-        volmount = "/path/on/container"
-        c.add_volume_mount(name=volname, mount_path=volmount)
-
+        volpath = "/path/on/container"
+        mount = K8sVolumeMount(name=volname, mount_path=volpath)
+        c.add_volume_mount(mount)
         y = c.as_yaml()
         self.assertIsInstance(y, str)
         d = yaml.load(y)
