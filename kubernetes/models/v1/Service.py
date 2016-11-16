@@ -20,9 +20,9 @@ class Service(object):
 
     def __init__(self, model=None):
         super(Service, self).__init__()
-        self.kind = 'Service'
-        self.api_version = 'v1'
 
+        self._kind = 'Service'
+        self._api_version = 'v1'
         self._metadata = ObjectMeta()
         self._spec = ServiceSpec()
         self._status = ServiceStatus()
@@ -89,6 +89,30 @@ class Service(object):
             s = {}
         s.update(selector)
         self.spec.selector = s
+
+    # ------------------------------------------------------------------------------------- kind
+
+    @property
+    def kind(self):
+        return self._kind
+
+    @kind.setter
+    def kind(self, k=None):
+        if not is_valid_string(k):
+            raise SyntaxError('Service: kind: [ {0} ] is invalid.'.format(k))
+        self._kind = k
+
+    # ------------------------------------------------------------------------------------- apiVersion
+
+    @property
+    def api_version(self):
+        return self._api_version
+
+    @api_version.setter
+    def api_version(self, v=None):
+        if not is_valid_string(v):
+            raise SyntaxError('Service: api_version: [ {0} ] is invalid.'.format(v))
+        self._api_version = v
 
     # ------------------------------------------------------------------------------------- name
 
