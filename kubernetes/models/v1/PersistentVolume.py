@@ -9,6 +9,7 @@
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.models.v1.PersistentVolumeSpec import PersistentVolumeSpec
 from kubernetes.models.v1.PersistentVolumeStatus import PersistentVolumeStatus
+from kubernetes.utils import is_valid_string
 
 
 class PersistentVolume(object):
@@ -39,6 +40,66 @@ class PersistentVolume(object):
             self.spec = PersistentVolumeSpec(model=model['spec'])
         if 'status' in model:
             self.status = PersistentVolumeStatus(model=model['status'])
+
+    # ------------------------------------------------------------------------------------- kind
+
+    @property
+    def kind(self):
+        return self._kind
+
+    @kind.setter
+    def kind(self, k=None):
+        if not is_valid_string(k):
+            raise SyntaxError('PersistentVolume: kind: [ {} ] is invalid.'.format(k))
+        self._kind = k
+
+    # ------------------------------------------------------------------------------------- apiVersion
+
+    @property
+    def api_version(self):
+        return self._api_version
+
+    @api_version.setter
+    def api_version(self, v=None):
+        if not is_valid_string(v):
+            raise SyntaxError('PersistentVolume: api_version: [ {} ] is invalid.'.format(v))
+        self._api_version = v
+
+    # ------------------------------------------------------------------------------------- metadata
+
+    @property
+    def metadata(self):
+        return self._metadata
+
+    @metadata.setter
+    def metadata(self, meta=None):
+        if not isinstance(meta, ObjectMeta):
+            raise SyntaxError('PersistentVolume: metadata: [ {} ] is invalid.'.format(meta))
+        self._metadata = meta
+
+    # ------------------------------------------------------------------------------------- spec
+
+    @property
+    def spec(self):
+        return self._spec
+
+    @spec.setter
+    def spec(self, spec=None):
+        if not isinstance(spec, PersistentVolumeSpec):
+            raise SyntaxError('PersistentVolume: spec: [ {} ] is invalid.'.format(spec))
+        self._spec = spec
+
+    # ------------------------------------------------------------------------------------- status
+
+    @property
+    def status(self):
+        return self._status
+
+    @status.setter
+    def status(self, status=None):
+        if not isinstance(status, PersistentVolumeStatus):
+            raise SyntaxError('PersistentVolume: status: [ {} ] is invalid.'.format(status))
+        self._status = status
 
     # ------------------------------------------------------------------------------------- serialize
 

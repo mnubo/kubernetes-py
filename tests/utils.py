@@ -8,18 +8,19 @@
 
 import os
 import socket
+
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sDeployment import K8sDeployment
 from kubernetes.K8sExceptions import NotFoundException
 from kubernetes.K8sObject import K8sObject
+from kubernetes.K8sPersistentVolume import K8sPersistentVolume
 from kubernetes.K8sPod import K8sPod
 from kubernetes.K8sReplicaSet import K8sReplicaSet
 from kubernetes.K8sReplicationController import K8sReplicationController
 from kubernetes.K8sSecret import K8sSecret
 from kubernetes.K8sService import K8sService
 from kubernetes.K8sVolume import K8sVolume
-
 
 kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
 
@@ -173,6 +174,17 @@ def create_volume(name=None, type=None):
     return obj
 
 
+def create_persistent_volume(config=None, name=None, type=None):
+    if config is None:
+        config = create_config()
+    obj = K8sPersistentVolume(
+        config=config,
+        name=name,
+        type=type,
+    )
+    return obj
+
+
 # --------------------------------------------------------------------------------- delete
 
 
@@ -272,3 +284,16 @@ def cleanup_deployments():
                     continue
             deps = ref.list()
 
+
+def cleanup_persistent_volumes():
+    ref = create_persistent_volume(name="throwaway", type="hostPath")
+    if is_reachable(ref.config.api_host):
+        vols = ref.list()
+        while len(vols) > 0:
+            for v in vols:
+                try:
+                    vol = K8sPersistentVolume(config=ref.config, name=v['metadata']['name'], type=ref.type).get()
+                    vol.delete()
+                except NotFoundException:
+                    continue
+            vols = ref.list()

@@ -65,8 +65,8 @@ class PersistentVolumeSpec(object):
         self._nfs = None
         self._secret = None
 
-        self._capacity = None
-        self._access_modes = None
+        self._capacity = {'storage': '10Gi'}
+        self._access_modes = ['ReadWriteOnce']
         self._claim_ref = None
         self._reclaim_policy = None
 
@@ -76,12 +76,8 @@ class PersistentVolumeSpec(object):
     def _build_with_model(self, model=None):
         if 'awsElasticBlockStore' in model:
             self.awsElasticBlockStore = AWSElasticBlockStoreVolumeSource(model=model['awsElasticBlockStore'])
-        if 'emptyDir' in model:
-            self.emptyDir = EmptyDirVolumeSource(model=model['emptyDir'])
         if 'gcePersistentDisk' in model:
             self.gcePersistentDisk = GCEPersistentDiskVolumeSource(model=model['gcePersistentDisk'])
-        if 'gitRepo' in model:
-            self.gitRepo = GitRepoVolumeSource(model=model['gitRepo'])
         if 'hostPath' in model:
             self.hostPath = HostPathVolumeSource(model=model['hostPath'])
         if 'name' in model:

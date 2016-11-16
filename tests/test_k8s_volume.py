@@ -23,6 +23,7 @@ from tests import utils
 
 
 class K8sVolumeTest(unittest.TestCase):
+
     def setUp(self):
         utils.cleanup_rc()
         utils.cleanup_pods()
@@ -37,7 +38,7 @@ class K8sVolumeTest(unittest.TestCase):
 
     def test_init_no_args(self):
         with self.assertRaises(SyntaxError):
-            v = K8sVolume()
+            K8sVolume()
 
     def test_init_invalid_name(self):
         name = object()

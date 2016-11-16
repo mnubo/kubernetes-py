@@ -15,7 +15,6 @@ class K8sVolume(object):
     def __init__(self, name=None, type=None):
         super(K8sVolume, self).__init__()
         self._type = None
-
         self.model = Volume()
         self.name = name
         self.type = type
