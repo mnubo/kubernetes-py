@@ -7,12 +7,11 @@
 #
 
 import json
-
 import yaml
 
+from kubernetes.K8sVolumeMount import K8sVolumeMount
 from kubernetes.models.v1.Container import Container
 from kubernetes.models.v1.ContainerPort import ContainerPort
-from kubernetes.models.v1.VolumeMount import VolumeMount
 
 
 class K8sContainer(object):
@@ -54,16 +53,12 @@ class K8sContainer(object):
         env.append(e)
         self.model.env = env
 
-    def add_volume_mount(self, name=None, mount_path=None, read_only=False, sub_path=None):
-        mount = VolumeMount()
-        mount.name = name
-        mount.mount_path = mount_path
-        mount.read_only = read_only
-        mount.sub_path = sub_path
+    def add_volume_mount(self, mount=None):
+        if not isinstance(mount, K8sVolumeMount):
+            raise SyntaxError('K8sContainer.add_volume_mount() mount: [ {} ] is invalid.'.format(mount))
         mounts = self.model.volume_mounts
-        if mounts is None:
-            mounts = []
-        mounts.append(mount)
+        if mount.model not in mounts:
+            mounts.append(mount.model)
         self.model.volume_mounts = mounts
 
     # -------------------------------------------------------------------------------------  name
@@ -86,4 +81,27 @@ class K8sContainer(object):
     def image(self, image=None):
         self.model.image = image
 
+    # -------------------------------------------------------------------------------------  volume_mounts
 
+    @property
+    def volume_mounts(self):
+        return self.model.volume_mounts
+
+    @volume_mounts.setter
+    def volume_mounts(self, mounts=None):
+        self.model.volume_mounts = mounts
+
+    # ------------------------------------------------------------------------------------- serialize
+
+    def serialize(self):
+        return self.model.serialize()
+
+    def as_json(self):
+        data = self.serialize()
+        dump = json.dumps(data, indent=4)
+        return dump
+
+    def as_yaml(self):
+        data = self.serialize()
+        dump = yaml.dump(data, default_flow_style=False)
+        return dump

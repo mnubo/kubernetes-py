@@ -35,7 +35,7 @@ class Container(object):
         self._readiness_probe = None
         self._resources = ResourceRequirements()
         self._security_context = None
-        self._volume_mounts = None
+        self._volume_mounts = []
         self._working_dir = None
 
         if model is not None:
