@@ -14,16 +14,13 @@ class ResourceRequirements(object):
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_resourcerequirements
     """
 
-    VALID_RESOURCES = ['cpu', 'memory']
+    VALID_RESOURCES = ['cpu', 'memory', 'storage']
 
     def __init__(self, model=None):
         super(ResourceRequirements, self).__init__()
 
         self._limits = {}
-        self._requests = {
-            'cpu': '100m',
-            'memory': '32M'
-        }
+        self._requests = {}
 
         if model is not None:
             m = filter_model(model)
