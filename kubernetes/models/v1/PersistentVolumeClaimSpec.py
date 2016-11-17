@@ -17,6 +17,8 @@ class PersistentVolumeClaimSpec(object):
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_persistentvolumeclaimspec
     """
 
+    VALID_RESOURCES = ['storage']
+
     def __init__(self, model=None):
         super(PersistentVolumeClaimSpec, self).__init__()
 
@@ -24,6 +26,9 @@ class PersistentVolumeClaimSpec(object):
         self._selector = LabelSelector()
         self._resources = ResourceRequirements()
         self._volume_name = None
+
+        self.access_modes = ['ReadWriteOnce']
+        self.resources.requests = {'storage': '10Gi'}
 
         if model is not None:
             self._build_with_model(model)
