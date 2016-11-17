@@ -13,6 +13,7 @@ from kubernetes.models.v1.GitRepoVolumeSource import GitRepoVolumeSource
 from kubernetes.models.v1.HostPathVolumeSource import HostPathVolumeSource
 from kubernetes.models.v1.NFSVolumeSource import NFSVolumeSource
 from kubernetes.models.v1.SecretVolumeSource import SecretVolumeSource
+from kubernetes.models.v1.PersistentVolumeClaimVolumeSource import PersistentVolumeClaimVolumeSource
 from kubernetes.utils import is_valid_string, filter_model
 
 
@@ -28,7 +29,8 @@ class Volume(object):
         'gitRepo': GitRepoVolumeSource,
         'hostPath': HostPathVolumeSource,
         'nfs': NFSVolumeSource,
-        'secret': SecretVolumeSource
+        'secret': SecretVolumeSource,
+        'persistentVolumeClaim': PersistentVolumeClaimVolumeSource,
     }
 
     def __init__(self, model=None):
@@ -36,7 +38,6 @@ class Volume(object):
         # TODO(froch): add support for the below
         # self._iscsi = None
         # self._glusterfs = None
-        # self._persistent_volume_claim = None
         # self._rbd = None
         # self._flex_volume = None
         # self._cinder = None
@@ -57,6 +58,7 @@ class Volume(object):
         self._hostPath = None
         self._name = None
         self._nfs = None
+        self._persistentVolumeClaim = None
         self._secret = None
 
         if model is not None:
@@ -87,6 +89,8 @@ class Volume(object):
             self.nfs = NFSVolumeSource(model=model['nfs'])
         if 'secret' in model:
             self.secret = SecretVolumeSource(model=model['secret'])
+        if 'persistentVolumeClaim' in model:
+            self.persistentVolumeClaim = PersistentVolumeClaimVolumeSource(model=model['persistentVolumeClaim'])
 
     @staticmethod
     def vol_type_to_source(vol_type=None):
@@ -188,6 +192,18 @@ class Volume(object):
             raise SyntaxError('Volume: secret: [ {0} ] is invalid.'.format(secret))
         self._secret = secret
 
+    # ------------------------------------------------------------------------------------- persistentVolumeClaim
+
+    @property
+    def persistentVolumeClaim(self):
+        return self._persistentVolumeClaim
+
+    @persistentVolumeClaim.setter
+    def persistentVolumeClaim(self, pvc=None):
+        if not isinstance(pvc, PersistentVolumeClaimVolumeSource):
+            raise SyntaxError('Volume: persistentVolumeClaim: [ {0} ] is invalid.'.format(pvc))
+        self._persistentVolumeClaim = pvc
+
     # ------------------------------------------------------------------------------------- serialize
 
     def serialize(self):
@@ -208,4 +224,6 @@ class Volume(object):
             data['nfs'] = self.nfs.serialize()
         if self.secret is not None:
             data['secret'] = self.secret.serialize()
+        if self.persistentVolumeClaim is not None:
+            data['persistentVolumeClaim'] = self.persistentVolumeClaim.serialize()
         return data
