@@ -38,6 +38,11 @@ class Container(object):
         self._volume_mounts = []
         self._working_dir = None
 
+        self.resources.requests = {
+            'cpu': '100m',
+            'memory': '32M'
+        }
+
         if model is not None:
             m = filter_model(model)
             self._build_with_model(m)
