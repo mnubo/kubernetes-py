@@ -97,6 +97,7 @@ class K8sPod(K8sObject):
     # ------------------------------------------------------------------------------------- polling readiness
 
     def is_ready(self):
+        self.get()
         if self.status is not None and isinstance(self.status, PodStatus):
             pod_phase = self.status.phase
             conditions = self.status.conditions
