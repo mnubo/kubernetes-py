@@ -6,9 +6,14 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+import time
+
 from kubernetes import K8sObject
+from kubernetes.K8sExceptions import TimedOutException
 from kubernetes.models.v1.PersistentVolume import PersistentVolume
 from kubernetes.models.v1.Volume import Volume
+
+READY_WAIT_TIMEOUT_SECONDS = 60
 
 
 class K8sPersistentVolume(K8sObject):
@@ -25,13 +30,22 @@ class K8sPersistentVolume(K8sObject):
 
     def create(self):
         super(K8sPersistentVolume, self).create()
-        while not self.model.status.phase == 'Available':
-            self.get()
+        self._wait_for_available()
         return self
 
     def get(self):
         self.model = PersistentVolume(model=self.get_model())
         return self
+
+    def _wait_for_available(self):
+        start_time = time.time()
+        while not self.model.status.phase == 'Available':
+            self.get()
+            elapsed_time = time.time() - start_time
+            if elapsed_time >= READY_WAIT_TIMEOUT_SECONDS:  # timeout
+                raise TimedOutException(
+                    "Timed out waiting on readiness of PersistentVolume: [ {} ]".format(self.name)
+                )
 
     # ------------------------------------------------------------------------------------- name
 
