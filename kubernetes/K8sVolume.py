@@ -220,3 +220,17 @@ class K8sVolume(object):
         if not hasattr(self.source, 'revision'):
             raise NotImplementedError()
         self.source.revision = rev
+
+    # ------------------------------------------------------------------------------------- claimName
+
+    @property
+    def claim_name(self):
+        if not hasattr(self.source, 'claim_name'):
+            raise NotImplementedError()
+        return self.source.claim_name
+
+    @claim_name.setter
+    def claim_name(self, name=None):
+        if not hasattr(self.source, 'claim_name'):
+            raise NotImplementedError()
+        self.source.claim_name = name
