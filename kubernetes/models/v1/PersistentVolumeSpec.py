@@ -14,6 +14,7 @@ from kubernetes.models.v1.GitRepoVolumeSource import GitRepoVolumeSource
 from kubernetes.models.v1.HostPathVolumeSource import HostPathVolumeSource
 from kubernetes.models.v1.NFSVolumeSource import NFSVolumeSource
 from kubernetes.models.v1.SecretVolumeSource import SecretVolumeSource
+from kubernetes.models.v1.PersistentVolumeClaimVolumeSource import PersistentVolumeClaimVolumeSource
 from kubernetes.utils import is_valid_string, is_valid_dict, is_valid_list
 
 
@@ -42,7 +43,6 @@ class PersistentVolumeSpec(object):
         # TODO(froch): add support for the below
         # self._iscsi = None
         # self._glusterfs = None
-        # self._persistent_volume_claim = None
         # self._rbd = None
         # self._flex_volume = None
         # self._cinder = None
@@ -63,12 +63,13 @@ class PersistentVolumeSpec(object):
         self._hostPath = None
         self._name = None
         self._nfs = None
+        self._persistentVolumeClaim = None
         self._secret = None
 
         self._capacity = {'storage': '10Gi'}
         self._access_modes = ['ReadWriteOnce']
         self._claim_ref = None
-        self._reclaim_policy = None
+        self._reclaim_policy = 'Retain'
 
         if model is not None:
             self._build_with_model(model)
@@ -91,9 +92,11 @@ class PersistentVolumeSpec(object):
         if 'accessModes' in model:
             self.access_modes = model['accessModes']
         if 'claimRef' in model:
-            self.claim_ref = model['claimRef']
+            self.claim_ref = ObjectReference(model=model['claimRef'])
         if 'persistentVolumeReclaimPolicy' in model:
             self.reclaim_policy = model['persistentVolumeReclaimPolicy']
+        if 'persistentVolumeClaim' in model:
+            self.persistentVolumeClaim = PersistentVolumeClaimVolumeSource(model=model['persistentVolumeClaim'])
 
     # ------------------------------------------------------------------------------------- aws ebs
 
@@ -240,6 +243,18 @@ class PersistentVolumeSpec(object):
             raise SyntaxError('PersistentVolumeSpec: reclaim_policy: [ {} ] is invalid.'.format(policy))
         self._reclaim_policy = policy
 
+    # ------------------------------------------------------------------------------------- persistentVolumeClaim
+
+    @property
+    def persistentVolumeClaim(self):
+        return self._persistentVolumeClaim
+
+    @persistentVolumeClaim.setter
+    def persistentVolumeClaim(self, pvc=None):
+        if not isinstance(pvc, PersistentVolumeClaimVolumeSource):
+            raise SyntaxError('PersistentVolumeSpec: persistentVolumeClaim: [ {} ] is invalid.'.format(pvc))
+        self._persistentVolumeClaim = pvc
+
     # ------------------------------------------------------------------------------------- serialize
 
     def serialize(self):
@@ -268,4 +283,6 @@ class PersistentVolumeSpec(object):
             data['claimRef'] = self.claim_ref.serialize()
         if self.reclaim_policy is not None:
             data['persistentVolumeReclaimPolicy'] = self.reclaim_policy
+        if self.persistentVolumeClaim is not None:
+            data['persistentVolumeClaim'] = self.reclaim_policy
         return data
