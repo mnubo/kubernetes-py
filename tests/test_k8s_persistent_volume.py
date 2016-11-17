@@ -7,6 +7,7 @@
 #
 
 import unittest
+
 from kubernetes.K8sPersistentVolume import K8sPersistentVolume
 from kubernetes.models.v1.AWSElasticBlockStoreVolumeSource import AWSElasticBlockStoreVolumeSource
 from kubernetes.models.v1.GCEPersistentDiskVolumeSource import GCEPersistentDiskVolumeSource
@@ -16,12 +17,11 @@ from tests import utils
 
 
 class K8sPersistentVolumeTest(unittest.TestCase):
-
     def setUp(self):
-        utils.cleanup_persistent_volumes()
+        utils.cleanup_pv()
 
     def tearDown(self):
-        utils.cleanup_persistent_volumes()
+        utils.cleanup_pv()
 
     # --------------------------------------------------------------------------------- init
 
@@ -80,7 +80,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "hostPath"
         host_path = "/path/on/host"
-        vol = utils.create_persistent_volume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         vol.host_path = host_path
         self.assertEqual(host_path, vol.host_path)
         if utils.is_reachable(vol.config.api_host):
@@ -93,7 +93,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
     def test_gce_init(self):
         name = "yoname"
         type = "gcePersistentDisk"
-        vol = utils.create_persistent_volume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         self.assertIsNotNone(vol)
         self.assertIsInstance(vol, K8sPersistentVolume)
         self.assertEqual(type, vol.type)
@@ -170,7 +170,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
         type = "gcePersistentDisk"
         pd_name = "mnubo-disk1"
         fs_type = 'xfs'
-        vol = utils.create_persistent_volume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         vol.pd_name = pd_name
         vol.fs_type = fs_type
         if utils.is_reachable(vol.config.api_host):
@@ -184,7 +184,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
     def test_aws_init(self):
         name = "yoname"
         type = "awsElasticBlockStore"
-        vol = utils.create_persistent_volume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         self.assertIsNotNone(vol)
         self.assertIsInstance(vol, K8sPersistentVolume)
         self.assertEqual(type, vol.type)
@@ -194,14 +194,14 @@ class K8sPersistentVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "awsElasticBlockStore"
         volume_id = object()
-        vol = utils.create_persistent_volume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         with self.assertRaises(SyntaxError):
             vol.volume_id = volume_id
 
     def test_aws_set_volume_id_none(self):
         name = "yoname"
         type = "awsElasticBlockStore"
-        vol = utils.create_persistent_volume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         with self.assertRaises(SyntaxError):
             vol.volume_id = None
 
@@ -209,7 +209,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "hostPath"
         volume_id = "vol-0a89c9040d544a371"
-        vol = utils.create_persistent_volume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         with self.assertRaises(NotImplementedError):
             vol.volume_id = volume_id
 
@@ -217,7 +217,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "awsElasticBlockStore"
         volume_id = "vol-0a89c9040d544a371"
-        vol = utils.create_persistent_volume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         vol.volume_id = volume_id
         self.assertEqual(vol.volume_id, volume_id)
 
@@ -226,7 +226,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
     def test_aws_set_fs_type_none(self):
         name = "yoname"
         type = "awsElasticBlockStore"
-        vol = utils.create_persistent_volume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         with self.assertRaises(SyntaxError):
             vol.fs_type = None
 
@@ -234,7 +234,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "awsElasticBlockStore"
         fs_type = object()
-        vol = utils.create_persistent_volume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         with self.assertRaises(SyntaxError):
             vol.fs_type = fs_type
 
@@ -242,7 +242,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "awsElasticBlockStore"
         fs_type = "xfs"
-        vol = utils.create_persistent_volume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         vol.fs_type = fs_type
         self.assertEqual(vol.fs_type, fs_type)
 
@@ -253,7 +253,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
         type = "awsElasticBlockStore"
         volume_id = "vol-0e3056a2"
         fs_type = 'xfs'
-        vol = utils.create_persistent_volume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         vol.volume_id = volume_id
         vol.fs_type = fs_type
         if utils.is_reachable(vol.config.api_host):
@@ -267,7 +267,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
     def test_nfs_init(self):
         name = "yoname"
         type = "nfs"
-        vol = utils.create_persistent_volume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         self.assertIsNotNone(vol)
         self.assertIsInstance(vol, K8sPersistentVolume)
         self.assertEqual(type, vol.type)
@@ -276,7 +276,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
     def test_nfs_set_server_none(self):
         name = "yoname"
         type = "nfs"
-        vol = utils.create_persistent_volume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         with self.assertRaises(SyntaxError):
             vol.nfs_server = None
 
@@ -284,7 +284,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "nfs"
         server = object()
-        vol = utils.create_persistent_volume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         with self.assertRaises(SyntaxError):
             vol.nfs_server = server
 
@@ -292,7 +292,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "hostPath"
         server = "nfs.company.com"
-        vol = utils.create_persistent_volume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         with self.assertRaises(NotImplementedError):
             vol.nfs_server = server
 
@@ -300,7 +300,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "nfs"
         server = "nfs.company.com"
-        vol = utils.create_persistent_volume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         vol.nfs_server = server
         self.assertEqual(vol.nfs_server, server)
 
@@ -311,7 +311,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
         type = "nfs"
         server = "nfs.company.com"
         path = "/some/path"
-        vol = utils.create_persistent_volume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         vol.nfs_server = server
         vol.nfs_path = path
         if utils.is_reachable(vol.config.api_host):
