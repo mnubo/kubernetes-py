@@ -43,9 +43,8 @@ def is_valid_dict(target=None, keys=None, type=None):
             return False
     if keys is not None and isinstance(keys, list):
         for x in target:
-            for y in keys:
-                if y not in x:
-                    return False
+            if x not in keys:
+                return False
     return True
 
 
