@@ -127,15 +127,16 @@ class K8sObjectTest(unittest.TestCase):
             obj = utils.create_object(config=config, name=name, obj_type=ot)
             r = obj.list()
             self.assertIsNotNone(r)
-            self.assertEqual(1, len(r))
-            secret = r[0]
-            self.assertIsInstance(secret, dict)
-            self.assertEqual(3, len(secret))
-            for i in ['data', 'metadata', 'type']:
-                self.assertIn(i, secret)
-            self.assertIsInstance(secret['data'], dict)
-            self.assertIsInstance(secret['metadata'], dict)
-            self.assertIsInstance(secret['type'], str)
+            self.assertGreaterEqual(1, len(r))  # default-token
+            if len(r):
+                secret = r[0]
+                self.assertIsInstance(secret, dict)
+                self.assertEqual(3, len(secret))
+                for i in ['data', 'metadata', 'type']:
+                    self.assertIn(i, secret)
+                self.assertIsInstance(secret['data'], dict)
+                self.assertIsInstance(secret['metadata'], dict)
+                self.assertIsInstance(secret['type'], str)
 
     def test_object_service_list_from_scratch(self):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
