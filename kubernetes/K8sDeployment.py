@@ -295,8 +295,9 @@ class K8sDeployment(K8sObject):
 
         url = '{base}/{name}/rollback'.format(base=self.base_url, name=self.name)
         state = self.request(method='POST', url=url, data=rollback.serialize())
-        self._wait_for_desired_replicas()
+
         self.get()
+        self._wait_for_desired_replicas()
 
         if not state.get('success'):
             status = state.get('status', '')
