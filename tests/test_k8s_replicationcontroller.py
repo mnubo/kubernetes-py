@@ -913,9 +913,9 @@ class K8sReplicationControllerTest(unittest.TestCase):
             rc.update()
             rc.wait_for_replicas()
             from_get = rc.get()
-            self.assertEqual(rc.desired_replicas, from_get.ready_replicas)
-            self.assertEqual(rc.ready_replicas, from_get.ready_replicas)
-            self.assertEqual(from_get.ready_replicas, from_get.desired_replicas)
+            self.assertEqual(rc.desired_replicas, from_get.desired_replicas)
+            self.assertEqual(rc.current_replicas, from_get.current_replicas)
+            self.assertEqual(rc.desired_replicas, from_get.current_replicas)
 
     # -------------------------------------------------------------------------------------  get by name
 
