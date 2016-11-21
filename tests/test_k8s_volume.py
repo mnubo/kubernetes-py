@@ -116,22 +116,22 @@ class K8sVolumeTest(unittest.TestCase):
         host_path = "/path/on/host"
         vol = K8sVolume(name=name, type=type)
         with self.assertRaises(NotImplementedError):
-            vol.host_path = host_path
+            vol.path = host_path
 
     def test_hostpath_set_path_none(self):
         name = "yoname"
         type = "hostPath"
         vol = K8sVolume(name=name, type=type)
         with self.assertRaises(SyntaxError):
-            vol.host_path = None
+            vol.path = None
 
     def test_hostpath_set_path(self):
         name = "yoname"
         type = "hostPath"
         host_path = "/path/on/host"
         vol = K8sVolume(name=name, type=type)
-        vol.host_path = host_path
-        self.assertEqual(host_path, vol.host_path)
+        vol.path = host_path
+        self.assertEqual(host_path, vol.path)
 
     # --------------------------------------------------------------------------------- secret
 
@@ -462,7 +462,7 @@ class K8sVolumeTest(unittest.TestCase):
         vol_type = "hostPath"
         host_path = "/var/lib/docker"
         volume = utils.create_volume(name=vol_name, type=vol_type)
-        volume.host_path = host_path
+        volume.path = host_path
 
         mount_name = vol_name
         mount_path = '/test-hostpath'
@@ -689,7 +689,7 @@ class K8sVolumeTest(unittest.TestCase):
         vol_type = "hostPath"
         hostpath = "/var/lib/docker"
         volume = utils.create_volume(name=vol_name, type=vol_type)
-        volume.host_path = hostpath
+        volume.path = hostpath
 
         mount_name = vol_name
         mount_path = '/test-hostpath'

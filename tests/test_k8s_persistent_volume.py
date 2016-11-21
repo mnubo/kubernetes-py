@@ -81,8 +81,8 @@ class K8sPersistentVolumeTest(unittest.TestCase):
         type = "hostPath"
         host_path = "/path/on/host"
         vol = utils.create_pv(name=name, type=type)
-        vol.host_path = host_path
-        self.assertEqual(host_path, vol.host_path)
+        vol.path = host_path
+        self.assertEqual(host_path, vol.path)
         if utils.is_reachable(vol.config.api_host):
             vol.create()
             self.assertIsInstance(vol, K8sPersistentVolume)
