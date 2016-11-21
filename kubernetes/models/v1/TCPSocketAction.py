@@ -9,9 +9,17 @@
 
 class TCPSocketAction(object):
 
-    def __init__(self):
+    def __init__(self, model=None):
         super(TCPSocketAction, self).__init__()
+
         self._port = None
+
+        if model is not None:
+            self._build_with_model(model)
+
+    def _build_with_model(self, model=None):
+        if 'port' in model:
+            self.port = model['port']
 
     # ------------------------------------------------------------------------------------- port
 
@@ -30,7 +38,7 @@ class TCPSocketAction(object):
 
     # ------------------------------------------------------------------------------------- serialize
 
-    def json(self):
+    def serialize(self):
         data = {}
         if self.port:
             data['port'] = self.port
