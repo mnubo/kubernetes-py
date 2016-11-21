@@ -709,6 +709,31 @@ class K8sVolumeTest(unittest.TestCase):
             volnames = [x.name for x in rc.volumes]
             self.assertIn(vol_name, volnames)
 
+    def test_rc_hostpath_list(self):
+        volumes = [
+            {'hostPath': {'path': '/root/.dockercfg'}, 'name': 'dockercred'},
+            {'hostPath': {'path': '/usr/bin/docker'}, 'name': 'dockerbin'},
+            {'hostPath': {'path': '/var/run/docker.sock'}, 'name': 'dockersock'},
+            {'hostPath': {'path': '/root/.docker'}, 'name': 'dockerconfig'}
+        ]
+        rc = utils.create_rc(name="admintool")
+
+        for vol in volumes:
+            keys = filter(lambda x: x != 'name', vol.keys())
+            v = K8sVolume(
+                name=vol['name'],
+                type=keys[0],
+            )
+            dico = vol[keys[0]]
+            if dico is not None:
+                v.path = dico['path']
+            rc.add_volume(v)
+
+        self.assertEqual(len(volumes), len(rc.volumes))
+        for i in range(0, len(volumes)):
+            self.assertEqual(volumes[i]['name'], rc.volumes[i].name)
+            self.assertEqual(volumes[i]['hostPath']['path'], rc.volumes[i].hostPath.path)
+
     # --------------------------------------------------------------------------------- api - rc - secret
 
     def test_rc_secret(self):
