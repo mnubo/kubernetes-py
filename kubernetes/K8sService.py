@@ -76,16 +76,6 @@ class K8sService(K8sObject):
             return self.model.metadata.labels[k]
         return None
 
-    # ------------------------------------------------------------------------------------- annotations
-
-    @property
-    def annotations(self):
-        return self.model.metadata.annotations
-
-    @annotations.setter
-    def annotations(self, anns=None):
-        self.model.metadata.annotations = anns
-
     # ------------------------------------------------------------------------------------- clusterIP
 
     @property
@@ -105,16 +95,6 @@ class K8sService(K8sObject):
     @external_ips.setter
     def external_ips(self, ips=None):
         self.model.spec.external_ips = ips
-
-    # ------------------------------------------------------------------------------------- labels
-
-    @property
-    def labels(self):
-        return self.model.metadata.labels
-
-    @labels.setter
-    def labels(self, labels=None):
-        self.model.metadata.labels = labels
 
     # ------------------------------------------------------------------------------------- loadBalancerIP
 
