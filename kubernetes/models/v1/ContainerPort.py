@@ -63,7 +63,7 @@ class ContainerPort(object):
     def host_port(self, port=None):
         if not ContainerPort._is_valid_port(port):
             raise SyntaxError('ContainerPort: host_port: [ {0} ] is invalid.'.format(port))
-        self.host_port = port
+        self._host_port = port
 
     # ------------------------------------------------------------------------------------- protocol
 
@@ -73,13 +73,13 @@ class ContainerPort(object):
 
     @protocol.setter
     def protocol(self, protocol=None):
-        if protocol not in ContainerPort.VALID_PROTOCOLS:
+        if protocol.upper() not in ContainerPort.VALID_PROTOCOLS:
             raise SyntaxError('ContainerPort: protocol: [ {0} ] is invalid.'.format(protocol))
-        self._protocol = protocol
+        self._protocol = protocol.upper()
 
     # ------------------------------------------------------------------------------------- serialize
 
-    def json(self):
+    def serialize(self):
         data = {}
         if self.name:
             data['name'] = self.name
