@@ -6,16 +6,21 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+import json
+import yaml
+
 from kubernetes.K8sObject import K8sObject
 from kubernetes.models.v1.Service import Service
-from kubernetes.K8sExceptions import NotFoundException
 
 
 class K8sService(K8sObject):
 
     def __init__(self, config=None, name=None):
-        super(K8sService, self).__init__(config=config, obj_type='Service', name=name)
-        self.model = Service(name=name, namespace=self.config.namespace)
+        super(K8sService, self).__init__(
+            config=config,
+            name=name,
+            obj_type='Service'
+        )
 
     # -------------------------------------------------------------------------------------  override
 
@@ -40,32 +45,20 @@ class K8sService(K8sObject):
         return self
 
     def add_port(self, name=None, port=None, target_port=None, protocol=None, node_port=None):
-        self.model.add_port(name=name, port=port, target_port=target_port, protocol=protocol, node_port=node_port)
+        if isinstance(target_port, int):
+            target_port = str(target_port)
+        self.model.add_port(
+            name=name,
+            port=port,
+            target_port=target_port,
+            protocol=protocol,
+            node_port=node_port
+        )
         return self
 
     def add_selector(self, selector=None):
         self.model.add_selector(selector=selector)
         return self
-
-    # ------------------------------------------------------------------------------------- del
-
-    def del_meta_creation_timestamp(self):
-        return self.model.del_meta_creation_timestamp()
-
-    def del_meta_generation(self):
-        return self.model.del_meta_generation()
-
-    def del_meta_resource_version(self):
-        return self.model.del_meta_resource_version()
-
-    def del_meta_self_link(self):
-        return self.model.del_meta_self_link()
-
-    def del_meta_uid(self):
-        return self.model.del_meta_uid()
-
-    def del_server_generated_meta_attr(self):
-        return self.model.del_server_generated_meta_attr()
 
     # ------------------------------------------------------------------------------------- get
 
@@ -74,95 +67,113 @@ class K8sService(K8sObject):
         return self
 
     def get_annotation(self, k=None):
-        return self.model.get_annotation(k=k)
-
-    def get_annotations(self):
-        return self.model.get_annotations()
-
-    def get_cluster_ip(self):
-        return self.model.get_cluster_ip()
-
-    def get_external_ips(self):
-        return self.model.get_external_ips()
+        if k in self.model.metadata.annotations:
+            return self.model.metadata.annotations[k]
+        return None
 
     def get_label(self, k=None):
-        return self.model.get_label(k=k)
+        if k in self.model.metadata.labels:
+            return self.model.metadata.labels[k]
+        return None
 
-    def get_labels(self):
-        return self.model.get_labels()
+    # ------------------------------------------------------------------------------------- clusterIP
 
-    def get_meta_creation_timestamp(self):
-        return self.model.get_meta_creation_timestamp()
+    @property
+    def cluster_ip(self):
+        return self.model.spec.cluster_ip
 
-    def get_meta_generation(self):
-        return self.model.get_meta_generation()
+    @cluster_ip.setter
+    def cluster_ip(self, ip=None):
+        self.model.spec.cluster_ip = ip
 
-    def get_meta_resource_version(self):
-        return self.model.get_meta_resource_version()
+    # ------------------------------------------------------------------------------------- externalIPs
 
-    def get_meta_self_link(self):
-        return self.model.get_meta_self_link()
+    @property
+    def external_ips(self):
+        return self.model.spec.external_ips
 
-    def get_meta_uid(self):
-        return self.model.get_meta_uid()
+    @external_ips.setter
+    def external_ips(self, ips=None):
+        self.model.spec.external_ips = ips
 
-    # ------------------------------------------------------------------------------------- set
+    # ------------------------------------------------------------------------------------- loadBalancerIP
 
-    def set_annotations(self, dico=None):
-        self.model.set_annotations(dico=dico)
-        return self
+    @property
+    def load_balancer_ip(self):
+        return self.model.spec.load_balancer_ip
 
-    def set_cluster_ip(self, ip=None):
-        self.model.set_cluster_ip(ip=ip)
-        return self
+    @load_balancer_ip.setter
+    def load_balancer_ip(self, ip=None):
+        self.model.spec.load_balancer_ip = ip
 
-    def set_external_ips(self, ips=None):
-        self.model.set_external_ips(ips=ips)
-        return self
+    # ------------------------------------------------------------------------------------- name
 
-    def set_labels(self, dico=None):
-        self.model.set_labels(dico=dico)
-        return self
+    @property
+    def name(self):
+        return self.model.name
 
-    def set_load_balancer_ip(self, ip=None):
-        self.model.set_load_balancer_ip(ip=ip)
-        return self
+    @name.setter
+    def name(self, name=None):
+        self.model.name = name
 
-    def set_namespace(self, name=None):
-        self.model.set_namespace(name=name)
-        return self
+    # ------------------------------------------------------------------------------------- namespace
 
-    def set_meta_creation_timestamp(self, ts=None):
-        return self.model.set_meta_creation_timestamp(ts=ts)
+    @property
+    def namespace(self):
+        return self.model.metadata.namespace
 
-    def set_meta_generation(self, gen=None):
-        return self.model.set_meta_generation(gen=gen)
+    @namespace.setter
+    def namespace(self, nspace=None):
+        self.model.metadata.namespace = nspace
 
-    def set_meta_resource_version(self, ver=None):
-        return self.model.set_meta_resource_version(ver=ver)
+    # ------------------------------------------------------------------------------------- ports
 
-    def set_meta_self_link(self, link=None):
-        return self.model.set_meta_self_link(link=link)
+    @property
+    def ports(self):
+        return self.model.spec.ports
 
-    def set_meta_uid(self, uid=None):
-        return self.model.set_meta_uid(uid=uid)
+    @ports.setter
+    def ports(self, ports=None):
+        self.model.spec.ports = ports
 
-    def set_session_affinity(self, affinity_type=None):
-        self.model.set_session_affinity(affinity_type=affinity_type)
-        return self
+    # ------------------------------------------------------------------------------------- sessionAffinity
 
-    def set_service_type(self, service_type=None):
-        self.model.set_service_type(service_type=service_type)
-        return self
+    @property
+    def session_affinity(self):
+        return self.model.spec.session_affinity
+
+    @session_affinity.setter
+    def session_affinity(self, sa=None):
+        self.model.spec.session_affinity = sa
+
+    # ------------------------------------------------------------------------------------- selector
+
+    @property
+    def selector(self):
+        return self.model.spec.selector
+
+    @selector.setter
+    def selector(self, s=None):
+        self.model.spec.selector = s
+
+    # ------------------------------------------------------------------------------------- type
+
+    @property
+    def type(self):
+        return self.model.spec.type
+
+    @type.setter
+    def type(self, t=None):
+        self.model.spec.type = t
 
     # ------------------------------------------------------------------------------------- filter
 
     @staticmethod
     def get_by_name(config=None, name=None):
-        service_list = list()
-        data = dict(labelSelector="name={svc_name}".format(svc_name=name))
+        service_list = []
+        data = {'labelSelector': 'name={}'.format(name)}
         services = K8sService(config=config, name=name).get_with_params(data=data)
         for svc in services:
-            service_name = Service(model=svc).get_name()
+            service_name = Service(model=svc).metadata.name
             service_list.append(K8sService(config=config, name=service_name).get())
         return service_list

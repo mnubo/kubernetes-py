@@ -8,19 +8,24 @@
 
 import unittest
 import uuid
-from kubernetes import K8sReplicationController, K8sConfig, K8sPod
+
+from kubernetes import K8sReplicationController, K8sConfig, K8sPod, K8sContainer
 from kubernetes.K8sExceptions import *
-from kubernetes.models.v1 import ReplicationController, ObjectMeta, PodSpec
+from kubernetes.models.v1 import (
+    ReplicationController, ObjectMeta, ReplicationControllerSpec, ReplicationControllerStatus
+)
 from tests import utils
 
 
 class K8sReplicationControllerTest(unittest.TestCase):
 
     def setUp(self):
-        pass
+        utils.cleanup_rc()
+        utils.cleanup_pods()
 
     def tearDown(self):
-        utils.cleanup_objects()
+        utils.cleanup_rc()
+        utils.cleanup_pods()
 
     # --------------------------------------------------------------------------------- init
 
@@ -37,19 +42,13 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_init_with_invalid_config(self):
         config = object()
-        try:
+        with self.assertRaises(SyntaxError):
             K8sReplicationController(config=config)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_init_with_invalid_name(self):
         name = object()
-        try:
+        with self.assertRaises(SyntaxError):
             utils.create_rc(name=name)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_init_with_name(self):
         name = "yomama"
@@ -79,102 +78,26 @@ class K8sReplicationControllerTest(unittest.TestCase):
     def test_struct_rc(self):
         name = "yomama"
         rc = utils.create_rc(name=name)
-        model = rc.model
-        self.assertIsInstance(model.model, dict)
-        self.assertIsInstance(model.pod_metadata, ObjectMeta)
-        self.assertIsInstance(model.pod_spec, PodSpec)
-        self.assertIsNone(model.pod_status)
-        self.assertIsInstance(model.rc_metadata, ObjectMeta)
-
-    def test_struct_rc_model(self):
-        name = "yomama"
-        rc = utils.create_rc(name=name)
-        model = rc.model.model
-        self.assertIsNotNone(model)
-        self.assertIsInstance(model, dict)
-
-        self.assertEqual(4, len(model))
-        for i in ['apiVersion', 'kind', 'metadata', 'spec']:
-            self.assertIn(i, model)
-        self.assertIsInstance(model['apiVersion'], str)
-        self.assertIsInstance(model['kind'], str)
-        self.assertIsInstance(model['metadata'], dict)
-        self.assertIsInstance(model['spec'], dict)
-
-        self.assertEqual(3, len(model['metadata']))
-        for i in ['labels', 'name', 'namespace']:
-            self.assertIn(i, model['metadata'])
-        self.assertIsInstance(model['metadata']['name'], str)
-        self.assertEqual(model['metadata']['name'], name)
-        self.assertIsInstance(model['metadata']['namespace'], str)
-        self.assertIsInstance(model['metadata']['labels'], dict)
-
-        self.assertEqual(1, len(model['metadata']['labels']))
-        self.assertIn('name', model['metadata']['labels'])
-        self.assertIsInstance(model['metadata']['labels']['name'], str)
-        self.assertEqual(model['metadata']['labels']['name'], name)
-
-        self.assertEqual(3, len(model['spec']))
-        for i in ['replicas', 'selector', 'template']:
-            self.assertIn(i, model['spec'])
-        self.assertIsInstance(model['spec']['replicas'], int)
-        self.assertIsInstance(model['spec']['selector'], dict)
-        self.assertIsInstance(model['spec']['template'], dict)
-
-        self.assertEqual(2, len(model['spec']['selector']))
-        for i in ['name', 'rc_version']:
-            self.assertIn(i, model['spec']['selector'])
-            self.assertIsInstance(model['spec']['selector'][i], str)
-
-        self.assertEqual(2, len(model['spec']['template']))
-        for i in ['metadata', 'spec']:
-            self.assertIn(i, model['spec']['template'])
-            self.assertIsInstance(model['spec']['template'][i], dict)
-
-        self.assertEqual(3, len(model['spec']['template']['metadata']))
-        for i in ['labels', 'name', 'namespace']:
-            self.assertIn(i, model['spec']['template']['metadata'])
-        self.assertIsInstance(model['spec']['template']['metadata']['labels'], dict)
-        self.assertIsInstance(model['spec']['template']['metadata']['name'], str)
-        self.assertIsInstance(model['spec']['template']['metadata']['namespace'], str)
-
-        self.assertEqual(2, len(model['spec']['template']['metadata']['labels']))
-        for i in ['name', 'rc_version']:
-            self.assertIn(i, model['spec']['template']['metadata']['labels'])
-            self.assertIsInstance(model['spec']['template']['metadata']['labels'][i], str)
-
-        self.assertEqual(4, len(model['spec']['template']['spec']))
-        for i in ['containers', 'dnsPolicy', 'restartPolicy', 'volumes']:
-            self.assertIn(i, model['spec']['template']['spec'])
-        for i in ['containers', 'volumes']:
-            self.assertIsInstance(model['spec']['template']['spec'][i], list)
-            self.assertEqual(0, len(model['spec']['template']['spec'][i]))
-        for i in ['dnsPolicy', 'restartPolicy']:
-            self.assertIsInstance(model['spec']['template']['spec'][i], str)
-        self.assertEqual('Default', model['spec']['template']['spec']['dnsPolicy'])
-        self.assertEqual('Always', model['spec']['template']['spec']['restartPolicy'])
+        self.assertIsInstance(rc.model, ReplicationController)
+        self.assertIsInstance(rc.model.metadata, ObjectMeta)
+        self.assertIsInstance(rc.model.spec, ReplicationControllerSpec)
+        self.assertIsInstance(rc.model.status, ReplicationControllerStatus)
 
     # --------------------------------------------------------------------------------- add annotation
 
     def test_add_annotation_none_args(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-        try:
+        with self.assertRaises(SyntaxError):
             rc.add_annotation()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_add_annotation_invalid_args(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
         k = object()
         v = object()
-        try:
+        with self.assertRaises(SyntaxError):
             rc.add_annotation(k, v)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_add_annotation(self):
         name = "yorc"
@@ -182,34 +105,44 @@ class K8sReplicationControllerTest(unittest.TestCase):
         k = "yokey"
         v = "yovalue"
         rc.add_annotation(k, v)
-        self.assertIn('annotations', rc.model.model['metadata'])
-        self.assertIn(k, rc.model.model['metadata']['annotations'])
-        self.assertEqual(rc.model.model['metadata']['annotations']['yokey'], v)
-        self.assertIn('annotations', rc.model.rc_metadata.model)
-        self.assertIn(k, rc.model.rc_metadata.model['annotations'])
-        self.assertEqual(rc.model.rc_metadata.model['annotations']['yokey'], v)
+        self.assertIn(k, rc.annotations)
+        self.assertEqual(v, rc.annotations[k])
+
+    # --------------------------------------------------------------------------------- add container
+
+    def test_rc_add_container_invalid(self):
+        name = "yorc"
+        obj = utils.create_rc(name=name)
+        c = object()
+        with self.assertRaises(SyntaxError):
+            obj.add_container(c)
+
+    def test_rc_add_container(self):
+        name = "yoname"
+        rc = utils.create_rc(name=name)
+        self.assertEqual(0, len(rc.containers))
+        name = "redis"
+        image = "redis:latest"
+        c = K8sContainer(name=name, image=image)
+        rc.add_container(c)
+        self.assertEqual(1, len(rc.containers))
+        self.assertIn(c, rc.containers)
 
     # --------------------------------------------------------------------------------- add label
 
     def test_add_label_none_args(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-        try:
+        with self.assertRaises(SyntaxError):
             rc.add_label()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_add_label_invalid_args(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
         k = object()
         v = object()
-        try:
+        with self.assertRaises(SyntaxError):
             rc.add_label(k, v)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_add_label(self):
         name = "yorc"
@@ -217,34 +150,24 @@ class K8sReplicationControllerTest(unittest.TestCase):
         k = "yokey"
         v = "yovalue"
         rc.add_label(k, v)
-        self.assertIn('labels', rc.model.model['metadata'])
-        self.assertIn(k, rc.model.model['metadata']['labels'])
-        self.assertEqual(rc.model.model['metadata']['labels']['yokey'], v)
-        self.assertIn('labels', rc.model.rc_metadata.model)
-        self.assertIn(k, rc.model.rc_metadata.model['labels'])
-        self.assertEqual(rc.model.rc_metadata.model['labels']['yokey'], v)
+        self.assertIn(k, rc.labels)
+        self.assertEqual(v, rc.labels[k])
 
     # --------------------------------------------------------------------------------- add pod annotation
 
     def test_add_pod_annotation_none_args(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-        try:
+        with self.assertRaises(SyntaxError):
             rc.add_pod_annotation()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_add_pod_annotation_invalid_args(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
         k = object()
         v = object()
-        try:
+        with self.assertRaises(SyntaxError):
             rc.add_pod_annotation(k, v)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_add_pod_annotation(self):
         name = "yorc"
@@ -252,34 +175,24 @@ class K8sReplicationControllerTest(unittest.TestCase):
         k = "yokey"
         v = "yovalue"
         rc.add_pod_annotation(k, v)
-        self.assertIn('annotations', rc.model.model['spec']['template']['metadata'])
-        self.assertIn(k, rc.model.model['spec']['template']['metadata']['annotations'])
-        self.assertEqual(rc.model.model['spec']['template']['metadata']['annotations']['yokey'], v)
-        self.assertIn('annotations', rc.model.pod_metadata.model)
-        self.assertIn(k, rc.model.pod_metadata.model['annotations'])
-        self.assertEqual(rc.model.pod_metadata.model['annotations']['yokey'], v)
+        self.assertIn(k, rc.pod_annotations)
+        self.assertEqual(v, rc.pod_annotations[k])
 
     # --------------------------------------------------------------------------------- add pod label
 
     def test_add_pod_label_none_args(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-        try:
+        with self.assertRaises(SyntaxError):
             rc.add_pod_label()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_add_pod_label_invalid_args(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
         k = object()
         v = object()
-        try:
+        with self.assertRaises(SyntaxError):
             rc.add_pod_label(k, v)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_add_pod_label(self):
         name = "yorc"
@@ -287,41 +200,48 @@ class K8sReplicationControllerTest(unittest.TestCase):
         k = "yokey"
         v = "yovalue"
         rc.add_pod_label(k, v)
-        self.assertIn('labels', rc.model.model['spec']['template']['metadata'])
-        self.assertIn(k, rc.model.model['spec']['template']['metadata']['labels'])
-        self.assertEqual(rc.model.model['spec']['template']['metadata']['labels']['yokey'], v)
-        self.assertIn('labels', rc.model.pod_metadata.model)
-        self.assertIn(k, rc.model.pod_metadata.model['labels'])
-        self.assertEqual(rc.model.pod_metadata.model['labels']['yokey'], v)
+        self.assertIn(k, rc.pod_labels)
+        self.assertEqual(v, rc.pod_labels[k])
+
+    # --------------------------------------------------------------------------------- add pull secret
+
+    def test_rc_add_image_pull_secrets_none_arg(self):
+        name = "yorc"
+        obj = utils.create_rc(name=name)
+        secretname = None
+        try:
+            obj.add_image_pull_secrets(name=secretname)
+            self.fail("Should not fail.")
+        except Exception as err:
+            self.assertIsInstance(err, SyntaxError)
+
+    def test_rc_add_image_pull_secrets_invalid_arg(self):
+        name = "yorc"
+        obj = utils.create_rc(name=name)
+        secretname = 666
+        try:
+            obj.add_image_pull_secrets(name=secretname)
+            self.fail("Should not fail.")
+        except Exception as err:
+            self.assertIsInstance(err, SyntaxError)
+
+    def test_rc_add_image_pull_secrets(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        secretname = "yosecret"
+        rc.add_image_pull_secrets(name=secretname)
+        self.assertEqual(1, len(rc.image_pull_secrets))
+        self.assertIn(secretname, rc.image_pull_secrets)
 
     # --------------------------------------------------------------------------------- del annotation
-
-    def test_del_annotation_none_arg(self):
-        name = "yorc"
-        rc = utils.create_rc(name=name)
-        try:
-            rc.del_annotation()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
-
-    def test_del_annotation_invalid_arg(self):
-        name = "yorc"
-        rc = utils.create_rc(name=name)
-        k = object()
-        try:
-            rc.del_annotation(k)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_del_annotation_doesnt_exist(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
         k = "yokey"
+        self.assertNotIn(k, rc.annotations)
         rc.del_annotation(k)
-        self.assertNotIn('annotations', rc.model.model['metadata'])
-        self.assertNotIn('annotations', rc.model.rc_metadata.model)
+        self.assertNotIn(k, rc.annotations)
 
     def test_del_annotation(self):
         name = "yorc"
@@ -329,82 +249,39 @@ class K8sReplicationControllerTest(unittest.TestCase):
         k = "yokey"
         v = "yovalue"
         rc.add_annotation(k, v)
-        self.assertIn(k, rc.model.model['metadata']['annotations'])
-        self.assertIn(k, rc.model.rc_metadata.model['annotations'])
+        self.assertIn(k, rc.annotations)
         rc.del_annotation(k)
-        self.assertNotIn(k, rc.model.model['metadata']['annotations'])
-        self.assertNotIn(k, rc.model.rc_metadata.model['annotations'])
+        self.assertNotIn(k, rc.annotations)
 
     # --------------------------------------------------------------------------------- del label
-
-    def test_del_label_none_arg(self):
-        name = "yorc"
-        rc = utils.create_rc(name=name)
-        try:
-            rc.del_label()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
-
-    def test_del_label_invalid_arg(self):
-        name = "yorc"
-        rc = utils.create_rc(name=name)
-        k = object()
-        try:
-            rc.del_label(k)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_del_label_doesnt_exist(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
         k = "yokey"
+        self.assertNotIn(k, rc.labels)
         rc.del_label(k)
-        self.assertIn('labels', rc.model.model['metadata'])
-        self.assertNotIn(k, rc.model.model['metadata'])
-        self.assertIn('labels', rc.model.rc_metadata.model)
+        self.assertNotIn(k, rc.labels)
 
     def test_del_label(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
         k = "yokey"
         v = "yovalue"
-        rc.add_annotation(k, v)
-        self.assertIn(k, rc.model.model['metadata']['annotations'])
-        self.assertIn(k, rc.model.rc_metadata.model['annotations'])
-        rc.del_annotation(k)
-        self.assertNotIn(k, rc.model.model['metadata']['annotations'])
-        self.assertNotIn(k, rc.model.rc_metadata.model['annotations'])
+        rc.add_label(k, v)
+        self.assertIn(k, rc.labels)
+        rc.del_label(k)
+        self.assertNotIn(k, rc.labels)
 
     # --------------------------------------------------------------------------------- del pod annotation
-
-    def test_del_pod_annotation_none_args(self):
-        name = "yorc"
-        rc = utils.create_rc(name=name)
-        try:
-            rc.del_pod_annotation()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
-
-    def test_del_pod_annotation_invalid_args(self):
-        name = "yorc"
-        rc = utils.create_rc(name=name)
-        k = object()
-        try:
-            rc.del_pod_annotation(k)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_del_pod_annotation_doesnt_exist(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
         k = "yokey"
+        self.assertNotIn(k, rc.pod_annotations)
         rc.del_pod_annotation(k)
-        self.assertNotIn('annotations', rc.model.model['spec']['template']['metadata'])
-        self.assertNotIn('annotations', rc.model.pod_metadata.model)
+        self.assertNotIn(k, rc.pod_annotations)
 
     def test_del_pod_annotation(self):
         name = "yorc"
@@ -412,40 +289,18 @@ class K8sReplicationControllerTest(unittest.TestCase):
         k = "yokey"
         v = "yovalue"
         rc.add_pod_annotation(k, v)
-        self.assertIn(k, rc.model.model['spec']['template']['metadata']['annotations'])
-        self.assertIn(k, rc.model.pod_metadata.model['annotations'])
+        self.assertIn(k, rc.pod_annotations)
         rc.del_pod_annotation(k)
-        self.assertNotIn(k, rc.model.model['spec']['template']['metadata']['annotations'])
-        self.assertNotIn(k, rc.model.pod_metadata.model['annotations'])
+        self.assertNotIn(k, rc.annotations)
 
     # --------------------------------------------------------------------------------- del pod label
-
-    def test_del_pod_label_none_args(self):
-        name = "yorc"
-        rc = utils.create_rc(name=name)
-        try:
-            rc.del_pod_label()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
-
-    def test_del_pod_label_invalid_args(self):
-        name = "yorc"
-        rc = utils.create_rc(name=name)
-        k = object()
-        try:
-            rc.del_pod_label(k)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_del_pod_label_doesnt_exist(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
         k = "yokey"
+        self.assertNotIn(k, rc.pod_labels)
         rc.del_pod_label(k)
-        self.assertNotIn(k, rc.model.model['spec']['template']['metadata']['labels'])
-        self.assertNotIn(k, rc.model.pod_metadata.model['labels'])
 
     def test_del_pod_label(self):
         name = "yorc"
@@ -453,11 +308,21 @@ class K8sReplicationControllerTest(unittest.TestCase):
         k = "yokey"
         v = "yovalue"
         rc.add_pod_label(k, v)
-        self.assertIn(k, rc.model.model['spec']['template']['metadata']['labels'])
-        self.assertIn(k, rc.model.pod_metadata.model['labels'])
+        self.assertIn(k, rc.pod_labels)
         rc.del_pod_label(k)
-        self.assertNotIn(k, rc.model.model['spec']['template']['metadata']['labels'])
-        self.assertNotIn(k, rc.model.pod_metadata.model['labels'])
+        self.assertNotIn(k, rc.pod_labels)
+
+    # --------------------------------------------------------------------------------- del pod node name
+
+    def test_rc_del_pod_node_name(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        nodename = "yonodename"
+        rc.pod_node_name = nodename
+        self.assertEqual(nodename, rc.pod_node_name)
+        rc.del_pod_node_name()
+        self.assertNotEqual(nodename, rc.pod_node_name)
+        self.assertIsNone(rc.pod_node_name)
 
     # --------------------------------------------------------------------------------- get
 
@@ -486,25 +351,6 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     # --------------------------------------------------------------------------------- get annotation
 
-    def test_get_annotation_none_args(self):
-        name = "yorc"
-        rc = utils.create_rc(name=name)
-        try:
-            rc.get_annotation()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
-
-    def test_get_annotation_invalid_args(self):
-        name = "yorc"
-        rc = utils.create_rc(name=name)
-        k = object()
-        try:
-            rc.get_annotation(k)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
-
     def test_get_annotation_doesnt_exist(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
@@ -524,49 +370,26 @@ class K8sReplicationControllerTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- get annotations
 
     def test_get_annotations_none(self):
-        name = "yorc"
+        name = "yorc-{}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
-        anns = rc.get_annotations()
-        self.assertIsNone(anns)
+        self.assertEqual({}, rc.annotations)
 
     def test_get_annotations(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-
         count = 4
         for i in range(0, count):
             k = "yokey_{0}".format(i)
             v = "yovalue_{0}".format(i)
             rc.add_annotation(k, v)
-
-        anns = rc.get_annotations()
-        self.assertEqual(count, len(anns))
+        self.assertEqual(count, len(rc.annotations))
         for i in range(0, count):
             k = "yokey_{0}".format(i)
             v = "yovalue_{0}".format(i)
-            self.assertIn(k, anns)
-            self.assertEqual(v, anns[k])
+            self.assertIn(k, rc.annotations)
+            self.assertEqual(v, rc.annotations[k])
 
     # --------------------------------------------------------------------------------- get label
-
-    def test_get_label_none_args(self):
-        name = "yorc"
-        rc = utils.create_rc(name=name)
-        try:
-            rc.get_label()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
-
-    def test_get_label_invalid_args(self):
-        name = "yorc"
-        rc = utils.create_rc(name=name)
-        k = object()
-        try:
-            rc.get_label(k)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_get_label_doesnt_exist(self):
         name = "yorc"
@@ -589,117 +412,73 @@ class K8sReplicationControllerTest(unittest.TestCase):
     def test_get_labels_none(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-        labels = rc.get_labels()
-        self.assertIsNotNone(labels)  # 'name' is already a label
-        self.assertIn('name', labels)
-        self.assertEqual(name, labels['name'])
+        self.assertIsNotNone(rc.labels)  # 'name' is already a label
+        self.assertIn('name', rc.labels)
+        self.assertEqual(name, rc.labels['name'])
 
     def test_get_labels(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-
         count = 4
         for i in range(0, count):
             k = "yokey_{0}".format(i)
             v = "yovalue_{0}".format(i)
             rc.add_label(k, v)
-
-        labels = rc.get_labels()
-        self.assertLessEqual(count, len(labels))  # 'name' is already a label
+        self.assertLessEqual(count, len(rc.labels))  # 'name' is already a label
         for i in range(0, count):
             k = "yokey_{0}".format(i)
             v = "yovalue_{0}".format(i)
-            self.assertIn(k, labels)
-            self.assertEqual(v, labels[k])
+            self.assertIn(k, rc.labels)
+            self.assertEqual(v, rc.labels[k])
 
     # --------------------------------------------------------------------------------- get pod annotation
-
-    def test_get_pod_annotation_none_args(self):
-        name = "yorc"
-        rc = utils.create_rc(name=name)
-        try:
-            rc.get_pod_annotation()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
-
-    def test_get_pod_annotation_invalid_args(self):
-        name = "yorc"
-        rc = utils.create_rc(name=name)
-        k = object()
-        try:
-            rc.get_pod_annotation(k)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_get_pod_annotation_doesnt_exist(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
         k = "yokey"
-        ann = rc.get_pod_annotation(k)
-        self.assertIsNone(ann)
+        self.assertNotIn(k, rc.pod_annotations)
+        self.assertIsNone(rc.get_pod_annotation(k))
 
     def test_get_pod_annotation(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
         k = "yokey"
-        v_in = "yovalue"
-        rc.add_pod_annotation(k, v_in)
-        v_out = rc.get_pod_annotation(k)
-        self.assertEqual(v_in, v_out)
+        v = "yovalue"
+        self.assertNotIn(k, rc.pod_annotations)
+        rc.add_pod_annotation(k, v)
+        self.assertIn(k, rc.pod_annotations)
+        self.assertEqual(v, rc.get_pod_annotation(k))
 
     # --------------------------------------------------------------------------------- get pod annotations
 
     def test_get_pod_annotations_none(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-        anns = rc.get_pod_annotations()
-        self.assertIsNone(anns)
+        self.assertEqual({}, rc.pod_annotations)
 
     def test_get_pod_annotations(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-
         count = 4
         for i in range(0, count):
             k = "yokey_{0}".format(i)
             v = "yovalue_{0}".format(i)
             rc.add_pod_annotation(k, v)
-
-        anns = rc.get_pod_annotations()
-        self.assertEqual(count, len(anns))
+        self.assertEqual(count, len(rc.pod_annotations))
         for i in range(0, count):
             k = "yokey_{0}".format(i)
             v = "yovalue_{0}".format(i)
-            self.assertIn(k, anns)
-            self.assertEqual(v, anns[k])
+            self.assertIn(k, rc.pod_annotations)
+            self.assertEqual(v, rc.pod_annotations[k])
 
     # --------------------------------------------------------------------------------- get pod label
-
-    def test_get_pod_label_none_args(self):
-        name = "yorc"
-        rc = utils.create_rc(name=name)
-        try:
-            rc.get_pod_label()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
-
-    def test_get_pod_label_invalid_args(self):
-        name = "yorc"
-        rc = utils.create_rc(name=name)
-        k = object()
-        try:
-            rc.get_pod_label(k)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_get_pod_label_doesnt_exist(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
         k = "yokey"
+        self.assertNotIn(k, rc.pod_labels)
         label = rc.get_pod_label(k)
         self.assertIsNone(label)
 
@@ -707,95 +486,162 @@ class K8sReplicationControllerTest(unittest.TestCase):
         name = "yorc"
         rc = utils.create_rc(name=name)
         k = "yokey"
-        v_in = "yovalue"
-        rc.add_pod_label(k, v_in)
-        v_out = rc.get_pod_label(k)
-        self.assertEqual(v_in, v_out)
+        v = "yovalue"
+        rc.add_pod_label(k, v)
+        self.assertIn(k, rc.pod_labels)
+        self.assertEqual(v, rc.get_pod_label(k))
 
     # --------------------------------------------------------------------------------- get pod labels
 
     def test_get_pod_labels_none(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-        labels = rc.get_pod_labels()
-        self.assertIsNotNone(labels)  # 'name' and 'rc_version' are already labels
-        self.assertIn('name', labels)
-        self.assertIn('rc_version', labels)
-        self.assertEqual(name, labels['name'])
+        self.assertIsNotNone(rc.pod_labels)  # 'name' and 'rc_version' are already labels
+        self.assertIn('name', rc.pod_labels)
+        self.assertIn('rc_version', rc.pod_labels)
+        self.assertEqual(name, rc.pod_labels['name'])
 
     def test_get_pod_labels(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-
         count = 4
         for i in range(0, count):
             k = "yokey_{0}".format(i)
             v = "yovalue_{0}".format(i)
             rc.add_pod_label(k, v)
-
-        labels = rc.get_pod_labels()
-        self.assertLessEqual(count, len(labels))  # 'name' and 'rc_version' are already labels
+        self.assertLessEqual(count, len(rc.pod_labels))  # 'name' and 'rc_version' are already labels
         for i in range(0, count):
             k = "yokey_{0}".format(i)
             v = "yovalue_{0}".format(i)
-            self.assertIn(k, labels)
-            self.assertEqual(v, labels[k])
+            self.assertIn(k, rc.pod_labels)
+            self.assertEqual(v, rc.pod_labels[k])
+
+    # --------------------------------------------------------------------------------- get pod node name
+
+    def test_rc_get_pod_node_name_none(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        self.assertIsNone(rc.pod_node_name)
+
+    def test_rc_get_pod_node_name(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        nodename = "yonodename"
+        rc.pod_node_name = nodename
+        self.assertEqual(nodename, rc.pod_node_name)
+
+    # --------------------------------------------------------------------------------- get pod node selector
+
+    def test_rc_get_pod_node_selector_none(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        self.assertEqual({}, rc.pod_node_selector)
+
+    def test_rc_get_pod_node_selector(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        s = {"disktype": "ssd"}
+        rc.pod_node_selector = s
+        self.assertEqual(s, rc.pod_node_selector)
 
     # --------------------------------------------------------------------------------- get replicas
 
     def test_get_replicas_none(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-        reps = rc.get_replicas()
-        self.assertEqual(0, reps)
+        self.assertEqual(0, rc.desired_replicas)
 
     def test_get_replicas(self):
         name = "yorc"
         count = 10
         rc = utils.create_rc(name=name, replicas=count)
-        reps = rc.get_replicas()
-        self.assertEqual(count, reps)
+        self.assertEqual(count, rc.desired_replicas)
+
+    # --------------------------------------------------------------------------------- get pod restart policy
+
+    def test_rc_get_pod_restart_policy_none(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        rp = rc.restart_policy
+        self.assertEqual('Always', rp)  # set to 'Always' by default
+
+    def test_rc_get_pod_restart_policy(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        p = 'OnFailure'
+        rc.restart_policy = p
+        self.assertEqual(p, rc.restart_policy)
 
     # --------------------------------------------------------------------------------- get selector
 
     def test_get_selector(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-        sel = rc.get_selector()
-        self.assertIsNotNone(sel)
-        self.assertIsInstance(sel, dict)
-        self.assertEqual(2, len(sel))
-        self.assertIn('name', sel)
-        self.assertIn('rc_version', sel)
-        self.assertEqual(name, sel['name'])
+        self.assertIsNotNone(rc.selector)
+        self.assertIsInstance(rc.selector, dict)
+        self.assertEqual(2, len(rc.selector))
+        self.assertIn('name', rc.selector)
+        self.assertIn('rc_version', rc.selector)
+        self.assertEqual(name, rc.selector['name'])
+
+    # --------------------------------------------------------------------------------- get service account
+
+    def test_rc_get_service_account_none(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        self.assertIsNone(rc.service_account_name)
+
+    def test_rc_get_service_account(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        acct = "yoservice"
+        rc.service_account_name = acct
+        self.assertEqual(acct, rc.service_account_name)
+
+    # --------------------------------------------------------------------------------- set active deadline
+
+    def test_rc_set_active_deadline_none_arg(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        d = None
+        with self.assertRaises(SyntaxError):
+            rc.active_deadline = d
+
+    def test_rc_set_active_deadline_invalid_arg(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        d = "yodeadline"
+        with self.assertRaises(SyntaxError):
+            rc.active_deadline = d
+
+    def test_rc_set_active_deadline(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        d = 600
+        rc.active_deadline = d
+        self.assertEqual(d, rc.active_deadline)
 
     # --------------------------------------------------------------------------------- set annotations
 
     def test_set_annotations_none_arg(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-        try:
-            rc.set_annotations()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            rc.annotations = None
 
     def test_set_annotations_invalid_arg(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
         anns = object()
-        try:
-            rc.set_annotations(anns)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            rc.annotations = anns
 
     def test_set_annotations(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
         anns_in = {'k1': 'v1', 'k2': 'v2'}
-        rc.set_annotations(anns_in)
-        anns_out = rc.get_annotations()
+        rc.annotations = anns_in
+        anns_out = rc.annotations
         self.assertEqual(anns_in, anns_out)
 
     # --------------------------------------------------------------------------------- set labels
@@ -803,144 +649,209 @@ class K8sReplicationControllerTest(unittest.TestCase):
     def test_set_labels_none_arg(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-        try:
-            rc.set_labels()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            rc.labels = None
 
     def test_set_labels_invalid_arg(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
         labels = object()
-        try:
-            rc.set_labels(labels)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            rc.labels = labels
 
     def test_set_labels(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-        labels_in = {'k1': 'v1', 'k2': 'v2'}
-        rc.set_labels(labels_in)
-        labels_out = rc.get_labels()
-        self.assertEqual(labels_in, labels_out)
+        labels = {'k1': 'v1', 'k2': 'v2'}
+        rc.labels = labels
+        self.assertEqual(labels, rc.labels)
 
     # --------------------------------------------------------------------------------- set namespace
 
     def test_set_namespace_none_arg(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-        try:
-            rc.set_namespace()
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            rc.namespace = None
 
     def test_set_namespace_invalid_arg(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
         nspace = object()
-        try:
-            rc.set_namespace(nspace)
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            rc.namespace = nspace
 
     def test_set_namespace(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-        nspace_in = "yonamespace"
-        rc.set_namespace(nspace_in)
-        nspace_out = rc.get_namespace()
-        self.assertEqual(nspace_in, nspace_out)
+        nspace = "yonamespace"
+        rc.namespace = nspace
+        self.assertEqual(nspace, rc.namespace)
 
     # --------------------------------------------------------------------------------- set pod annotations
 
     def test_set_pod_annotations_none_arg(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-        try:
-            rc.set_pod_annotations()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            rc.pod_annotations = None
 
     def test_set_pod_annotations_invalid_arg(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
         anns = object()
-        try:
-            rc.set_pod_annotations(anns)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            rc.pod_annotations = anns
 
     def test_set_pod_annotations(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-        anns_in = {'k1': 'v1', 'k2': 'v2'}
-        rc.set_pod_annotations(anns_in)
-        anns_out = rc.get_pod_annotations()
-        self.assertEqual(anns_in, anns_out)
+        anns = {'k1': 'v1', 'k2': 'v2'}
+        rc.pod_annotations = anns
+        self.assertEqual(anns, rc.pod_annotations)
+
+    # --------------------------------------------------------------------------------- set pod node name
+
+    def test_rc_set_pod_node_name_none_arg(self):
+        name = "yorc"
+        obj = utils.create_rc(name=name)
+        nodename = None
+        with self.assertRaises(SyntaxError):
+            obj.pod_node_name = nodename
+
+    def test_rc_set_pod_node_name_invalid_arg(self):
+        name = "yorc"
+        obj = utils.create_rc(name=name)
+        nodename = 666
+        with self.assertRaises(SyntaxError):
+            obj.pod_node_name = nodename
+
+    def test_rc_set_pod_node_name(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        nodename = "yonodename"
+        rc.pod_node_name = nodename
+        self.assertEqual(rc.pod_node_name, nodename)
+
+    # --------------------------------------------------------------------------------- set pod node selector
+
+    def test_rc_set_pod_node_selector_none_arg(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        s = None
+        with self.assertRaises(SyntaxError):
+            rc.pod_node_selector = s
+
+    def test_rc_set_pod_node_selector_invalid_arg(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        s = "yoselector"
+        with self.assertRaises(SyntaxError):
+            rc.pod_node_selector = s
+
+    def test_rc_set_pod_node_selector(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        s = {"disktype": "ssd"}
+        rc.pod_node_selector = s
+        self.assertEqual(s, rc.pod_node_selector)
 
     # --------------------------------------------------------------------------------- set labels
 
     def test_set_pod_labels_none_arg(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-        try:
-            rc.set_pod_labels()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            rc.pod_labels = None
 
     def test_set_pod_labels_invalid_arg(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
         labels = object()
-        try:
-            rc.set_pod_labels(labels)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            rc.pod_labels = labels
 
     def test_set_pod_labels(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-        labels_in = {'k1': 'v1', 'k2': 'v2'}
-        rc.set_pod_labels(labels_in)
-        labels_out = rc.get_pod_labels()
-        self.assertEqual(labels_in, labels_out)
+        labels = {'k1': 'v1', 'k2': 'v2'}
+        rc.pod_labels = labels
+        self.assertEqual(labels, rc.pod_labels)
+
+    # --------------------------------------------------------------------------------- set pod restart policy
+
+    def test_rc_set_pod_restart_policy_none_arg(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        with self.assertRaises(SyntaxError):
+            rc.restart_policy = None
+
+    def test_rc_set_pod_restart_policy_not_a_string(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        p = 666
+        with self.assertRaises(SyntaxError):
+            rc.restart_policy = p
+
+    def test_rc_set_pod_restart_policy_invalid_arg(self):
+        name = "yorc"
+        obj = utils.create_rc(name=name)
+        p = 'yopolicy'
+        with self.assertRaises(SyntaxError):
+            obj.restart_policy = p
+
+    def test_rc_set_pod_restart_policy(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        p = 'Always'
+        rc.restart_policy = p
+        self.assertEqual(p, rc.restart_policy)
+
+    # --------------------------------------------------------------------------------- set pod service account
+
+    def test_rc_set_service_account_none_arg(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        with self.assertRaises(SyntaxError):
+            rc.service_account_name = None
+
+    def test_rc_set_service_account_invalid_arg(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        acct = 666
+        with self.assertRaises(SyntaxError):
+            rc.service_account_name = acct
+
+    def test_rc_set_service_account(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        acct = "yoservice"
+        rc.service_account_name = acct
+        self.assertEqual(acct, rc.service_account_name)
 
     # --------------------------------------------------------------------------------- set replicas
 
     def test_set_replicas_none_arg(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-        try:
-            rc.set_replicas()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            rc.desired_replicas = None
 
     def test_set_replicas_invalid_arg(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
         count = -99
-        try:
-            rc.set_replicas(count)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            rc.desired_replicas = count
 
     def test_set_replicas(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
         count = 10
-        before = rc.get_replicas()
+        before = rc.desired_replicas
         self.assertNotEqual(before, count)
-        rc.set_replicas(count)
-        after = rc.get_replicas()
+        rc.desired_replicas = count
+        after = rc.desired_replicas
         self.assertEqual(count, after)
         self.assertNotEqual(before, after)
 
@@ -949,65 +860,62 @@ class K8sReplicationControllerTest(unittest.TestCase):
     def test_set_selector_none_arg(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-        try:
-            rc.set_selector()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            rc.selector = None
 
     def test_set_selector_invalid_arg(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
         sel = object()
-        try:
-            rc.set_selector(sel)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            rc.selector = sel
 
     def test_set_selector(self):
         name = "yorc"
         rc = utils.create_rc(name=name)
-        sel_in = {'k1': 'v1', 'k2': 'v2'}
-        rc.set_selector(sel_in)
-        sel_out = rc.get_selector()
-        self.assertEqual(sel_in, sel_out)
+        sel = {'k1': 'v1', 'k2': 'v2'}
+        rc.selector = sel
+        self.assertEqual(sel, rc.selector)
+
+    # --------------------------------------------------------------------------------- set termination grace period
+
+    def test_rc_set_termination_grace_period_none_arg(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        with self.assertRaises(SyntaxError):
+            rc.termination_grace_period = None
+
+    def test_rc_set_termination_grace_period_invalid_arg(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        secs = -666
+        with self.assertRaises(SyntaxError):
+            rc.termination_grace_period = secs
+
+    def test_rc_set_termination_grace_period(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        secs = 1234
+        rc.termination_grace_period = secs
+        self.assertEqual(secs, rc.termination_grace_period)
 
     # -------------------------------------------------------------------------------------  wait for replicas
 
-    def test_wait_for_replicas_none_args(self):
-        name = "yorc"
-        rc = utils.create_rc(name=name)
-        try:
-            rc.wait_for_replicas()
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
-
-    def test_wait_for_replicas_invalid_args(self):
-        name = "yorc"
-        rc = utils.create_rc(name=name)
-        replicas = object()
-        try:
-            rc.wait_for_replicas(replicas=replicas)
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
-
-    def test_wait_for_replicas_timed_out(self):
-        # this test makes no sense without a prior call to scale.
-        # it'll wait forever on a quantity of pods that does not change.
-        # please see test_scale().
+    def test_wait_for_replicas(self):
         cont_name = "yocontainer"
         container = utils.create_container(name=cont_name)
         name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         rc.add_container(container)
-        count = 99
         if utils.is_reachable(rc.config.api_host):
-            try:
-                rc.create()
-                rc.wait_for_replicas(replicas=count)
-            except Exception as err:
-                self.assertIsInstance(err, TimedOutException)
+            rc.create()
+            rc.desired_replicas = 2
+            rc.update()
+            rc.wait_for_replicas()
+            from_get = rc.get()
+            self.assertEqual(rc.desired_replicas, from_get.desired_replicas)
+            self.assertEqual(rc.current_replicas, from_get.current_replicas)
+            self.assertEqual(rc.desired_replicas, from_get.current_replicas)
 
     # -------------------------------------------------------------------------------------  get by name
 
@@ -1060,50 +968,42 @@ class K8sReplicationControllerTest(unittest.TestCase):
     # -------------------------------------------------------------------------------------  resize
 
     def test_scale_none_args(self):
-        try:
+        with self.assertRaises(SyntaxError):
             K8sReplicationController.scale()
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_scale_invalid_config(self):
         config = object()
         name = "yoname"
         replicas = 1
-        try:
+        with self.assertRaises(SyntaxError):
             K8sReplicationController.scale(config=config, name=name, replicas=replicas)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
 
     def test_scale_invalid_name(self):
         name = object()
         replicas = 1
-        try:
-            K8sReplicationController.scale(name=name, replicas=replicas)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        config = utils.create_config()
+        if utils.is_reachable(config.api_host):
+            with self.assertRaises(SyntaxError):
+                K8sReplicationController.scale(config=config, name=name, replicas=replicas)
 
     def test_scale_invalid_replicas(self):
         name = "yoname"
         replicas = -99
-        try:
-            K8sReplicationController.scale(name=name, replicas=replicas)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        container = utils.create_container(name=name)
+        rc = utils.create_rc(name=name)
+        rc.add_container(container)
+        if utils.is_reachable(rc.config.api_host):
+            with self.assertRaises(SyntaxError):
+                rc.create()
+                K8sReplicationController.scale(config=rc.config, name=rc.name, replicas=replicas)
 
     def test_scale_nonexistent(self):
         name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         replicas = 3
         if utils.is_reachable(rc.config.api_host):
-            try:
+            with self.assertRaises(NotFoundException):
                 K8sReplicationController.scale(config=rc.config, name=name, replicas=replicas)
-                self.fail("Should not fail.")
-            except Exception as err:
-                self.assertIsInstance(err, NotFoundException)
 
     def test_scale(self):
         cont_name = "yocontainer"
@@ -1117,7 +1017,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
             K8sReplicationController.scale(config=rc.config, name=name, replicas=replicas)
             result = rc.get()
             self.assertIsInstance(result, K8sReplicationController)
-            self.assertEqual(replicas, result.model.model['spec']['replicas'])
+            self.assertEqual(replicas, result.desired_replicas)
 
     # -------------------------------------------------------------------------------------  rolling update
 
@@ -1158,8 +1058,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         if utils.is_reachable(rc.config.api_host):
             rc.create()
             rollout = K8sReplicationController.rolling_update(config=rc.config, name=name, image=new_image)
-            self.assertEqual(new_image, rollout.model.model['spec']['template']['spec']['containers'][0]['image'])
-            self.assertEqual(new_image, rollout.model.pod_spec.containers[0].model['image'])
+            self.assertEqual(new_image, rollout.containers[0].image)
 
     def test_rolling_update_two_containers_size_0_fails(self):
         cont_name_1 = "redis"
@@ -1194,11 +1093,12 @@ class K8sReplicationControllerTest(unittest.TestCase):
         rc.add_container(container_2)
         if utils.is_reachable(rc.config.api_host):
             rc.create()
-            rollout = K8sReplicationController.rolling_update(config=rc.config, name=name, image=new_image, container_name=cont_name_1)
-            self.assertEqual(2, len(rollout.model.pod_spec.containers))
-            for c in rollout.model.pod_spec.containers:
-                self.assertIn(c.model['name'], [cont_name_1, cont_name_2])
-                self.assertIn(c.model['image'], [new_image, image_2])
+            rollout = K8sReplicationController.rolling_update(config=rc.config, name=name, image=new_image,
+                                                              container_name=cont_name_1)
+            self.assertEqual(2, len(rollout.containers))
+            for c in rollout.containers:
+                self.assertIn(c.name, [cont_name_1, cont_name_2])
+                self.assertIn(c.image, [new_image, image_2])
 
     def test_rolling_update_two_containers_size_1(self):
         cont_name_1 = "redis"
@@ -1220,26 +1120,30 @@ class K8sReplicationControllerTest(unittest.TestCase):
                 name=name,
                 replicas=count
             )
-            labels = rc.get_pod_labels()
             pods = K8sPod.get_by_labels(
                 config=rc.config,
-                labels=labels
+                labels=rc.pod_labels
             )
+
             self.assertEqual(count, len(pods))
-            self.assertEqual(image_1, pods[0].model.pod_spec.containers[0].model['image'])
+            for p in pods:
+                for c in p.containers:
+                    self.assertIn(c.image, [image_1, image_2])
+
             rollout = K8sReplicationController.rolling_update(
                 config=rc.config,
                 name=name,
                 image=new_image,
                 container_name=cont_name_1
             )
-            labels = rollout.get_pod_labels()
             pods = K8sPod.get_by_labels(
                 config=rc.config,
-                labels=labels
+                labels=rollout.pod_labels
             )
             self.assertEqual(count, len(pods))
-            self.assertEqual(new_image, pods[0].model.pod_spec.containers[0].model['image'])
+            for p in pods:
+                for c in p.containers:
+                    self.assertIn(c.image, [new_image, image_2])
 
     def test_rolling_update_two_containers_size_3(self):
         cont_name_1 = "redis"
@@ -1261,28 +1165,29 @@ class K8sReplicationControllerTest(unittest.TestCase):
                 name=name,
                 replicas=count
             )
-            labels = rc.get_pod_labels()
             pods = K8sPod.get_by_labels(
                 config=rc.config,
-                labels=labels
+                labels=rc.pod_labels
             )
             self.assertEqual(count, len(pods))
-            for i in range(0, count):
-                self.assertEqual(image_1, pods[i].model.pod_spec.containers[0].model['image'])
+            for p in pods:
+                for c in p.containers:
+                    self.assertIn(c.image, [image_1, image_2])
+
             rollout = K8sReplicationController.rolling_update(
                 config=rc.config,
                 name=name,
                 image=new_image,
                 container_name=cont_name_1
             )
-            labels = rollout.get_pod_labels()
             pods = K8sPod.get_by_labels(
                 config=rc.config,
-                labels=labels
+                labels=rollout.pod_labels
             )
             self.assertEqual(count, len(pods))
-            for i in range(0, count):
-                self.assertEqual(new_image, pods[i].model.pod_spec.containers[0].model['image'])
+            for p in pods:
+                for c in p.containers:
+                    self.assertIn(c.image, [new_image, image_2])
 
     def test_rolling_update_one_container_size_0_new_rc(self):
         cont_name = "redis"
@@ -1301,8 +1206,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         if utils.is_reachable(rc_1.config.api_host):
             rc_1.create()
             rollout = K8sReplicationController.rolling_update(config=rc_1.config, name=name, rc_new=rc_2)
-            self.assertEqual(new_image, rollout.model.model['spec']['template']['spec']['containers'][0]['image'])
-            self.assertEqual(new_image, rollout.model.pod_spec.containers[0].model['image'])
+            self.assertEqual(new_image, rollout.containers[0].image)
 
     def test_rolling_update_two_containers_size_0_new_rc(self):
         cont_name_1 = "redis"
@@ -1328,8 +1232,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         if utils.is_reachable(rc_1.config.api_host):
             rc_1.create()
             rollout = K8sReplicationController.rolling_update(config=rc_1.config, name=name_1, rc_new=rc_2)
-            self.assertEqual(new_image, rollout.model.model['spec']['template']['spec']['containers'][0]['image'])
-            self.assertEqual(new_image, rollout.model.pod_spec.containers[0].model['image'])
+            self.assertEqual(new_image, rollout.containers[0].image)
 
     def test_rolling_update_two_containers_size_1_new_rc(self):
         cont_name_1 = "redis"
@@ -1360,25 +1263,28 @@ class K8sReplicationControllerTest(unittest.TestCase):
                 name=name_1,
                 replicas=count
             )
-            labels = rc_1.get_pod_labels()
             pods = K8sPod.get_by_labels(
                 config=rc_1.config,
-                labels=labels
+                labels=rc_1.pod_labels
             )
             self.assertEqual(count, len(pods))
-            self.assertEqual(image_1, pods[0].model.pod_spec.containers[0].model['image'])
+            for p in pods:
+                for c in p.containers:
+                    self.assertIn(c.image, [image_1, image_2])
+
             rollout = K8sReplicationController.rolling_update(
                 config=rc_1.config,
                 name=name_1,
                 rc_new=rc_2
             )
-            labels = rollout.get_pod_labels()
             pods = K8sPod.get_by_labels(
                 config=rc_1.config,
-                labels=labels
+                labels=rollout.pod_labels
             )
             self.assertEqual(count, len(pods))
-            self.assertEqual(new_image, pods[0].model.pod_spec.containers[0].model['image'])
+            for p in pods:
+                for c in p.containers:
+                    self.assertIn(c.image, [new_image, image_2])
 
     def test_rolling_update_two_containers_size_3_new_rc(self):
         cont_name_1 = "redis"
@@ -1409,27 +1315,28 @@ class K8sReplicationControllerTest(unittest.TestCase):
                 name=name_1,
                 replicas=count
             )
-            labels = rc_1.get_pod_labels()
             pods = K8sPod.get_by_labels(
                 config=rc_1.config,
-                labels=labels
+                labels=rc_1.pod_labels
             )
             self.assertEqual(count, len(pods))
-            for i in range(0, count):
-                self.assertEqual(image_1, pods[i].model.pod_spec.containers[0].model['image'])
+            for p in pods:
+                for c in p.containers:
+                    self.assertIn(c.image, [image_1, image_2])
+
             rollout = K8sReplicationController.rolling_update(
                 config=rc_1.config,
                 name=name_1,
                 rc_new=rc_2
             )
-            labels = rollout.get_pod_labels()
             pods = K8sPod.get_by_labels(
                 config=rc_1.config,
-                labels=labels
+                labels=rollout.pod_labels
             )
             self.assertEqual(count, len(pods))
-            for i in range(0, count):
-                self.assertEqual(new_image, pods[i].model.pod_spec.containers[0].model['image'])
+            for p in pods:
+                for c in p.containers:
+                    self.assertIn(c.image, [new_image, image_2])
 
     # -------------------------------------------------------------------------------------  api - create
 
@@ -1461,13 +1368,11 @@ class K8sReplicationControllerTest(unittest.TestCase):
         rc = utils.create_rc(name=name)
         rc.add_container(container=container)
         if utils.is_reachable(rc.config.api_host):
-            try:
+            with self.assertRaises(AlreadyExistsException):
                 obj = rc.create()
                 self.assertIsNotNone(obj)
                 self.assertIsInstance(obj, K8sReplicationController)
                 rc.create()
-            except Exception as err:
-                self.assertIsInstance(err, AlreadyExistsException)
 
     # ------------------------------------------------------------------------------------- api - list
 
@@ -1505,11 +1410,8 @@ class K8sReplicationControllerTest(unittest.TestCase):
         name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         if utils.is_reachable(rc.config.api_host):
-            try:
+            with self.assertRaises(NotFoundException):
                 rc.update()
-                self.fail("Should not fail.")
-            except Exception as err:
-                self.assertIsInstance(err, NotFoundException)
 
     def test_update_name_fails(self):
         name = "yocontainer"
@@ -1525,11 +1427,8 @@ class K8sReplicationControllerTest(unittest.TestCase):
             self.assertEqual(1, len(result))
             self.assertIsInstance(result[0], K8sReplicationController)
             result[0].name = name2
-            try:
+            with self.assertRaises(NotFoundException):
                 result[0].update()
-                self.fail("Should not fail.")
-            except Exception as err:
-                self.assertIsInstance(err, BadRequestException)
 
     def test_update_namespace_fails(self):
         name = "yocontainer"
@@ -1545,14 +1444,11 @@ class K8sReplicationControllerTest(unittest.TestCase):
             self.assertEqual(1, len(result))
             rc2 = result[0]
             self.assertIsInstance(rc2, K8sReplicationController)
-            self.assertNotEqual(rc2.get_namespace(), nspace)
+            self.assertNotEqual(rc2.namespace, nspace)
             self.assertEqual(rc, rc2)
-            rc2.set_namespace(nspace)
-            try:
+            rc2.namespace = nspace
+            with self.assertRaises(BadRequestException):
                 rc2.update()
-                self.fail("Should not fail.")
-            except Exception as err:
-                self.assertIsInstance(err, BadRequestException)
 
     def test_update_labels_succeeds(self):
         name = "yocontainer"
@@ -1562,16 +1458,13 @@ class K8sReplicationControllerTest(unittest.TestCase):
         rc.add_container(container)
         if utils.is_reachable(rc.config.api_host):
             rc.create()
-            labels = rc.get_labels()
-            labels['yomama'] = 'sofat'
-            rc.set_labels(labels)
+            rc.labels['yomama'] = 'sofat'
             rc.update()
             result = rc.get()
             self.assertIsInstance(result, K8sReplicationController)
-            dico = result.get_labels()
-            self.assertIsInstance(dico, dict)
-            for k, v in labels.items():
-                self.assertEqual(dico[k], v)
+            self.assertIsInstance(result.labels, dict)
+            for k, v in rc.labels.items():
+                self.assertEqual(result.labels[k], v)
 
     def test_update_add_container_succeeds(self):
         cont_names = ["yocontainer", "yocontainer2"]
@@ -1586,12 +1479,10 @@ class K8sReplicationControllerTest(unittest.TestCase):
             result = rc.update()
             self.assertIsInstance(result, K8sReplicationController)
             self.assertEqual(result, rc)
-            conts = result.get_pod_containers()
-            self.assertIsInstance(conts, list)
-            self.assertEqual(2, len(conts))
-            for c in conts:
-                self.assertIsInstance(c, dict)
-                self.assertIn(c['name'], cont_names)
+            self.assertIsInstance(result.containers, list)
+            self.assertEqual(2, len(result.containers))
+            for c in result.containers:
+                self.assertIn(c.name, cont_names)
 
     # ------------------------------------------------------------------------------------- api - delete
 

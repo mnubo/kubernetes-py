@@ -7,75 +7,230 @@
 #
 
 from kubernetes.models.v1.Volume import Volume
-from kubernetes.K8sObject import K8sObject
 
 
-class K8sVolume(K8sObject):
+class K8sVolume(object):
+    VALID_VOLUME_TYPES = Volume.VOLUME_TYPES_TO_SOURCE_MAP.keys()
 
-    VALID_VOLUME_TYPES = Volume.VALID_VOLUME_TYPES
+    def __init__(self, name=None, type=None):
+        super(K8sVolume, self).__init__()
+        self._type = None
+        self.model = Volume()
+        self.name = name
+        self.type = type
 
-    def __init__(self, config=None, model=None, name=None, type=None, mount_path=None, read_only=False):
+    # ------------------------------------------------------------------------------------- name
 
-        super(K8sVolume, self).__init__(config=config, name=name, obj_type='Volume')
+    @property
+    def name(self):
+        return self.model.name
 
-        if model is None:
-            self.model = Volume(name=name, type=type, mount_path=mount_path, read_only=read_only)
-            self.type = type
+    @name.setter
+    def name(self, name=None):
+        self.model.name = name
 
-        if model is not None:
-            if not isinstance(model, Volume):
-                raise SyntaxError('K8sVolume: model: [ {0} ] must be a Volume.'.format(model.__class__.__name__))
-            self.model = model
-            self.type = self.model.type
+    # ------------------------------------------------------------------------------------- type
 
-    # -------------------------------------------------------------------------------------  emptyDir
+    @property
+    def type(self):
+        return self._type
 
-    def set_medium(self, medium=None):
-        self.model.set_medium(medium)
-        return self
+    @type.setter
+    def type(self, t=None):
+        if t not in self.VALID_VOLUME_TYPES:
+            raise SyntaxError('K8sVolume: type: [ {} ] is invalid.'.format(t))
+        self._type = t
+        setattr(self.model, t, Volume.vol_type_to_source(t))
 
-    # -------------------------------------------------------------------------------------  hostPath & nfs - path
+    # ------------------------------------------------------------------------------------- source
 
-    def set_path(self, path=None):
-        self.model.set_path(path)
-        return self
+    @property
+    def source(self):
+        return getattr(self.model, self._type, None)
 
-    # -------------------------------------------------------------------------------------  secret
+    @source.setter
+    def source(self, s=None):
+        raise NotImplementedError()
 
-    def set_secret_name(self, secret=None):
-        self.model.set_secret_name(secret)
-        return self
+    # ------------------------------------------------------------------------------------- medium (emptyDir)
 
-    # -------------------------------------------------------------------------------------  awsElasticBlockStore
+    @property
+    def medium(self):
+        if not hasattr(self.source, 'medium'):
+            raise NotImplementedError()
+        return self.source.medium
 
-    def set_volume_id(self, volume_id=None):
-        self.model.set_volume_id(volume_id)
-        return self
+    @medium.setter
+    def medium(self, m=None):
+        if not hasattr(self.source, 'medium'):
+            raise NotImplementedError()
+        self.source.medium = m
 
-    # -------------------------------------------------------------------------------------  gcePersistentDisk
+    # ------------------------------------------------------------------------------------- path (hostPath)
 
-    def set_pd_name(self, pd_name=None):
-        self.model.set_pd_name(pd_name)
-        return self
+    @property
+    def host_path(self):
+        if not hasattr(self.source, 'path'):
+            raise NotImplementedError()
+        return self.source.path
 
-    # -------------------------------------------------------------------------------------  aws & gce - fs type
+    @host_path.setter
+    def host_path(self, p=None):
+        if not hasattr(self.source, 'path'):
+            raise NotImplementedError()
+        self.source.path = p
 
-    def set_fs_type(self, fs_type=None):
-        self.model.set_fs_type(fs_type)
-        return self
+    # ------------------------------------------------------------------------------------- secret_name (secret)
 
-    # -------------------------------------------------------------------------------------  nfs
+    @property
+    def secret_name(self):
+        if not hasattr(self.source, 'secret_name'):
+            raise NotImplementedError()
+        return self.source.secret_name
 
-    def set_server(self, server=None):
-        self.model.set_server(server)
-        return self
+    @secret_name.setter
+    def secret_name(self, sn=None):
+        if not hasattr(self.source, 'secret_name'):
+            raise NotImplementedError()
+        self.source.secret_name = sn
 
-    # -------------------------------------------------------------------------------------  gitRepo
+    # ------------------------------------------------------------------------------------- volume_id (AWS)
 
-    def set_git_repository(self, repo=None):
-        self.model.set_git_repository(repo)
-        return self
+    # http://kubernetes.io/docs/user-guide/volumes/#awselasticblockstore
+    # - the nodes on which pods are running must be AWS EC2 instances
+    # - those instances need to be in the same region and availability-zone as the EBS volume
+    # - EBS only supports a single EC2 instance mounting a volume
 
-    def set_git_revision(self, revision=None):
-        self.model.set_git_revision(revision)
-        return self
+    # Pod creation will timeout waiting for readiness if not on AWS; unschedulable.
+
+    @property
+    def volume_id(self):
+        if not hasattr(self.source, 'volume_id'):
+            raise NotImplementedError()
+        return self.source.volume_id
+
+    @volume_id.setter
+    def volume_id(self, vid=None):
+        if not hasattr(self.source, 'volume_id'):
+            raise NotImplementedError()
+        self.source.volume_id = vid
+
+    # ------------------------------------------------------------------------------------- pd_name (GCE)
+
+    # http://kubernetes.io/docs/user-guide/volumes/#gcepersistentdisk
+    # - the nodes on which pods are running must be GCE VMs
+    # - those VMs need to be in the same GCE project and zone as the PD
+
+    # Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
+
+    @property
+    def pd_name(self):
+        if not hasattr(self.source, 'pd_name'):
+            raise NotImplementedError()
+        return self.source.pd_name
+
+    @pd_name.setter
+    def pd_name(self, pd=None):
+        if not hasattr(self.source, 'pd_name'):
+            raise NotImplementedError()
+        self.source.pd_name = pd
+
+    # ------------------------------------------------------------------------------------- read_only (GCE)
+
+    # HTTP 422: GCE PD can only be mounted on multiple machines if it is read-only
+
+    @property
+    def read_only(self):
+        if not hasattr(self.source, 'read_only'):
+            raise NotImplementedError()
+        return self.source.read_only
+
+    @read_only.setter
+    def read_only(self, ro=None):
+        if not hasattr(self.source, 'read_only'):
+            raise NotImplementedError()
+        self.source.read_only = ro
+
+    # ------------------------------------------------------------------------------------- fs_type (AWS, GCE)
+
+    @property
+    def fs_type(self):
+        if not hasattr(self.source, 'fs_type'):
+            raise NotImplementedError()
+        return self.source.fs_type
+
+    @fs_type.setter
+    def fs_type(self, t=None):
+        if not hasattr(self.source, 'fs_type'):
+            raise NotImplementedError()
+        self.source.fs_type = t
+
+    # ------------------------------------------------------------------------------------- nfs_server
+
+    @property
+    def nfs_server(self):
+        if not hasattr(self.source, 'server'):
+            raise NotImplementedError()
+        return self.source.server
+
+    @nfs_server.setter
+    def nfs_server(self, s=None):
+        if not hasattr(self.source, 'server'):
+            raise NotImplementedError()
+        self.source.server = s
+
+    # ------------------------------------------------------------------------------------- nfs_path
+
+    @property
+    def nfs_path(self):
+        if not hasattr(self.source, 'path'):
+            raise NotImplementedError()
+        return self.source.path
+
+    @nfs_path.setter
+    def nfs_path(self, p=None):
+        if not hasattr(self.source, 'path'):
+            raise NotImplementedError()
+        self.source.path = p
+
+    # ------------------------------------------------------------------------------------- git_repository
+
+    @property
+    def git_repository(self):
+        if not hasattr(self.source, 'repository'):
+            raise NotImplementedError()
+        return self.source.repository
+
+    @git_repository.setter
+    def git_repository(self, repo=None):
+        if not hasattr(self.source, 'repository'):
+            raise NotImplementedError()
+        self.source.repository = repo
+
+    # ------------------------------------------------------------------------------------- git_revision
+
+    @property
+    def git_revision(self):
+        if not hasattr(self.source, 'revision'):
+            raise NotImplementedError()
+        return self.source.revision
+
+    @git_revision.setter
+    def git_revision(self, rev=None):
+        if not hasattr(self.source, 'revision'):
+            raise NotImplementedError()
+        self.source.revision = rev
+
+    # ------------------------------------------------------------------------------------- claimName
+
+    @property
+    def claim_name(self):
+        if not hasattr(self.source, 'claim_name'):
+            raise NotImplementedError()
+        return self.source.claim_name
+
+    @claim_name.setter
+    def claim_name(self, name=None):
+        if not hasattr(self.source, 'claim_name'):
+            raise NotImplementedError()
+        self.source.claim_name = name

@@ -6,106 +6,68 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1.BaseModel import BaseModel
+from kubernetes.models.v1.ExecAction import ExecAction
+from kubernetes.models.v1.HTTPGetAction import HTTPGetAction
+from kubernetes.models.v1.TCPSocketAction import TCPSocketAction
+from kubernetes.utils import filter_model
 
 
-class Probe(BaseModel):
+class Probe(object):
+    """
+    http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_probe
+    """
 
     VALID_HANDLERS = ['exec', 'httpGet', 'tcpSocket']
 
-    def __init__(self, **kwargs):
-        BaseModel.__init__(self)
-        model = kwargs.get('model', None)
+    def __init__(self, handler=None, model=None):
+        super(Probe, self).__init__()
+
+        if handler not in Probe.VALID_HANDLERS:
+            raise SyntaxError('Probe: handler: [ {0} ] is invalid.'.format(handler))
+        self.handler = handler
+
+        self.exec_action = None
+        self.http_get_action = None
+        self.tcp_socket_action = None
+
+        if handler == 'exec':
+            self.exec_action = ExecAction()
+        if handler == 'httpGet':
+            self.http_get_action = HTTPGetAction()
+        if handler == 'tcpSocket':
+            self.tcp_socket_action = TCPSocketAction()
+
+        self.initial_delay_seconds = 15
+        self.timeout_seconds = 1
+        self.period_seconds = 10
+        self.success_threshold = 1
+        self.failure_threshold = 3
 
         if model is not None:
-            filtered = filter(lambda x: x in Probe.VALID_HANDLERS, model.keys())
-        else:
-            filtered = filter(lambda x: x in Probe.VALID_HANDLERS, kwargs)
+            m = filter_model(model)
+            self._build_with_model(m)
 
-        if not filtered:
-            raise SyntaxError('Probe: Valid handler not found. (eg. {0} )'.format(Probe.VALID_HANDLERS))
-        if len(filtered) > 1:
-            raise SyntaxError('Probe: More than one handler found: [ {0} ]'.format(filtered))
-        handler = filtered[0]  # there can be only one.
+    def _build_with_model(self, model=None):
+        pass
 
-        if model is not None:
-            initial_delay_s = model.get('initialDelaySeconds', 1)
-            timeout_s = model.get('timeoutSeconds', 3)
-            period_s = model.get('periodSeconds', 15)
-            success_threshold = model.get('successThreshold', 1)
-            failure_threshold = model.get('failureThreshold', 2)
-        else:
-            initial_delay_s = kwargs.get('initialDelaySeconds', 1)
-            timeout_s = kwargs.get('timeoutSeconds', 3)
-            period_s = kwargs.get('periodSeconds', 15)
-            success_threshold = kwargs.get('successThreshold', 1)
-            failure_threshold = kwargs.get('failureThreshold', 2)
+    # ------------------------------------------------------------------------------------- serialize
 
-        if model is not None:
-            assert isinstance(model, dict)
-            self.model = model
-            if 'status' in self.model.keys():
-                self.model.pop('status', None)
-            for h in Probe.VALID_HANDLERS:
-                if h in self.model.keys():
-                    self.handler = h
-                    break
-        else:
-            self.model = dict()
-            self.handler = handler
-            handler_dict = kwargs[handler]
-            self.set_handler(handler_dict)
-            self.model['initialDelaySeconds'] = initial_delay_s
-            self.model['timeoutSeconds'] = timeout_s
-            self.model['periodSeconds'] = period_s
-            self.model['successThreshold'] = success_threshold
-            self.model['failureThreshold'] = failure_threshold
-
-    def get_handler(self):
-        my_handler = None
-        if self.handler in self.model.keys():
-            my_handler = self.model[self.handler]
-        return my_handler
-
-    def get_failure_threshold(self):
-        return self.model['failureThreshold']
-
-    def get_initial_delay(self):
-        return self.model['initialDelaySeconds']
-
-    def get_period(self):
-        return self.model['periodSeconds']
-
-    def get_success_threshold(self):
-        return self.model['successThreshold']
-
-    def get_timeout(self):
-        return self.model['timeoutSeconds']
-
-    def set_handler(self, handler_dict=None):
-
-        # Creating a new one.
-        self.model[self.handler] = dict()
-
+    def serialize(self):
+        data = {}
         if self.handler == 'exec':
-            if 'command' not in handler_dict:
-                raise SyntaxError('Probe: command must be given when using an exec handler.')
-            self.model[self.handler]['command'] = handler_dict.get('command')
-
+            data[self.handler] = self.exec_action.json()
         if self.handler == 'httpGet':
-            if 'port' not in handler_dict:
-                raise SyntaxError('Probe: port must be given when using an httpGet handler.')
-            self.model[self.handler]['port'] = int(handler_dict.get('port'))
-            if 'path' in handler_dict:
-                self.model[self.handler]['path'] = handler_dict.get('path')
-            if 'host' in handler_dict:
-                self.model[self.handler]['host'] = handler_dict.get('host')
-            if 'scheme' in handler_dict:
-                self.model[self.handler]['scheme'] = handler_dict.get('scheme')
-
+            data[self.handler] = self.http_get_action.json()
         if self.handler == 'tcpSocket':
-            if 'port' not in handler_dict:
-                raise SyntaxError('Probe: port must be given when using a tcpSocket handler.')
-            self.model[self.handler]['port'] = int(handler_dict.get('port'))
-
-        return self
+            data[self.handler] = self.tcp_socket_action.json()
+        if self.initial_delay_seconds:
+            data['initialDelaySeconds'] = self.initial_delay_seconds
+        if self.timeout_seconds:
+            data['timeoutSeconds'] = self.timeout_seconds
+        if self.period_seconds:
+            data['periodSeconds'] = self.period_seconds
+        if self.success_threshold:
+            data['successThreshold'] = self.success_threshold
+        if self.failure_threshold:
+            data['failureThreshold'] = self.failure_threshold
+        return data

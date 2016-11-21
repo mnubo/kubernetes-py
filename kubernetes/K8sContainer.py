@@ -6,129 +6,102 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+import json
+import yaml
+
+from kubernetes.K8sVolumeMount import K8sVolumeMount
 from kubernetes.models.v1.Container import Container
+from kubernetes.models.v1.ContainerPort import ContainerPort
 
 
 class K8sContainer(object):
     """
     The K8sContainer object currently supports the default Kubernetes container runtime, ie. Docker.
-
     """
 
-    def __init__(self, model=None, name=None, image=None):
+    def __init__(self, name=None, image=None):
         super(K8sContainer, self).__init__()
+        self.model = Container()
+        self.name = name
+        self.image = image
 
-        if model is not None:
-            self.model = Container(model=model)
-        else:
-            if name is None:
-                raise SyntaxError('K8sContainer: name: [ {0} ] cannot be None.'.format(name))
-            if image is None:
-                raise SyntaxError('K8sContainer: image: [ {0} ] cannot be None.'.format(image))
-            self.model = Container(name=name, image=image)
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.model.name == other.model.name and self.model.image == other.model.image
+        return NotImplemented
 
     # -------------------------------------------------------------------------------------  add
 
-    def add_port(self, container_port, host_port=None, protocol=None, name=None, host_ip=None):
-        if host_port is not None:
-            assert isinstance(host_port, int)
-        if protocol is not None:
-            assert isinstance(protocol, str)
-        if name is not None:
-            assert isinstance(name, str)
-        if host_ip is not None:
-            assert isinstance(host_ip, str)
+    def add_port(self, container_port=None, host_port=None, name=None, protocol=None, host_ip=None):
+        p = ContainerPort()
+        p.container_port = container_port
+        p.host_port = host_port
+        p.name = name
+        p.protocol = protocol
+        p.host_ip = host_ip
+        ports = self.model.ports
+        if ports is None:
+            ports = []
+        ports.append(p)
+        self.model.ports = ports
 
-        self.model.add_port(
-            container_port=container_port,
-            host_port=host_port,
-            name=name,
-            protocol=protocol,
-            host_ip=host_ip
-        )
+    def add_env(self, name=None, value=None):
+        e = {'name': name, 'value': value}
+        env = self.model.env
+        if env is None:
+            env = []
+        env.append(e)
+        self.model.env = env
 
-        return self
+    def add_volume_mount(self, mount=None):
+        if not isinstance(mount, K8sVolumeMount):
+            raise SyntaxError('K8sContainer.add_volume_mount() mount: [ {} ] is invalid.'.format(mount))
+        mounts = self.model.volume_mounts
+        if mount.model not in mounts:
+            mounts.append(mount.model)
+        self.model.volume_mounts = mounts
 
-    def add_env(self, k, v):
-        assert isinstance(k, str)
-        assert isinstance(v, str)
-        self.model.add_env(name=k, value=v)
-        return self
+    # -------------------------------------------------------------------------------------  name
 
-    def add_volume_mount(self, volume=None):
-        self.model.add_volume_mount(volume)
-        return self
+    @property
+    def name(self):
+        return self.model.name
 
-    # -------------------------------------------------------------------------------------  get
+    @name.setter
+    def name(self, name=None):
+        self.model.name = name
 
-    def get(self):
-        return self
+    # -------------------------------------------------------------------------------------  image
 
-    def get_liveness_probe(self):
-        return self.model.get_liveness_probe()
+    @property
+    def image(self):
+        return self.model.image
 
-    def get_model(self):
-        return self.model
+    @image.setter
+    def image(self, image=None):
+        self.model.image = image
 
-    def get_readiness_probe(self):
-        return self.model.get_readiness_probe()
+    # -------------------------------------------------------------------------------------  volume_mounts
 
-    # -------------------------------------------------------------------------------------  set
+    @property
+    def volume_mounts(self):
+        return self.model.volume_mounts
 
-    def set_arguments(self, args):
-        assert isinstance(args, list)
-        self.model.set_arguments(args=args)
-        return self
+    @volume_mounts.setter
+    def volume_mounts(self, mounts=None):
+        self.model.volume_mounts = mounts
 
-    def set_command(self, cmd):
-        assert isinstance(cmd, list)
-        self.model.set_command(cmd=cmd)
-        return self
+    # ------------------------------------------------------------------------------------- serialize
 
-    def set_host_network(self, mode):
-        assert isinstance(mode, bool)
-        self.model.set_host_network(mode=mode)
-        return self
+    def serialize(self):
+        return self.model.serialize()
 
-    def set_image(self, image=None):
-        if image is None:
-            raise SyntaxError("K8sContainer: image: [ {0} ] cannot be None.".format(image))
-        if not isinstance(image, str):
-            raise SyntaxError("K8sContainer: image: [ {0} ] must be a string.".format(image.__class__.__name__))
-        self.model.set_image(image=image)
-        return self
+    def as_json(self):
+        data = self.serialize()
+        dump = json.dumps(data, indent=4)
+        return dump
 
-    def set_liveness_probe(self, **kwargs):
-        self.model.set_liveness_probe(**kwargs)
-        return self
-
-    def set_name(self, name):
-        assert isinstance(name, str)
-        self.model.set_name(name=name)
-        return self
-
-    def set_privileged(self, mode):
-        assert isinstance(mode, bool)
-        self.model.set_privileged(mode=mode)
-        return self
-
-    def set_pull_policy(self, policy):
-        assert isinstance(policy, str)
-        self.model.set_pull_policy(policy=policy)
-        return self
-
-    def set_readiness_probe(self, **kwargs):
-        self.model.set_readiness_probe(**kwargs)
-        return self
-
-    def set_requested_resources(self, cpu, mem):
-        assert isinstance(cpu, str)
-        assert isinstance(mem, str)
-        self.model.set_requested_resources(cpu=cpu, mem=mem)
-        return self
-
-    def set_limit_resources(self, cpu, mem):
-        assert isinstance(cpu, str)
-        assert isinstance(mem, str)
-        self.model.set_limit_resources(cpu=cpu, mem=mem)
-        return self
+    def as_yaml(self):
+        data = self.serialize()
+        dump = yaml.dump(data, default_flow_style=False)
+        return dump

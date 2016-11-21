@@ -6,17 +6,18 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import urllib
-import json
-import requests
-import tempfile
-import os
 import base64
+import json
+import os
+import tempfile
+import urllib
+
+import requests
+
 from kubernetes.utils.ConvertData import convert
 
 
 class HttpRequest:
-
     def __init__(self, method='GET', host='localhost:80', url='/', data=None, auth=None,
                  cert=None, ca_cert=None, ca_cert_data=None, token=None):
 

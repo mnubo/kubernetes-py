@@ -3,7 +3,6 @@ from K8sContainer import K8sContainer
 from K8sDeployment import K8sDeployment
 from K8sObject import K8sObject
 from K8sPod import K8sPod
-from K8sPodBasedObject import K8sPodBasedObject
 from K8sReplicationController import K8sReplicationController
 from K8sSecret import K8sSecret
 from K8sService import K8sService
