@@ -7,6 +7,7 @@
 #
 
 import unittest
+import uuid
 
 from kubernetes import K8sObject, K8sConfig
 from kubernetes.K8sExceptions import UnprocessableEntityException, NotFoundException
@@ -55,7 +56,7 @@ class K8sObjectTest(unittest.TestCase):
 
     def test_init_object_type_pod(self):
         ot = "Pod"
-        name = "yomama"
+        name = "yomama-{}".format(str(uuid.uuid4()))
         obj = utils.create_object(name=name, obj_type=ot)
         self.assertIsInstance(obj, K8sObject)
         self.assertEqual(ot, obj.obj_type)
@@ -63,7 +64,7 @@ class K8sObjectTest(unittest.TestCase):
 
     def test_init_object_type_rc(self):
         ot = "ReplicationController"
-        name = "yomama"
+        name = "yomama-{}".format(str(uuid.uuid4()))
         obj = utils.create_object(name=name, obj_type=ot)
         self.assertIsInstance(obj, K8sObject)
         self.assertEqual(ot, obj.obj_type)
@@ -71,7 +72,7 @@ class K8sObjectTest(unittest.TestCase):
 
     def test_init_object_type_secret(self):
         ot = "Secret"
-        name = "yomama"
+        name = "yomama-{}".format(str(uuid.uuid4()))
         obj = utils.create_object(name=name, obj_type=ot)
         self.assertIsInstance(obj, K8sObject)
         self.assertEqual(ot, obj.obj_type)
@@ -79,7 +80,7 @@ class K8sObjectTest(unittest.TestCase):
 
     def test_init_object_type_service(self):
         ot = "Service"
-        name = "yomama"
+        name = "yomama-{}".format(str(uuid.uuid4()))
         obj = utils.create_object(name=name, obj_type=ot)
         self.assertIsInstance(obj, K8sObject)
         self.assertEqual(ot, obj.obj_type)
@@ -103,7 +104,7 @@ class K8sObjectTest(unittest.TestCase):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         if utils.is_reachable(config.api_host):
             ot = "Pod"
-            name = "yomama"
+            name = "yomama-{}".format(str(uuid.uuid4()))
             obj = utils.create_object(config=config, name=name, obj_type=ot)
             r = obj.list()
             self.assertIsNotNone(r)
@@ -113,7 +114,7 @@ class K8sObjectTest(unittest.TestCase):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "ReplicationController"
-            name = "yomama"
+            name = "yomama-{}".format(str(uuid.uuid4()))
             obj = utils.create_object(config=config, name=name, obj_type=ot)
             r = obj.list()
             self.assertIsNotNone(r)
@@ -123,7 +124,7 @@ class K8sObjectTest(unittest.TestCase):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "Secret"
-            name = "yomama"
+            name = "yomama-{}".format(str(uuid.uuid4()))
             obj = utils.create_object(config=config, name=name, obj_type=ot)
             r = obj.list()
             self.assertIsNotNone(r)
@@ -142,7 +143,7 @@ class K8sObjectTest(unittest.TestCase):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "Service"
-            name = "yomama"
+            name = "yomama-{}".format(str(uuid.uuid4()))
             obj = utils.create_object(config=config, name=name, obj_type=ot)
             r = obj.list()
             self.assertIsNotNone(r)
@@ -182,7 +183,7 @@ class K8sObjectTest(unittest.TestCase):
 
     def test_object_get_model_name_unset(self):
         ot = "Pod"
-        name = "yomama"
+        name = "yomama-{}".format(str(uuid.uuid4()))
         obj = utils.create_object(name=name, obj_type=ot)
         with self.assertRaises(NotFoundException):
             obj.get_model()
@@ -191,7 +192,7 @@ class K8sObjectTest(unittest.TestCase):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "Pod"
-            name = "yomama"
+            name = "yomama-{}".format(str(uuid.uuid4()))
             obj = utils.create_object(config=config, name=name, obj_type=ot)
             with self.assertRaises(NotFoundException):
                 obj.get_model()
@@ -200,7 +201,7 @@ class K8sObjectTest(unittest.TestCase):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "ReplicationController"
-            name = "yomama"
+            name = "yomama-{}".format(str(uuid.uuid4()))
             obj = utils.create_object(config=config, name=name, obj_type=ot)
             with self.assertRaises(NotFoundException):
                 obj.get_model()
@@ -209,7 +210,7 @@ class K8sObjectTest(unittest.TestCase):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "Secret"
-            name = "yomama"
+            name = "yomama-{}".format(str(uuid.uuid4()))
             obj = utils.create_object(config=config, name=name, obj_type=ot)
             with self.assertRaises(NotFoundException):
                 obj.get_model()
@@ -218,7 +219,7 @@ class K8sObjectTest(unittest.TestCase):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "Service"
-            name = "yomama"
+            name = "yomama-{}".format(str(uuid.uuid4()))
             obj = utils.create_object(config=config, name=name, obj_type=ot)
             with self.assertRaises(NotFoundException):
                 obj.get_model()
@@ -227,7 +228,7 @@ class K8sObjectTest(unittest.TestCase):
 
     def test_object_get_with_params_none_arg(self):
         ot = "Pod"
-        name = "yomama"
+        name = "yomama-{}".format(str(uuid.uuid4()))
         obj = utils.create_object(name=name, obj_type=ot)
         try:
             obj.get_with_params()
@@ -236,7 +237,7 @@ class K8sObjectTest(unittest.TestCase):
 
     def test_object_get_with_params_invalid_arg(self):
         ot = "Pod"
-        name = "yomama"
+        name = "yomama-{}".format(str(uuid.uuid4()))
         obj = utils.create_object(name=name, obj_type=ot)
         data = object()
         try:
@@ -248,7 +249,7 @@ class K8sObjectTest(unittest.TestCase):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "Pod"
-            name = "yomama"
+            name = "yomama-{}".format(str(uuid.uuid4()))
             obj = utils.create_object(config=config, name=name, obj_type=ot)
             data = {'yokey': 'yovalue'}
             r = obj.get_with_params(data)
@@ -260,7 +261,7 @@ class K8sObjectTest(unittest.TestCase):
     def test_object_pod_create_unprocessable(self):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         ot = "Pod"
-        name = "yomama"
+        name = "yomama-{}".format(str(uuid.uuid4()))
         if config.api_host is not None and utils.is_reachable(config.api_host):
             obj = utils.create_object(config=config, name=name, obj_type=ot)
             with self.assertRaises(UnprocessableEntityException):
@@ -270,7 +271,7 @@ class K8sObjectTest(unittest.TestCase):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "ReplicationController"
-            name = "yomama"
+            name = "yomama-{}".format(str(uuid.uuid4()))
             obj = utils.create_object(config=config, name=name, obj_type=ot)
             with self.assertRaises(UnprocessableEntityException):
                 obj.create()
@@ -279,7 +280,7 @@ class K8sObjectTest(unittest.TestCase):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "Secret"
-            name = "yomama"
+            name = "yomama-{}".format(str(uuid.uuid4()))
             obj = utils.create_object(config=config, name=name, obj_type=ot)
             obj.create()
             self.assertIsInstance(obj, K8sObject)
@@ -288,7 +289,7 @@ class K8sObjectTest(unittest.TestCase):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "Service"
-            name = "yomama"
+            name = "yomama-{}".format(str(uuid.uuid4()))
             obj = utils.create_object(config=config, name=name, obj_type=ot)
             with self.assertRaises(UnprocessableEntityException):
                 obj.create()
@@ -297,7 +298,7 @@ class K8sObjectTest(unittest.TestCase):
 
     def test_object_update_not_found(self):
         ot = "Pod"
-        name = "yomama"
+        name = "yomama-{}".format(str(uuid.uuid4()))
         obj = utils.create_object(name=name, obj_type=ot)
         with self.assertRaises(NotFoundException):
             obj.update()
@@ -305,7 +306,7 @@ class K8sObjectTest(unittest.TestCase):
     def test_object_secret_update(self):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         ot = "Secret"
-        name = "yomama"
+        name = "yomama-{}".format(str(uuid.uuid4()))
         obj = utils.create_object(config=config, name=name, obj_type=ot)
         if config.api_host is not None and utils.is_reachable(config.api_host):
             obj.create()
@@ -315,7 +316,7 @@ class K8sObjectTest(unittest.TestCase):
 
     def test_object_delete_not_found(self):
         ot = "Pod"
-        name = "yomama"
+        name = "yomama-{}".format(str(uuid.uuid4()))
         obj = utils.create_object(name=name, obj_type=ot)
         with self.assertRaises(NotFoundException):
             obj.delete()
@@ -323,7 +324,7 @@ class K8sObjectTest(unittest.TestCase):
     def test_object_pod_delete_not_found(self):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         ot = "Pod"
-        name = "yomama"
+        name = "yomama-{}".format(str(uuid.uuid4()))
         if config.api_host is not None and utils.is_reachable(config.api_host):
             obj = utils.create_object(config=config, name=name, obj_type=ot)
             with self.assertRaises(NotFoundException):
@@ -333,25 +334,25 @@ class K8sObjectTest(unittest.TestCase):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         if config.api_host is not None and utils.is_reachable(config.api_host):
             ot = "ReplicationController"
-            name = "yomama"
+            name = "yomama-{}".format(str(uuid.uuid4()))
             obj = utils.create_object(config=config, name=name, obj_type=ot)
             with self.assertRaises(NotFoundException):
                 obj.delete()
 
     def test_object_secret_delete_not_found(self):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        ot = "Secret"
+        name = "yomama-{}".format(str(uuid.uuid4()))
         if config.api_host is not None and utils.is_reachable(config.api_host):
-            ot = "Secret"
-            name = "yomama"
             obj = utils.create_object(config=config, name=name, obj_type=ot)
             with self.assertRaises(NotFoundException):
                 obj.delete()
 
     def test_object_service_delete_not_found(self):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        ot = "Service"
+        name = "yomama-{}".format(str(uuid.uuid4()))
         if config.api_host is not None and utils.is_reachable(config.api_host):
-            ot = "Service"
-            name = "yomama"
             obj = utils.create_object(config=config, name=name, obj_type=ot)
             with self.assertRaises(NotFoundException):
                 obj.delete()
