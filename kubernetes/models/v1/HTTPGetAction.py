@@ -55,7 +55,7 @@ class HTTPGetAction(object):
     def path(self, path=None):
         if not is_valid_string(path):
             raise SyntaxError('HTTPGetAction: path: [ {0} ] is invalid.'.format(path))
-        self._port = path
+        self._path = path
 
     # ------------------------------------------------------------------------------------- port
 
