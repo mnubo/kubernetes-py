@@ -13,7 +13,8 @@ import yaml
 
 from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sVolumeMount import K8sVolumeMount
-from kubernetes.models.v1 import Container
+from kubernetes.models.v1.Container import Container
+from kubernetes.models.v1.Probe import Probe
 
 
 class K8sContainerTest(unittest.TestCase):
@@ -98,6 +99,47 @@ class K8sContainerTest(unittest.TestCase):
         c.add_volume_mount(mount)
         self.assertEqual(1, len(c.volume_mounts))
         self.assertIn(mount.model, c.volume_mounts)
+
+    # ------------------------------------------------------------------------------------- add liveness probe
+
+    def test_add_liveness_probe(self):
+        name = "redis"
+        image = "redis:3.0.7"
+        c = K8sContainer(name=name, image=image)
+        probe = {
+            'initialDelaySeconds': 15,
+            'tcpSocket': {
+                'port': '8086'
+            },
+            'timeoutSeconds': 1
+        }
+        c.add_liveness_probe(**probe)
+        self.assertIsInstance(c.liveness_probe, Probe)
+        self.assertEqual(c.liveness_probe.initial_delay_seconds, probe['initialDelaySeconds'])
+        self.assertEqual(c.liveness_probe.tcp_socket_action.port, str(probe['tcpSocket']['port']))
+        self.assertEqual(c.liveness_probe.timeout_seconds, probe['timeoutSeconds'])
+        data = c.liveness_probe.serialize()
+        self.assertEqual(probe, data)
+
+    # ------------------------------------------------------------------------------------- add readiness probe
+
+    def test_add_readiness_probe(self):
+        name = "redis"
+        image = "redis:3.0.7"
+        c = K8sContainer(name=name, image=image)
+        probe = {
+            'httpGet': {
+                'path': '/admin/health',
+                'port': '8086',
+                'scheme': 'HTTP'
+            }
+        }
+        c.add_readiness_probe(**probe)
+        self.assertIsInstance(c.readiness_probe, Probe)
+        self.assertEqual(c.readiness_probe.http_get_action.path, probe['httpGet']['path'])
+        self.assertEqual(c.readiness_probe.http_get_action.port, probe['httpGet']['port'])
+        data = c.readiness_probe.serialize()
+        self.assertEqual(probe, data)
 
     # ------------------------------------------------------------------------------------- serialize
 
