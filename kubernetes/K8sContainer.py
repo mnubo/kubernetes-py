@@ -12,6 +12,7 @@ import yaml
 from kubernetes.K8sVolumeMount import K8sVolumeMount
 from kubernetes.models.v1.Container import Container
 from kubernetes.models.v1.ContainerPort import ContainerPort
+from kubernetes.models.v1.Probe import Probe
 
 
 class K8sContainer(object):
@@ -60,6 +61,34 @@ class K8sContainer(object):
         if mount.model not in mounts:
             mounts.append(mount.model)
         self.model.volume_mounts = mounts
+
+    def add_liveness_probe(self, **kwargs):
+        probe = Probe(model=kwargs)
+        self.liveness_probe = probe
+
+    def add_readiness_probe(self, **kwargs):
+        probe = Probe(model=kwargs)
+        self.readiness_probe = probe
+
+    # -------------------------------------------------------------------------------------  livenessProbe
+
+    @property
+    def liveness_probe(self):
+        return self.model.liveness_probe
+
+    @liveness_probe.setter
+    def liveness_probe(self, probe=None):
+        self.model.liveness_probe = probe
+
+    # -------------------------------------------------------------------------------------  readinessProbe
+
+    @property
+    def readiness_probe(self):
+        return self.model.readiness_probe
+
+    @readiness_probe.setter
+    def readiness_probe(self, probe=None):
+        self.model.readiness_probe = probe
 
     # -------------------------------------------------------------------------------------  name
 
