@@ -26,11 +26,11 @@ class Probe(object):
         self._http_get_action = None
         self._tcp_socket_action = None
 
-        self._initial_delay_seconds = 15
-        self._timeout_seconds = 1
-        self._period_seconds = 10
-        self._success_threshold = 1
-        self._failure_threshold = 3
+        self._initial_delay_seconds = None
+        self._timeout_seconds = None
+        self._period_seconds = None
+        self._success_threshold = None
+        self._failure_threshold = None
 
         if model is not None:
             m = filter_model(model)
@@ -70,7 +70,7 @@ class Probe(object):
 
     @property
     def http_get_action(self):
-        return self._exec_action
+        return self._http_get_action
 
     @http_get_action.setter
     def http_get_action(self, action=None):
