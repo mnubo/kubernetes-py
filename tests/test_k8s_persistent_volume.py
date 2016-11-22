@@ -57,22 +57,22 @@ class K8sPersistentVolumeTest(unittest.TestCase):
         host_path = "/path/on/host"
         vol = K8sPersistentVolume(name=name, type=type)
         with self.assertRaises(NotImplementedError):
-            vol.host_path = host_path
+            vol.path = host_path
 
     def test_hostpath_set_path_none(self):
         name = "yoname"
         type = "hostPath"
         vol = K8sPersistentVolume(name=name, type=type)
         with self.assertRaises(SyntaxError):
-            vol.host_path = None
+            vol.path = None
 
     def test_hostpath_set_path(self):
         name = "yoname"
         type = "hostPath"
         host_path = "/path/on/host"
         vol = K8sPersistentVolume(name=name, type=type)
-        vol.host_path = host_path
-        self.assertEqual(host_path, vol.host_path)
+        vol.path = host_path
+        self.assertEqual(host_path, vol.path)
 
     # --------------------------------------------------------------------------------- api - hostpath
 
@@ -86,7 +86,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
         if utils.is_reachable(vol.config.api_host):
             vol.create()
             self.assertIsInstance(vol, K8sPersistentVolume)
-            self.assertEqual(host_path, vol.host_path)
+            self.assertEqual(host_path, vol.path)
 
     # --------------------------------------------------------------------------------- gcePersistentDisk
 
