@@ -9,10 +9,12 @@
 import unittest
 import uuid
 
-from kubernetes import K8sReplicationController, K8sConfig, K8sPod, K8sContainer
+from kubernetes import K8sReplicationController, K8sConfig, K8sPod, K8sContainer, K8sSecret
 from kubernetes.K8sExceptions import *
 from kubernetes.models.v1 import (
-    ReplicationController, ObjectMeta, ReplicationControllerSpec, ReplicationControllerStatus
+    ReplicationController, ObjectMeta,
+    ReplicationControllerSpec, ReplicationControllerStatus,
+    Secret
 )
 from tests import utils
 
@@ -58,7 +60,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         self.assertEqual(rc.name, name)
 
     def test_init_with_config_and_pull_secrets(self):
-        ps = "yomama"
+        ps = [{'name': 'yomama'}]
         name = "sofat"
         config = K8sConfig(pull_secret=ps, kubeconfig=utils.kubeconfig_fallback)
         rc = utils.create_rc(config=config, name=name)
@@ -81,7 +83,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         self.assertIsInstance(rc.model, ReplicationController)
         self.assertIsInstance(rc.model.metadata, ObjectMeta)
         self.assertIsInstance(rc.model.spec, ReplicationControllerSpec)
-        self.assertIsInstance(rc.model.status, ReplicationControllerStatus)
+        self.assertIsNone(rc.model.status)
 
     # --------------------------------------------------------------------------------- add annotation
 
@@ -209,29 +211,29 @@ class K8sReplicationControllerTest(unittest.TestCase):
         name = "yorc"
         obj = utils.create_rc(name=name)
         secretname = None
-        try:
-            obj.add_image_pull_secrets(name=secretname)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        with self.assertRaises(SyntaxError):
+            obj.add_image_pull_secrets(secretname)
 
     def test_rc_add_image_pull_secrets_invalid_arg(self):
         name = "yorc"
         obj = utils.create_rc(name=name)
-        secretname = 666
-        try:
-            obj.add_image_pull_secrets(name=secretname)
-            self.fail("Should not fail.")
-        except Exception as err:
-            self.assertIsInstance(err, SyntaxError)
+        secrets = 666
+        with self.assertRaises(SyntaxError):
+            obj.add_image_pull_secrets(secrets)
 
     def test_rc_add_image_pull_secrets(self):
+        config = utils.create_config()
+        config.pull_secret = [{'name': 'secretname'}]
         name = "yorc"
-        rc = utils.create_rc(name=name)
-        secretname = "yosecret"
-        rc.add_image_pull_secrets(name=secretname)
+        rc = utils.create_rc(config=config, name=name)
         self.assertEqual(1, len(rc.image_pull_secrets))
-        self.assertIn(secretname, rc.image_pull_secrets)
+        self.assertEqual(config.pull_secret, rc.image_pull_secrets)
+        container = utils.create_container(name="nginx", image="nginx:latest")
+        rc.add_container(container)
+        if utils.is_reachable(rc.config.api_host):
+            rc.create()
+            self.assertIsInstance(rc, K8sReplicationController)
+            self.assertEqual(config.pull_secret, rc.image_pull_secrets)
 
     # --------------------------------------------------------------------------------- del annotation
 
@@ -1386,7 +1388,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
             'spec': {
                 'selector': {
                     'name': 'admintool',
-                    'rc_version': 'd0a9b0ca-a6bf-489b-ba8d-47e7d4b44c53'
+                    'rc_version': '1926c7e1-74e5-4088-86d6-af7b21d38741'
                 },
                 'template': {
                     'spec': {
@@ -1395,7 +1397,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
                         'restartPolicy': 'Always',
                         'volumes': [{
                             'hostPath': {
-                                'path': '/root/.dockercfg'
+                                'path': '/root/.docker/config.json'
                             },
                             'name': 'dockercred'
                         }, {
@@ -1414,7 +1416,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
                             },
                             'name': 'dockerconfig'
                         }],
-                        'imagePullSecrets': ['privateregistry'],
+                        'imagePullSecrets': [{'name': 'privateregistry'}],
                         'containers': [{
                             'livenessProbe': {
                                 'initialDelaySeconds': 15,
@@ -1424,7 +1426,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
                                 'timeoutSeconds': 1
                             },
                             'name': 'admintool',
-                            'image': 'dockerep-1.mtl.mnubo.com:4329/admintool-service:1.0.614',
+                            'image': 'nginx:latest',
                             'volumeMounts': [{
                                 'mountPath': '/root/.dockercfg',
                                 'name': 'dockercred'
@@ -1457,16 +1459,16 @@ class K8sReplicationControllerTest(unittest.TestCase):
                             'imagePullPolicy': 'IfNotPresent',
                             'readinessProbe': {
                                 'httpGet': {
-                                    'path': '/admin/health',
+                                    'path': '/',
                                     'scheme': 'HTTP',
                                     'port': 'admintoolport'
                                 }
                             },
                             'ports': [{
                                 'protocol': 'TCP',
-                                'containerPort': 8086,
+                                'containerPort': 80,
                                 'name': 'admintoolport',
-                                'hostPort': 31086
+                                'hostPort': 80
                             }],
                             'resources': {
                                 'requests': {
@@ -1479,7 +1481,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
                     'metadata': {
                         'labels': {
                             'name': 'admintool',
-                            'rc_version': 'd0a9b0ca-a6bf-489b-ba8d-47e7d4b44c53'
+                            'rc_version': '1926c7e1-74e5-4088-86d6-af7b21d38741'
                         }
                     }
                 },
@@ -1489,7 +1491,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
             'metadata': {
                 'labels': {
                     'name': 'admintool',
-                    'rc_version': 'd0a9b0ca-a6bf-489b-ba8d-47e7d4b44c53'
+                    'rc_version': '1926c7e1-74e5-4088-86d6-af7b21d38741'
                 },
                 'name': 'admintool'
             }
