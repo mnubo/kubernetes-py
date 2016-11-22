@@ -66,13 +66,8 @@ class K8sPod(K8sObject):
             self.model.spec.containers = containers
         return self
 
-    def add_image_pull_secrets(self, name=None):
-        secrets = self.model.spec.image_pull_secrets
-        if secrets is None:
-            secrets = []
-        if name not in secrets:
-            secrets.append(name)
-            self.model.spec.image_pull_secrets = secrets
+    def add_image_pull_secrets(self, secrets=None):
+        self.model.spec.add_image_pull_secrets(secrets)
         return self
 
     def add_volume(self, volume=None):
