@@ -18,7 +18,6 @@ from LoadBalancerStatus import LoadBalancerStatus
 from ObjectMeta import ObjectMeta
 from PersistentVolumeSpec import PersistentVolumeSpec
 from Pod import Pod
-from PodBasedModel import PodBasedModel
 from PodCondition import PodCondition
 from PodSpec import PodSpec
 from PodStatus import PodStatus
