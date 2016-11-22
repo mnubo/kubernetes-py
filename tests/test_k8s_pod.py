@@ -67,7 +67,7 @@ class K8sPodTest(unittest.TestCase):
         self.assertEqual(pod.name, name)
 
     def test_init_with_config_and_pull_secrets(self):
-        ps = "yomama"
+        ps = [{'name': 'yomama'}]
         name = "sofat"
         cfg = K8sConfig(kubeconfig=utils.kubeconfig_fallback, pull_secret=ps)
         pod = utils.create_pod(config=cfg, name=name)
@@ -174,7 +174,7 @@ class K8sPodTest(unittest.TestCase):
         obj = utils.create_pod(name=name)
         secretname = None
         try:
-            obj.add_image_pull_secrets(name=secretname)
+            obj.add_image_pull_secrets(secretname)
             self.fail("Should not fail.")
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
@@ -184,7 +184,7 @@ class K8sPodTest(unittest.TestCase):
         obj = utils.create_pod(name=name)
         secretname = 666
         try:
-            obj.add_image_pull_secrets(name=secretname)
+            obj.add_image_pull_secrets(secretname)
             self.fail("Should not fail.")
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
@@ -192,10 +192,10 @@ class K8sPodTest(unittest.TestCase):
     def test_pod_add_image_pull_secrets(self):
         name = "yoname"
         pod = utils.create_pod(name=name)
-        secretname = "yosecret"
-        pod.add_image_pull_secrets(name=secretname)
+        secret = [{'name': 'yosecret'}]
+        pod.add_image_pull_secrets(secret)
         self.assertEqual(1, len(pod.model.spec.image_pull_secrets))
-        self.assertEqual(secretname, pod.model.spec.image_pull_secrets[0])
+        self.assertEqual(secret, pod.model.spec.image_pull_secrets[0])
 
     # --------------------------------------------------------------------------------- add volume
 
