@@ -70,6 +70,16 @@ class K8sContainer(object):
         probe = Probe(model=kwargs)
         self.readiness_probe = probe
 
+    # -------------------------------------------------------------------------------------  ports
+
+    @property
+    def ports(self):
+        return self.model.ports
+
+    @ports.setter
+    def ports(self, ports=None):
+        self.model.ports = ports
+
     # -------------------------------------------------------------------------------------  livenessProbe
 
     @property
