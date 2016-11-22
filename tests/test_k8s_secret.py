@@ -214,52 +214,40 @@ class K8sSecretTest(unittest.TestCase):
         secret.type = t
         self.assertEqual(t, secret.type)
 
-    # --------------------------------------------------------------------------------- set dockercfg secret
-
-    def test_set_dockercfg_secret_none_arg(self):
-        name = "yosecret"
-        secret = utils.create_secret(name=name)
-        with self.assertRaises(SyntaxError):
-            secret.dockercfg = None
-
-    def test_set_dockercfg_secret_invalid_arg(self):
-        name = "yosecret"
-        secret = utils.create_secret(name=name)
-        data = object()
-        with self.assertRaises(SyntaxError):
-            secret.dockercfg = data
-
-    def test_set_dockercfg_secret(self):
-        name = "yosecret"
-        secret = utils.create_secret(name=name)
-        data = "yodockercfg"
-        secret.dockercfg = data
-        self.assertEqual('kubernetes.io/dockercfg', secret.type)
-        self.assertEqual(data, secret.dockercfg)
-
     # --------------------------------------------------------------------------------- set dockercfg json secret
 
     def test_set_dockercfg_json_secret_none_arg(self):
         name = "yosecret"
         secret = utils.create_secret(name=name)
         with self.assertRaises(SyntaxError):
-            secret.dockercfg_json = None
+            secret.dockerconfigjson = None
 
     def test_set_dockercfg_json_secret_invalid_arg(self):
         name = "yosecret"
         secret = utils.create_secret(name=name)
         data = object()
         with self.assertRaises(SyntaxError):
-            secret.dockercfg_json = data
+            secret.dockerconfigjson = data
 
     def test_set_dockercfg_json_secret(self):
         name = "yosecret"
         secret = utils.create_secret(name=name)
         data = "yodockercfgjson"
-        secret.dockercfg_json = data
+        secret.dockerconfigjson = data
         self.assertEqual('kubernetes.io/dockerconfigjson', secret.type)
         self.assertIn('.dockerconfigjson', secret.data)
-        self.assertEqual(data, secret.dockercfg_json)
+        self.assertEqual(data, secret.dockerconfigjson)
+
+    def test_set_dockercfg_secret_privateregistry(self):
+        name = "privateregistry"
+        secret = utils.create_secret(name=name)
+        data = '{"auths": {"registry:port": {"auth": "yonigz", "email": "you@hello.com"}}}'
+        secret.dockerconfigjson = data
+        self.assertEqual('kubernetes.io/dockerconfigjson', secret.type)
+        self.assertIn('.dockerconfigjson', secret.data)
+        self.assertEqual(data, secret.dockerconfigjson)
+        s = secret.create()
+        self.assertIsInstance(s, K8sSecret)
 
     # --------------------------------------------------------------------------------- set service account token
 
@@ -396,23 +384,13 @@ class K8sSecretTest(unittest.TestCase):
             d = from_get.data[k]
             self.assertEqual(d, v)
 
-    def test_update_dockercfg_secret_fails(self):
-        name = "yosecret-{0}".format(str(uuid.uuid4()))
-        secret = utils.create_secret(name=name)
-        v = "yovalue"
-        if utils.is_reachable(secret.config.api_host):
-            secret.create()
-            secret.dockercfg = v
-            with self.assertRaises(UnprocessableEntityException):
-                secret.update()
-
     def test_update_dockercfg_json_secret_fails(self):
         name = "yosecret-{0}".format(str(uuid.uuid4()))
         secret = utils.create_secret(name=name)
         v = "yovalue"
         if utils.is_reachable(secret.config.api_host):
             secret.create()
-            secret.dockercfg_json = v
+            secret.dockerconfigjson = v
             with self.assertRaises(UnprocessableEntityException):
                 secret.update()
 
