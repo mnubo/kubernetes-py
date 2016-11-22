@@ -32,9 +32,7 @@ class TCPSocketAction(object):
         msg = 'TCPSocketAction: port: [ {0} ] is invalid.'.format(port)
         if isinstance(port, str) and port.isdigit():
             port = int(port)
-        if not isinstance(port, int):
-            raise SyntaxError(msg)
-        if not 1 < port < 65535:
+        if isinstance(port, int) and not 1 < port < 65535:
             raise SyntaxError(msg)
         self._port = str(port)
 
