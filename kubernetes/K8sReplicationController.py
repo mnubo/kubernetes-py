@@ -41,8 +41,8 @@ class K8sReplicationController(K8sObject):
         self.selector = labels
         self.desired_replicas = replicas
 
-        if self.config.pull_secret is not None:
-            self.add_image_pull_secrets(name=self.config.pull_secret)
+        if config.pull_secret is not None:
+            self.add_image_pull_secrets(config.pull_secret)
 
     # -------------------------------------------------------------------------------------  override
 
@@ -83,8 +83,8 @@ class K8sReplicationController(K8sObject):
         self.model.spec.template.spec.containers = containers
         return self
 
-    def add_image_pull_secrets(self, name=None):
-        self.model.spec.template.spec.add_image_pull_secrets(name)
+    def add_image_pull_secrets(self, secrets=None):
+        self.model.spec.template.spec.add_image_pull_secrets(secrets)
         return self
 
     def add_volume(self, volume=None):
