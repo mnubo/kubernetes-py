@@ -25,7 +25,7 @@ class Secret(object):
         self._api_version = 'v1'
         self._metadata = ObjectMeta()
         self._data = {}
-        self._string_data = {}
+        self._string_data = None
         self._type = None
 
         if model is not None:
@@ -163,32 +163,18 @@ class Secret(object):
             raise SyntaxError('Secret: type: [ {0} ] is invalid.'.format(t))
         self._type = t
 
-    # ------------------------------------------------------------------------------------- dockercfg
-
-    @property
-    def dockercfg(self):
-        s = self.data['.dockercfg']
-        return base64.b64decode(s)
-
-    @dockercfg.setter
-    def dockercfg(self, secret=None):
-        if not is_valid_string(secret):
-            raise SyntaxError('Secret: dockercfg: [ {} ] is invalid.'.format(secret))
-        self.data = {'.dockercfg': base64.b64encode(secret)}
-        self.type = 'kubernetes.io/dockercfg'
-
     # ------------------------------------------------------------------------------------- dockercfg json
 
     @property
-    def dockercfg_json(self):
+    def dockerconfigjson(self):
         if '.dockerconfigjson' in self.data:
             return self.data['.dockerconfigjson']
         return None
 
-    @dockercfg_json.setter
-    def dockercfg_json(self, secret=None):
+    @dockerconfigjson.setter
+    def dockerconfigjson(self, secret=None):
         if not is_valid_string(secret):
-            raise SyntaxError('Secret: dockercfg_json: [ {} ] is invalid.'.format(secret))
+            raise SyntaxError('Secret: dockercfgjson: [ {} ] is invalid.'.format(secret))
         self.type = 'kubernetes.io/dockerconfigjson'
         self.data = {'.dockerconfigjson': secret}
 
