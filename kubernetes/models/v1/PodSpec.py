@@ -30,7 +30,7 @@ class PodSpec(object):
         self._host_network = None
         self._host_pid = None
         self._hostname = None
-        self._image_pull_secrets = []
+        self._image_pull_secrets = None
         self._node_name = None
         self._node_selector = {}
         self._restart_policy = 'Always'
@@ -64,6 +64,8 @@ class PodSpec(object):
             self.host_pid = model['hostPID']
         if 'hostname' in model:
             self.hostname = model['hostname']
+        if 'imagePullSecrets' in model:
+            self.image_pull_secrets = model['imagePullSecrets']
         if 'nodeName' in model:
             self.node_name = model['nodeName']
         if 'nodeSelector' in model:
@@ -91,19 +93,25 @@ class PodSpec(object):
 
     def add_container(self, container=None):
         if not isinstance(container, Container):
-            raise SyntaxError('PodSpec: container: [ {0} ] is invalid.'.format(container.__class__.__name__))
+            raise SyntaxError('PodSpec.add_container90: container: [ {0} ] is invalid.'.format(container.__class__.__name__))
         self._containers.append(container)
         return self
 
     def add_volume(self, volume=None):
         if not isinstance(volume, Volume):
-            raise SyntaxError('PodSpec: volume: [ {0} ] is invalid'.format(volume))
+            raise SyntaxError('PodSpec.add_volume(): volume: [ {0} ] is invalid'.format(volume))
         self._volumes.append(volume)
 
-    def add_image_pull_secrets(self, name=None):
-        if not isinstance(name, str):
-            raise SyntaxError('PodSpec: name: [ {0} ] is invalid.'.format(name))
-        self._image_pull_secrets.append(name)
+    def add_image_pull_secrets(self, secrets=None):
+        if not is_valid_list(secrets, dict):
+            raise SyntaxError('PodSpec.add_image_pull_secrets() secrets : [ {0} ] is invalid.'.format(secrets))
+        s = self.image_pull_secrets
+        if s is None:
+            combined = secrets
+        else:
+            combined = s + secrets
+        filtered = filter(lambda x: isinstance(x, dict), combined)
+        self.image_pull_secrets = filtered
         return self
 
     # ------------------------------------------------------------------------------------- del
@@ -214,7 +222,7 @@ class PodSpec(object):
 
     @image_pull_secrets.setter
     def image_pull_secrets(self, secrets=None):
-        if not is_valid_list(secrets, str):
+        if not is_valid_list(secrets, dict):
             raise SyntaxError('PodSpec: image_pull_secrets: [ {0} ] is invalid.'.format(secrets))
         self._image_pull_secrets = secrets
 
