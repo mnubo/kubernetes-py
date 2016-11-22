@@ -21,7 +21,7 @@ class ReplicationController(object):
 
         self._metadata = ObjectMeta()
         self._spec = ReplicationControllerSpec()
-        self._status = ReplicationControllerStatus()
+        self._status = None
 
         self.kind = 'ReplicationController'
         self.api_version = 'v1'
