@@ -104,13 +104,13 @@ class K8sPersistentVolume(K8sObject):
     # ------------------------------------------------------------------------------------- path (hostPath)
 
     @property
-    def host_path(self):
+    def path(self):
         if not hasattr(self.source, 'path'):
             raise NotImplementedError()
         return self.source.path
 
-    @host_path.setter
-    def host_path(self, p=None):
+    @path.setter
+    def path(self, p=None):
         if not hasattr(self.source, 'path'):
             raise NotImplementedError()
         self.source.path = p
