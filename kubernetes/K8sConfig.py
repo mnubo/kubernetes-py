@@ -109,8 +109,8 @@ class K8sConfig(object):
                 raise SyntaxError('K8sConfig: auth: [ {0} ] must be a tuple for basic authentication.'.format(auth))
             if not isinstance(namespace, str):
                 raise SyntaxError('K8sConfig: namespace: [ {0} ] must be a string.'.format(namespace))
-            if pull_secret is not None and not isinstance(pull_secret, str):
-                raise SyntaxError('K8sConfig: pull_secret: [ {0} ] must be a string.'.format(pull_secret))
+            if pull_secret is not None and not isinstance(pull_secret, list):
+                raise SyntaxError('K8sConfig: pull_secret: [ {0} ] must be a list.'.format(pull_secret))
             if token is not None and not isinstance(token, str):
                 raise SyntaxError('K8sConfig: token: [ {0} ] must be a string.'.format(token))
             if version not in VALID_API_VERSIONS:
