@@ -65,10 +65,11 @@ class HTTPGetAction(object):
 
     @port.setter
     def port(self, port=None):
-        if isinstance(port, int):
-            port = str(port)
-        if not is_valid_string(port):
-            raise SyntaxError('HTTPGetAction: port: [ {0} ] is invalid.'.format(port))
+        msg = 'HTTPGetAction: port: [ {0} ] is invalid.'.format(port)
+        if isinstance(port, str) and port.isdigit():
+            port = int(port)
+        if isinstance(port, int) and not 1 < port < 65535:
+            raise SyntaxError(msg)
         self._port = port
 
     # ------------------------------------------------------------------------------------- host
