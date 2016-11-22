@@ -1374,6 +1374,136 @@ class K8sReplicationControllerTest(unittest.TestCase):
                 self.assertIsInstance(obj, K8sReplicationController)
                 rc.create()
 
+    def test_create_from_full_model(self):
+        model = {
+            'status': {
+                'observedGeneration': 0,
+                'readyReplicas': 0,
+                'fullyLabeledReplicas': 0,
+                'replicas': 0
+            },
+            'kind': 'ReplicationController',
+            'spec': {
+                'selector': {
+                    'name': 'admintool',
+                    'rc_version': 'd0a9b0ca-a6bf-489b-ba8d-47e7d4b44c53'
+                },
+                'template': {
+                    'spec': {
+                        'dnsPolicy': 'ClusterFirst',
+                        'terminationGracePeriodSeconds': 30,
+                        'restartPolicy': 'Always',
+                        'volumes': [{
+                            'hostPath': {
+                                'path': '/root/.dockercfg'
+                            },
+                            'name': 'dockercred'
+                        }, {
+                            'hostPath': {
+                                'path': '/usr/bin/docker'
+                            },
+                            'name': 'dockerbin'
+                        }, {
+                            'hostPath': {
+                                'path': '/var/run/docker.sock'
+                            },
+                            'name': 'dockersock'
+                        }, {
+                            'hostPath': {
+                                'path': '/root/.docker'
+                            },
+                            'name': 'dockerconfig'
+                        }],
+                        'imagePullSecrets': ['privateregistry'],
+                        'containers': [{
+                            'livenessProbe': {
+                                'initialDelaySeconds': 15,
+                                'tcpSocket': {
+                                    'port': 'admintoolport'
+                                },
+                                'timeoutSeconds': 1
+                            },
+                            'name': 'admintool',
+                            'image': 'dockerep-1.mtl.mnubo.com:4329/admintool-service:1.0.614',
+                            'volumeMounts': [{
+                                'mountPath': '/root/.dockercfg',
+                                'name': 'dockercred'
+                            }, {
+                                'mountPath': '/usr/bin/docker',
+                                'name': 'dockerbin'
+                            }, {
+                                'mountPath': '/var/run/docker.sock',
+                                'name': 'dockersock'
+                            }, {
+                                'mountPath': '/root/.docker',
+                                'name': 'dockerconfig'
+                            }],
+                            'env': [{
+                                'name': 'docker_env',
+                                'value': 'prod'
+                            }, {
+                                'name': 'DATADOG_PORT_8125_UDP_ADDR',
+                                'value': '10.101.1.52'
+                            }, {
+                                'name': 'docker_repository',
+                                'value': 'dockerep-1.mtl.mnubo.com:4329'
+                            }, {
+                                'name': 'ENV',
+                                'value': 'prod'
+                            }, {
+                                'name': 'DOCKER_TAG',
+                                'value': 'latest'
+                            }],
+                            'imagePullPolicy': 'IfNotPresent',
+                            'readinessProbe': {
+                                'httpGet': {
+                                    'path': '/admin/health',
+                                    'scheme': 'HTTP',
+                                    'port': 'admintoolport'
+                                }
+                            },
+                            'ports': [{
+                                'protocol': 'TCP',
+                                'containerPort': 8086,
+                                'name': 'admintoolport',
+                                'hostPort': 31086
+                            }],
+                            'resources': {
+                                'requests': {
+                                    'cpu': '100m',
+                                    'memory': '32M'
+                                }
+                            }
+                        }]
+                    },
+                    'metadata': {
+                        'labels': {
+                            'name': 'admintool',
+                            'rc_version': 'd0a9b0ca-a6bf-489b-ba8d-47e7d4b44c53'
+                        }
+                    }
+                },
+                'replicas': 1
+            },
+            'apiVersion': 'v1',
+            'metadata': {
+                'labels': {
+                    'name': 'admintool',
+                    'rc_version': 'd0a9b0ca-a6bf-489b-ba8d-47e7d4b44c53'
+                },
+                'name': 'admintool'
+            }
+        }
+
+        model = ReplicationController(model=model)
+        self.assertIsInstance(model, ReplicationController)
+
+        rc = K8sReplicationController(name=model.metadata.name)
+        rc.model = model
+        if utils.is_reachable(rc.config.api_host):
+            rc.create()
+            self.assertIsInstance(rc, K8sReplicationController)
+
     # ------------------------------------------------------------------------------------- api - list
 
     def test_list_nonexistent(self):
