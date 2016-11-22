@@ -40,7 +40,7 @@ class K8sDeployment(K8sObject):
             self.add_container(container)
 
         if self.config.pull_secret is not None:
-            self.add_image_pull_secrets(name=self.config.pull_secret)
+            self.add_image_pull_secrets(self.config.pull_secret)
 
     # -------------------------------------------------------------------------------------  override
 
@@ -95,8 +95,8 @@ class K8sDeployment(K8sObject):
         self.model.spec.template.spec.containers = containers
         return self
 
-    def add_image_pull_secrets(self, name=None):
-        self.model.spec.template.spec.add_image_pull_secrets(name)
+    def add_image_pull_secrets(self, secret=None):
+        self.model.spec.template.spec.add_image_pull_secrets(secret)
         return self
 
     # -------------------------------------------------------------------------------------  get
