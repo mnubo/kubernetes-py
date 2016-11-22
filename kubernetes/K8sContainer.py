@@ -35,15 +35,22 @@ class K8sContainer(object):
 
     def add_port(self, container_port=None, host_port=None, name=None, protocol=None, host_ip=None):
         p = ContainerPort()
-        p.container_port = container_port
-        p.host_port = host_port
-        p.name = name
-        p.protocol = protocol
-        p.host_ip = host_ip
+        if container_port is not None:
+            p.container_port = container_port
+        if host_port is not None:
+            p.host_port = host_port
+        if name is not None:
+            p.name = name
+        if protocol is not None:
+            p.protocol = protocol
+        if host_ip is not None:
+            p.host_ip = host_ip
+
         ports = self.model.ports
         if ports is None:
             ports = []
         ports.append(p)
+
         self.model.ports = ports
 
     def add_env(self, name=None, value=None):
