@@ -16,9 +16,11 @@ from kubernetes.models.v1.Secret import Secret
 class K8sSecret(K8sObject):
 
     def __init__(self, config=None, name=None):
-        self.model = Secret()
-        super(K8sSecret, self).__init__(config=config, obj_type='Secret', name=name)
-        self.name = name
+        super(K8sSecret, self).__init__(
+            config=config,
+            obj_type='Secret',
+            name=name
+        )
 
     # -------------------------------------------------------------------------------------  override
 
@@ -35,46 +37,6 @@ class K8sSecret(K8sObject):
         super(K8sSecret, self).update()
         self.get()
         return self
-
-    # ------------------------------------------------------------------------------------- add
-
-    def add_annotation(self, k=None, v=None):
-        self.model.add_annotation(k=k, v=v)
-        return self
-
-    def add_label(self, k=None, v=None):
-        self.model.add_label(k=k, v=v)
-        return self
-
-    # ------------------------------------------------------------------------------------- annotations
-
-    @property
-    def annotations(self):
-        return self.model.metadata.annotations
-
-    @annotations.setter
-    def annotations(self, anns=None):
-        self.model.metadata.annotations = anns
-
-    # ------------------------------------------------------------------------------------- labels
-
-    @property
-    def labels(self):
-        return self.model.metadata.labels
-
-    @labels.setter
-    def labels(self, labels=None):
-        self.model.metadata.labels = labels
-
-    # ------------------------------------------------------------------------------------- name
-
-    @property
-    def name(self):
-        return self.model.metadata.name
-
-    @name.setter
-    def name(self, name=None):
-        self.model.metadata.name = name
 
     # ------------------------------------------------------------------------------------- data
 
@@ -96,25 +58,15 @@ class K8sSecret(K8sObject):
     def type(self, t=None):
         self.model.type = t
 
-    # ------------------------------------------------------------------------------------- dockercfg
+    # ------------------------------------------------------------------------------------- dockerconfigjson
 
     @property
-    def dockercfg(self):
-        return self.model.dockercfg
+    def dockerconfigjson(self):
+        return self.model.dockerconfigjson
 
-    @dockercfg.setter
-    def dockercfg(self, secret=None):
-        self.model.dockercfg = secret
-
-    # ------------------------------------------------------------------------------------- dockercfg json
-
-    @property
-    def dockercfg_json(self):
-        return self.model.dockercfg_json
-
-    @dockercfg_json.setter
-    def dockercfg_json(self, secret=None):
-        self.model.dockercfg_json = secret
+    @dockerconfigjson.setter
+    def dockerconfigjson(self, secret=None):
+        self.model.dockerconfigjson = secret
 
     # ------------------------------------------------------------------------------------- set
 
