@@ -130,7 +130,7 @@ class K8sContainerTest(unittest.TestCase):
         probe = {
             'httpGet': {
                 'path': '/admin/health',
-                'port': '8086',
+                'port': 8086,
                 'scheme': 'HTTP'
             }
         }
