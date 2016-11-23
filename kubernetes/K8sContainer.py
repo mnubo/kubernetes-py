@@ -13,6 +13,7 @@ from kubernetes.K8sVolumeMount import K8sVolumeMount
 from kubernetes.models.v1.Container import Container
 from kubernetes.models.v1.ContainerPort import ContainerPort
 from kubernetes.models.v1.Probe import Probe
+from kubernetes.models.v1.ResourceRequirements import ResourceRequirements
 
 
 class K8sContainer(object):
@@ -77,6 +78,26 @@ class K8sContainer(object):
         probe = Probe(model=kwargs)
         self.readiness_probe = probe
 
+    # -------------------------------------------------------------------------------------  args
+
+    @property
+    def args(self):
+        return self.model.args
+
+    @args.setter
+    def args(self, args=None):
+        self.model.args = args
+
+    # -------------------------------------------------------------------------------------  command
+
+    @property
+    def command(self):
+        return self.model.command
+
+    @command.setter
+    def command(self, cmd=None):
+        self.model.command = cmd
+
     # -------------------------------------------------------------------------------------  ports
 
     @property
@@ -106,6 +127,17 @@ class K8sContainer(object):
     @readiness_probe.setter
     def readiness_probe(self, probe=None):
         self.model.readiness_probe = probe
+
+    # -------------------------------------------------------------------------------------  resources
+
+    @property
+    def resources(self):
+        return self.model.args
+
+    @resources.setter
+    def resources(self, res=None):
+        r = ResourceRequirements(model=res)
+        self.model.resources = r
 
     # -------------------------------------------------------------------------------------  name
 
