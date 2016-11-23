@@ -77,10 +77,15 @@ class K8sReplicationController(K8sObject):
     def add_container(self, container=None):
         if not isinstance(container, K8sContainer):
             raise SyntaxError('K8sReplicationController.add_container() container: [ {0} ] is invalid.'.format(container))
-        containers = self.model.spec.template.spec.containers
-        if container.model not in containers:
+        existing = self.container_image
+        if container.name in existing:
+            self.container_image = (container.name, container.image)
+        else:
+            containers = self.model.spec.template.spec.containers
+            if containers is None:
+                containers = []
             containers.append(container.model)
-        self.model.spec.template.spec.containers = containers
+            self.model.spec.template.spec.containers = containers
         return self
 
     def add_image_pull_secrets(self, secrets=None):
@@ -163,17 +168,11 @@ class K8sReplicationController(K8sObject):
     # -------------------------------------------------------------------------------------  container_image
 
     @property
-    def container_image(self, name=None):
-        if name is None and len(self.containers) > 1:
-            raise SyntaxError("K8sReplicationController.container_image() Please specify a container name.")
-
-        if len(self.containers) == 1:
-            return self.containers[0].image
-        else:
-            filtered = filter(lambda x: x.name == name, self.containers)
-            if filtered:
-                return filtered[0].image
-            return None
+    def container_image(self):
+        data = {}
+        for c in self.containers:
+            data[c.name] = c.image
+        return data
 
     @container_image.setter
     def container_image(self, tup=None):

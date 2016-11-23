@@ -9,18 +9,16 @@
 import unittest
 import uuid
 
-from kubernetes import K8sReplicationController, K8sConfig, K8sPod, K8sContainer, K8sSecret
+from kubernetes import K8sReplicationController, K8sConfig, K8sPod, K8sContainer
 from kubernetes.K8sExceptions import *
 from kubernetes.models.v1 import (
     ReplicationController, ObjectMeta,
-    ReplicationControllerSpec, ReplicationControllerStatus,
-    Secret
+    ReplicationControllerSpec
 )
 from tests import utils
 
 
 class K8sReplicationControllerTest(unittest.TestCase):
-
     def setUp(self):
         utils.cleanup_rc()
         utils.cleanup_pods()
@@ -1615,6 +1613,24 @@ class K8sReplicationControllerTest(unittest.TestCase):
             self.assertEqual(2, len(result.containers))
             for c in result.containers:
                 self.assertIn(c.name, cont_names)
+
+    def test_update_with_add_container(self):
+        rc_name = "nginx-{}".format(str(uuid.uuid4()))
+        rc = utils.create_rc(name=rc_name)
+        container_1 = utils.create_container(name="nginx", image="nginx:1.8.1")
+        container_2 = utils.create_container(name="nginx", image="nginx:1.10.2")
+        rc.add_container(container_1)
+        rc.desired_replicas = 1
+        if utils.is_reachable(rc.config.api_host):
+            rc.create()
+            self.assertIsInstance(rc, K8sReplicationController)
+            rc.add_container(container_2)
+            self.assertEqual(1, len(rc.containers))
+            self.assertNotEqual(container_1, rc.containers[0])
+            self.assertEqual(container_2, rc.containers[0])
+            rc.update()
+            self.assertNotEqual(container_1, rc.containers[0])
+            self.assertEqual(container_2, rc.containers[0])
 
     # ------------------------------------------------------------------------------------- api - delete
 
