@@ -731,3 +731,29 @@ class K8sServiceTest(unittest.TestCase):
             svc.delete()
             from_get = K8sService.get_by_name(svc.config, svc.name)
             self.assertNotIn(svc, from_get)
+
+    # --------------------------------------------------------------------------------- api - system
+
+    def test_system_service(self):
+        config = utils.create_config()
+        config.namespace = 'kube-system'
+
+        service = utils.create_service(config, name="kubernetes-dashboard")
+        service.type = 'ClusterIP'
+        service.add_port(
+            port=80,
+            target_port="k8s-dashport",
+            name="kubernetes-dashboard",
+            protocol="TCP"
+        )
+        service.selector = {'k8s-app': "kubernetes-dashboard"}
+        service.labels = {
+            'k8s-app': "kubernetes-dashboard",
+            'kubernetes.io/cluster-service': 'true'
+        }
+
+        if utils.is_reachable(service.config.api_host):
+            with self.assertRaises(AlreadyExistsException):
+                service.create()
+            service.get()
+            service.update()
