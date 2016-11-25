@@ -238,17 +238,6 @@ class K8sSecretTest(unittest.TestCase):
         self.assertIn('.dockerconfigjson', secret.data)
         self.assertEqual(data, secret.dockerconfigjson)
 
-    def test_set_dockercfg_secret_privateregistry(self):
-        name = "privateregistry"
-        secret = utils.create_secret(name=name)
-        data = '{"auths": {"registry:port": {"auth": "yonigz", "email": "you@hello.com"}}}'
-        secret.dockerconfigjson = data
-        self.assertEqual('kubernetes.io/dockerconfigjson', secret.type)
-        self.assertIn('.dockerconfigjson', secret.data)
-        self.assertEqual(data, secret.dockerconfigjson)
-        s = secret.create()
-        self.assertIsInstance(s, K8sSecret)
-
     # --------------------------------------------------------------------------------- set service account token
 
     def test_set_service_account_token_none_args(self):
@@ -420,3 +409,31 @@ class K8sSecretTest(unittest.TestCase):
             _list = secret.list()
             count_final = len(_list)
             self.assertEqual(count_before_create, count_final)
+
+    # --------------------------------------------------------------------------------- api - system
+
+    def test_set_default_dockerconfigjson(self):
+        name = "privateregistry"
+        secret = utils.create_secret(name=name)
+        data = '{"auths": {"repo:port": {"auth": "authstring", "email": "you@company.com"}}}'
+        secret.dockerconfigjson = data
+        self.assertEqual('kubernetes.io/dockerconfigjson', secret.type)
+        self.assertIn('.dockerconfigjson', secret.data)
+        self.assertEqual(data, secret.dockerconfigjson)
+        if utils.is_reachable(secret.config.api_host):
+            s = secret.create()
+            self.assertIsInstance(s, K8sSecret)
+
+    def test_set_system_dockerconfigjson(self):
+        name = "privateregistry"
+        config = utils.create_config()
+        config.namespace = 'kube-system'
+        secret = utils.create_secret(config=config, name=name)
+        data = '{"auths": {"repo:port": {"auth": "authstring", "email": "you@company.com"}}}'
+        secret.dockerconfigjson = data
+        self.assertEqual('kubernetes.io/dockerconfigjson', secret.type)
+        self.assertIn('.dockerconfigjson', secret.data)
+        self.assertEqual(data, secret.dockerconfigjson)
+        if utils.is_reachable(secret.config.api_host):
+            s = secret.create()
+            self.assertIsInstance(s, K8sSecret)
