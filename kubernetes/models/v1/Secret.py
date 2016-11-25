@@ -136,6 +136,8 @@ class Secret(object):
         if not is_valid_dict(data):
             raise SyntaxError(msg)
         for k, v in data.items():
+            if not is_valid_string(k) or not is_valid_string(v):
+                raise SyntaxError(msg)
             self._data[k] = base64.b64encode(v)
 
     # ------------------------------------------------------------------------------------- stringData
