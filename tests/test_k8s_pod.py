@@ -195,7 +195,7 @@ class K8sPodTest(unittest.TestCase):
         secret = [{'name': 'yosecret'}]
         pod.add_image_pull_secrets(secret)
         self.assertEqual(1, len(pod.model.spec.image_pull_secrets))
-        self.assertEqual(secret, pod.model.spec.image_pull_secrets[0])
+        self.assertEqual(secret, pod.model.spec.image_pull_secrets)
 
     # --------------------------------------------------------------------------------- add volume
 
