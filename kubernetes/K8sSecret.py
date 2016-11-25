@@ -62,7 +62,8 @@ class K8sSecret(K8sObject):
 
     @property
     def dockerconfigjson(self):
-        return self.model.dockerconfigjson
+        data = json.loads(self.model.dockerconfigjson)
+        return data
 
     @dockerconfigjson.setter
     def dockerconfigjson(self, secret=None):
