@@ -229,15 +229,6 @@ class K8sSecretTest(unittest.TestCase):
         with self.assertRaises(SyntaxError):
             secret.dockerconfigjson = data
 
-    def test_set_dockercfg_json_secret(self):
-        name = "yosecret"
-        secret = utils.create_secret(name=name)
-        data = "yodockercfgjson"
-        secret.dockerconfigjson = data
-        self.assertEqual('kubernetes.io/dockerconfigjson', secret.type)
-        self.assertIn('.dockerconfigjson', secret.data)
-        self.assertEqual(data, secret.dockerconfigjson)
-
     # --------------------------------------------------------------------------------- set service account token
 
     def test_set_service_account_token_none_args(self):
@@ -373,16 +364,6 @@ class K8sSecretTest(unittest.TestCase):
             d = from_get.data[k]
             self.assertEqual(d, v)
 
-    def test_update_dockercfg_json_secret_fails(self):
-        name = "yosecret-{0}".format(str(uuid.uuid4()))
-        secret = utils.create_secret(name=name)
-        v = "yovalue"
-        if utils.is_reachable(secret.config.api_host):
-            secret.create()
-            secret.dockerconfigjson = v
-            with self.assertRaises(UnprocessableEntityException):
-                secret.update()
-
     # --------------------------------------------------------------------------------- api - delete
 
     def test_delete_nonexistent(self):
@@ -415,7 +396,7 @@ class K8sSecretTest(unittest.TestCase):
     def test_set_default_dockerconfigjson(self):
         name = "privateregistry"
         secret = utils.create_secret(name=name)
-        data = '{"auths": {"repo:port": {"auth": "authstring", "email": "you@company.com"}}}'
+        data = {"auths": {"repo:port": {"auth": "authstring", "email": "you@company.com"}}}
         secret.dockerconfigjson = data
         self.assertEqual('kubernetes.io/dockerconfigjson', secret.type)
         self.assertIn('.dockerconfigjson', secret.data)
@@ -429,7 +410,7 @@ class K8sSecretTest(unittest.TestCase):
         config = utils.create_config()
         config.namespace = 'kube-system'
         secret = utils.create_secret(config=config, name=name)
-        data = '{"auths": {"repo:port": {"auth": "authstring", "email": "you@company.com"}}}'
+        data = {"auths": {"repo:port": {"auth": "authstring", "email": "you@company.com"}}}
         secret.dockerconfigjson = data
         self.assertEqual('kubernetes.io/dockerconfigjson', secret.type)
         self.assertIn('.dockerconfigjson', secret.data)
