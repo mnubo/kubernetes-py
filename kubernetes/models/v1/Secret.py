@@ -7,6 +7,7 @@
 #
 
 import base64
+import json
 
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.utils import is_valid_string, is_valid_dict
@@ -135,8 +136,6 @@ class Secret(object):
         if not is_valid_dict(data):
             raise SyntaxError(msg)
         for k, v in data.items():
-            if not is_valid_string(k) or not is_valid_string(v):
-                raise SyntaxError(msg)
             self._data[k] = base64.b64encode(v)
 
     # ------------------------------------------------------------------------------------- stringData
@@ -173,10 +172,12 @@ class Secret(object):
 
     @dockerconfigjson.setter
     def dockerconfigjson(self, secret=None):
-        if not is_valid_string(secret):
+        if not is_valid_dict(secret):
             raise SyntaxError('Secret: dockercfgjson: [ {} ] is invalid.'.format(secret))
         self.type = 'kubernetes.io/dockerconfigjson'
-        self.data = {'.dockerconfigjson': secret}
+        s = json.dumps(secret)
+        utf = s.encode('utf-8')
+        self.data = {'.dockerconfigjson': utf}
 
     # ------------------------------------------------------------------------------------- service account token
 
