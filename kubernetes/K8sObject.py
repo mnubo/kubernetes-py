@@ -258,9 +258,6 @@ class K8sObject(object):
         # HTTP 409: Cannot apply update if UID in precondition and updated object.meta
         if self.model.metadata.uid is not None:
             self.model.metadata.uid = None
-        # HTTP 409: the object has been modified; please apply your changes to the latest version and try again
-        if self.model.metadata.resource_version is not None:
-            self.model.metadata.resource_version = None
 
         url = '{base}/{name}'.format(base=self.base_url, name=self.name)
         state = self.request(method='PUT', url=url, data=self.serialize())
