@@ -11,10 +11,9 @@ import uuid
 
 from kubernetes import K8sReplicationController, K8sConfig, K8sPod, K8sContainer
 from kubernetes.K8sExceptions import *
-from kubernetes.models.v1 import (
-    ReplicationController, ObjectMeta,
-    ReplicationControllerSpec
-)
+from kubernetes.models.v1.ObjectMeta import ObjectMeta
+from kubernetes.models.v1.ReplicationController import ReplicationController
+from kubernetes.models.v1.ReplicationControllerSpec import ReplicationControllerSpec
 from tests import utils
 
 
