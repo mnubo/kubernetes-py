@@ -41,7 +41,7 @@ class K8sReplicationController(K8sObject):
         self.selector = labels
         self.desired_replicas = replicas
 
-        if config.pull_secret is not None:
+        if config is not None and config.pull_secret is not None:
             self.add_image_pull_secrets(config.pull_secret)
 
     # -------------------------------------------------------------------------------------  override
