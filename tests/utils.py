@@ -215,6 +215,8 @@ def cleanup_objects():
         cleanup_deployments()
         cleanup_rs()
         cleanup_pods()
+        cleanup_pv()
+        cleanup_pvc()
         cleanup_secrets()
         cleanup_services()
 

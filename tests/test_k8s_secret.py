@@ -394,7 +394,7 @@ class K8sSecretTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- api - system
 
     def test_set_default_dockerconfigjson(self):
-        name = "privateregistry"
+        name = "docker-registry"
         secret = utils.create_secret(name=name)
         data = {"auths": {"repo:port": {"auth": "authstring", "email": "you@company.com"}}}
         secret.dockerconfigjson = data
@@ -406,7 +406,7 @@ class K8sSecretTest(unittest.TestCase):
             self.assertIsInstance(s, K8sSecret)
 
     def test_set_system_dockerconfigjson(self):
-        name = "privateregistry"
+        name = "docker-registry"
         config = utils.create_config()
         config.namespace = 'kube-system'
         secret = utils.create_secret(config=config, name=name)

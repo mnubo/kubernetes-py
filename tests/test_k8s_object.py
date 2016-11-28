@@ -15,8 +15,9 @@ from tests import utils
 
 
 class K8sObjectTest(unittest.TestCase):
+
     def setUp(self):
-        pass
+        utils.cleanup_objects()
 
     def tearDown(self):
         utils.cleanup_objects()
@@ -128,14 +129,15 @@ class K8sObjectTest(unittest.TestCase):
             obj = utils.create_object(config=config, name=name, obj_type=ot)
             r = obj.list()
             self.assertIsNotNone(r)
-            self.assertGreaterEqual(1, len(r))  # default-token
+            if not len(r):
+                obj.create()
+                r = obj.list()
             if len(r):
                 secret = r[0]
                 self.assertIsInstance(secret, dict)
-                self.assertEqual(3, len(secret))
-                for i in ['data', 'metadata', 'type']:
+                self.assertEqual(2, len(secret))
+                for i in ['metadata', 'type']:
                     self.assertIn(i, secret)
-                self.assertIsInstance(secret['data'], dict)
                 self.assertIsInstance(secret['metadata'], dict)
                 self.assertIsInstance(secret['type'], str)
 
@@ -185,8 +187,9 @@ class K8sObjectTest(unittest.TestCase):
         ot = "Pod"
         name = "yomama-{}".format(str(uuid.uuid4()))
         obj = utils.create_object(name=name, obj_type=ot)
-        with self.assertRaises(NotFoundException):
-            obj.get_model()
+        if utils.is_reachable(obj.config.api_host):
+            with self.assertRaises(NotFoundException):
+                obj.get_model()
 
     def test_object_pod_get_model_doesnt_exist(self):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
@@ -300,8 +303,9 @@ class K8sObjectTest(unittest.TestCase):
         ot = "Pod"
         name = "yomama-{}".format(str(uuid.uuid4()))
         obj = utils.create_object(name=name, obj_type=ot)
-        with self.assertRaises(NotFoundException):
-            obj.update()
+        if utils.is_reachable(obj.config.api_host):
+            with self.assertRaises(NotFoundException):
+                obj.update()
 
     def test_object_secret_update(self):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
@@ -318,8 +322,9 @@ class K8sObjectTest(unittest.TestCase):
         ot = "Pod"
         name = "yomama-{}".format(str(uuid.uuid4()))
         obj = utils.create_object(name=name, obj_type=ot)
-        with self.assertRaises(NotFoundException):
-            obj.delete()
+        if utils.is_reachable(obj.config.api_host):
+            with self.assertRaises(NotFoundException):
+                obj.delete()
 
     def test_object_pod_delete_not_found(self):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)

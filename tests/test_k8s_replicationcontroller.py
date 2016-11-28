@@ -967,8 +967,9 @@ class K8sReplicationControllerTest(unittest.TestCase):
     # -------------------------------------------------------------------------------------  resize
 
     def test_scale_none_args(self):
+        config = utils.create_config()
         with self.assertRaises(SyntaxError):
-            K8sReplicationController.scale()
+            K8sReplicationController.scale(config=config)
 
     def test_scale_invalid_config(self):
         config = object()
@@ -1497,7 +1498,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         model = ReplicationController(model=model)
         self.assertIsInstance(model, ReplicationController)
 
-        rc = K8sReplicationController(name=model.metadata.name)
+        rc = utils.create_rc(name=model.metadata.name)
         rc.model = model
         if utils.is_reachable(rc.config.api_host):
             rc.create()

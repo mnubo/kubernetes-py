@@ -31,17 +31,19 @@ class K8sPersistentVolumeClaimTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- init
 
     def test_init_no_args(self):
+        config = utils.create_config()
         with self.assertRaises(SyntaxError):
-            K8sPersistentVolumeClaim()
+            K8sPersistentVolumeClaim(config=config)
 
     def test_init_invalid_name(self):
         name = object()
+        config = utils.create_config()
         with self.assertRaises(SyntaxError):
-            K8sPersistentVolumeClaim(name=name)
+            K8sPersistentVolumeClaim(config=config, name=name)
 
     def test_init(self):
         name = "yopvc123"
-        claim = K8sPersistentVolumeClaim(name=name)
+        claim = utils.create_pvc(name=name)
         self.assertIsInstance(claim, K8sPersistentVolumeClaim)
         self.assertEqual(claim.name, name)
 

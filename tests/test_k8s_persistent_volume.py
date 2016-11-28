@@ -26,26 +26,29 @@ class K8sPersistentVolumeTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- init
 
     def test_init_no_args(self):
+        config = utils.create_config()
         with self.assertRaises(SyntaxError):
-            K8sPersistentVolume()
+            K8sPersistentVolume(config=config)
 
     def test_init_invalid_name(self):
         name = object()
+        config = utils.create_config()
         with self.assertRaises(SyntaxError):
-            K8sPersistentVolume(name=name)
+            K8sPersistentVolume(config=config, name=name)
 
     def test_init_invalid_type(self):
         name = "yoname"
         type = object()
+        config = utils.create_config()
         with self.assertRaises(SyntaxError):
-            K8sPersistentVolume(name=name, type=type)
+            K8sPersistentVolume(config=config, name=name, type=type)
 
     # --------------------------------------------------------------------------------- hostPath
 
     def test_init_host_path(self):
         name = "yoname"
         type = 'hostPath'
-        vol = K8sPersistentVolume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         self.assertIsNotNone(vol)
         self.assertIsInstance(vol, K8sPersistentVolume)
         self.assertEqual('hostPath', vol.type)
@@ -55,14 +58,14 @@ class K8sPersistentVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "gcePersistentDisk"
         host_path = "/path/on/host"
-        vol = K8sPersistentVolume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         with self.assertRaises(NotImplementedError):
             vol.path = host_path
 
     def test_hostpath_set_path_none(self):
         name = "yoname"
         type = "hostPath"
-        vol = K8sPersistentVolume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         with self.assertRaises(SyntaxError):
             vol.path = None
 
@@ -70,7 +73,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "hostPath"
         host_path = "/path/on/host"
-        vol = K8sPersistentVolume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         vol.path = host_path
         self.assertEqual(host_path, vol.path)
 
@@ -102,7 +105,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
     def test_gce_set_pd_name_none(self):
         name = "yoname"
         type = "gcePersistentDisk"
-        vol = K8sPersistentVolume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         with self.assertRaises(SyntaxError):
             vol.pd_name = None
 
@@ -110,7 +113,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "gcePersistentDisk"
         pd_name = object()
-        vol = K8sPersistentVolume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         with self.assertRaises(SyntaxError):
             vol.pd_name = pd_name
 
@@ -118,7 +121,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "hostPath"
         pd_name = "yopdname"
-        vol = K8sPersistentVolume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         with self.assertRaises(NotImplementedError):
             vol.pd_name = pd_name
 
@@ -126,7 +129,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "gcePersistentDisk"
         pd_name = "vol-0a89c9040d544a371"
-        vol = K8sPersistentVolume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         vol.pd_name = pd_name
         self.assertEqual(vol.pd_name, pd_name)
 
@@ -135,7 +138,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
     def test_gce_set_fs_type_none(self):
         name = "yoname"
         type = "gcePersistentDisk"
-        vol = K8sPersistentVolume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         with self.assertRaises(SyntaxError):
             vol.fs_type = None
 
@@ -143,7 +146,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "gcePersistentDisk"
         fs_type = object()
-        vol = K8sPersistentVolume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         with self.assertRaises(SyntaxError):
             vol.fs_type = fs_type
 
@@ -151,7 +154,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "hostPath"
         fs_type = object()
-        vol = K8sPersistentVolume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         with self.assertRaises(NotImplementedError):
             vol.fs_type = fs_type
 
@@ -159,7 +162,7 @@ class K8sPersistentVolumeTest(unittest.TestCase):
         name = "yoname"
         type = "gcePersistentDisk"
         fs_type = "xfs"
-        vol = K8sPersistentVolume(name=name, type=type)
+        vol = utils.create_pv(name=name, type=type)
         vol.fs_type = fs_type
         self.assertEqual(vol.fs_type, fs_type)
 

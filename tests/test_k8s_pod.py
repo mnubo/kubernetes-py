@@ -825,13 +825,15 @@ class K8sPodTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------- get by name
 
     def test_get_by_name_none_args(self):
+        config = utils.create_config()
         with self.assertRaises(SyntaxError):
-            K8sPod.get_by_name()
+            K8sPod.get_by_name(config=config)
 
     def test_get_by_name_invalid_args(self):
         name = object()
+        config = utils.create_config()
         with self.assertRaises(SyntaxError):
-            K8sPod.get_by_name(name=name)
+            K8sPod.get_by_name(config=config, name=name)
 
     def test_get_by_name_nonexistent(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
@@ -856,13 +858,15 @@ class K8sPodTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------- get by labels
 
     def test_get_by_labels_none_args(self):
+        config = utils.create_config()
         with self.assertRaises(SyntaxError):
-            K8sPod.get_by_labels()
+            K8sPod.get_by_labels(config=config)
 
     def test_get_by_labels_invalid_args(self):
         name = object()
+        config = utils.create_config()
         with self.assertRaises(SyntaxError):
-            K8sPod.get_by_labels(labels=name)
+            K8sPod.get_by_labels(config=config, labels=name)
 
     def test_get_by_labels_nonexistent(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
