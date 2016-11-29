@@ -255,7 +255,7 @@ class K8sObject(object):
         if self.name is None:
             raise SyntaxError('K8sObject: name: [ {0} ] must be set to UPDATE the object.'.format(self.name))
 
-        self.model.metadata.strip()  # strip server-generated metadata before posting updates
+        self.model.metadata.strip(self.model.kind)  # strip server-generated metadata before posting updates
 
         url = '{base}/{name}'.format(base=self.base_url, name=self.name)
         state = self.request(method='PUT', url=url, data=self.serialize())

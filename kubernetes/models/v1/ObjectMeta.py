@@ -76,13 +76,14 @@ class ObjectMeta(object):
 
     # ------------------------------------------------------------------------------------- name
 
-    def strip(self):
+    def strip(self, kind=None):
         # self._name = None
         self._generate_name = None
         # self._namespace = None
         self._self_link = None
         self._uid = None
-        self._resource_version = None
+        if kind != 'Service':
+            self._resource_version = None
         self._generation = None
         self._creation_timestamp = None
         self._deletion_timestamp = None
