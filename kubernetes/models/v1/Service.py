@@ -66,14 +66,14 @@ class Service(object):
         ports = []
         # exists previously
         for p in self.spec.ports:
-            if p.port == port:
+            if int(p.port) == int(port):
                 p.name = name
                 p.target_port = target_port
                 p.protocol = protocol
                 p.node_port = node_port
             ports.append(p)
         # doesn't exist yet
-        if port not in [x.port for x in ports]:
+        if int(port) not in [int(x.port) for x in ports]:
             p = ServicePort()
             p.name = name
             p.port = port
