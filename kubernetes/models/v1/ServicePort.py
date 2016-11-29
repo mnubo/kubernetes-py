@@ -102,9 +102,9 @@ class ServicePort(object):
 
     @node_port.setter
     def node_port(self, port=None):
-        if isinstance(port, str) and port.isdigit():
+        if port is not None and isinstance(port, str) and port.isdigit():
             port = int(port)
-        if not isinstance(port, int):
+        if port is not None and not isinstance(port, int):
             raise SyntaxError('ServicePort: node_port: [ {} ] is invalid.'.format(port))
         self._node_port = port
 
