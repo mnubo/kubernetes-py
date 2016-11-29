@@ -63,23 +63,25 @@ class Service(object):
     def add_port(self, name=None, port=None, target_port=None, protocol=None, node_port=None):
         if not is_valid_string(name):
             raise SyntaxError('Service.add_port() name: [ {} ] is invalid.'.format(name))
-        ports = self.spec.ports
-        filtered = filter(lambda x: x.name == name, ports)
-        inverse = filter(lambda x: x.name != name, ports)
-        if not filtered:
-            sp = ServicePort(name=name)
-        else:
-            sp = filtered[0]
-        if port:
-            sp.port = port
-        if target_port:
-            sp.target_port = target_port
-        if protocol:
-            sp.protocol = protocol
-        if node_port:
-            sp.node_port = node_port
-        inverse.append(sp)
-        self.spec.ports = inverse
+        ports = []
+        # exists previously
+        for p in self.spec.ports:
+            if p.port == port:
+                p.name = name
+                p.target_port = target_port
+                p.protocol = protocol
+                p.node_port = node_port
+            ports.append(p)
+        # doesn't exist yet
+        if port not in [x.port for x in ports]:
+            p = ServicePort()
+            p.name = name
+            p.port = port
+            p.target_port = target_port
+            p.protocol = protocol
+            p.node_port = node_port
+            ports.append(p)
+        self.spec.ports = ports
 
     def add_selector(self, selector=None):
         if not is_valid_dict(selector):

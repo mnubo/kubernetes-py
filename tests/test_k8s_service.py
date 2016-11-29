@@ -19,6 +19,7 @@ from tests import utils
 
 
 class K8sServiceTest(unittest.TestCase):
+
     def setUp(self):
         utils.cleanup_services()
 
@@ -708,6 +709,52 @@ class K8sServiceTest(unittest.TestCase):
             svc.external_ips = [ip]
             svc.update()
             self.assertIn(ip, svc.external_ips)
+
+    def test_update_with_full_model(self):
+        data = {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "frontend",
+                "namespace": "default",
+                "labels": {
+                    "name": "frontend"
+                }
+            },
+            "spec": {
+                "ports": [
+                    {
+                        "protocol": "TCP",
+                        "port": 8082,
+                        "targetPort": "feport",
+                        "nodePort": 8082
+                    }
+                ],
+                "selector": {
+                    "name": "frontend"
+                },
+                "clusterIP": "10.250.1.27",
+                "type": "NodePort",
+                "sessionAffinity": "None"
+            },
+            "status": {
+                "loadBalancer": {}
+            }
+        }
+
+        svc = Service(model=data)
+        k8s_service = utils.create_service(name=svc.name)
+        k8s_service.model = svc
+
+        k8s_service.add_port(
+            name="frontend",
+            port=8082,
+            target_port="feport",
+            node_port=8082,
+            protocol='tcp'
+        )
+
+        self.assertEqual(1, len(k8s_service.ports))
 
     # --------------------------------------------------------------------------------- api - delete
 
