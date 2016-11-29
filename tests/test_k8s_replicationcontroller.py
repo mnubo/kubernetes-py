@@ -14,7 +14,13 @@ from kubernetes.K8sExceptions import *
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.models.v1.ReplicationController import ReplicationController
 from kubernetes.models.v1.ReplicationControllerSpec import ReplicationControllerSpec
+from kubernetes.models.v1.Probe import Probe
 from tests import utils
+
+
+
+
+
 
 
 class K8sReplicationControllerTest(unittest.TestCase):
@@ -1337,6 +1343,54 @@ class K8sReplicationControllerTest(unittest.TestCase):
             for p in pods:
                 for c in p.containers:
                     self.assertIn(c.image, [new_image, image_2])
+
+    def test_update_from_full_model_with_liveness_probe(self):
+        data = utils.frontend()
+
+        rc = ReplicationController(model=data)
+        k8s_rc = utils.create_rc(name=rc.metadata.name)
+        k8s_rc.model = rc
+
+        self.assertEqual(1, len(k8s_rc.liveness_probes))
+        liveness = k8s_rc.liveness_probes['frontend']
+        self.assertIsInstance(liveness, Probe)
+        self.assertEqual(15, liveness.initial_delay_seconds)
+
+        if utils.is_reachable(k8s_rc.config.api_host):
+            k8s_rc.create()
+            self.assertIsInstance(k8s_rc, K8sReplicationController)
+            liveness = k8s_rc.liveness_probes['frontend']
+            liveness.initial_delay_seconds = 60
+            k8s_rc.liveness_probes = ('frontend', liveness)
+            k8s_rc.update()
+            liveness = k8s_rc.liveness_probes['frontend']
+            self.assertEqual(liveness.initial_delay_seconds, 60)
+
+    def test_rolling_update_from_full_model_with_liveness_probe(self):
+        data = utils.frontend()
+
+        rc = ReplicationController(model=data)
+        k8s_rc = utils.create_rc(name=rc.metadata.name)
+        k8s_rc.model = rc
+
+        self.assertEqual(1, len(k8s_rc.liveness_probes))
+        liveness = k8s_rc.liveness_probes['frontend']
+        self.assertIsInstance(liveness, Probe)
+        self.assertEqual(15, liveness.initial_delay_seconds)
+
+        if utils.is_reachable(k8s_rc.config.api_host):
+            k8s_rc.create()
+            self.assertIsInstance(k8s_rc, K8sReplicationController)
+            liveness = k8s_rc.liveness_probes['frontend']
+            liveness.initial_delay_seconds = 60
+            k8s_rc.liveness_probes = ('frontend', liveness)
+            K8sReplicationController.rolling_update(
+                config=k8s_rc.config,
+                name=k8s_rc.name,
+                rc_new=k8s_rc
+            )
+            liveness = k8s_rc.liveness_probes['frontend']
+            self.assertEqual(liveness.initial_delay_seconds, 60)
 
     # -------------------------------------------------------------------------------------  api - create
 
