@@ -17,6 +17,7 @@ class ObjectMeta(object):
 
     def __init__(self, model=None):
         super(ObjectMeta, self).__init__()
+
         self._name = None
         self._generate_name = None
         self._namespace = None
@@ -72,6 +73,25 @@ class ObjectMeta(object):
             self.finalizers = model['finalizers']
         if 'clusterName' in model:
             self.cluster_name = model['clusterName']
+
+    # ------------------------------------------------------------------------------------- name
+
+    def strip(self):
+        # self._name = None
+        self._generate_name = None
+        # self._namespace = None
+        self._self_link = None
+        self._uid = None
+        self._resource_version = None
+        self._generation = None
+        self._creation_timestamp = None
+        self._deletion_timestamp = None
+        self._deletion_grace_period_seconds = None
+        # self._labels = {}
+        # self._annotations = {}
+        self._owner_references = None
+        self._finalizers = None
+        self._cluster_name = None
 
     # ------------------------------------------------------------------------------------- name
 
