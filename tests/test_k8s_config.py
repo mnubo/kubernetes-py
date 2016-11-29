@@ -156,7 +156,7 @@ class K8sConfigTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_init_pull_secret(self):
-        ps = "yomama"
+        ps = [{'name': "yomama"}]
         config = K8sConfig(
             kubeconfig=None,
             pull_secret=ps

@@ -19,10 +19,11 @@ DEFAULT_NAMESPACE = "default"
 VALID_API_VERSIONS = ["v1"]
 
 VALID_IP_RE = re.compile(r'^(http[s]?\:\/\/)?((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3})(:[0-9]+)?$')
-VALID_HOST_RE = re.compile(r'^(http[s]?\:\/\/)?([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9]\.)*([A-Za-z]|[A-Za-z][A-Za-z\-]*[A-Za-z])(:[0-9]+)?$')
+VALID_HOST_RE = re.compile(r'^(http[s]?\:\/\/)?([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-\.]*[A-Za-z])+(:[0-9]+)?$')
 
 
 class K8sConfig(object):
+
     def __init__(self, kubeconfig=DEFAULT_KUBECONFIG, api_host=DEFAULT_API_HOST, auth=None, cert=None,
                  namespace=DEFAULT_NAMESPACE, pull_secret=None, token=None, version=DEFAULT_API_VERSION):
         """
@@ -60,9 +61,8 @@ class K8sConfig(object):
             except YAMLError as err:
                 raise SyntaxError('K8sConfig: kubeconfig: [ {0} ] is not a valid YAML file.'.format(kubeconfig))
 
+        # we're pulling configuration from a kubeconfig file
         if dotconf is not None:
-            # we're pulling configuration from a kubeconfig file
-
             self.clusters = dotconf['clusters']
             self.contexts = dotconf['contexts']
             self.current_context = dotconf['current-context']
@@ -98,8 +98,8 @@ class K8sConfig(object):
                     else:
                         self.namespace = namespace
 
+        # we're using user-supplied config; run some sanity checks.
         if dotconf is None:
-            # we're using user-supplied config; run some sanity checks.
 
             if not isinstance(api_host, str) or not isinstance(version, str):
                 raise SyntaxError('K8sConfig: host: [ {0} ] and version: [ {1} ] must be strings.'.format(api_host, version))
@@ -109,8 +109,8 @@ class K8sConfig(object):
                 raise SyntaxError('K8sConfig: auth: [ {0} ] must be a tuple for basic authentication.'.format(auth))
             if not isinstance(namespace, str):
                 raise SyntaxError('K8sConfig: namespace: [ {0} ] must be a string.'.format(namespace))
-            if pull_secret is not None and not isinstance(pull_secret, str):
-                raise SyntaxError('K8sConfig: pull_secret: [ {0} ] must be a string.'.format(pull_secret))
+            if pull_secret is not None and not isinstance(pull_secret, list):
+                raise SyntaxError('K8sConfig: pull_secret: [ {0} ] must be a list.'.format(pull_secret))
             if token is not None and not isinstance(token, str):
                 raise SyntaxError('K8sConfig: token: [ {0} ] must be a string.'.format(token))
             if version not in VALID_API_VERSIONS:
@@ -120,7 +120,6 @@ class K8sConfig(object):
             schema_re = re.compile(r"^http[s]*")
             if not schema_re.search(api_host):
                 api_host = "http://{0}".format(api_host)
-
             self.api_host = api_host
             self.auth = auth
             self.cert = cert
@@ -128,3 +127,21 @@ class K8sConfig(object):
             self.pull_secret = pull_secret
             self.token = token
             self.version = version
+
+    def serialize(self):
+        data = {}
+        if self.api_host is not None:
+            data['api_host'] = self.api_host
+        if self.auth is not None:
+            data['auth'] = self.auth
+        if self.cert is not None:
+            data['cert'] = self.cert
+        if self.namespace is not None:
+            data['namespace'] = self.namespace
+        if self.pull_secret is not None:
+            data['pull_secret'] = self.pull_secret
+        if self.token is not None:
+            data['token'] = self.token
+        if self.version is not None:
+            data['version'] = self.version
+        return data

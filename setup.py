@@ -17,14 +17,16 @@ setup(
     version=version(),
     description='A python module for Kubernetes.',
     author='mnubo inc.',
-    author_email='scoutu@mnubo.com',
+    author_email='scoutu@mnubo.com, francis@mnubo.com',
     url='https://github.com/mnubo/kubernetes-py',
     download_url='https://github.com/mnubo/kubernetes-py/tarball/' + version(),
     keywords=['kubernetes', 'k8s'],
     packages=[
         'kubernetes',
         'kubernetes.models',
+        'kubernetes.models.unversioned',
         'kubernetes.models.v1',
+        'kubernetes.models.v1beta1',
         'kubernetes.utils'
     ],
     install_requires=[

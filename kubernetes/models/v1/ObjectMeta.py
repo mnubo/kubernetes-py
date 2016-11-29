@@ -6,320 +6,287 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1.BaseModel import BaseModel
+from kubernetes.models.v1.OwnerReference import OwnerReference
+from kubernetes.utils import is_valid_string, filter_model, is_valid_list, is_valid_dict
 
 
-class ObjectMeta(BaseModel):
-    def __init__(self, name=None, namespace='default', model=None, del_server_attr=True):
-        BaseModel.__init__(self)
+class ObjectMeta(object):
+    """
+    http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_objectmeta
+    """
+
+    def __init__(self, model=None):
+        super(ObjectMeta, self).__init__()
+        self._name = None
+        self._generate_name = None
+        self._namespace = None
+        self._self_link = None
+        self._uid = None
+        self._resource_version = None
+        self._generation = None
+        self._creation_timestamp = None
+        self._deletion_timestamp = None
+        self._deletion_grace_period_seconds = None
+        self._labels = {}
+        self._annotations = {}
+        self._owner_references = None
+        self._finalizers = None
+        self._cluster_name = None
+
         if model is not None:
-            self.model = model
-            if del_server_attr:
-                self.del_server_generated_meta_attr()
-        else:
-            self.model = dict(name=name, namespace=namespace, labels=dict(name=name))
+            m = filter_model(model)
+            self._build_with_model(m)
 
-    # ------------------------------------------------------------------------------------- add
+    def _build_with_model(self, model=None):
+        if 'name' in model:
+            self.name = model['name']
+        if 'generateName' in model:
+            self.generate_name = model['generateName']
+        if 'namespace' in model:
+            self.namespace = model['namespace']
+        if 'selfLink' in model:
+            self.self_link = model['selfLink']
+        if 'uid' in model:
+            self.uid = model['uid']
+        if 'resourceVersion' in model:
+            self.resource_version = model['resourceVersion']
+        if 'generation' in model:
+            self.generation = model['generation']
+        if 'creationTimestamp' in model:
+            self.creation_timestamp = model['creationTimestamp']
+        if 'deletionTimestamp' in model:
+            self.deletion_timestamp = model['deletionTimestamp']
+        if 'deletionGracePeriodSeconds' in model:
+            self.deletion_grace_period_seconds = model['deletionGracePeriodSeconds']
+        if 'labels' in model:
+            self.labels = model['labels']
+        if 'annotations' in model:
+            self.annotations = model['annotations']
+        if 'ownerReferences' in model:
+            refs = []
+            for o in model['ownerReferences']:
+                ref = OwnerReference(model=o)
+                refs.append(ref)
+            self.owner_references = refs
+        if 'finalizers' in model:
+            self.finalizers = model['finalizers']
+        if 'clusterName' in model:
+            self.cluster_name = model['clusterName']
 
-    def add_annotation(self, k=None, v=None):
-        if k is None or v is None:
-            raise SyntaxError('ObjectMeta: annotation: [ {0}, {1} ] cannot be None.'.format(k, v))
-        if not isinstance(k, str) or not isinstance(v, str):
-            kc = k.__class__.__name__
-            vc = v.__class__.__name__
-            raise SyntaxError('ObjectMeta: annotation: [ {0}, {1} ] must be strings.'.format(kc, vc))
+    # ------------------------------------------------------------------------------------- name
 
-        if 'annotations' not in self.model:
-            self.model['annotations'] = dict()
+    @property
+    def name(self):
+        return self._name
 
-        if k not in self.model['annotations']:
-            self.model['annotations'].update({k: v})
-        else:
-            self.model['annotations'][k] = v
+    @name.setter
+    def name(self, name=None):
+        if not is_valid_string(name):
+            raise SyntaxError('ObjectMeta: name: [ {0} ] is invalid.'.format(name))
+        self._name = name
 
-        return self
+    # ------------------------------------------------------------------------------------- generate name
 
-    def add_label(self, k=None, v=None):
-        if k is None or v is None:
-            raise SyntaxError('ObjectMeta: label: [ {0}, {1} ] cannot be None.'.format(k, v))
-        if not isinstance(k, str) or not isinstance(v, str):
-            kc = k.__class__.__name__
-            vc = v.__class__.__name__
-            raise SyntaxError('ObjectMeta: label: [ {0}, {1} ] must be strings.'.format(kc, vc))
+    @property
+    def generate_name(self):
+        return self._generate_name
 
-        if k not in self.model['labels']:
-            self.model['labels'].update({k: v})
-        else:
-            self.model['labels'][k] = v
-        return self
+    @generate_name.setter
+    def generate_name(self, name=None):
+        if not is_valid_string(name):
+            raise SyntaxError('ObjectMeta: generate_name: [ {0} ] is invalid.'.format(name))
+        self._generate_name = name
 
-    # ------------------------------------------------------------------------------------- delete
+    # ------------------------------------------------------------------------------------- namespace
 
-    def del_annotation(self, k=None):
-        if k is None:
-            raise SyntaxError('ObjectMeta: k: [ {0} ] cannot be None.'.format(k))
-        if not isinstance(k, str):
-            raise SyntaxError('ObjectMeta: k: [ {0} ] must be a string'.format(k.__class__.__name__))
+    @property
+    def namespace(self):
+        return self._namespace
 
-        if 'annotations' not in self.model:
-            return self
+    @namespace.setter
+    def namespace(self, namespace=None):
+        if not is_valid_string(namespace):
+            raise SyntaxError('ObjectMeta: namespace: [ {0} ] is invalid.'.format(namespace))
+        self._namespace = namespace
 
-        if k in self.model['annotations']:
-            assert isinstance(self.model['annotations'], dict)
-            self.model['annotations'].pop(k, None)
+    # ------------------------------------------------------------------------------------- selfLink
 
-        return self
+    @property
+    def self_link(self):
+        return self._self_link
 
-    def del_creation_timestamp(self):
-        if 'creationTimestamp' in self.model:
-            self.model.pop('creationTimestamp', None)
-        return self
+    @self_link.setter
+    def self_link(self, link=None):
+        if not is_valid_string(link):
+            raise SyntaxError('ObjectMeta: self_link: [ {0} ] is invalid.'.format(link))
+        self._self_link = link
 
-    def del_deletion_timestamp(self):
-        if 'deletionTimestamp' in self.model:
-            self.model.pop('deletionTimestamp', None)
-        return self
+    # ------------------------------------------------------------------------------------- uid
 
-    def del_deletion_grace_period_seconds(self):
-        if 'deletionGracePeriodSeconds' in self.model:
-            self.model.pop('deletionGracePeriodSeconds', None)
-        return self
+    @property
+    def uid(self):
+        return self._uid
 
-    def del_generation(self):
-        if 'generation' in self.model:
-            self.model.pop('generation', None)
-        return self
+    @uid.setter
+    def uid(self, uid=None):
+        if uid is not None:
+            if not is_valid_string(uid):
+                raise SyntaxError('ObjectMeta: uid: [ {0} ] is invalid.'.format(uid))
+        self._uid = uid
 
-    def del_label(self, k=None):
-        if k is None:
-            raise SyntaxError('ObjectMeta: k: [ {0} ] cannot be None.'.format(k))
-        if not isinstance(k, str):
-            raise SyntaxError('ObjectMeta: k: [ {0} ] must be a string.'.format(k.__class__.__name__))
+    # ------------------------------------------------------------------------------------- resourceVersion
 
-        if 'labels' not in self.model:
-            return self
+    @property
+    def resource_version(self):
+        return self._resource_version
 
-        if k in self.model['labels']:
-            assert isinstance(self.model['labels'], dict)
-            self.model['labels'].pop(k, None)
+    @resource_version.setter
+    def resource_version(self, v=None):
+        if v is not None:
+            if not isinstance(v, str):
+                raise SyntaxError('ObjectMeta: resource_version: [ {0} ] is invalid.'.format(v))
+        self._resource_version = v
 
-        return self
+    # ------------------------------------------------------------------------------------- generation
 
-    def del_resource_version(self):
-        if 'resourceVersion' in self.model:
-            self.model.pop('resourceVersion', None)
-        return self
+    @property
+    def generation(self):
+        return self._generation
 
-    def del_status(self):
-        if 'status' in self.model:
-            self.model.pop('status', None)
-        return self
-
-    def del_self_link(self):
-        if 'selfLink' in self.model:
-            self.model.pop('selfLink', None)
-        return self
-
-    def del_server_generated_meta_attr(self):
-        self.del_generation()\
-            .del_resource_version()\
-            .del_creation_timestamp()\
-            .del_deletion_timestamp()\
-            .del_deletion_grace_period_seconds()\
-            .del_status()\
-            .del_self_link()\
-            .del_uid()
-        return self
-
-    def del_uid(self):
-        if 'uid' in self.model:
-            self.model.pop('uid', None)
-        return self
-
-    # ------------------------------------------------------------------------------------- get
-
-    def get_annotation(self, k):
-        if k is None:
-            raise SyntaxError('ObjectMeta: k: [ {0} ] cannot be None.'.format(k))
-        if not isinstance(k, str):
-            raise SyntaxError('ObjectMeta: k: [ {0} ] must be a string.'.format(k.__class__.__name__))
-        if 'annotations' in self.model:
-            if k in self.model['annotations']:
-                return self.model['annotations'][k]
-        return None
-
-    def get_annotations(self):
-        if 'annotations' in self.model:
-            return self.model['annotations']
-        return None
-
-    def get_creation_timestamp(self):
-        if 'creationTimestamp' in self.model:
-            return self.model['creationTimestamp']
-        return None
-
-    def get_deletion_timestamp(self):
-        if 'deletionTimestamp' in self.model:
-            return self.model['deletionTimestamp']
-        return None
-
-    def get_deletion_grace_period_seconds(self):
-        if 'deletionGracePeriodSeconds' in self.model:
-            return self.model['deletionGracePeriodSeconds']
-        return None
-
-    def get_generate_name(self):
-        if 'generateName' in self.model:
-            return self.model['generateName']
-        return None
-
-    def get_generation(self):
-        if 'generation' in self.model:
-            return self.model['generation']
-        return None
-
-    def get_label(self, k):
-        if k is None:
-            raise SyntaxError('ObjectMeta: k: [ {0} ] cannot be None.'.format(k))
-        if not isinstance(k, str):
-            raise SyntaxError('ObjectMeta: k: [ {0} ] must be a string.'.format(k.__class__.__name__))
-        if 'labels' in self.model and k in self.model['labels']:
-            return self.model['labels'][k]
-        return None
-
-    def get_labels(self):
-        if 'labels' in self.model:
-            return self.model['labels']
-        return None
-
-    def get_name(self):
-        return self.model['name']
-
-    def get_namespace(self):
-        return self.model['namespace']
-
-    def get_resource_version(self):
-        if 'resourceVersion' in self.model:
-            return self.model['resourceVersion']
-        return None
-
-    def get_status(self):
-        if 'status' in self.model:
-            return self.model['status']
-        return None
-
-    def get_self_link(self):
-        if 'selfLink' in self.model:
-            return self.model['selfLink']
-        return None
-
-    def get_uid(self):
-        if 'uid' in self.model:
-            return self.model['uid']
-        return None
-
-    def set_annotations(self, dico=None):
-        if dico is None:
-            raise SyntaxError('ObjectMeta: dico: [ {0} ] cannot be None.'.format(dico))
-        if not isinstance(dico, dict):
-            raise SyntaxError('ObjectMeta: dico: [ {0} ] must be a dict.'.format(dico.__class__.__name__))
-        for k, v in dico.iteritems():
-            if not isinstance(k, str) or not isinstance(v, str):
-                raise SyntaxError('ObjectMeta: dico: [ {0} ] must be a mapping of str -> str.'.format(dico))
-        self.model['annotations'] = dico
-        return self
-
-    # ------------------------------------------------------------------------------------- set
-
-    def set_creation_timestamp(self, ts=None):
-        if ts is None:
-            raise SyntaxError('ObjectMeta: ts: [ {0} ] cannot be None.'.format(ts))
-        if not isinstance(ts, str):
-            raise SyntaxError('ObjectMeta: ts: [ {0} ] must be a string.'.format(ts.__class__.__name__))
-        self.model['creationTimestamp'] = ts
-        return self
-
-    def set_deletion_timestamp(self, ts=None):
-        if ts is None or not isinstance(ts, str):
-            raise SyntaxError('ObjectMeta: ts should be a string.')
-        self.model['deletionTimestamp'] = ts
-        return self
-
-    def set_deletion_grace_period_seconds(self, secs=None):
-        if secs is None or not isinstance(secs, str):
-            raise SyntaxError('ObjectMeta: secs should be a int.')
-        self.model['deletionGracePeriodSeconds'] = secs
-        return self
-
-    def set_generate_name(self, mode, name=None):
-        if not isinstance(mode, bool):
-            raise SyntaxError('ObjectMeta: ensure mode is True or False')
-        if mode:
-            if name is None:
-                self.model['generateName'] = self.model['name']
-            else:
-                assert isinstance(name, str)
-                self.model['generateName'] = name
-        else:
-            if 'generateName' in self.model:
-                self.model.pop('generateName', None)
-        return self
-
-    def set_generation(self, gen=None):
-        if gen is None:
-            raise SyntaxError('ObjectMeta: gen: [ {0} ] cannot be None.'.format(gen))
+    @generation.setter
+    def generation(self, gen=None):
         if not isinstance(gen, int):
-            raise SyntaxError('ObjectMeta: gen: [ {0} ] must be an int.'.format(gen.__class__.__name__))
-        self.model['generation'] = gen
-        return self
+            raise SyntaxError('ObjectMeta: generation: [ {0} ] is invalid.'.format(gen))
+        self._generation = gen
 
-    def set_labels(self, labels=None):
-        if labels is None:
-            raise SyntaxError('ObjectMeta: dico: [ {0} ] cannot be None.'.format(labels))
-        if not isinstance(labels, dict):
-            raise SyntaxError('ObjectMeta: dico: [ {0} ] must be a dict.'.format(labels.__class__.__name__))
-        for k, v in labels.iteritems():
-            if not isinstance(k, str) or not isinstance(v, str):
-                raise SyntaxError('ObjectMeta: dico: [ {0} ] must be a mapping of str -> str.'.format(labels))
-        self.model['labels'] = labels
-        return self
+    # ------------------------------------------------------------------------------------- creationTimestamp
 
-    def set_name(self, name=None, set_label=True):
-        if name is None or not isinstance(name, str):
-            raise SyntaxError('ObjectMeta: name should be a string.')
-        self.model['name'] = name
-        if set_label:
-            self.model['labels']['name'] = name
-        return self
+    @property
+    def creation_timestamp(self):
+        return self._creation_timestamp
 
-    def set_namespace(self, namespace=None):
-        if namespace is None:
-            raise SyntaxError('ObjectMeta: name: [ {0} ] cannot be None.'.format(namespace))
-        if not isinstance(namespace, str):
-            raise SyntaxError('ObjectMeta: name: [ {0} ] must be a string.'.format(namespace.__class__.__name__))
-        self.model['namespace'] = namespace
-        return self
+    @creation_timestamp.setter
+    def creation_timestamp(self, time=None):
+        if not is_valid_string(time):
+            raise SyntaxError('ObjectMeta: creation_timestamp: [ {0} ] is invalid.'.format(time))
+        self._creation_timestamp = time
 
-    def set_resource_version(self, ver=None):
-        if ver is None:
-            raise SyntaxError('ObjectMeta: ver: [ {0} ] cannot be None.'.format(ver))
-        if not isinstance(ver, str):
-            raise SyntaxError('ObjectMeta: ver: [ {0} ] must be a string.'.format(ver.__class__.__name__))
-        self.model['resourceVersion'] = ver
-        return self
+    # ------------------------------------------------------------------------------------- deletionTimestamp
 
-    def set_self_link(self, link=None):
-        if link is None:
-            raise SyntaxError('ObjectMeta: link: [ {0} ] cannot be None.'.format(link))
-        if not isinstance(link, str):
-            raise SyntaxError('ObjectMeta: link: [ {0} ] must be a string.'.format(link.__class__.__name__))
-        self.model['selfLink'] = link
-        return self
+    @property
+    def deletion_timestamp(self):
+        return self._deletion_timestamp
 
-    def set_uid(self, uid=None):
-        if uid is None:
-            raise SyntaxError('ObjectMeta: uid: [ {0} ] cannot be None.'.format(uid))
-        if not isinstance(uid, str):
-            raise SyntaxError('ObjectMeta: uid: [ {0} ] must be a string.'.format(uid.__class__.__name__))
-        self.model['uid'] = uid
-        return self
+    @deletion_timestamp.setter
+    def deletion_timestamp(self, time=None):
+        if not is_valid_string(time):
+            raise SyntaxError('ObjectMeta: deletion_timestamp: [ {0} ] is invalid.'.format(time))
+        self._deletion_timestamp = time
+
+    # ------------------------------------------------------------------------------------- deletionGracePeriodSeconds
+
+    @property
+    def deletion_grace_period_seconds(self):
+        return self._deletion_grace_period_seconds
+
+    @deletion_grace_period_seconds.setter
+    def deletion_grace_period_seconds(self, secs=None):
+        if not isinstance(secs, int):
+            raise SyntaxError('ObjectMeta: deletion_grace_period_seconds: [ {0} ] is invalid.'.format(secs))
+        self._deletion_grace_period_seconds = secs
+
+    # ------------------------------------------------------------------------------------- labels
+
+    @property
+    def labels(self):
+        return self._labels
+
+    @labels.setter
+    def labels(self, labels=None):
+        if not is_valid_dict(labels, type=str):
+            raise SyntaxError('ObjectMeta: labels: [ {0} ] is invalid.'.format(labels))
+        self._labels = labels
+
+    # ------------------------------------------------------------------------------------- annotations
+
+    @property
+    def annotations(self):
+        return self._annotations
+
+    @annotations.setter
+    def annotations(self, anns=None):
+        if not is_valid_dict(anns, type=str):
+            raise SyntaxError('ObjectMeta: annotations: [ {0} ] is invalid.'.format(anns))
+        self._annotations = anns
+
+    # ------------------------------------------------------------------------------------- ownerReferences
+
+    @property
+    def owner_references(self):
+        return self._owner_references
+
+    @owner_references.setter
+    def owner_references(self, refs=None):
+        if not is_valid_list(refs, OwnerReference):
+            raise SyntaxError('ObjectMeta: owner_references: [ {0} ] is invalid.'.format(refs))
+        self._owner_references = refs
+
+    # ------------------------------------------------------------------------------------- finalizers
+
+    @property
+    def finalizers(self):
+        return self._finalizers
+
+    @finalizers.setter
+    def finalizers(self, f=None):
+        if not is_valid_list(f, str):
+            raise SyntaxError('ObjectMeta: finalizers: [ {0} ] is invalid.'.format(f))
+        self._finalizers = f
+
+    # ------------------------------------------------------------------------------------- clusterName
+
+    @property
+    def cluster_name(self):
+        return self._cluster_name
+
+    @cluster_name.setter
+    def cluster_name(self, name=None):
+        if not is_valid_string(name):
+            raise SyntaxError('ObjectMeta: cluster_name: [ {0} ] is invalid.'.format(name))
+        self._cluster_name = name
+
+    # ------------------------------------------------------------------------------------- serialize
+
+    def serialize(self):
+        data = {}
+        if self.name:
+            data['name'] = self.name
+        if self.generate_name:
+            data['generateName'] = self.generate_name
+        if self.namespace:
+            data['namespace'] = self.namespace
+        if self.self_link:
+            data['selfLink'] = self.self_link
+        if self.uid:
+            data['uid'] = self.uid
+        if self.resource_version:
+            data['resourceVersion'] = self.resource_version
+        if self.generation:
+            data['generation'] = self.generation
+        if self.creation_timestamp:
+            data['creationTimestamp'] = self.creation_timestamp
+        if self.deletion_timestamp:
+            data['deletionTimestamp'] = self.deletion_timestamp
+        if self.deletion_grace_period_seconds:
+            data['deletionGracePeriodSeconds'] = self.deletion_grace_period_seconds
+        if self.labels:
+            data['labels'] = self.labels
+        if self.annotations:
+            data['annotations'] = self.annotations
+        if self.owner_references:
+            data['ownerReferences'] = self.owner_references
+        if self.finalizers:
+            data['finalizers'] = self.finalizers
+        if self.cluster_name:
+            data['clusterName'] = self.cluster_name
+        return data

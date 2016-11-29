@@ -6,147 +6,231 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1.BaseModel import BaseModel
-from kubernetes.models.v1.ObjectMeta import ObjectMeta
-from kubernetes.K8sExceptions import *
 import base64
+import json
+
+from kubernetes.models.v1.ObjectMeta import ObjectMeta
+from kubernetes.utils import is_valid_string, is_valid_dict
 
 
-class Secret(BaseModel):
-    def __init__(self, name=None, namespace='default', model=None):
-        BaseModel.__init__(self)
+class Secret(object):
+    """
+    http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_secret
+    """
 
-        if name is None:
-            raise SyntaxError('Secret: name: [ {0} ] cannot be None.'.format(name))
-        if not isinstance(name, str):
-            raise SyntaxError('Secret: name: [ {0} ] must be a string.'.format(name))
+    def __init__(self, model=None):
 
-        if model is not None and not isinstance(model, dict):
-            raise SyntaxError('Secret: model: [ {0} ] must be a dict.'.format(model))
+        super(Secret, self).__init__()
+
+        self._kind = 'Secret'
+        self._api_version = 'v1'
+        self._metadata = ObjectMeta()
+        self._data = {}
+        self._string_data = None
+        self._type = None
 
         if model is not None:
-            if 'status' in self.model:
-                self.model.pop('status', None)
-            self.model = model
-            self.secret_metadata = ObjectMeta(model=self.model['metadata'])
+            self._build_with_model(model)
 
-        else:
-            self.model = dict(kind='Secret', apiVersion='v1')
-            self.secret_metadata = ObjectMeta(name=name, namespace=namespace)
-            self._update_model()
+    def _build_with_model(self, model=None):
+        if 'kind' in model:
+            self.kind = model['kind']
+        if 'apiVersion' in model:
+            self.api_version = model['apiVersion']
+        if 'metadata' in model:
+            self.metadata = ObjectMeta(model=model['metadata'])
+        if 'data' in model:
+            d = {}
+            for k, v in model['data'].items():
+                d[k] = base64.b64decode(v)
+            self.data = d
+        if 'stringData' in model:
+            self.string_data = model['stringData']
+        if 'type' in model:
+            self.type = model['type']
 
-    def _update_model(self):
-        self.model['metadata'] = self.secret_metadata.get()
-        return self
+    def __eq__(self, other):
+        # see https://github.com/kubernetes/kubernetes/blob/release-1.3/docs/design/identifiers.md
+        if isinstance(other, self.__class__):
+            return self.metadata.name == other.metadata.name
+        return NotImplemented
 
     # ------------------------------------------------------------------------------------- add
 
     def add_annotation(self, k=None, v=None):
-        self.secret_metadata.add_annotation(k=k, v=v)
+        anns = self.metadata.annotations
+        if anns is None:
+            anns = {}
+        anns.update({k: v})
+        self.metadata.annotations = anns
         return self
 
     def add_label(self, k=None, v=None):
-        self.secret_metadata.add_label(k=k, v=v)
+        labels = self.metadata.labels
+        if labels is None:
+            labels = {}
+        labels.update({k: v})
+        self.metadata.labels = labels
         return self
 
-    # ------------------------------------------------------------------------------------- get
+    # ------------------------------------------------------------------------------------- kind
 
-    def get_annotation(self, k):
-        assert isinstance(k, str)
-        return self.secret_metadata.get_annotation(k=k)
+    @property
+    def kind(self):
+        return self._kind
 
-    def get_annotations(self):
-        return self.secret_metadata.get_annotations()
+    @kind.setter
+    def kind(self, k=None):
+        if not is_valid_string(k):
+            raise SyntaxError('Secret: kind: [ {0} ] is invalid.'.format(k))
+        self._kind = k
 
-    def get_label(self, k):
-        assert isinstance(k, str)
-        return self.secret_metadata.get_label(k=k)
+    # ------------------------------------------------------------------------------------- apiVersion
 
-    def get_labels(self):
-        return self.secret_metadata.get_annotations()
+    @property
+    def api_version(self):
+        return self._api_version
 
-    def get_data(self, k=None):
-        if k is None:
-            raise SyntaxError('Secret: k: [ {0} ] cannot be None.'.format(k))
-        if not isinstance(k, str):
-            raise SyntaxError('Secret: k: [ {0} ] must be a string.'.format(k.__class__.__name__))
-        if 'data' not in self.model or k not in self.model['data']:
-            raise NotFoundException('Secret: k: [ {0} ] not found.'.format(k))
-        encoded = self.model['data'][k]
-        return base64.b64decode(encoded)
+    @api_version.setter
+    def api_version(self, v=None):
+        if not is_valid_string(v):
+            raise SyntaxError('Secret: api_version: [ {0} ] is invalid.'.format(v))
+        self._api_version = v
 
-    def get_type(self):
-        return self.model['type']
+    # ------------------------------------------------------------------------------------- labels
 
-    def get_dockercfg_secret(self):
-        return self.get_data(k='.dockercfg')
+    @property
+    def labels(self):
+        return self.metadata.labels
 
-    # ------------------------------------------------------------------------------------- set
+    @labels.setter
+    def labels(self, labels=None):
+        if not is_valid_dict(labels):
+            raise SyntaxError('Secret: labels: [ {0} ] is invalid.'.format(labels))
+        self.metadata.labels = labels
 
-    def set_annotations(self, new_dict):
-        assert isinstance(new_dict, dict)
-        self.secret_metadata.set_annotations(dico=new_dict)
-        return self
+    # ------------------------------------------------------------------------------------- metadata
 
-    def set_data(self, k=None, v=None):
-        if k is None or v is None:
-            raise SyntaxError('Secret: k: [ {0} ] or v: [ {1} ] cannot be None.'.format(k, v))
-        if not isinstance(k, str) or not isinstance(v, str):
-            raise SyntaxError('Secret: k: [ {0} ] or v: [ {1} ] must be a string.'.format(k, v))
-        if 'data' not in self.model:
-            self.model['data'] = dict()
-        self.model['data'][k] = base64.b64encode(v)
-        return self
+    @property
+    def metadata(self):
+        return self._metadata
 
-    def set_dockercfg_secret(self, data=None):
-        if data is None:
-            raise SyntaxError('Secret: data: [ {0} ] cannot be None.'.format(data))
-        if not isinstance(data, str):
-            raise SyntaxError('Secret: data: [ {0} ] must be a string'.format(data))
-        self.set_type(secret_type='kubernetes.io/dockercfg')
-        self.set_data(k='.dockercfg', v=data)
-        return self
+    @metadata.setter
+    def metadata(self, md=None):
+        if not isinstance(md, ObjectMeta):
+            raise SyntaxError('Secret: metadata: [ {0} ] is invalid.'.format(md))
+        self._metadata = md
 
-    def set_dockercfg_json_secret(self, data=None):
-        if data is None:
-            raise SyntaxError('Secret: data: [ {0} ] cannot be None.'.format(data))
-        if not isinstance(data, str):
-            raise SyntaxError('Secret: data: [ {0} ] must be a string'.format(data))
-        self.set_type(secret_type='kubernetes.io/dockerconfigjson')
-        self.set_data(k='.dockerconfigjson', v=data)
-        return self
+    # ------------------------------------------------------------------------------------- data
 
-    def set_labels(self, new_dict):
-        assert isinstance(new_dict, dict)
-        self.secret_metadata.set_labels(labels=new_dict)
-        return self
+    @property
+    def data(self):
+        d = {}
+        for k, v in self._data.items():
+            d[k] = base64.b64decode(v)
+        return d
+
+    @data.setter
+    def data(self, data=None):
+        msg = 'Secret: data: [ {0} ] is invalid.'.format(data)
+        if not is_valid_dict(data):
+            raise SyntaxError(msg)
+        for k, v in data.items():
+            if not is_valid_string(k) or not is_valid_string(v):
+                raise SyntaxError(msg)
+            self._data[k] = base64.b64encode(v)
+
+    # ------------------------------------------------------------------------------------- stringData
+
+    @property
+    def string_data(self):
+        return self._string_data
+
+    @string_data.setter
+    def string_data(self, data=None):
+        if not is_valid_dict(data):
+            raise SyntaxError('Secret: string_data: [ {0} ] is invalid.'.format(data))
+        self._string_data = data
+
+    # ------------------------------------------------------------------------------------- type
+
+    @property
+    def type(self):
+        return self._type
+
+    @type.setter
+    def type(self, t=None):
+        if not is_valid_string(t):
+            raise SyntaxError('Secret: type: [ {0} ] is invalid.'.format(t))
+        self._type = t
+
+    # ------------------------------------------------------------------------------------- dockercfg json
+
+    @property
+    def dockerconfigjson(self):
+        if '.dockerconfigjson' in self.data:
+            return self.data['.dockerconfigjson']
+        return None
+
+    @dockerconfigjson.setter
+    def dockerconfigjson(self, secret=None):
+        if not is_valid_dict(secret):
+            raise SyntaxError('Secret: dockercfgjson: [ {} ] is invalid.'.format(secret))
+        self.type = 'kubernetes.io/dockerconfigjson'
+        s = json.dumps(secret)
+        utf = s.encode('utf-8')
+        self.data = {'.dockerconfigjson': utf}
+
+    # ------------------------------------------------------------------------------------- service account token
 
     def set_service_account_token(self, account_name=None, account_uid=None,
                                   token=None, kubecfg_data=None, cacert=None):
 
-        if account_name is None or account_uid is None or token is None:
-            raise SyntaxError('Secret: account_name: [ {0} ], account_uid: [ {1} ] or token: [ {2} ] '
-                              'cannot be None'.format(account_name, account_uid, token))
-        if not isinstance(account_name, str) or not isinstance(account_uid, str) or not isinstance(token, str):
-            raise SyntaxError('Secret: account_name: [ {0} ], account_uid: [ {1} ] or token: [ {2} ] '
-                              'must be strings'.format(account_name, account_uid, token))
+        if not is_valid_string(account_name):
+            raise SyntaxError('Secret.set_service_account() account_name: [ {} ] is invalid.'.format(account_name))
+        if not is_valid_string(account_uid):
+            raise SyntaxError('Secret.set_service_account() account_uid: [ {} ] is invalid.'.format(account_uid))
+        if not is_valid_string(token):
+            raise SyntaxError('Secret.set_service_account() token: [ {} ] is invalid.'.format(token))
 
-        self.set_type(secret_type='kubernetes.io/service-account-token')
-        self.secret_metadata.add_annotation(k='kubernetes.io/service-account.name', v=account_name)
-        self.secret_metadata.add_annotation(k='kubernetes.io/service-account.uid', v=account_uid)
-        self.set_data(k='token', v=token)
+        anns = {
+            'kubernetes.io/service-account.name': account_name,
+            'kubernetes.io/service-account.uid': account_uid
+        }
 
-        if kubecfg_data is not None and isinstance(kubecfg_data, str):
-            self.set_data(k='kubernetes.kubeconfig', v=kubecfg_data)
-        if cacert is not None and isinstance(cacert, str):
-            self.set_data(k='ca.crt', v=cacert)
+        self.type = 'kubernetes.io/service-account-token'
+        self.metadata.annotations = anns
+        self.data = {'token': token}
+
+        if is_valid_string(kubecfg_data):
+            d = self.data
+            d['kubernetes.kubeconfig'] = kubecfg_data
+            self.data = d
+
+        if is_valid_string(cacert):
+            d = self.data
+            d['ca.crt'] = cacert
+            self.data = d
 
         return self
 
-    def set_type(self, secret_type=None):
-        if secret_type is None:
-            raise SyntaxError('Secret: secret_type: [ {0} ] cannot be None.'.format(secret_type))
-        if not isinstance(secret_type, str):
-            raise SyntaxError('Secret: secret_type: [ {0} ] must be a string'.format(secret_type))
-        self.model['type'] = secret_type
-        return self
+    # ------------------------------------------------------------------------------------- serialize
+
+    def serialize(self):
+        data = {}
+        if self.kind is not None:
+            data['kind'] = self.kind
+        if self.api_version is not None:
+            data['apiVersion'] = self.api_version
+        if self.metadata is not None:
+            data['metadata'] = self.metadata.serialize()
+        if self.data is not None:
+            d = {}
+            for k, v in self.data.items():
+                d[k] = base64.b64encode(v)
+            data['data'] = d
+        if self.string_data is not None:
+            data['stringData'] = self.string_data
+        if self.type is not None:
+            data['type'] = self.type
+        return data

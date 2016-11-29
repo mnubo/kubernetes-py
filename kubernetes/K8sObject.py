@@ -6,16 +6,19 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.utils import HttpRequest
-from kubernetes.models.v1.BaseUrls import BaseUrls
-from kubernetes.models.v1.BaseModel import BaseModel
-from kubernetes.models.v1.DeleteOptions import DeleteOptions
+import json
+import yaml
+
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sExceptions import *
-import json
+from kubernetes.models.v1.BaseUrls import BaseUrls
+from kubernetes.models.v1.DeleteOptions import DeleteOptions
+from kubernetes.utils import HttpRequest, is_valid_dict, str_to_class
 
 VALID_K8s_OBJS = [
     'Deployment',
+    'PersistentVolume',
+    'PersistentVolumeClaim',
     'Pod',
     'ReplicaSet',
     'ReplicationController',
@@ -26,8 +29,7 @@ VALID_K8s_OBJS = [
 
 
 class K8sObject(object):
-
-    def __init__(self, config=None, name=None, obj_type=None):
+    def __init__(self, config=None, obj_type=None, name=None):
         super(K8sObject, self).__init__()
 
         if config is not None and not isinstance(config, K8sConfig):
@@ -36,21 +38,13 @@ class K8sObject(object):
             config = K8sConfig()
         self.config = config
 
-        if name is None:
-            raise SyntaxError('K8sObject: name: [ {0} ] cannot be None.'.format(name))
-        if not isinstance(name, str):
-            raise SyntaxError('K8sObject: name: [ {0} ] must be a string.'.format(name.__class__.__name__))
-
-        if obj_type is None or not isinstance(obj_type, str):
-            raise SyntaxError('K8sObject: obj_type: [ {0} ] must be a string.'.format(obj_type.__class__.__name__))
-
         if obj_type not in VALID_K8s_OBJS:
             valid = ", ".join(VALID_K8s_OBJS)
             raise SyntaxError('K8sObject: obj_type: [ {0} ] must be in: [ {1} ]'.format(obj_type, valid))
-
         self.obj_type = obj_type
+
+        self.model = str_to_class(obj_type)
         self.name = name
-        self.model = BaseModel()
 
         try:
             urls = BaseUrls(api_version=self.config.version, namespace=self.config.namespace)
@@ -59,33 +53,105 @@ class K8sObject(object):
             raise Exception('Could not set BaseUrl for type: [ {0} ]'.format(obj_type))
 
     def __str__(self):
-        return "{0}".format(self.model.get())
+        return "{}".format(self.model.serialize())
 
     def __eq__(self, other):
         # see https://github.com/kubernetes/kubernetes/blob/release-1.3/docs/design/identifiers.md
         if isinstance(other, self.__class__):
-            # Uniquely name (via a name) an object across space.
-            return self.config.namespace == other.config.namespace \
-                   and self.name == other.name
+            return self.config.namespace == other.config.namespace and self.name == other.name
         return NotImplemented
 
-    # ------------------------------------------------------------------------------------- representations
+    # ------------------------------------------------------------------------------------- get
 
-    def as_dict(self):
-        return self.model.get()
+    def get_annotation(self, k=None):
+        if k in self.model.metadata.annotations:
+            return self.model.metadata.annotations[k]
+        return None
+
+    def get_label(self, k=None):
+        if k in self.model.metadata.labels:
+            return self.model.metadata.labels[k]
+        return None
+
+    # ------------------------------------------------------------------------------------- add
+
+    def add_annotation(self, k=None, v=None):
+        anns = self.model.metadata.annotations
+        if anns is None:
+            anns = {}
+        anns.update({k: v})
+        self.model.metadata.annotations = anns
+        return self
+
+    def add_label(self, k=None, v=None):
+        labels = self.model.metadata.labels
+        if labels is None:
+            labels = {}
+        labels.update({k: v})
+        self.model.metadata.labels = labels
+        return self
+
+    # ------------------------------------------------------------------------------------- del
+
+    def del_annotation(self, k=None):
+        orig = self.model.metadata.annotations
+        if k in orig:
+            orig.pop(k)
+            self.model.metadata.annotations = orig
+        return self
+
+    def del_label(self, k=None):
+        orig = self.model.metadata.labels
+        if k in orig:
+            orig.pop(k)
+            self.model.metadata.labels = orig
+        return self
+
+    # ------------------------------------------------------------------------------------- annotations
+
+    @property
+    def annotations(self):
+        return self.model.metadata.annotations
+
+    @annotations.setter
+    def annotations(self, anns=None):
+        self.model.metadata.annotations = anns
+
+    # ------------------------------------------------------------------------------------- labels
+
+    @property
+    def labels(self):
+        return self.model.metadata.labels
+
+    @labels.setter
+    def labels(self, labels=None):
+        self.model.metadata.labels = labels
+
+    # ------------------------------------------------------------------------------------- name
+
+    @property
+    def name(self):
+        return self.model.metadata.name
+
+    @name.setter
+    def name(self, name=None):
+        self.model.metadata.labels['name'] = name
+        self.model.metadata.name = name
+
+    # ------------------------------------------------------------------------------------- serialize
+
+    def serialize(self):
+        return self.model.serialize()
 
     def as_json(self):
-        return json.dumps(self.model.get())
+        data = self.serialize()
+        dump = json.dumps(data, indent=4)
+        return dump
 
-    # ------------------------------------------------------------------------------------- set name
-
-    def set_name(self, name):
-        self.name = name
-        if self.model is not None:
-            meth = getattr(self.model, "set_name", None)
-            if callable(meth):
-                meth(name=name)
-        return self
+    def as_yaml(self):
+        data = self.serialize()
+        dump = yaml.dump(data, default_flow_style=False)
+        return dump
 
     # ------------------------------------------------------------------------------------- remote API calls
 
@@ -145,18 +211,16 @@ class K8sObject(object):
         if not state.get('success'):
             status = state.get('status', '')
             reason = state.get('data', dict()).get('message', None)
-            message = 'K8sObject: GET [ {0}:{1} ] failed: HTTP {2} : {3} '.format(self.obj_type, self.name, status, reason)
+            message = 'K8sObject: GET [ {0}:{1} ] failed: HTTP {2} : {3} '.format(self.obj_type, self.name, status,
+                                                                                  reason)
             raise NotFoundException(message)
 
         model = state.get('data')
         return model
 
     def get_with_params(self, data=None):
-        if data is None:
-            raise SyntaxError('K8sObject: data: [ {0} ] cannot be None.'.format(data))
-        if not isinstance(data, dict):
-            raise SyntaxError('K8sObject: data: [ {0} ] must be a dict.'.format(data.__class__.__name__))
-
+        if not is_valid_dict(data):
+            raise SyntaxError('K8sObject.get_with_params(): data: [ {0} ] is invalid.'.format(data))
         url = '{base}'.format(base=self.base_url)
         state = self.request(method='GET', url=url, data=data)
         return state.get('data', None).get('items', list())
@@ -165,14 +229,19 @@ class K8sObject(object):
         if self.name is None:
             raise SyntaxError('K8sObject: name: [ {0} ] must be set to CREATE the object.'.format(self.name))
 
+        # HTTP 500 : resourceVersion may not be set on objects to be created
+        if self.model.metadata.resource_version is not None:
+            self.model.metadata.resource_version = None
+
         url = '{base}'.format(base=self.base_url)
-        state = self.request(method='POST', url=url, data=self.model.get())
+        post_data = self.serialize()
+        state = self.request(method='POST', url=url, data=post_data)
 
         if not state.get('success'):
             status = state.get('status', '')
             state_data = state.get('data', dict())
             reason = state_data['message'] if 'message' in state_data else state_data
-            message = 'K8sObject: CREATE failed : HTTP {0} : {1}'.format(status, reason)
+            message = 'K8sObject: CREATE failed : HTTP {0} : {1} : {2}'.format(status, reason, post_data)
             if int(status) == 401:
                 raise UnauthorizedException(message)
             if int(status) == 409:
@@ -186,8 +255,12 @@ class K8sObject(object):
         if self.name is None:
             raise SyntaxError('K8sObject: name: [ {0} ] must be set to UPDATE the object.'.format(self.name))
 
+        # HTTP 409: Cannot apply update if UID in precondition and updated object.meta
+        if self.model.metadata.uid is not None:
+            self.model.metadata.uid = None
+
         url = '{base}/{name}'.format(base=self.base_url, name=self.name)
-        state = self.request(method='PUT', url=url, data=self.model.get())
+        state = self.request(method='PUT', url=url, data=self.serialize())
 
         if not state.get('success'):
             status = state.get('status', '')
@@ -206,8 +279,7 @@ class K8sObject(object):
             raise SyntaxError('K8sObject: name: [ {0} ] must be set to DELETE the object.'.format(self.name))
 
         url = '{base}/{name}'.format(base=self.base_url, name=self.name)
-        self.model = DeleteOptions(kind='DeleteOptions')
-        state = self.request(method='DELETE', url=url, data=self.model.get())
+        state = self.request(method='DELETE', url=url, data=DeleteOptions().serialize())
 
         if not state.get('success'):
             status = state.get('status', '')

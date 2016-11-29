@@ -7,8 +7,9 @@
 #
 
 import unittest
-import utils
 import uuid
+
+import utils
 from kubernetes import K8sDeployment, K8sConfig
 from kubernetes.K8sExceptions import *
 
@@ -16,10 +17,14 @@ from kubernetes.K8sExceptions import *
 class K8sDeploymentTests(unittest.TestCase):
 
     def setUp(self):
-        pass
+        utils.cleanup_deployments()
+        utils.cleanup_rs()
+        utils.cleanup_pods()
 
     def tearDown(self):
-        utils.cleanup_objects()
+        utils.cleanup_deployments()
+        utils.cleanup_rs()
+        utils.cleanup_pods()
 
     # --------------------------------------------------------------------------------- init
 
@@ -72,10 +77,11 @@ class K8sDeploymentTests(unittest.TestCase):
             self.assertIsNotNone(d)
             self.assertIsInstance(d, K8sDeployment)
             self.assertEqual(d, dep)
-            self.assertEqual(0, d.model.model['spec']['replicas'])
-            self.assertNotIn('replicas', d.model.model['status'])
-            self.assertNotIn('availableReplicas', d.model.model['status'])
-            self.assertNotIn('updatedReplicas', d.model.model['status'])
+            self.assertEqual(0, d.desired_replicas)
+            self.assertIsNone(d.available_replicas)
+            self.assertIsNone(d.current_replicas)
+            self.assertIsNone(d.unavailable_replicas)
+            self.assertIsNone(d.updated_replicas)
 
     def test_create_one_replica(self):
         name = "yodep-{0}".format(str(uuid.uuid4()))
@@ -84,15 +90,15 @@ class K8sDeploymentTests(unittest.TestCase):
         cont_image = "nginx:1.7.9"
         cont = utils.create_container(name=cont_name, image=cont_image)
         dep.add_container(container=cont)
-        dep.set_replicas(1)
+        dep.desired_replicas = 1
         if utils.is_reachable(dep.config.api_host):
             d = dep.create()
             self.assertIsNotNone(d)
             self.assertIsInstance(d, K8sDeployment)
             self.assertEqual(d, dep)
-            self.assertEqual(1, d.model.model['status']['replicas'])
-            self.assertEqual(1, d.model.model['status']['availableReplicas'])
-            self.assertEqual(1, d.model.model['status']['updatedReplicas'])
+            self.assertEqual(1, d.desired_replicas)
+            self.assertEqual(1, d.available_replicas)
+            self.assertEqual(1, d.updated_replicas)
 
     def test_create_three_replicas(self):
         name = "yodep-{0}".format(str(uuid.uuid4()))
@@ -101,15 +107,15 @@ class K8sDeploymentTests(unittest.TestCase):
         cont_image = "nginx:1.7.9"
         cont = utils.create_container(name=cont_name, image=cont_image)
         dep.add_container(container=cont)
-        dep.set_replicas(3)
+        dep.desired_replicas = 3
         if utils.is_reachable(dep.config.api_host):
             d = dep.create()
             self.assertIsNotNone(d)
             self.assertIsInstance(d, K8sDeployment)
             self.assertEqual(d, dep)
-            self.assertEqual(3, d.model.model['status']['replicas'])
-            self.assertEqual(3, d.model.model['status']['availableReplicas'])
-            self.assertEqual(3, d.model.model['status']['updatedReplicas'])
+            self.assertEqual(3, d.desired_replicas)
+            self.assertEqual(3, d.available_replicas)
+            self.assertEqual(3, d.updated_replicas)
 
     def test_create_already_exists(self):
         name = "yodep-{0}".format(str(uuid.uuid4()))
@@ -118,7 +124,7 @@ class K8sDeploymentTests(unittest.TestCase):
         cont_image = "nginx:1.7.9"
         cont = utils.create_container(name=cont_name, image=cont_image)
         dep.add_container(container=cont)
-        dep.set_replicas(1)
+        dep.desired_replicas = 1
         if utils.is_reachable(dep.config.api_host):
             dep.create()
             with self.assertRaises(AlreadyExistsException):
@@ -173,7 +179,7 @@ class K8sDeploymentTests(unittest.TestCase):
         if utils.is_reachable(dep.config.api_host):
             dep.create()
             dep.name = name2
-            with self.assertRaises(BadRequestException):
+            with self.assertRaises(NotFoundException):
                 dep.update()
 
     def test_update_namespace_fails(self):
@@ -185,7 +191,7 @@ class K8sDeploymentTests(unittest.TestCase):
         dep.add_container(container)
         if utils.is_reachable(dep.config.api_host):
             dep.create()
-            dep.set_namespace(nspace)
+            dep.namespace = nspace
             with self.assertRaises(BadRequestException):
                 dep.update()
 
@@ -197,16 +203,15 @@ class K8sDeploymentTests(unittest.TestCase):
         dep_name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=dep_name)
         dep.add_container(container)
-        dep.set_replicas(3)
+        dep.desired_replicas = 3
         if utils.is_reachable(dep.config.api_host):
             dep.create()
-            self.assertEqual(image1, dep.model.model['spec']['template']['spec']['containers'][0]['image'])
-            dep.set_container_image(name=name, image=image2)
-            dep.update()
-            self.assertIn('annotations', dep.model.deployment_metadata.model)
-            self.assertIn('deployment.kubernetes.io/revision', dep.model.deployment_metadata.model['annotations'])
-            self.assertNotEqual(image1, dep.model.model['spec']['template']['spec']['containers'][0]['image'])
-            self.assertEqual(image2, dep.model.model['spec']['template']['spec']['containers'][0]['image'])
+            self.assertEqual(image1, dep.containers[0].image)
+            dep.container_image = (name, image2)
+            d = dep.update()
+            self.assertIn('deployment.kubernetes.io/revision', dep.annotations)
+            self.assertNotEqual(image1, d.containers[0].image)
+            self.assertEqual(image2, d.containers[0].image)
 
     def test_update_labels(self):
         name = "nginx"
@@ -215,14 +220,14 @@ class K8sDeploymentTests(unittest.TestCase):
         dep_name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=dep_name)
         dep.add_container(container)
-        dep.set_replicas(3)
+        dep.desired_replicas = 3
         if utils.is_reachable(dep.config.api_host):
             dep.create()
-            labels = dep.get_labels()
+            labels = dep.labels
             labels['newkey'] = 'newvalue'
-            dep.set_labels(labels)
+            dep.labels = labels
             updated = dep.update()
-            self.assertEqual(labels, updated.get_labels())
+            self.assertEqual(labels, updated.labels)
 
     def test_update_pod_labels(self):
         name = "nginx"
@@ -231,14 +236,14 @@ class K8sDeploymentTests(unittest.TestCase):
         dep_name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=dep_name)
         dep.add_container(container)
-        dep.set_replicas(3)
+        dep.desired_replicas = 3
         if utils.is_reachable(dep.config.api_host):
             dep.create()
-            labels = dep.get_pod_labels()
+            labels = dep.pod_labels
             labels['newkey'] = 'newvalue'
-            dep.set_pod_labels(labels)
+            dep.pod_labels = labels
             updated = dep.update()
-            self.assertEqual(labels, updated.get_pod_labels())
+            self.assertEqual(labels, updated.pod_labels)
 
     # --------------------------------------------------------------------------------- api - rollback
 
@@ -250,17 +255,23 @@ class K8sDeploymentTests(unittest.TestCase):
         dep_name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=dep_name)
         dep.add_container(container)
-        dep.set_replicas(3)
+        dep.desired_replicas = 3
         if utils.is_reachable(dep.config.api_host):
             dep.create()
-            self.assertEqual(image1, dep.model.model['spec']['template']['spec']['containers'][0]['image'])
-            dep.set_container_image(name=name, image=image2)
+            self.assertEqual(image1, dep.containers[0].image)
+            dep.container_image = (name, image2)
             dep.update()
-            self.assertIn('annotations', dep.model.deployment_metadata.model)
-            self.assertIn('deployment.kubernetes.io/revision', dep.model.deployment_metadata.model['annotations'])
-            self.assertNotEqual(image1, dep.model.model['spec']['template']['spec']['containers'][0]['image'])
-            self.assertEqual(image2, dep.model.model['spec']['template']['spec']['containers'][0]['image'])
+            self.assertIn('deployment.kubernetes.io/revision', dep.annotations)
+            rev_before = dep.get_annotation('deployment.kubernetes.io/revision')
+            self.assertNotEqual(image1, dep.containers[0].image)
+            self.assertEqual(image2, dep.containers[0].image)
             dep.rollback()
+            self.assertIn('deployment.kubernetes.io/revision', dep.annotations)
+            rev_after = dep.get_annotation('deployment.kubernetes.io/revision')
+            self.assertNotEqual(rev_before, rev_after)
+            self.assertGreater(rev_after, rev_before)
+            self.assertEqual(image1, dep.containers[0].image)
+            self.assertNotEqual(image2, dep.containers[0].image)
 
     # --------------------------------------------------------------------------------- api - delete
 
@@ -331,13 +342,13 @@ class K8sDeploymentTests(unittest.TestCase):
         name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=name)
         dep.add_container(container)
-        dep.set_replicas(3)
+        dep.desired_replicas = 3
         if utils.is_reachable(dep.config.api_host):
             dep.create()
-            replicas = dep.get_replicas()
-            for k in replicas:
-                self.assertEqual(3, replicas[k])
+            self.assertEqual(3, dep.desired_replicas)
+            self.assertEqual(3, dep.updated_replicas)
+            self.assertEqual(3, dep.available_replicas)
             dep.scale(5)
-            replicas = dep.get_replicas()
-            for k in replicas:
-                self.assertEqual(5, replicas[k])
+            self.assertEqual(5, dep.desired_replicas)
+            self.assertEqual(5, dep.updated_replicas)
+            self.assertEqual(5, dep.available_replicas)

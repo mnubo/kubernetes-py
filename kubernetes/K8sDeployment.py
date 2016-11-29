@@ -7,53 +7,54 @@
 #
 
 import time
+
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sContainer import K8sContainer
-from kubernetes.K8sPodBasedObject import K8sPodBasedObject
-from kubernetes.models.v1.Deployment import Deployment
-from kubernetes.K8sExceptions import TimedOutException, NotFoundException, BadRequestException
+from kubernetes.K8sExceptions import BadRequestException
+from kubernetes.K8sExceptions import TimedOutException, NotFoundException
+from kubernetes.K8sObject import K8sObject
+from kubernetes.models.unversioned.LabelSelector import LabelSelector
+from kubernetes.models.v1beta1.Deployment import Deployment
+from kubernetes.models.v1beta1.DeploymentRollback import DeploymentRollback
 
-API_VERSION = 'extensions/v1beta1'
-SCALE_WAIT_TIMEOUT_SECONDS = 60
+SCALE_WAIT_TIMEOUT_SECONDS = 120
 
 
-class K8sDeployment(K8sPodBasedObject):
-
+class K8sDeployment(K8sObject):
     def __init__(self, config=None, name=None, image=None, replicas=0):
+
         super(K8sDeployment, self).__init__(config=config, obj_type='Deployment', name=name)
 
-        self.config.version = API_VERSION
-        self.model = Deployment(name=name, namespace=self.config.namespace)
-        self.set_replicas(replicas)
+        self.desired_replicas = replicas
 
-        selector = {
-            'matchLabels': {
-                'name': name
-            }
-        }
-        self.set_selector(selector)
+        labels = {'name': name}
+        sel = LabelSelector()
+        sel.match_labels = labels
+
+        self.selector = sel
+        self.labels = labels
+        self.pod_labels = labels
 
         if image is not None:
             container = K8sContainer(name=name, image=image)
             self.add_container(container)
-            self.model.set_pod_name(name=name)
 
         if self.config.pull_secret is not None:
-            self.add_image_pull_secrets(name=self.config.pull_secret)
+            self.add_image_pull_secrets(self.config.pull_secret)
 
     # -------------------------------------------------------------------------------------  override
 
     def create(self):
         super(K8sDeployment, self).create()
         self.get()
-        if self.model.model['spec']['replicas'] > 0:
+        if self.desired_replicas > 0:
             self._wait_for_desired_replicas()
         return self
 
     def update(self):
         super(K8sDeployment, self).update()
         self.get()
-        if self.model.model['spec']['replicas'] > 0:
+        if self.desired_replicas > 0:
             self._wait_for_desired_replicas()
         return self
 
@@ -66,84 +67,178 @@ class K8sDeployment(K8sPodBasedObject):
             self._check_timeout(start_time)
 
     def _has_desired_replicas(self):
-        if self._has_replica_data():
-            r = self.get_replicas()
-            if r['desired'] == r['updated'] and \
-               r['desired'] == r['available']:
-                return True
-        return False
-
-    def _has_replica_data(self):
-        if 'status' in self.model.model:
-            has_available = 'availableReplicas' in self.model.model['status']
-            has_updated = 'updatedReplicas' in self.model.model['status']
-            if has_available and has_updated:
-                return True
+        if self.updated_replicas == self.desired_replicas \
+                and self.current_replicas == self.desired_replicas \
+                and self.available_replicas == self.desired_replicas:
+            return True
         return False
 
     def _check_timeout(self, start_time=None):
         elapsed_time = time.time() - start_time
         if elapsed_time >= SCALE_WAIT_TIMEOUT_SECONDS:  # timeout
             raise TimedOutException(
-                "Timed out scaling replicas to: [ {0} ] with labels: [ {1} ]"
-                .format(
-                    self.model.model['spec']['replicas'],
-                    self.model.model['spec']['selector']['matchLabels']
+                "Timed out scaling replicas to: [ {0} ] with labels: [ {1} ]".format(
+                    self.model.spec.replicas,
+                    self.model.spec.selector.match_labels
                 )
             )
         time.sleep(0.2)
 
+    # -------------------------------------------------------------------------------------  add
+
+    def add_container(self, container=None):
+        if not isinstance(container, K8sContainer):
+            raise SyntaxError('K8sDeployment.add_container() container: [ {0} ] is invalid.'.format(container))
+        containers = self.model.spec.template.spec.containers
+        if container.model not in containers:
+            containers.append(container.model)
+        self.model.spec.template.spec.containers = containers
+        return self
+
+    def add_image_pull_secrets(self, secret=None):
+        self.model.spec.template.spec.add_image_pull_secrets(secret)
+        return self
+
     # -------------------------------------------------------------------------------------  get
 
     def get(self):
-        model = self.get_model()
-        self.model = Deployment(
-            name=model['metadata']['name'],
-            model=model,
-            replicas=model['spec']['replicas']
-        )
+        self.model = Deployment(model=self.get_model())
         return self
 
-    def get_labels(self):
-        return self.model.get_labels()
+    # ------------------------------------------------------------------------------------- namespace
 
-    def get_namespace(self):
-        return self.model.get_namespace()
+    @property
+    def namespace(self):
+        return self.model.metadata.namespace
 
-    def get_pod_labels(self):
-        return self.model.get_pod_labels()
+    @namespace.setter
+    def namespace(self, nspace=None):
+        self.model.metadata.namespace = nspace
 
-    def get_replicas(self):
-        desired = self.model.model['spec']['replicas']
-        updated = self.model.model['status']['updatedReplicas']
-        available = self.model.model['status']['availableReplicas']
-        return {
-            'desired': desired,
-            'updated': updated,
-            'available': available
-        }
+    # -------------------------------------------------------------------------------------  pod annotations
 
-    # -------------------------------------------------------------------------------------  set
+    @property
+    def pod_annotations(self):
+        return self.model.spec.template.metadata.annotations
 
-    def set_labels(self, dico=None):
-        self.model.set_labels(dico=dico)
-        return self
+    @pod_annotations.setter
+    def pod_annotations(self, anns=None):
+        self.model.spec.template.metadata.annotations = anns
 
-    def set_namespace(self, name=None):
-        self.model.set_namespace(name=name)
-        return self
+    # -------------------------------------------------------------------------------------  pod labels
 
-    def set_pod_labels(self, labels=None):
-        self.model.set_pod_labels(labels=labels)
-        return self
+    @property
+    def pod_labels(self):
+        return self.model.spec.template.metadata.labels
 
-    def set_replicas(self, replicas=None):
-        self.model.set_replicas(replicas=replicas)
-        return self
+    @pod_labels.setter
+    def pod_labels(self, labels=None):
+        self.model.spec.template.metadata.labels = labels
 
-    def set_selector(self, dico=None):
-        self.model.set_selector(dico=dico)
-        return self
+    # ------------------------------------------------------------------------------------- current replicas
+
+    @property
+    def current_replicas(self):
+        return self.model.status.replicas
+
+    @current_replicas.setter
+    def current_replicas(self, reps=None):
+        self.model.status.replicas = reps
+
+    # ------------------------------------------------------------------------------------- desired replicas
+
+    @property
+    def desired_replicas(self):
+        return self.model.spec.replicas
+
+    @desired_replicas.setter
+    def desired_replicas(self, reps=None):
+        self.model.spec.replicas = reps
+
+    # ------------------------------------------------------------------------------------- updated replicas
+
+    @property
+    def updated_replicas(self):
+        return self.model.status.updated_replicas
+
+    @updated_replicas.setter
+    def updated_replicas(self, reps=None):
+        self.model.status.updated_replicas = reps
+
+    # ------------------------------------------------------------------------------------- available replicas
+
+    @property
+    def available_replicas(self):
+        return self.model.status.available_replicas
+
+    @available_replicas.setter
+    def available_replicas(self, reps=None):
+        self.model.status.available_replicas = reps
+
+    # ------------------------------------------------------------------------------------- unavailable replicas
+
+    @property
+    def unavailable_replicas(self):
+        return self.model.status.unavailable_replicas
+
+    @unavailable_replicas.setter
+    def unavailable_replicas(self, reps=None):
+        self.model.status.unavailable_replicas = reps
+
+    # -------------------------------------------------------------------------------------  selector
+
+    @property
+    def selector(self):
+        return self.model.spec.selector
+
+    @selector.setter
+    def selector(self, sel=None):
+        self.model.spec.selector = sel
+
+    # -------------------------------------------------------------------------------------  containers
+
+    @property
+    def containers(self):
+        objs = []
+        for c in self.model.spec.template.spec.containers:
+            k8scontainer = K8sContainer(name=c.name, image=c.image)
+            k8scontainer.model = c
+            objs.append(k8scontainer)
+        return objs
+
+    @containers.setter
+    def containers(self, containers=None):
+        models = []
+        for obj in containers:
+            models.append(obj.model)
+        self.model.spec.template.spec.containers = models
+
+    # -------------------------------------------------------------------------------------  container_image
+
+    @property
+    def container_image(self, name=None):
+        if name is None and len(self.containers) > 1:
+            raise SyntaxError("K8sDeployment.container_image() Please specify a container name.")
+
+        if len(self.containers) == 1:
+            return self.containers[0].image
+        else:
+            filtered = filter(lambda x: x.name == name, self.containers)
+            if filtered:
+                return filtered[0].image
+            return None
+
+    @container_image.setter
+    def container_image(self, tup=None):
+        if not isinstance(tup, tuple):
+            raise SyntaxError('K8sDeployment.container_image() must be a tuple of the form (name, image)')
+        name, image = tup
+        found = filter(lambda x: x.name == name, self.containers)
+        if found:
+            new = filter(lambda x: x.name != name, self.containers)
+            found[0].image = image
+            new.append(found[0])
+            self.containers = new
 
     # -------------------------------------------------------------------------------------  get by name
 
@@ -163,7 +258,8 @@ class K8sDeployment(K8sPodBasedObject):
 
         for dep in deps:
             try:
-                dep_name = Deployment(model=dep).get_name()
+                d = Deployment(model=dep)
+                dep_name = d.metadata.name
                 dep_list.append(K8sDeployment(config=config, name=dep_name).get())
             except NotFoundException:
                 pass
@@ -172,7 +268,7 @@ class K8sDeployment(K8sPodBasedObject):
 
     # -------------------------------------------------------------------------------------  rollback
 
-    def rollback(self, revision=None):
+    def rollback(self, revision=None, annotations=None):
         """
         Currently raises an HTTP 400 Error. Unsure what to feed the endpoint
 
@@ -184,43 +280,36 @@ class K8sDeployment(K8sPodBasedObject):
         :return:
         """
 
-        # if revision is not None and not isinstance(revision, str):
-        #     raise SyntaxError('K8sDeployment: revision: [ {0} ] must be a string.'.format(revision.__class__.__name__))
-        #
-        # data = {
-        #     'kind': self.model.model['kind'],
-        #     'apiversion': self.model.model['apiVersion'],
-        #     'name': self.model.model['metadata']['name'],
-        #     'updatedAnnotations': {
-        #         'label': "1234"
-        #     }
-        # }
-        # if revision is not None:
-        #     data['rollbackTo']['revision'] = revision
-        #
-        # url = '{base}/{name}/rollback'.format(base=self.base_url, name=data['name'])
-        # state = self.request(method='POST', url=url, data=data)
-        #
-        # if not state.get('success'):
-        #     status = state.get('status', '')
-        #     reason = state.get('data', dict()).get('message', None)
-        #     message = 'K8sDeployment: ROLLBACK failed : HTTP {0} : {1}'.format(status, reason)
-        #     raise BadRequestException(message)
-        #
-        # return self
+        rollback = DeploymentRollback()
+        rollback.name = self.name
 
-        raise NotImplementedError()
+        if revision is not None:
+            rollback.rollback_to.revision = revision
+        else:
+            current_revision = int(self.get_annotation('deployment.kubernetes.io/revision'))
+            rev = max(current_revision - 1, 0)
+            rollback.rollback_to.revision = rev
+
+        if annotations is not None:
+            rollback.updated_annotations = annotations
+
+        url = '{base}/{name}/rollback'.format(base=self.base_url, name=self.name)
+        state = self.request(method='POST', url=url, data=rollback.serialize())
+
+        self.get()
+        self._wait_for_desired_replicas()
+
+        if not state.get('success'):
+            status = state.get('status', '')
+            reason = state.get('data', dict()).get('message', None)
+            message = 'K8sDeployment: ROLLBACK failed : HTTP {0} : {1}'.format(status, reason)
+            raise BadRequestException(message)
+
+        return self
 
     # -------------------------------------------------------------------------------------  scale
 
     def scale(self, replicas=None):
-
-        if replicas is None:
-            raise SyntaxError('K8sDeployment: replicas: [ {0} ] cannot be None.'.format(replicas))
-        if not isinstance(replicas, int) or not replicas > 0:
-            raise SyntaxError('K8sDeployment: replicas: [ {0} ] must be a positive integer.'.format(replicas))
-
-        self.set_replicas(replicas)
+        self.desired_replicas = replicas
         self.update()
-
         return self

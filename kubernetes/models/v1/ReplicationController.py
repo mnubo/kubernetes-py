@@ -6,180 +6,93 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1.PodBasedModel import PodBasedModel
-from kubernetes.models.v1.PodSpec import PodSpec
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
+from kubernetes.models.v1.ReplicationControllerSpec import ReplicationControllerSpec
+from kubernetes.models.v1.ReplicationControllerStatus import ReplicationControllerStatus
 
 
-class ReplicationController(PodBasedModel):
+class ReplicationController(object):
+    """
+    http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_replicationcontroller
+    """
 
-    def __init__(self, name=None, image=None, namespace='default', replicas=1, model=None):
+    def __init__(self, model=None):
         super(ReplicationController, self).__init__()
 
+        self._metadata = ObjectMeta()
+        self._spec = ReplicationControllerSpec()
+        self._status = None
+
+        self.kind = 'ReplicationController'
+        self.api_version = 'v1'
+
         if model is not None:
-            self.model = model
-            if 'status' in self.model:
-                self.model.pop('status', None)
-            if 'metadata' in self.model:
-                self.rc_metadata = ObjectMeta(model=self.model['metadata'])
-            if 'template' in self.model['spec']:
-                self.pod_spec = PodSpec(model=self.model['spec']['template']['spec'])
-                self.pod_metadata = ObjectMeta(model=self.model['spec']['template']['metadata'])
+            self._build_with_model(model)
 
-        else:
-            if name is None:
-                raise SyntaxError('ReplicationController: name: [ {0} ] cannot be None.'.format(name))
-            if not isinstance(name, str):
-                raise SyntaxError('ReplicationController: name: [ {0} ] must be a string.'.format(name))
+    def __eq__(self, other):
+        # see https://github.com/kubernetes/kubernetes/blob/release-1.3/docs/design/identifiers.md
+        if isinstance(other, self.__class__):
+            # Uniquely name (via a name) an object across space.
+            return self.metadata.name == other.metadata.name and \
+                   self.metadata.namespace == other.metadata.namespace
+        return NotImplemented
 
-            self.model = dict(kind='ReplicationController', apiVersion='v1')
-            self.rc_metadata = ObjectMeta(name=name, namespace=namespace)
-            self.pod_metadata = ObjectMeta(name=name, namespace=namespace)
+    def _build_with_model(self, model=None):
+        if 'metadata' in model:
+            self.metadata = ObjectMeta(model=model['metadata'])
+        if 'spec' in model:
+            self.spec = ReplicationControllerSpec(model=model['spec'])
+        if 'status' in model:
+            self.status = ReplicationControllerStatus(model=model['status'])
 
-            self.model['spec'] = {
-                "replicas": replicas,
-                "selector": dict(name=name)
-            }
-            self.model['spec']['template'] = dict()
+    # ------------------------------------------------------------------------------------- metadata
 
-            if image is not None:
-                self.pod_spec = PodSpec(name=name, image=image)
-            else:
-                self.pod_spec = PodSpec(name=name)
+    @property
+    def metadata(self):
+        return self._metadata
 
-            self.pod_spec.set_restart_policy('Always')
+    @metadata.setter
+    def metadata(self, metadata=None):
+        if not isinstance(metadata, ObjectMeta):
+            raise SyntaxError('ReplicationController: metadata: [ {0} ] is invalid.'.format(metadata))
+        self._metadata = metadata
 
-        self._update_model()
+    # ------------------------------------------------------------------------------------- spec
 
-    def _update_model(self):
-        self.model['metadata'] = self.rc_metadata.get()
-        if self.pod_metadata is not None:
-            if 'template' not in self.model['spec']:
-                self.model['spec']['template'] = dict()
-            self.model['spec']['template']['metadata'] = self.pod_metadata.get()
-        if self.pod_spec is not None:
-            if 'template' not in self.model['spec']:
-                self.model['spec']['template'] = dict()
-            self.model['spec']['template']['spec'] = self.pod_spec.get()
-        return self
+    @property
+    def spec(self):
+        return self._spec
 
-    # -------------------------------------------------------------------------------------  add
+    @spec.setter
+    def spec(self, spec=None):
+        if not isinstance(spec, ReplicationControllerSpec):
+            raise SyntaxError('ReplicationController: spec: [ {0} ] is invalid.'.format(spec))
+        self._spec = spec
 
-    def add_label(self, k=None, v=None):
-        if k is None or v is None:
-            raise SyntaxError('ReplicationController: k: [ {0} ] or v: [ {1} ] cannot be None.'.format(k, v))
-        if not isinstance(k, str) or not isinstance(v, str):
-            raise SyntaxError('ReplicationController: k: [ {0} ] or v: [ {1} ] must be a string.'.format(k, v))
-        self.rc_metadata.add_label(k=k, v=v)
-        return self
+    # ------------------------------------------------------------------------------------- status
 
-    def add_annotation(self, k=None, v=None):
-        if k is None or v is None:
-            raise SyntaxError('ReplicationController: k: [ {0} ] or v: [ {1} ] cannot be None.'.format(k, v))
-        if not isinstance(k, str) or not isinstance(v, str):
-            raise SyntaxError('ReplicationController: k: [ {0} ] or v: [ {1} ] must be a string.'.format(k, v))
-        self.rc_metadata.add_annotation(k=k, v=v)
-        return self
+    @property
+    def status(self):
+        return self._status
 
-    # -------------------------------------------------------------------------------------  del
+    @status.setter
+    def status(self, status=None):
+        if not isinstance(status, ReplicationControllerStatus):
+            raise SyntaxError('ReplicationController: status: [ {0} ] is invalid.'.format(status))
+        self._status = status
 
-    def del_annotation(self, k=None):
-        if k is None:
-            raise SyntaxError('ReplicationController: k: [ {0} ] cannot be None.'.format(k))
-        if not isinstance(k, str):
-            raise SyntaxError('ReplicationController: k: [ {0} ] must be a string.'.format(k))
-        self.rc_metadata.del_annotation(k=k)
-        return self
+    # ------------------------------------------------------------------------------------- serialize
 
-    def del_label(self, k=None):
-        if k is None:
-            raise SyntaxError('ReplicationController: k: [ {0} ] cannot be None.'.format(k))
-        if not isinstance(k, str):
-            raise SyntaxError('ReplicationController: k: [ {0} ] must be a string.'.format(k))
-        self.rc_metadata.del_label(k=k)
-        return self
-
-    # -------------------------------------------------------------------------------------  get
-
-    def get_annotation(self, k=None):
-        if k is None:
-            raise SyntaxError('ReplicationController: k: [ {0} ] cannot be None.'.format(k))
-        if not isinstance(k, str):
-            raise SyntaxError('ReplicationController: k: [ {0} ] must be a string.'.format(k))
-        return self.rc_metadata.get_annotation(k=k)
-
-    def get_annotations(self):
-        return self.rc_metadata.get_annotations()
-
-    def get_label(self, k=None):
-        if k is None:
-            raise SyntaxError('ReplicationController: k: [ {0} ] cannot be None.'.format(k))
-        if not isinstance(k, str):
-            raise SyntaxError('ReplicationController: k: [ {0} ] must be a string.'.format(k))
-        return self.rc_metadata.get_label(k=k)
-
-    def get_labels(self):
-        return self.rc_metadata.get_labels()
-
-    def get_name(self):
-        return self.rc_metadata.get_name()
-
-    def get_namespace(self):
-        return self.rc_metadata.get_namespace()
-
-    def get_replicas(self):
-        return self.model['spec']['replicas']
-
-    def get_selector(self):
-        return self.model['spec']['selector']
-
-    # -------------------------------------------------------------------------------------  set
-
-    def set_annotations(self, dico=None):
-        if dico is None:
-            raise SyntaxError('ReplicationController: dico: [ {0} ] cannot be None.'.format(dico))
-        if not isinstance(dico, dict):
-            raise SyntaxError('ReplicationController: dico: [ {0} ] must be a dict.'.format(dico))
-        self.rc_metadata.set_annotations(dico=dico)
-        return self
-
-    def set_labels(self, dico=None):
-        if dico is None:
-            raise SyntaxError('ReplicationController: dico: [ {0} ] cannot be None.'.format(dico))
-        if not isinstance(dico, dict):
-            raise SyntaxError('ReplicationController: dico: [ {0} ] must be a dict.'.format(dico))
-        self.rc_metadata.set_labels(labels=dico)
-        return self
-
-    def set_name(self, name=None):
-        if name is None:
-            raise SyntaxError('ReplicationController: name: [ {0} ] cannot be None.'.format(name))
-        if not isinstance(name, str):
-            raise SyntaxError('ReplicationController: dico: [ {0} ] must be a string.'.format(name))
-        self.rc_metadata.set_name(name=name)
-        return self
-
-    def set_namespace(self, name=None):
-        if name is None:
-            raise SyntaxError('ReplicationController: name: [ {0} ] cannot be None.'.format(name))
-        if not isinstance(name, str):
-            raise SyntaxError('ReplicationController: dico: [ {0} ] must be a string.'.format(name))
-        self.rc_metadata.set_namespace(namespace=name)
-        self.pod_metadata.set_namespace(namespace=name)
-        return self
-
-    def set_replicas(self, replicas=None):
-        if replicas is None:
-            raise SyntaxError('ReplicationController: replicas: [ {0} ] cannot be None.'.format(replicas))
-        if not isinstance(replicas, int) or replicas < 0:
-            raise SyntaxError('ReplicationController: replicas: [ {0} ] must be a positive integer.'.format(replicas))
-        self.model['spec']['replicas'] = replicas
-        return self
-
-    def set_selector(self, dico=None):
-        if dico is None:
-            raise SyntaxError('ReplicationController: dico: [ {0} ] cannot be None.'.format(dico))
-        if not isinstance(dico, dict):
-            raise SyntaxError('ReplicationController: dico: [ {0} ] must be a dict.'.format(dico))
-        self.model['spec']['selector'] = dico
-        return self
+    def serialize(self):
+        data = {}
+        if self.kind:
+            data['kind'] = self.kind
+        if self.api_version:
+            data['apiVersion'] = self.api_version
+        if self.metadata is not None:
+            data['metadata'] = self.metadata.serialize()
+        if self.spec is not None:
+            data['spec'] = self.spec.serialize()
+        if self.status is not None:
+            data['status'] = self.status.serialize()
+        return data
