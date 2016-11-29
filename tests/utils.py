@@ -333,3 +333,83 @@ def cleanup_pvc():
                 except NotFoundException:
                     continue
             claims = ref.list()
+
+
+# --------------------------------------------------------------------------------- front-end replication controller
+
+def frontend():
+    return {
+            "kind": "ReplicationController",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "frontend",
+                "namespace": "default",
+                "labels": {
+                    "name": "frontend",
+                    "rc_version": "780e750d-a0f7-491e-9038-1ee238c012fa"
+                }
+            },
+            "spec": {
+                "replicas": 2,
+                "selector": {
+                    "name": "frontend",
+                    "rc_version": "780e750d-a0f7-491e-9038-1ee238c012fa"
+                },
+                "template": {
+                    "metadata": {
+                        "labels": {
+                            "name": "frontend",
+                            "rc_version": "780e750d-a0f7-491e-9038-1ee238c012fa"
+                        }
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "name": "frontend",
+                                "image": "nginx:latest",
+                                "ports": [
+                                    {
+                                        "name": "feport",
+                                        "containerPort": 80,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+                                "resources": {
+                                    "requests": {
+                                        "cpu": "100m",
+                                        "memory": "32M"
+                                    }
+                                },
+                                "livenessProbe": {
+                                    "tcpSocket": {
+                                        "port": "feport"
+                                    },
+                                    "initialDelaySeconds": 15,
+                                    "timeoutSeconds": 1,
+                                    "periodSeconds": 10,
+                                    "successThreshold": 1,
+                                    "failureThreshold": 3
+                                },
+                                "readinessProbe": {
+                                    "httpGet": {
+                                        "path": "/",
+                                        "port": "feport",
+                                        "scheme": "HTTP"
+                                    },
+                                    "timeoutSeconds": 1,
+                                    "periodSeconds": 10,
+                                    "successThreshold": 1,
+                                    "failureThreshold": 3
+                                },
+                                "terminationMessagePath": "/dev/termination-log",
+                                "imagePullPolicy": "IfNotPresent"
+                            },
+                        ],
+                        "restartPolicy": "Always",
+                        "terminationGracePeriodSeconds": 30,
+                        "dnsPolicy": "ClusterFirst",
+                        "securityContext": {},
+                    }
+                }
+            }
+        }
