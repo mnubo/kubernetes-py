@@ -255,9 +255,7 @@ class K8sObject(object):
         if self.name is None:
             raise SyntaxError('K8sObject: name: [ {0} ] must be set to UPDATE the object.'.format(self.name))
 
-        # HTTP 409: Cannot apply update if UID in precondition and updated object.meta
-        if self.model.metadata.uid is not None:
-            self.model.metadata.uid = None
+        self.model.metadata.strip()  # strip server-generated metadata before posting updates
 
         url = '{base}/{name}'.format(base=self.base_url, name=self.name)
         state = self.request(method='PUT', url=url, data=self.serialize())
