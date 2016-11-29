@@ -63,6 +63,8 @@ class Service(object):
     def add_port(self, name=None, port=None, target_port=None, protocol=None, node_port=None):
         if not is_valid_string(name):
             raise SyntaxError('Service.add_port() name: [ {} ] is invalid.'.format(name))
+        if port is None or not (isinstance(port, str) or isinstance(port, int)):
+            raise SyntaxError('Service.add_port() port: [ {} ] is invalid.'.format(name))
         ports = []
         # exists previously
         for p in self.spec.ports:
