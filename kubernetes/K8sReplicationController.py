@@ -21,7 +21,7 @@ from kubernetes.models.v1.ReplicationController import ReplicationController
 from kubernetes.models.v1.Probe import Probe
 from kubernetes.utils import is_valid_string
 
-SCALE_WAIT_TIMEOUT_SECONDS = 120
+SCALE_WAIT_TIMEOUT_SECONDS = 300
 
 
 class K8sReplicationController(K8sObject):
