@@ -6,10 +6,7 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import json
 import time
-
-import yaml
 
 from kubernetes import K8sConfig
 from kubernetes.K8sContainer import K8sContainer
@@ -23,7 +20,6 @@ POD_READY_TIMEOUT_SECONDS = 120
 
 
 class K8sPod(K8sObject):
-
     def __init__(self, config=None, name=None):
         super(K8sPod, self).__init__(
             config=config,

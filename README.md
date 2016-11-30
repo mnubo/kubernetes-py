@@ -3,13 +3,15 @@
 [![Build Status](https://travis-ci.org/mnubo/kubernetes-py.svg?branch=master)](https://travis-ci.org/mnubo/kubernetes-py)
 [![Coverage Status](https://coveralls.io/repos/github/mnubo/kubernetes-py/badge.svg?branch=master)](https://coveralls.io/github/mnubo/kubernetes-py?branch=master)
 
-A python module to use Kubernetes. Currently based on the version 1 of the API.
+Kubernetes API bindings in Python.
 
 Currently supported Kubernetes objects:
 
 * ~/.kube/config
 * Deployment
 * Pod
+* PersistentVolume
+* PersistentVolumeClaim
 * ReplicationController
 * Secret
 * Service
@@ -17,15 +19,15 @@ Currently supported Kubernetes objects:
 
 ## Usage
 
-Documentation is currently work in progress. Please find some code snippets to help understand how to use this module.
+Find some code snippets below to help understand how to use this module.
 
 ### Configuration
 
 By default, the module attempts to load existing configuration from `~/.kube/config`. You are welcome to specify
-another location from where to load a kubeconfig file. 
+another location if you so choose. 
 
 Otherwise, individual configuration parameters can be overridden piecemeal. In this case you must 
-specify `kubeconfig=None` when initializing a K8sConfig object, otherwise the `~/kube/.config` file 
+specify `kubeconfig=None` when initializing a K8sConfig object; the `~/kube/.config` file 
 takes precedence if it exists.
     
     from kubernetes import K8sConfig
@@ -60,9 +62,9 @@ takes precedence if it exists.
 
 ### Containers
 
-This module uses the default container runtime.
+This module assumes the default container runtime.
 
-Defining a container:
+##### Defining a container:
 
     from kubernetes import K8sContainer
     
@@ -76,7 +78,7 @@ Defining a container:
 
 ### Deployments
 
-Creating a Deployment:
+##### Creating a Deployment:
 
     from kubernetes import K8sDeployment
     
@@ -88,7 +90,7 @@ Creating a Deployment:
     deployment.add_container(container)
     deployment.create()
 
-Fetching a Deployment:
+##### Fetching a Deployment:
 
     from kubernetes import K8sDeployment
     
@@ -96,7 +98,7 @@ Fetching a Deployment:
     deployment.get()
 
 
-Fetching all available Deployments:
+##### Fetching all available Deployments:
 
     from kubernetes import K8sDeployment
     
@@ -104,7 +106,7 @@ Fetching all available Deployments:
     deployment.list()
 
 
-Updating a Deployment:
+##### Updating a Deployment:
 
     from kubernetes import K8sDeployment, K8sContainer
     
@@ -116,7 +118,7 @@ Updating a Deployment:
     deployment.update()
 
 
-Scaling a Deployment:
+##### Scaling a Deployment:
 
     from kubernetes import K8sDeployment, K8sContainer
     
@@ -128,17 +130,117 @@ Scaling a Deployment:
     deployment.scale(10)
 
 
-Deleting a Deployment:
+##### Deleting a Deployment:
 
     from kubernetes import K8sDeployment
     
-    deployment = K8sDeployment(confif=cfg_cert, name='my_deployment')
+    deployment = K8sDeployment(config=cfg_cert, name='my_deployment')
     deployment.delete()    
+
+
+### Persistent Volumes
+
+
+##### Creating an AWS EBS Persistent Volume:
+
+    from kubernetes import K8sPersistentVolume
+    
+    pv_aws = K8sPersistentVolume(
+        config=cfg_cert, 
+        name="my_aws_ebs", 
+        type="awsElasticBlockStore"
+    )
+    pv_aws.fs_type = "xfs"
+    pv_aws.volume_id = "vol-0a89cd040d534a371"
+    pv_aws.create()
+
+As [specified](http://kubernetes.io/docs/user-guide/volumes/#awselasticblockstore):
+- the nodes on which pods are running must be AWS EC2 instances
+- those instances need to be in the same region and availability-zone as the EBS volume
+- EBS only supports a single EC2 instance mounting a volume
+
+Pod creation will timeout waiting for readiness if not on AWS; unschedulable.
+
+
+##### Creating a GCE PD Persistent Volume
+
+    from kubernetes import K8sPersistentVolume
+    
+    pv_gce = K8sPersistentVolume(
+        config=cfg_cert, 
+        name="my_gce_pd", 
+        type="gcePersistentDisk"
+    )
+    pv_gce.fs_type = "ext4"
+    pv_gce.pd_name = "han-shot-first"
+    pv_gce.create()
+
+As [specified](http://kubernetes.io/docs/user-guide/volumes/#gcepersistentdisk):
+- the nodes on which pods are running must be GCE VMs
+- those VMs need to be in the same GCE project and zone as the PD
+
+Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
+
+
+##### Creating an NFS Persistent Volume
+
+    from kubernetes import K8sPersistentVolume
+    
+    pv = K8sPersistentVolume(
+        config=cfg_cert,
+        name="my_pv",
+        type="nfs"
+    )
+    pv.nfs_server = "nfs.mycompany.com"
+    pv.nfs_path = "/path/to/dir"
+    pv.create()
+    
+
+### Persistent Volume Claims
+
+
+##### Creating and Mounting a PersistentVolumeClaim
+
+    from kubernetes import K8sContainer
+    from kubernetes import K8sPersistentVolumeClaim
+    from kubernetes import K8sPod
+    from kubernetes import K8sVolume
+    from kubernetes import K8sVolumeMount
+    
+    container = K8sContainer(name='nginx', image='nginx:1.9.1')
+    
+    pvc = K8sPersistentVolumeClaim(
+        config=cfg_cert,
+        name="my_pvc",
+    )
+    pvc.create()
+    
+    vol = K8sVolume(
+        config=cfg_cert,
+        name="my_volume",
+        type="persistentVolumeClaim"
+    )
+    vol.claim_name = pvc.name
+    
+    mount = K8sVolumeMount(
+        config=cfg_cert,
+        name=vol.name,
+        mount_path="/path/on/container"
+    )
+    container.add_volume_mount(mount)
+    
+    pod = K8sPod(
+        config=cfg_cert,
+        name="my_pod"
+    )
+    pod.add_volume(vol)
+    pod.add_container(container)
+    pod.create()
 
 
 ### Pods
 
-Creating a Pod:
+##### Creating a Pod:
 
     from kubernetes import K8sPod
     
@@ -146,21 +248,21 @@ Creating a Pod:
     pod.add_container(container)
     pod.create()
     
-Fetching a Pod:
+##### Fetching a Pod:
 
     from kubernetes import K8sPod
     
     pod = K8sPod(config=cfg_token, name='redis')
     pod.get()
     
-Fetching all available Pods:
+##### Fetching all available Pods:
 
     from kubernetes import K8sPod
     
     pod = K8sPod(config=cfg_token, name='redis')
     pod.list()
 
-Deleting a Pod:
+##### Deleting a Pod:
 
     from kubernetes import K8sPod
     
@@ -169,7 +271,7 @@ Deleting a Pod:
 
 ### ReplicationController
 
-Creating a ReplicationController:
+##### Creating a ReplicationController:
 
     from kubernetes import K8sReplicationController
     
@@ -181,21 +283,21 @@ Creating a ReplicationController:
     )
     rc.create()
 
-Fetching a ReplicationController:
+##### Fetching a ReplicationController:
 
     from kubernetes import K8sReplicationController
     
     rc = K8sReplicationController(config=cfg_cert, name='redis')
     rc.get()
     
-Fetching all available ReplicationControllers:
+##### Fetching all available ReplicationControllers:
 
     from kubernetes import K8sReplicationController
     
     rc = K8sReplicationController(config=cfg_cert, name='redis')
     rc.list()    
 
-Deleting a ReplicationController:
+##### Deleting a ReplicationController:
 
     from kubernetes import K8sReplicationController
     
@@ -204,7 +306,7 @@ Deleting a ReplicationController:
 
 ### Service
 
-Creating a service:
+##### Creating a service:
 
     from kubernetes import K8sService
     
@@ -214,14 +316,14 @@ Creating a service:
     svc.set_cluster_ip('192.168.1.100')
     svc.create()
 
-Fetching a service:
+##### Fetching a service:
 
     from kubernetes import K8sService
 
     svc = K8sService(config=cfg_cert, name='redis')
     svc.get()
 
-Deleting a service:
+##### Deleting a service:
 
     from kubernetes import K8sService
     
@@ -230,29 +332,28 @@ Deleting a service:
 
 ### Secret
 
-Creating a secret:
+##### Creating a secret:
 
     from kubernetes import K8sSecret
     
-    data = {
-        'somehost': {
-            'auth': 'sometoken',
-            'email': 'someone@somecompany.com'
-        }
-    }
+    data = { "auths": {
+                "repo:port": {
+                    "auth": "authstring", 
+                    "email": "you@company.com"
+                }}}  
     
     secret = K8sSecret(config=cfg_cert, name='my_registry')
-    secret.set_dockercfg_secret(data=data)
+    secret.dockerconfigjson = data
     secret.create()
-
-Fetching a secret:
+        
+##### Fetching a secret:
 
     from kubernetes import K8sSecret
 
     secret = K8sSecret(config=cfg_cert, name='my_registry')
     secret.get()
 
-Deleting a secret:
+##### Deleting a secret:
 
     from kubernetes import K8sSecret
     
@@ -261,16 +362,7 @@ Deleting a secret:
     
 ### Volume
 
-We currently support: 
-
-- `emptyDir`
-- `hostPath`
-- `awsElasticBlockStore`
-- `gcePersistentDisk`
-- `nfs`
-- `gitRepo`
-
-Mounting an AWS EBS volume inside a Pod:
+##### Mounting an AWS EBS volume inside a Pod:
     
     from kubernetes import K8sVolume
     
@@ -293,25 +385,25 @@ Development of features and unit tests was done against both a full Kubernetes c
 the [minikube](https://github.com/kubernetes/minikube) tool. You will find a `./bin/minukube.sh` script in the 
 source tree which fetches the application binary.
 
-The unit tests which require making remote API calls check if there is a reachable API server; if no such endpoint
+The unit tests that require making remote API calls check if there is a reachable API server; if no such endpoint
 is found, the test is skipped. It is recommended to begin testing things out against `minikube`. However, be aware
-that minikube does not support the entire feature set of a full Kubernetes install (eg. Deployments).
+that minikube does not support the entire feature set of a full Kubernetes install.
 
 ```
 $ nosetests --with-coverage --cover-package=kubernetes
 ```
 
-Please note that when using minikube, the generated `~/.minikube/ca.crt` defines the following hosts:
+Please note that when using minikube, and Kuebrnetes in general, the default hosts are as below:
 
 * `kubernetes`
 * `kubernetes.default`
 * `kubernetes.default.svc`
 * `kubernetes.default.svc.cluster.local`
 
-For certificate validation to succeed, you should edit your `~/.kube/config` to address one of the hosts:
+For certificate validation to succeed, you should edit your `~/.kube/config` to address one of the hosts, eg.:
 
     - cluster:
         certificate-authority: /Users/kubernetes/.minikube/ca.crt
         server: https://kubernetes:8443
 
-And also add an entry to your `/etc/hosts` file for the host alias you choose.
+Finally, add an entry to your `/etc/hosts` file for the host alias you choose.

@@ -19,7 +19,7 @@ DEFAULT_NAMESPACE = "default"
 VALID_API_VERSIONS = ["v1"]
 
 VALID_IP_RE = re.compile(r'^(http[s]?\:\/\/)?((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3})(:[0-9]+)?$')
-VALID_HOST_RE = re.compile(r'^(http[s]?\:\/\/)?([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9]\.)*([A-Za-z]|[A-Za-z][A-Za-z\-]*[A-Za-z])(:[0-9]+)?$')
+VALID_HOST_RE = re.compile(r'^(http[s]?\:\/\/)?([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-\.]*[A-Za-z])+(:[0-9]+)?$')
 
 
 class K8sConfig(object):
