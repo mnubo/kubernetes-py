@@ -44,8 +44,7 @@ class K8sPersistentVolumeClaim(K8sObject):
             elapsed_time = time.time() - start_time
             if elapsed_time >= READY_WAIT_TIMEOUT_SECONDS:  # timeout
                 raise TimedOutException(
-                    "Timed out waiting on readiness of PersistentVolumeClaim: [ {} ]".format(self.name)
-                )
+                    "Timed out waiting on readiness of PersistentVolumeClaim: [ {} ]".format(self.name))
 
     # ------------------------------------------------------------------------------------- accessModes
 

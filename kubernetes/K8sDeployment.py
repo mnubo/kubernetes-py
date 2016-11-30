@@ -21,6 +21,7 @@ SCALE_WAIT_TIMEOUT_SECONDS = 120
 
 
 class K8sDeployment(K8sObject):
+
     def __init__(self, config=None, name=None, image=None, replicas=0):
 
         super(K8sDeployment, self).__init__(config=config, obj_type='Deployment', name=name)
@@ -270,11 +271,11 @@ class K8sDeployment(K8sObject):
 
     def rollback(self, revision=None, annotations=None):
         """
-        Currently raises an HTTP 400 Error. Unsure what to feed the endpoint
+        Performs a rollback of the Deployment.
 
-        'Deployment in version "v1beta1" cannot be handled as a DeploymentRollback:
-        converting (v1beta1.Deployment) to (extensions.DeploymentRollback):
-        UpdatedAnnotations not present in src'
+        If the 'revision' parameter is omitted, we fetch the Deployment's system-generated
+        annotation containing the current revision, and revert to the version immediately
+        preceding the current version.
 
         :param revision: The revision to rollback to.
         :return:
@@ -283,8 +284,10 @@ class K8sDeployment(K8sObject):
         rollback = DeploymentRollback()
         rollback.name = self.name
 
+        # to the specified revision
         if revision is not None:
             rollback.rollback_to.revision = revision
+        # to the revision immediately preceding the current revision
         else:
             current_revision = int(self.get_annotation('deployment.kubernetes.io/revision'))
             rev = max(current_revision - 1, 0)

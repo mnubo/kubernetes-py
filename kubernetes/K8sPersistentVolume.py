@@ -20,7 +20,12 @@ class K8sPersistentVolume(K8sObject):
     VALID_VOLUME_TYPES = filter(lambda x: x not in ['emptyDir', 'gitRepo', 'secret'], Volume.VOLUME_TYPES_TO_SOURCE_MAP.keys())
 
     def __init__(self, config=None, name=None, type=None):
-        super(K8sPersistentVolume, self).__init__(config=config, name=name, obj_type='PersistentVolume')
+        super(K8sPersistentVolume, self).__init__(
+            config=config,
+            name=name,
+            obj_type='PersistentVolume'
+        )
+
         self._type = None
         self.model = PersistentVolume()
         self.name = name
@@ -117,13 +122,6 @@ class K8sPersistentVolume(K8sObject):
 
     # ------------------------------------------------------------------------------------- volume_id (AWS)
 
-    # http://kubernetes.io/docs/user-guide/volumes/#awselasticblockstore
-    # - the nodes on which pods are running must be AWS EC2 instances
-    # - those instances need to be in the same region and availability-zone as the EBS volume
-    # - EBS only supports a single EC2 instance mounting a volume
-
-    # Pod creation will timeout waiting for readiness if not on AWS; unschedulable.
-
     @property
     def volume_id(self):
         if not hasattr(self.source, 'volume_id'):
@@ -137,12 +135,6 @@ class K8sPersistentVolume(K8sObject):
         self.source.volume_id = vid
 
     # ------------------------------------------------------------------------------------- pd_name (GCE)
-
-    # http://kubernetes.io/docs/user-guide/volumes/#gcepersistentdisk
-    # - the nodes on which pods are running must be GCE VMs
-    # - those VMs need to be in the same GCE project and zone as the PD
-
-    # Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
 
     @property
     def pd_name(self):
