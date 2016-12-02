@@ -413,3 +413,131 @@ def frontend():
                 }
             }
         }
+
+
+# --------------------------------------------------------------------------------- admintool replication controller
+
+def admintool():
+    return {
+            'status': {
+                'observedGeneration': 0,
+                'readyReplicas': 0,
+                'fullyLabeledReplicas': 0,
+                'replicas': 0
+            },
+            'kind': 'ReplicationController',
+            'spec': {
+                'selector': {
+                    'name': 'admintool',
+                    'rc_version': '1926c7e1-74e5-4088-86d6-af7b21d38741'
+                },
+                'template': {
+                    'spec': {
+                        'dnsPolicy': 'ClusterFirst',
+                        'terminationGracePeriodSeconds': 30,
+                        'restartPolicy': 'Always',
+                        # 'volumes': [{
+                        #     'hostPath': {
+                        #         'path': '/root/.docker/config.json'
+                        #     },
+                        #     'name': 'dockercred'
+                        # }, {
+                        #     'hostPath': {
+                        #         'path': '/usr/bin/docker'
+                        #     },
+                        #     'name': 'dockerbin'
+                        # }, {
+                        #     'hostPath': {
+                        #         'path': '/var/run/docker.sock'
+                        #     },
+                        #     'name': 'dockersock'
+                        # }, {
+                        #     'hostPath': {
+                        #         'path': '/root/.docker'
+                        #     },
+                        #     'name': 'dockerconfig'
+                        # }],
+                        'imagePullSecrets': [{'name': 'privateregistry'}],
+                        'containers': [{
+                            'livenessProbe': {
+                                'initialDelaySeconds': 15,
+                                'tcpSocket': {
+                                    'port': 'admintoolport'
+                                },
+                                'timeoutSeconds': 1
+                            },
+                            'name': 'admintool',
+                            'image': 'nginx:latest',
+                            # 'volumeMounts': [{
+                            #     'mountPath': '/root/.dockercfg',
+                            #     'name': 'dockercred',
+                            #     'readOnly': True
+                            # }, {
+                            #     'mountPath': '/usr/bin/docker',
+                            #     'name': 'dockerbin',
+                            #     'readOnly': True
+                            # }, {
+                            #     'mountPath': '/var/run/docker.sock',
+                            #     'name': 'dockersock',
+                            #     'readOnly': True
+                            # }, {
+                            #     'mountPath': '/root/.docker',
+                            #     'name': 'dockerconfig',
+                            #     'readOnly': True
+                            # }],
+                            'env': [{
+                                'name': 'docker_env',
+                                'value': 'prod'
+                            }, {
+                                'name': 'DATADOG_PORT_8125_UDP_ADDR',
+                                'value': '10.101.1.52'
+                            }, {
+                                'name': 'docker_repository',
+                                'value': 'dockerep-1.mtl.mnubo.com:4329'
+                            }, {
+                                'name': 'ENV',
+                                'value': 'prod'
+                            }, {
+                                'name': 'DOCKER_TAG',
+                                'value': 'latest'
+                            }],
+                            'imagePullPolicy': 'IfNotPresent',
+                            'readinessProbe': {
+                                'httpGet': {
+                                    'path': '/',
+                                    'scheme': 'HTTP',
+                                    'port': 'admintoolport'
+                                }
+                            },
+                            'ports': [{
+                                'protocol': 'TCP',
+                                'containerPort': 80,
+                                'name': 'admintoolport',
+                                'hostPort': 80
+                            }],
+                            'resources': {
+                                'requests': {
+                                    'cpu': '100m',
+                                    'memory': '32M'
+                                }
+                            }
+                        }]
+                    },
+                    'metadata': {
+                        'labels': {
+                            'name': 'admintool',
+                            'rc_version': '1926c7e1-74e5-4088-86d6-af7b21d38741'
+                        }
+                    }
+                },
+                'replicas': 1
+            },
+            'apiVersion': 'v1',
+            'metadata': {
+                'labels': {
+                    'name': 'admintool',
+                    'rc_version': '1926c7e1-74e5-4088-86d6-af7b21d38741'
+                },
+                'name': 'admintool'
+            }
+        }
