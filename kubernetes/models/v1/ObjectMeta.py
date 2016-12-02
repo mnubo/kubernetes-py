@@ -236,7 +236,7 @@ class ObjectMeta(object):
 
     @annotations.setter
     def annotations(self, anns=None):
-        if not is_valid_dict(anns, type=str):
+        if not is_valid_dict(anns, str):
             raise SyntaxError('ObjectMeta: annotations: [ {0} ] is invalid.'.format(anns))
         self._annotations = anns
 
