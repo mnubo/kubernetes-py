@@ -14,6 +14,7 @@ from kubernetes.K8sExceptions import NotFoundException, TimedOutException
 from kubernetes.K8sObject import K8sObject
 from kubernetes.models.v1.Pod import Pod
 from kubernetes.models.v1.PodStatus import PodStatus
+from kubernetes.models.v1.Probe import Probe
 from kubernetes.utils import is_valid_dict, is_valid_string
 
 
@@ -186,6 +187,66 @@ class K8sPod(K8sObject):
     @node_selector.setter
     def node_selector(self, selector=None):
         self.model.spec.node_selector = selector
+
+    # -------------------------------------------------------------------------------------  livenessProbes
+
+    @property
+    def liveness_probes(self):
+        data = {}
+        containers = self.model.spec.containers
+        for c in containers:
+            if c.liveness_probe is not None:
+                data[c.name] = c.liveness_probe
+        return data
+
+    @liveness_probes.setter
+    def liveness_probes(self, tup=None):
+        if not isinstance(tup, tuple):
+            raise SyntaxError('K8sPod: liveness_probes: [ {} ] is invalid.'.format(tup))
+
+        c_name, probe = tup
+        container_names = [c.name for c in self.model.spec.containers]
+        if c_name not in container_names:
+            raise SyntaxError('K8sPod: liveness_probes: container [ {} ] not found.'.format(c_name))
+        if not isinstance(probe, Probe):
+            raise SyntaxError('K8sPod: liveness_probe: probe: [ {} ] is invalid.'.format(probe))
+
+        containers = []
+        for c in self.model.spec.containers:
+            if c.name == c_name:
+                c.liveness_probe = probe
+            containers.append(c)
+        self.model.spec.template.spec.containers = containers
+
+    # -------------------------------------------------------------------------------------  readinessProbes
+
+    @property
+    def readiness_probes(self):
+        data = {}
+        containers = self.model.spec.containers
+        for c in containers:
+            if c.readiness_probe is not None:
+                data[c.name] = c.readiness_probe
+        return data
+
+    @readiness_probes.setter
+    def readiness_probes(self, tup=None):
+        if not isinstance(tup, tuple):
+            raise SyntaxError('K8sPod: readiness_probes: [ {} ] is invalid.'.format(tup))
+
+        c_name, probe = tup
+        container_names = [c.name for c in self.model.spec.template.spec.containers]
+        if c_name not in container_names:
+            raise SyntaxError('K8sPod: readiness_probes: container [ {} ] not found.'.format(c_name))
+        if not isinstance(probe, Probe):
+            raise SyntaxError('K8sPod: readiness_probes: probe: [ {} ] is invalid.'.format(probe))
+
+        containers = []
+        for c in self.model.spec.template.spec.containers:
+            if c.name == c_name:
+                c.readiness_probe = probe
+            containers.append(c)
+        self.model.spec.template.spec.containers = containers
 
     # ------------------------------------------------------------------------------------- restartPolicy
 
