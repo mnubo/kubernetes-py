@@ -17,10 +17,10 @@ from kubernetes.models.unversioned.LabelSelector import LabelSelector
 from kubernetes.models.v1beta1.Deployment import Deployment
 from kubernetes.models.v1beta1.DeploymentRollback import DeploymentRollback
 
-SCALE_WAIT_TIMEOUT_SECONDS = 120
-
 
 class K8sDeployment(K8sObject):
+
+    SCALE_WAIT_TIMEOUT_SECONDS = 120
 
     def __init__(self, config=None, name=None, image=None, replicas=0):
 
@@ -76,7 +76,7 @@ class K8sDeployment(K8sObject):
 
     def _check_timeout(self, start_time=None):
         elapsed_time = time.time() - start_time
-        if elapsed_time >= SCALE_WAIT_TIMEOUT_SECONDS:  # timeout
+        if elapsed_time >= self.SCALE_WAIT_TIMEOUT_SECONDS:  # timeout
             raise TimedOutException(
                 "Timed out scaling replicas to: [ {0} ] with labels: [ {1} ]".format(
                     self.model.spec.replicas,
