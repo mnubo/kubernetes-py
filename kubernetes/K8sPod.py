@@ -16,10 +16,11 @@ from kubernetes.models.v1.Pod import Pod
 from kubernetes.models.v1.PodStatus import PodStatus
 from kubernetes.utils import is_valid_dict, is_valid_string
 
-POD_READY_TIMEOUT_SECONDS = 120
-
 
 class K8sPod(K8sObject):
+
+    POD_READY_TIMEOUT_SECONDS = 120
+
     def __init__(self, config=None, name=None):
         super(K8sPod, self).__init__(
             config=config,
@@ -48,7 +49,7 @@ class K8sPod(K8sObject):
         while not self.is_ready():
             time.sleep(0.2)
             elapsed_time = time.time() - start_time
-            if elapsed_time >= POD_READY_TIMEOUT_SECONDS:
+            if elapsed_time >= self.POD_READY_TIMEOUT_SECONDS:
                 raise TimedOutException("Timed out on Pod readiness: [ {0} ]".format(self.name))
 
     # -------------------------------------------------------------------------------------  add
