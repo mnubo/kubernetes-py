@@ -79,7 +79,7 @@ class K8sObject(object):
         anns = self.model.metadata.annotations
         if anns is None:
             anns = {}
-        anns.update({k: v})
+        anns.update({k: str(v)})
         self.model.metadata.annotations = anns
         return self
 
