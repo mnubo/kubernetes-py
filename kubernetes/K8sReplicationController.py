@@ -9,7 +9,6 @@
 import copy
 import time
 import uuid
-from enum import Enum
 import base64
 
 from kubernetes import K8sConfig
@@ -639,7 +638,7 @@ class K8sReplicationController(K8sObject):
             pass
 
         if foo_next is None:
-            raise NewRolloutException('K8sReplicationController.rolling_update() '
-                                      'No pending rollout of RC: [ {} ] to abort; perform a new rollout.'.format(name))
+            raise NotFoundException('K8sReplicationController.rolling_update() '
+                                    'No pending rollout of RC: [ {} ] to abort; perform a new rollout.'.format(name))
         if foo is None:
             raise NotFoundException('K8sReplicationController.rolling_update() RC: [ {} ] not found.'.format(name))
