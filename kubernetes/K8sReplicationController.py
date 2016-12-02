@@ -9,6 +9,8 @@
 import copy
 import time
 import uuid
+from enum import Enum
+import base64
 
 from kubernetes import K8sConfig
 from kubernetes.K8sContainer import K8sContainer
@@ -21,10 +23,10 @@ from kubernetes.models.v1.ReplicationController import ReplicationController
 from kubernetes.models.v1.Probe import Probe
 from kubernetes.utils import is_valid_string
 
-SCALE_WAIT_TIMEOUT_SECONDS = 120
-
 
 class K8sReplicationController(K8sObject):
+
+    SCALE_WAIT_TIMEOUT_SECONDS = 120
 
     def __init__(self, config=None, name=None, replicas=0):
 
@@ -48,11 +50,15 @@ class K8sReplicationController(K8sObject):
     # -------------------------------------------------------------------------------------  override
 
     def create(self):
+        _hash = base64.b64encode(self.as_json())
+        self.add_annotation('kubernetes.io/deployment', _hash)
         super(K8sReplicationController, self).create()
         self.wait_for_replicas()
         return self
 
     def update(self):
+        _hash = base64.b64encode(self.as_json())
+        self.add_annotation('kubernetes.io/deployment', _hash)
         super(K8sReplicationController, self).update()
         self.get()
         return self
@@ -256,6 +262,7 @@ class K8sReplicationController(K8sObject):
     @pod_name.setter
     def pod_name(self, name=None):
         self.model.spec.template.metadata.name = name
+        self.model.spec.template.metadata.labels['name'] = name
 
     # -------------------------------------------------------------------------------------  pod node name
 
@@ -429,10 +436,10 @@ class K8sReplicationController(K8sObject):
                     is_ready = True
             if not is_ready:
                 elapsed_time = time.time() - start_time
-                if elapsed_time >= SCALE_WAIT_TIMEOUT_SECONDS:  # timeout
+                if elapsed_time >= self.SCALE_WAIT_TIMEOUT_SECONDS:  # timeout
                     raise TimedOutException(
-                        "Timed out scaling RC: [ {0} ] to replica count: [ {1} ]".format(self.name, self.desired_replicas)
-                    )
+                        "Timed out scaling RC: [ {0} ] "
+                        "to replica count: [ {1} ]".format(self.name, self.desired_replicas))
                 time.sleep(0.2)
                 self.get()
         return self
@@ -468,7 +475,9 @@ class K8sReplicationController(K8sObject):
         Scales the number of pods in the specified K8sReplicationController to the desired replica count.
 
         :param config: an instance of K8sConfig
+
         :param name: the name of the ReplicationController we want to scale.
+
         :param replicas: the desired number of replicas.
 
         :return: An instance of K8sReplicationController
@@ -483,21 +492,25 @@ class K8sReplicationController(K8sObject):
     # -------------------------------------------------------------------------------------  rolling update
 
     @staticmethod
-    def rolling_update(config=None, name=None, image=None, container_name=None, rc_new=None, wait_seconds=10):
+    def rolling_update(config=None, name=None, image=None, container_name=None, rc_new=None):
         """
         Performs a simple rolling update of a ReplicationController.
 
-        See https://github.com/kubernetes/kubernetes/blob/release-1.0/docs/design/simple-rolling-update.md
-        for algorithm details.
+        See https://github.com/kubernetes/kubernetes/blob/master/docs/design/simple-rolling-update.md
+        for algorithm details. We have modified it slightly to allow for keeping the same RC name
+        between updates, which is not supported by default by kubectl.
 
         :param config: An instance of K8sConfig. If omitted, reads from ~/.kube/config.
+
         :param name: The name of the ReplicationController we want to update.
+
         :param image: The updated image version we want applied.
+
         :param container_name: The name of the container we're targeting for the update.
-                               Required if more than one container is present.
+               Required if more than one container is present.
+
         :param rc_new: An instance of K8sReplicationController with the new configuration to apply.
-                       Mutually exclusive with [image, container_name] if specified.
-        :param wait_seconds:
+               Mutually exclusive with [image, container_name] if specified.
 
         :return:
         """
@@ -508,110 +521,125 @@ class K8sReplicationController(K8sObject):
             raise SyntaxError("K8sReplicationController: please specify either 'image' or 'rc_new'")
         if name is not None and image is not None and rc_new is not None:
             raise SyntaxError(
-                'K8sReplicationController: rc_new is mutually exclusive with a [image, container_name] pair.'
-            )
+                'K8sReplicationController: rc_new is mutually exclusive with an (container_name, image) pair.')
 
-        phase = 'init'
-        ann_desired_replicas = 'desired-replicas'
-        name_old = "{0}-old".format(name)
+        return K8sReplicationController._rolling_update_init(
+            config=config,
+            name=name,
+            image=image,
+            container_name=container_name,
+            rc_new=rc_new
+        )
 
-        rc_current = None
-        rc_old = None
-        rc_current_exists = False
-        rc_next_exists = False
+    @staticmethod
+    def _rolling_update_init(config=None, name=None, image=None, container_name=None, rc_new=None):
+
+        foo = None
+        foo_next = None
+        name_next = "{}-next".format(name)
 
         try:
-            rc_current = K8sReplicationController(config=config, name=name).get()
-            rc_current_exists = True
+            foo = K8sReplicationController(config=config, name=name).get()
+        except NotFoundException:
+            pass
+        try:
+            foo_next = K8sReplicationController(config=config, name=name_next).get()
         except NotFoundException:
             pass
 
-        try:
-            rc_old = K8sReplicationController(config=config, name=name_old).get()
-            rc_next_exists = True
-        except NotFoundException:
-            pass
+        if foo is None and foo_next is None:
+            raise NotFoundException('K8sReplicationController.rolling_update() RC: [ {} ] not found.'.format(name))
 
-        if not rc_current_exists and not rc_next_exists:
-            raise NotFoundException('K8sReplicationController: rc: [ {0} ] does not exist.'.format(name))
-
-        if rc_current_exists and not rc_next_exists:
+        if foo is not None and foo_next is None:
 
             if rc_new is not None:
-                rc_old = rc_new
-                rc_old.add_annotation(k=ann_desired_replicas, v=str(rc_current.desired_replicas))
-
+                foo_next = copy.deepcopy(rc_new)
             else:
-                rc_old = copy.deepcopy(rc_current)
-                rc_old.add_annotation(k=ann_desired_replicas, v=str(rc_current.desired_replicas))
+                foo_next = K8sReplicationController(config=config, name=name)
 
-                if len(rc_old.containers) > 1 and not container_name:
-                    raise UnprocessableEntityException(
-                        'K8sReplicationController: unable to determine on which container to perform a rolling_update; '
-                        'please specify the target container_name.'
-                    )
+            foo_old = copy.deepcopy(foo)
+            foo_old.name = "{}-old".format(foo.name)
+            foo.delete(orphan=True)
+            foo_old.create()
 
-                if len(rc_old.containers) == 1 and not container_name:
-                    container_name = rc_old.containers[0].name
+            if image and len(foo_old.containers) > 1 and not container_name:
+                raise UnprocessableEntityException(
+                    'K8sReplicationController: Please specify the target container_name '
+                    'on which to apply image: [ {} ].'.format(image))
 
-                rc_old.container_image = (container_name, image)
+            if len(foo_old.containers) == 1 and not container_name:
+                container_name = foo_old.containers[0].name
 
-            rc_current.delete()
-
-            rc_old.name = name_old
-            rc_old.create()
+            if container_name and image:
+                existing = filter(lambda x: x.name != container_name, foo_old.containers)
+                if existing:
+                    [foo_next.add_container(x) for x in existing]
+                filtered = filter(lambda x: x.name == container_name, foo_old.containers)
+                if filtered:
+                    container = filtered[0]
+                    container.image = image
+                    foo_next.add_container(container)
 
             new_version = str(uuid.uuid4())
-            rc_current = copy.deepcopy(rc_old)
-            rc_current.name = name
-            rc_current.desired_replicas = 0
-            rc_current.add_pod_label(k='name', v=name)
-            rc_current.add_pod_label(k='rc_version', v=new_version)
-            rc_current.selector = {'name': name, 'rc_version': new_version}
-            rc_current.create()
+            foo_next.name = name
+            foo_next.add_pod_label(k='name', v=name)
+            foo_next.add_pod_label(k='rc_version', v=new_version)
+            foo_next.selector = {'name': name, 'rc_version': new_version}
+            foo_next.add_annotation('kubernetes.io/desired-replicas', foo_old.desired_replicas)
+            foo_next.desired_replicas = 0
 
-            phase = 'rollout'
+            foo_next.create()
+            return K8sReplicationController._rolling_update_rollout(config, name)
 
-        elif rc_next_exists and not rc_current_exists:
-            phase = 'rename'
+        if foo is None and foo_next is not None:
+            return K8sReplicationController._rolling_update_rename(config, name)
 
-        elif rc_current_exists and rc_next_exists:
-            if not rc_old.get_annotation(k=ann_desired_replicas):
-                rc_old.add_annotation(k=ann_desired_replicas, v=rc_current.desired_replicas)
-                rc_old.update()
-            phase = 'rollout'
+        if foo is not None and foo_next is not None:
+            if 'kubernetes.io/desired-replicas' not in foo_next.annotations:
+                foo_next.add_annotation('kubernetes.io/desired-replicas', foo.current_replicas)
+                foo_next.update()
+            return K8sReplicationController._rolling_update_rollout(config, name)
 
-        if phase == 'rollout':
-            desired_replicas = rc_old.get_annotation(k=ann_desired_replicas)
+    @staticmethod
+    def _rolling_update_rollout(config=None, name=None):
+        name_old = "{}-old".format(name)
+        foo = K8sReplicationController(config=config, name=name_old).get()
+        foo_next = K8sReplicationController(config=config, name=name).get()
 
-            while rc_current.current_replicas < int(desired_replicas):
+        while foo_next.current_replicas < int(foo_next.get_annotation('kubernetes.io/desired-replicas')):
+            K8sReplicationController.scale(config, name, foo_next.current_replicas+1)
+            if foo.current_replicas > 0:
+                K8sReplicationController.scale(config, name_old, foo.current_replicas-1)
+            foo.get()
+            foo_next.get()
 
-                K8sReplicationController.scale(
-                    config=rc_current.config,
-                    name=rc_current.name,
-                    replicas=min(rc_current.current_replicas+1, desired_replicas)
-                )
+        return K8sReplicationController._rolling_update_rename(config, name)
 
-                if rc_old.desired_replicas > 0:
-                    K8sReplicationController.scale(
-                        config=rc_old.config,
-                        name=rc_old.name,
-                        replicas=max(rc_old.current_replicas-1, 0)
-                    )
+    @staticmethod
+    def _rolling_update_rename(config=None, name=None):
+        name_old = "{}-old".format(name)
+        foo = K8sReplicationController(config=config, name=name_old).get()
+        foo_next = K8sReplicationController(config=config, name=name).get()
+        foo.delete()
+        return foo_next
 
-                rc_current.get()
-                rc_old.get()
+    @staticmethod
+    def _rolling_update_abort(config=None, name=None):
+        foo = None
+        foo_next = None
+        name_next = "{}-next".format(name)
 
-            if rc_old.desired_replicas > 0:
-                K8sReplicationController.scale(
-                    config=rc_old.config,
-                    name=rc_old.name,
-                    replicas=0
-                )
+        try:
+            foo = K8sReplicationController(config=config, name=name).get()
+        except NotFoundException:
+            pass
+        try:
+            foo_next = K8sReplicationController(config=config, name=name_next).get()
+        except NotFoundException:
+            pass
 
-            phase = 'rename'
-
-        if phase == 'rename':
-            rc_old.delete()
-
-        return rc_current
+        if foo_next is None:
+            raise NewRolloutException('K8sReplicationController.rolling_update() '
+                                      'No pending rollout of RC: [ {} ] to abort; perform a new rollout.'.format(name))
+        if foo is None:
+            raise NotFoundException('K8sReplicationController.rolling_update() RC: [ {} ] not found.'.format(name))
