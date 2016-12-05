@@ -25,7 +25,7 @@ from kubernetes.utils import is_valid_string
 
 class K8sReplicationController(K8sObject):
 
-    SCALE_WAIT_TIMEOUT_SECONDS = 120
+    SCALE_WAIT_TIMEOUT_SECONDS = 600
 
     def __init__(self, config=None, name=None, replicas=0):
 
