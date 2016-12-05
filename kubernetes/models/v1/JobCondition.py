@@ -6,6 +6,8 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+from kubernetes.utils import is_valid_string
+
 
 class JobCondition(object):
     """
@@ -41,15 +43,75 @@ class JobCondition(object):
 
     # --------------------------------------------------------------------------------- type
 
+    @property
+    def type(self):
+        return self._type
+
+    @type.setter
+    def type(self, t=None):
+        if not is_valid_string(t):
+            raise SyntaxError('JobCondition: type: [ {} ] is invalid.'.format(t))
+        self._type = t
+
     # --------------------------------------------------------------------------------- status
+
+    @property
+    def status(self):
+        return self._status
+
+    @status.setter
+    def status(self, s=None):
+        if not is_valid_string(s):
+            raise SyntaxError('JobCondition: status: [ {} ] is invalid.'.format(s))
+        self._status = s
 
     # --------------------------------------------------------------------------------- lastProbeTime
 
+    @property
+    def last_probe_time(self):
+        return self._last_probe_time
+
+    @last_probe_time.setter
+    def last_probe_time(self, t=None):
+        if not is_valid_string(t):
+            raise SyntaxError('JobCondition: last_probe_time: [ {} ] is invalid.'.format(t))
+        self._last_probe_time = t
+
     # --------------------------------------------------------------------------------- lastTransitionTime
+
+    @property
+    def last_transition_time(self):
+        return self._last_transition_time
+
+    @last_transition_time.setter
+    def last_transition_time(self, t=None):
+        if not is_valid_string(t):
+            raise SyntaxError('JobCondition: last_transition_time: [ {} ] is invalid.'.format(t))
+        self._last_transition_time = t
 
     # --------------------------------------------------------------------------------- reason
 
+    @property
+    def reason(self):
+        return self._reason
+
+    @reason.setter
+    def reason(self, r=None):
+        if not is_valid_string(r):
+            raise SyntaxError('JobCondition: reason: [ {} ] is invalid.'.format(r))
+        self._reason = r
+
     # --------------------------------------------------------------------------------- message
+
+    @property
+    def message(self):
+        return self._message
+
+    @message.setter
+    def message(self, m=None):
+        if not is_valid_string(m):
+            raise SyntaxError('JobCondition: message: [ {} ] is invalid.'.format(m))
+        self._message = m
 
     # --------------------------------------------------------------------------------- serialize
 
