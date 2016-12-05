@@ -12,19 +12,15 @@ import uuid
 from kubernetes import K8sReplicationController, K8sConfig, K8sPod, K8sContainer
 from kubernetes.K8sExceptions import *
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
+from kubernetes.models.v1.Probe import Probe
 from kubernetes.models.v1.ReplicationController import ReplicationController
 from kubernetes.models.v1.ReplicationControllerSpec import ReplicationControllerSpec
-from kubernetes.models.v1.Probe import Probe
 from tests import utils
-
-
-
-
-
 
 
 class K8sReplicationControllerTest(unittest.TestCase):
     def setUp(self):
+        K8sReplicationController.SCALE_WAIT_TIMEOUT_SECONDS = 20
         utils.cleanup_rc()
         utils.cleanup_pods()
 
@@ -1099,8 +1095,8 @@ class K8sReplicationControllerTest(unittest.TestCase):
         rc.add_container(container_2)
         if utils.is_reachable(rc.config.api_host):
             rc.create()
-            rollout = K8sReplicationController.rolling_update(config=rc.config, name=name, image=new_image,
-                                                              container_name=cont_name_1)
+            rollout = K8sReplicationController.rolling_update(
+                config=rc.config, name=name, image=new_image, container_name=cont_name_1)
             self.assertEqual(2, len(rollout.containers))
             for c in rollout.containers:
                 self.assertIn(c.name, [cont_name_1, cont_name_2])
@@ -1180,12 +1176,14 @@ class K8sReplicationControllerTest(unittest.TestCase):
                 for c in p.containers:
                     self.assertIn(c.image, [image_1, image_2])
 
-            rollout = K8sReplicationController.rolling_update(
+            K8sReplicationController.rolling_update(
                 config=rc.config,
                 name=name,
                 image=new_image,
                 container_name=cont_name_1
             )
+
+            rollout = rc.get()
             pods = K8sPod.get_by_labels(
                 config=rc.config,
                 labels=rollout.pod_labels
@@ -1308,19 +1306,16 @@ class K8sReplicationControllerTest(unittest.TestCase):
         rc_1 = utils.create_rc(name=name_1)
         rc_1.add_container(container_1)
         rc_1.add_container(container_2)
+        rc_1.desired_replicas = count
 
         name_2 = "yorc-{0}".format(str(uuid.uuid4()))
         rc_2 = utils.create_rc(name=name_2)
         rc_2.add_container(container_3)
         rc_2.add_container(container_2)
+        rc_2.desired_replicas = count
 
         if utils.is_reachable(rc_1.config.api_host):
             rc_1.create()
-            K8sReplicationController.scale(
-                config=rc_1.config,
-                name=name_1,
-                replicas=count
-            )
             pods = K8sPod.get_by_labels(
                 config=rc_1.config,
                 labels=rc_1.pod_labels
@@ -1344,14 +1339,14 @@ class K8sReplicationControllerTest(unittest.TestCase):
                 for c in p.containers:
                     self.assertIn(c.image, [new_image, image_2])
 
-    def test_update_from_full_model_with_liveness_probe(self):
+    def test_update_from_full_model_with_liveness_probes(self):
         data = utils.frontend()
 
         rc = ReplicationController(model=data)
         k8s_rc = utils.create_rc(name=rc.metadata.name)
         k8s_rc.model = rc
-
         self.assertEqual(1, len(k8s_rc.liveness_probes))
+
         liveness = k8s_rc.liveness_probes['frontend']
         self.assertIsInstance(liveness, Probe)
         self.assertEqual(15, liveness.initial_delay_seconds)
@@ -1359,38 +1354,57 @@ class K8sReplicationControllerTest(unittest.TestCase):
         if utils.is_reachable(k8s_rc.config.api_host):
             k8s_rc.create()
             self.assertIsInstance(k8s_rc, K8sReplicationController)
+
             liveness = k8s_rc.liveness_probes['frontend']
             liveness.initial_delay_seconds = 60
             k8s_rc.liveness_probes = ('frontend', liveness)
             k8s_rc.update()
-            liveness = k8s_rc.liveness_probes['frontend']
-            self.assertEqual(liveness.initial_delay_seconds, 60)
 
-    def test_rolling_update_from_full_model_with_liveness_probe(self):
+            pods = K8sPod.get_by_labels(config=k8s_rc.config, labels=k8s_rc.pod_labels)
+            self.assertEqual(2, len(pods))
+            for pod in pods:
+                _liveness = pod.liveness_probes['frontend']
+                self.assertNotEqual(_liveness.initial_delay_seconds, liveness.initial_delay_seconds)
+
+            k8s_rc.liveness_probes = ('frontend', liveness)
+            k8s_rc.rolling_update(config=k8s_rc.config, name=k8s_rc.name, rc_new=k8s_rc)
+
+            from_update = k8s_rc.get()
+            pods = K8sPod.get_by_labels(config=from_update.config, labels=from_update.pod_labels)
+            self.assertEqual(2, len(pods))
+            for pod in pods:
+                from_get = pod.liveness_probes['frontend']
+                self.assertEqual(from_get.initial_delay_seconds, liveness.initial_delay_seconds)
+
+    def test_update_from_full_model_with_readiness_probes(self):
         data = utils.frontend()
 
         rc = ReplicationController(model=data)
         k8s_rc = utils.create_rc(name=rc.metadata.name)
         k8s_rc.model = rc
-
         self.assertEqual(1, len(k8s_rc.liveness_probes))
-        liveness = k8s_rc.liveness_probes['frontend']
-        self.assertIsInstance(liveness, Probe)
-        self.assertEqual(15, liveness.initial_delay_seconds)
+
+        readiness = k8s_rc.readiness_probes['frontend']
+        self.assertIsInstance(readiness, Probe)
+        self.assertEqual("/", readiness.http_get_action.path)
 
         if utils.is_reachable(k8s_rc.config.api_host):
             k8s_rc.create()
             self.assertIsInstance(k8s_rc, K8sReplicationController)
-            liveness = k8s_rc.liveness_probes['frontend']
-            liveness.initial_delay_seconds = 60
-            k8s_rc.liveness_probes = ('frontend', liveness)
-            K8sReplicationController.rolling_update(
-                config=k8s_rc.config,
-                name=k8s_rc.name,
-                rc_new=k8s_rc
-            )
-            liveness = k8s_rc.liveness_probes['frontend']
-            self.assertEqual(liveness.initial_delay_seconds, 60)
+
+            readiness = k8s_rc.readiness_probes['frontend']
+            readiness.http_get_action.path = "/new/path"
+            k8s_rc.readiness_probes = ('frontend', readiness)
+            k8s_rc.update()
+
+            pods = K8sPod.get_by_labels(config=k8s_rc.config, labels=k8s_rc.pod_labels)
+            for pod in pods:
+                _readiness = pod.readiness_probes['frontend']
+                self.assertNotEqual(_readiness.http_get_action.path, readiness.http_get_action.path)
+
+            k8s_rc.readiness_probes = ('frontend', readiness)
+            with self.assertRaises(TimedOutException):
+                k8s_rc.rolling_update(config=k8s_rc.config, name=k8s_rc.name, rc_new=k8s_rc)
 
     # -------------------------------------------------------------------------------------  api - create
 
@@ -1419,6 +1433,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         name = "yocontainer"
         container = utils.create_container(name=name)
         name = "yorc-{0}".format(str(uuid.uuid4()))
+
         rc = utils.create_rc(name=name)
         rc.add_container(container=container)
         if utils.is_reachable(rc.config.api_host):
@@ -1429,126 +1444,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
                 rc.create()
 
     def test_create_from_full_model(self):
-        model = {
-            'status': {
-                'observedGeneration': 0,
-                'readyReplicas': 0,
-                'fullyLabeledReplicas': 0,
-                'replicas': 0
-            },
-            'kind': 'ReplicationController',
-            'spec': {
-                'selector': {
-                    'name': 'admintool',
-                    'rc_version': '1926c7e1-74e5-4088-86d6-af7b21d38741'
-                },
-                'template': {
-                    'spec': {
-                        'dnsPolicy': 'ClusterFirst',
-                        'terminationGracePeriodSeconds': 30,
-                        'restartPolicy': 'Always',
-                        'volumes': [{
-                            'hostPath': {
-                                'path': '/root/.docker/config.json'
-                            },
-                            'name': 'dockercred'
-                        }, {
-                            'hostPath': {
-                                'path': '/usr/bin/docker'
-                            },
-                            'name': 'dockerbin'
-                        }, {
-                            'hostPath': {
-                                'path': '/var/run/docker.sock'
-                            },
-                            'name': 'dockersock'
-                        }, {
-                            'hostPath': {
-                                'path': '/root/.docker'
-                            },
-                            'name': 'dockerconfig'
-                        }],
-                        'imagePullSecrets': [{'name': 'privateregistry'}],
-                        'containers': [{
-                            'livenessProbe': {
-                                'initialDelaySeconds': 15,
-                                'tcpSocket': {
-                                    'port': 'admintoolport'
-                                },
-                                'timeoutSeconds': 1
-                            },
-                            'name': 'admintool',
-                            'image': 'nginx:latest',
-                            'volumeMounts': [{
-                                'mountPath': '/root/.dockercfg',
-                                'name': 'dockercred'
-                            }, {
-                                'mountPath': '/usr/bin/docker',
-                                'name': 'dockerbin'
-                            }, {
-                                'mountPath': '/var/run/docker.sock',
-                                'name': 'dockersock'
-                            }, {
-                                'mountPath': '/root/.docker',
-                                'name': 'dockerconfig'
-                            }],
-                            'env': [{
-                                'name': 'docker_env',
-                                'value': 'prod'
-                            }, {
-                                'name': 'DATADOG_PORT_8125_UDP_ADDR',
-                                'value': '10.101.1.52'
-                            }, {
-                                'name': 'docker_repository',
-                                'value': 'dockerep-1.mtl.mnubo.com:4329'
-                            }, {
-                                'name': 'ENV',
-                                'value': 'prod'
-                            }, {
-                                'name': 'DOCKER_TAG',
-                                'value': 'latest'
-                            }],
-                            'imagePullPolicy': 'IfNotPresent',
-                            'readinessProbe': {
-                                'httpGet': {
-                                    'path': '/',
-                                    'scheme': 'HTTP',
-                                    'port': 'admintoolport'
-                                }
-                            },
-                            'ports': [{
-                                'protocol': 'TCP',
-                                'containerPort': 80,
-                                'name': 'admintoolport',
-                                'hostPort': 80
-                            }],
-                            'resources': {
-                                'requests': {
-                                    'cpu': '100m',
-                                    'memory': '32M'
-                                }
-                            }
-                        }]
-                    },
-                    'metadata': {
-                        'labels': {
-                            'name': 'admintool',
-                            'rc_version': '1926c7e1-74e5-4088-86d6-af7b21d38741'
-                        }
-                    }
-                },
-                'replicas': 1
-            },
-            'apiVersion': 'v1',
-            'metadata': {
-                'labels': {
-                    'name': 'admintool',
-                    'rc_version': '1926c7e1-74e5-4088-86d6-af7b21d38741'
-                },
-                'name': 'admintool'
-            }
-        }
-
+        model = utils.admintool()
         model = ReplicationController(model=model)
         self.assertIsInstance(model, ReplicationController)
 
@@ -1692,11 +1588,8 @@ class K8sReplicationControllerTest(unittest.TestCase):
         name = "yorc-{0}".format(str(uuid.uuid4()))
         rc = utils.create_rc(name=name)
         if utils.is_reachable(rc.config.api_host):
-            try:
+            with self.assertRaises(NotFoundException):
                 rc.delete()
-                self.fail("Should not fail.")
-            except Exception as err:
-                self.assertIsInstance(err, NotFoundException)
 
     def test_delete(self):
         name = "yocontainer"
@@ -1710,3 +1603,21 @@ class K8sReplicationControllerTest(unittest.TestCase):
             result = rc.list()
             self.assertIsInstance(result, list)
             self.assertEqual(0, len(result))
+
+    # ------------------------------------------------------------------------------------- api - rolling udpate rework
+
+    def test_rolling_update_name_and_image(self):
+        name = "redis-{}".format(str(uuid.uuid4()))
+        image_1 = "redis:3.2.0"
+        new_image = "redis:3.2.3"
+        count = 3
+        container = utils.create_container(name=name, image=image_1)
+        rc = utils.create_rc(name=name)
+        rc.add_container(container)
+        rc.desired_replicas = count
+        if utils.is_reachable(rc.config.api_host):
+            rc.create()
+            K8sReplicationController.rolling_update(config=rc.config, name=rc.name, image=new_image)
+            rc.get()
+            self.assertNotEqual(rc.container_image[name], image_1)
+            self.assertEqual(rc.container_image[name], new_image)

@@ -837,7 +837,7 @@ class K8sVolumeTest(unittest.TestCase):
         container_image = "redis:3.0.7"
         container_redis = utils.create_container(name=container_name, image=container_image)
 
-        pd_name = "kubernetes-py-test-pd"
+        pd_name = "mnubo-disk1"
         vol_name = "persistent"
         vol_type = "gcePersistentDisk"
         volume = utils.create_volume(name=vol_name, type=vol_type)
