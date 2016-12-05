@@ -6,6 +6,7 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+from kubernetes.models.v1.Job import Job
 from kubernetes.K8sObject import K8sObject
 
 
@@ -18,3 +19,7 @@ class K8sJob(K8sObject):
             obj_type='Job',
             name=name
         )
+
+    def get(self):
+        self.model = Job(model=self.get_model())
+        return self

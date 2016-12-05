@@ -24,7 +24,7 @@ class Job(object):
         self._api_version = 'batch/v1'
         self._metadata = ObjectMeta()
         self._spec = JobSpec()
-        self._status = JobStatus()
+        self._status = None
 
         if model is not None:
             self._build_with_model(model)

@@ -346,6 +346,19 @@ def cleanup_pvc():
             claims = ref.list()
 
 
+def cleanup_jobs():
+    ref = create_job(name="throwaway")
+    if is_reachable(ref.config.api_host):
+        jobs = ref.list()
+        while len(jobs) > 0:
+            for j in jobs:
+                try:
+                    job = K8sJob(config=ref.config, name=j['metadata']['name']).get()
+                    job.delete()
+                except NotFoundException:
+                    continue
+            jobs = ref.list()
+
 # --------------------------------------------------------------------------------- front-end replication controller
 
 def frontend():

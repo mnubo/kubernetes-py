@@ -7,17 +7,22 @@
 #
 
 import unittest
-from kubernetes import K8sJob
+import uuid
+
+from kubernetes.K8sJob import K8sJob
+from kubernetes.models.v1.Job import Job
+from kubernetes.models.v1.JobSpec import JobSpec
+from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from tests import utils
 
 
 class K8sJobTests(unittest.TestCase):
 
     def setUp(self):
-        pass
+        utils.cleanup_jobs()
 
     def tearDown(self):
-        pass
+        utils.cleanup_jobs()
 
     # --------------------------------------------------------------------------------- init
 
@@ -51,3 +56,29 @@ class K8sJobTests(unittest.TestCase):
 
     # --------------------------------------------------------------------------------- struct
 
+    def test_struct_k8s_job(self):
+        name = "yomama"
+        job = utils.create_job(name=name)
+        self.assertIsNotNone(job)
+        self.assertIsInstance(job, K8sJob)
+        self.assertIsNotNone(job.model)
+        self.assertIsInstance(job.model, Job)
+
+    def test_struct_job(self):
+        name = "yomama"
+        job = utils.create_job(name=name)
+        self.assertIsInstance(job.model, Job)
+        self.assertIsInstance(job.model.metadata, ObjectMeta)
+        self.assertIsInstance(job.model.spec, JobSpec)
+        self.assertIsNone(job.model.status)
+
+    # --------------------------------------------------------------------------------- api - create
+
+    def test_api_create(self):
+        name = "job-{}".format(uuid.uuid4())
+        job = Job(model=utils.job())
+        k8s_job = utils.create_job(name=name)
+        k8s_job.model = job
+        if utils.is_reachable(k8s_job.config.api_host):
+            k8s_job.create()
+            self.assertIsInstance(k8s_job, K8sJob)
