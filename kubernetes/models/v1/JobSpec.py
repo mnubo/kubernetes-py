@@ -23,7 +23,9 @@ class JobSpec(object):
         self._active_deadline_seconds = None
         self._selector = None
         self._manual_selector = None
-        self._template = None
+        self._template = PodTemplateSpec()
+
+        self.template.spec.VALID_RESTART_POLICIES = ['OnFailure', 'Never']
 
         if model is not None:
             self._build_with_model(model)
