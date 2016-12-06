@@ -19,6 +19,7 @@ from tests import utils
 
 
 class K8sReplicationControllerTest(unittest.TestCase):
+
     def setUp(self):
         K8sReplicationController.SCALE_WAIT_TIMEOUT_SECONDS = 20
         utils.cleanup_rc()
@@ -1147,13 +1148,13 @@ class K8sReplicationControllerTest(unittest.TestCase):
                 for c in p.containers:
                     self.assertIn(c.image, [new_image, image_2])
 
-    def test_rolling_update_two_containers_size_3(self):
+    def test_rolling_update_two_containers_size_2(self):
         cont_name_1 = "redis"
         cont_name_2 = "nginx"
         image_1 = "redis:3.2.0"
         image_2 = "nginx:1.10"
         new_image = "redis:3.2.3"
-        count = 3
+        count = 2
         container_1 = utils.create_container(name=cont_name_1, image=image_1)
         container_2 = utils.create_container(name=cont_name_2, image=image_2)
         name = "yorc-{0}".format(str(uuid.uuid4()))
@@ -1290,13 +1291,13 @@ class K8sReplicationControllerTest(unittest.TestCase):
                 for c in p.containers:
                     self.assertIn(c.image, [new_image, image_2])
 
-    def test_rolling_update_two_containers_size_3_new_rc(self):
+    def test_rolling_update_two_containers_size_2_new_rc(self):
         cont_name_1 = "redis"
         cont_name_2 = "nginx"
         image_1 = "redis:3.2.0"
         image_2 = "nginx:1.10"
         new_image = "redis:3.2.3"
-        count = 3
+        count = 2
 
         container_1 = utils.create_container(name=cont_name_1, image=image_1)
         container_2 = utils.create_container(name=cont_name_2, image=image_2)
@@ -1610,7 +1611,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         name = "redis-{}".format(str(uuid.uuid4()))
         image_1 = "redis:3.2.0"
         new_image = "redis:3.2.3"
-        count = 3
+        count = 2
         container = utils.create_container(name=name, image=image_1)
         rc = utils.create_rc(name=name)
         rc.add_container(container)
