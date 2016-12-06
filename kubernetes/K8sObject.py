@@ -16,6 +16,7 @@ from kubernetes.models.v1.DeleteOptions import DeleteOptions
 from kubernetes.utils import HttpRequest, is_valid_dict, str_to_class
 
 VALID_K8s_OBJS = [
+    'CronJob',
     'Deployment',
     'Job',
     'PersistentVolume',
@@ -48,7 +49,7 @@ class K8sObject(object):
         self.name = name
 
         try:
-            urls = BaseUrls(api_version=self.config.version, namespace=self.config.namespace)
+            urls = BaseUrls(api=self.config.version, namespace=self.config.namespace)
             self.base_url = urls.get_base_url(object_type=obj_type)
         except:
             raise Exception('Could not set BaseUrl for type: [ {0} ]'.format(obj_type))

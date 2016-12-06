@@ -22,8 +22,8 @@ class CronJob(object):
 
         self._kind = 'CronJob'
         self._api_version = "batch/v2alpha1"
-        self._metadata = None
-        self._spec = None
+        self._metadata = ObjectMeta()
+        self._spec = CronJobSpec()
         self._status = None
 
         if model is not None:
