@@ -46,13 +46,16 @@ class JobSpec(object):
 
     # --------------------------------------------------------------------------------- parallelism
 
+    # .parallelism can be set to any non-negative value. If it is unspecified, it defaults to 1.
+    #  If it is specified as 0, then the Job is effectively paused until it is increased.
+
     @property
     def parallelism(self):
         return self._parallelism
 
     @parallelism.setter
     def parallelism(self, p=None):
-        if not isinstance(p, int):
+        if not isinstance(p, int) or not p >= 0:
             raise SyntaxError('JobSpec: parallelism: [ {} ] is invalid.'.format(p))
         self._parallelism = p
 
@@ -64,7 +67,7 @@ class JobSpec(object):
 
     @completions.setter
     def completions(self, c=None):
-        if not isinstance(c, int):
+        if not isinstance(c, int) or not c >= 0:
             raise SyntaxError('JobSpec: completions: [ {} ] is invalid.'.format(c))
         self._completions = c
 
@@ -76,7 +79,7 @@ class JobSpec(object):
 
     @active_deadline_seconds.setter
     def active_deadline_seconds(self, ads=None):
-        if not isinstance(ads, int):
+        if not isinstance(ads, int) or not ads >= 0:
             raise SyntaxError('JobSpec: active_deadline_seconds: [ {} ] is invalid.'.format(ads))
         self._active_deadline_seconds = ads
 
@@ -94,13 +97,14 @@ class JobSpec(object):
 
     # --------------------------------------------------------------------------------- manualSelector
 
+    # Leave manualSelector unset unless you are certain of what you are doing.
+
     @property
     def manual_selector(self):
         return self._manual_selector
 
     @manual_selector.setter
-    def manual_selector(self, s=None):
-        # Leave manualSelector unset unless you are certain what you are doing.
+    def manual_selector(self, s=False):
         if not isinstance(s, bool):
             raise SyntaxError('JobSpec: manual_selector: [ {} ] is invalid.'.format(s))
         self._manual_selector = s
@@ -128,7 +132,7 @@ class JobSpec(object):
         if self.active_deadline_seconds is not None:
             data['activeDeadlineSeconds'] = self.active_deadline_seconds
         if self.selector is not None:
-            data['selector'] = self.selector
+            data['selector'] = self.selector.serialize()
         if self.manual_selector is not None:
             data['manualSelector'] = self.manual_selector
         if self.template is not None:

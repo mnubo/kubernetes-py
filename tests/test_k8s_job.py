@@ -20,6 +20,7 @@ class K8sJobTests(unittest.TestCase):
 
     def setUp(self):
         utils.cleanup_jobs()
+        utils.cleanup_pods()
 
     def tearDown(self):
         utils.cleanup_jobs()
@@ -72,6 +73,120 @@ class K8sJobTests(unittest.TestCase):
         self.assertIsInstance(job.model.spec, JobSpec)
         self.assertIsNone(job.model.status)
 
+    # --------------------------------------------------------------------------------- parallelism
+
+    def test_parallelism_none_arg(self):
+        p = None
+        name = "job-{}".format(str(uuid.uuid4()))
+        job = utils.create_job(name=name)
+        with self.assertRaises(SyntaxError):
+            job.parallelism = p
+
+    def test_parallelism_invalid_arg(self):
+        p = object()
+        name = "job-{}".format(str(uuid.uuid4()))
+        job = utils.create_job(name=name)
+        with self.assertRaises(SyntaxError):
+            job.parallelism = p
+
+    def test_parallelism_negative_int(self):
+        p = -5
+        name = "job-{}".format(str(uuid.uuid4()))
+        job = utils.create_job(name=name)
+        with self.assertRaises(SyntaxError):
+            job.parallelism = p
+
+    def test_parallelism(self):
+        p = 5
+        name = "job-{}".format(str(uuid.uuid4()))
+        job = utils.create_job(name=name)
+        job.parallelism = p
+        self.assertEqual(p, job.parallelism)
+
+    # --------------------------------------------------------------------------------- completions
+
+    def test_completions_none_arg(self):
+        c = None
+        name = "job-{}".format(str(uuid.uuid4()))
+        job = utils.create_job(name=name)
+        with self.assertRaises(SyntaxError):
+            job.completions = c
+
+    def test_completions_invalid_arg(self):
+        c = object()
+        name = "job-{}".format(str(uuid.uuid4()))
+        job = utils.create_job(name=name)
+        with self.assertRaises(SyntaxError):
+            job.completions = c
+
+    def test_completions_negative_int(self):
+        c = -5
+        name = "job-{}".format(str(uuid.uuid4()))
+        job = utils.create_job(name=name)
+        with self.assertRaises(SyntaxError):
+            job.completions = c
+
+    def test_completions(self):
+        c = 5
+        name = "job-{}".format(str(uuid.uuid4()))
+        job = utils.create_job(name=name)
+        job.completions = c
+        self.assertEqual(c, job.completions)
+
+    # --------------------------------------------------------------------------------- activeDeadlineSeconds
+
+    def test_active_deadline_seconds_none_arg(self):
+        s = None
+        name = "job-{}".format(str(uuid.uuid4()))
+        job = utils.create_job(name=name)
+        with self.assertRaises(SyntaxError):
+            job.active_deadline_seconds = s
+
+    def test_active_deadline_seconds_invalid_arg(self):
+        s = object()
+        name = "job-{}".format(str(uuid.uuid4()))
+        job = utils.create_job(name=name)
+        with self.assertRaises(SyntaxError):
+            job.active_deadline_seconds = s
+
+    def test_active_deadline_seconds_negative_int(self):
+        s = -5
+        name = "job-{}".format(str(uuid.uuid4()))
+        job = utils.create_job(name=name)
+        with self.assertRaises(SyntaxError):
+            job.active_deadline_seconds = s
+
+    def test_active_deadline_seconds(self):
+        s = 5
+        name = "job-{}".format(str(uuid.uuid4()))
+        job = utils.create_job(name=name)
+        job.active_deadline_seconds = s
+        self.assertEqual(s, job.active_deadline_seconds)
+
+    # --------------------------------------------------------------------------------- restartPolicy
+
+    def test_restart_policy_none_arg(self):
+        p = None
+        name = "job-{}".format(str(uuid.uuid4()))
+        job = utils.create_job(name=name)
+        with self.assertRaises(SyntaxError):
+            job.restart_policy = p
+
+    def test_restart_policy_invalid_arg(self):
+        p = 'Always'
+        name = "job-{}".format(str(uuid.uuid4()))
+        job = utils.create_job(name=name)
+        with self.assertRaises(SyntaxError):
+            job.restart_policy = p
+
+    def test_restart_policy(self):
+        p = 'Never'
+        name = "job-{}".format(str(uuid.uuid4()))
+        job = utils.create_job(name=name)
+        self.assertEqual('OnFailure', job.restart_policy)
+        job.restart_policy = p
+        self.assertEqual(p, job.restart_policy)
+
     # --------------------------------------------------------------------------------- api - create
 
     def test_api_create(self):
@@ -82,3 +197,30 @@ class K8sJobTests(unittest.TestCase):
         if utils.is_reachable(k8s_job.config.api_host):
             k8s_job.create()
             self.assertIsInstance(k8s_job, K8sJob)
+
+    # --------------------------------------------------------------------------------- api - update
+
+    def test_api_update(self):
+        name = "job-{}".format(uuid.uuid4())
+        job = Job(model=utils.job())
+        k8s_job = utils.create_job(name=name)
+        k8s_job.model = job
+        k8s_job.completions = 30
+        if utils.is_reachable(k8s_job.config.api_host):
+            k8s_job.create()
+            k8s_job.parallelism = 10
+            k8s_job.update()
+            self.assertEqual(k8s_job.parallelism, 10)
+
+    # --------------------------------------------------------------------------------- api - scale
+
+    def test_api_scale(self):
+        name = "job-{}".format(uuid.uuid4())
+        job = Job(model=utils.job())
+        k8s_job = utils.create_job(name=name)
+        k8s_job.model = job
+        k8s_job.completions = 30
+        if utils.is_reachable(k8s_job.config.api_host):
+            k8s_job.create()
+            k8s_job.scale(10)
+            self.assertEqual(k8s_job.parallelism, 10)

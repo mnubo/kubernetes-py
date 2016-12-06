@@ -56,7 +56,6 @@ def is_reachable(api_host):
 
 # --------------------------------------------------------------------------------- detecting api server
 
-
 def _is_api_server(service=None):
     if not isinstance(service, dict):
         return False
@@ -76,7 +75,6 @@ def _is_api_server(service=None):
 
 
 # --------------------------------------------------------------------------------- create
-
 
 def create_container(model=None, name=None, image="redis"):
     if model is None:
@@ -218,7 +216,6 @@ def create_job(config=None, name=None):
 
 # --------------------------------------------------------------------------------- delete
 
-
 def cleanup_objects():
     config = K8sConfig(kubeconfig=kubeconfig_fallback)
     if is_reachable(config.api_host):
@@ -358,6 +355,7 @@ def cleanup_jobs():
                 except NotFoundException:
                     continue
             jobs = ref.list()
+
 
 # --------------------------------------------------------------------------------- front-end replication controller
 
@@ -573,7 +571,7 @@ def admintool():
     }
 
 
-# --------------------------------------------------------------------------------- job
+# --------------------------------------------------------------------------------- jobs
 
 def job():
     """
@@ -600,6 +598,86 @@ def job():
                         }
                     ],
                     'restartPolicy': 'Never'
+                }
+            }
+        }
+    }
+
+
+def scheduledjob():
+    """
+    http://kubernetes.io/docs/user-guide/cron-jobs/#creating-a-cron-job
+
+    Note:: ScheduledJob resource was introduced in Kubernetes version 1.4,
+    but starting from version 1.5 its current name is CronJob.
+    """
+
+    return {
+        "apiVersion": "batch/v2alpha1",
+        "kind": "ScheduledJob",
+        "metadata": {
+            "name": "hello"
+        },
+        "spec": {
+            "schedule": "*/1 * * * *",
+            "jobTemplate": {
+                "spec": {
+                    "template": {
+                        "spec": {
+                            "containers": [
+                                {
+                                    "name": "hello",
+                                    "image": "busybox",
+                                    "args": [
+                                        "/bin/sh",
+                                        "-c",
+                                        "date; echo Hello from the Kubernetes cluster"
+                                    ]
+                                }
+                            ],
+                            "restartPolicy": "OnFailure"
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+def cronjob():
+    """
+    http://kubernetes.io/docs/user-guide/cron-jobs/#creating-a-cron-job
+
+    Note:: ScheduledJob resource was introduced in Kubernetes version 1.4,
+    but starting from version 1.5 its current name is CronJob.
+    """
+
+    return {
+        "apiVersion": "batch/v2alpha1",
+        "kind": "CronJob",
+        "metadata": {
+            "name": "hello"
+        },
+        "spec": {
+            "schedule": "*/1 * * * *",
+            "jobTemplate": {
+                "spec": {
+                    "template": {
+                        "spec": {
+                            "containers": [
+                                {
+                                    "name": "hello",
+                                    "image": "busybox",
+                                    "args": [
+                                        "/bin/sh",
+                                        "-c",
+                                        "date; echo Hello from the Kubernetes cluster"
+                                    ]
+                                }
+                            ],
+                            "restartPolicy": "OnFailure"
+                        }
+                    }
                 }
             }
         }
