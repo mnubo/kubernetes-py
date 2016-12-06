@@ -7,6 +7,7 @@
 #
 
 from kubernetes.K8sObject import K8sObject
+from kubernetes.models.v2alpha1.CronJob import CronJob
 
 
 class K8sCronJob(K8sObject):
@@ -17,3 +18,21 @@ class K8sCronJob(K8sObject):
             obj_type='CronJob',
             name=name
         )
+
+    # -------------------------------------------------------------------------------------  override
+
+    def create(self):
+        super(K8sCronJob, self).create()
+        self.get()
+        return self
+
+    def update(self):
+        super(K8sCronJob, self).update()
+        self.get()
+        return self
+
+    # -------------------------------------------------------------------------------------  get
+
+    def get(self):
+        self.model = CronJob(model=self.get_model())
+        return self

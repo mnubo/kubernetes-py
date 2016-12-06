@@ -18,9 +18,10 @@ class CronJobSpec(object):
         super(CronJobSpec, self).__init__()
 
         self._schedule = "@hourly"
-        self._job_template = None
+        self._job_template = CronJobTemplate()
         self._starting_deadline_seconds = None
         self._concurrency_policy = 'Allow'
+        self._suspend = False
 
         if model is not None:
             self._build_with_model(model)
@@ -34,6 +35,8 @@ class CronJobSpec(object):
             self.starting_deadline_seconds = model['startingDeadlineSeconds']
         if 'concurrencyPolicy' in model:
             self.concurrency_policy = model['concurrencyPolicy']
+        if 'suspend' in model:
+            self.suspend = model['suspend']
 
     # ------------------------------------------------------------------------------------- schedule
 
@@ -83,6 +86,18 @@ class CronJobSpec(object):
             raise SyntaxError('CronJobSpec: concurrency_policy: [ {} ] is invalid.'.format(cp))
         self._concurrency_policy = cp
 
+    # ------------------------------------------------------------------------------------- suspend
+
+    @property
+    def suspend(self):
+        return self._suspend
+
+    @suspend.setter
+    def suspend(self, s=False):
+        if not isinstance(s, bool):
+            raise SyntaxError('CronJobSpec: suspend: [ {} ] is invalid.'.format(s))
+        self._suspend = s
+
     # ------------------------------------------------------------------------------------- serialize
 
     def serialize(self):
@@ -95,4 +110,6 @@ class CronJobSpec(object):
             data['startingDeadlineSeconds'] = self.starting_deadline_seconds
         if self.concurrency_policy is not None:
             data['concurrencyPolicy'] = self.concurrency_policy
+        if self.suspend is not None:
+            data['suspend'] = self.suspend
         return data

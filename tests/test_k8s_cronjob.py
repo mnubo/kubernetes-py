@@ -7,7 +7,9 @@
 #
 
 import unittest
+import uuid
 
+from kubernetes.models.v2alpha1.CronJob import CronJob
 from kubernetes.K8sCronJob import K8sCronJob
 from tests import utils
 
@@ -49,3 +51,14 @@ class K8sCronJobTests(unittest.TestCase):
         self.assertIsNotNone(rc)
         self.assertIsInstance(rc, K8sCronJob)
         self.assertEqual(rc.name, name)
+
+    # --------------------------------------------------------------------------------- api - create
+
+    def test_api_create(self):
+        name = "job-{}".format(uuid.uuid4())
+        job = CronJob(model=utils.scheduledjob())
+        k8s_cronjob = utils.create_cronjob(name=name)
+        k8s_cronjob.model = job
+        if utils.is_reachable(k8s_cronjob.config.api_host):
+            k8s_cronjob.create()
+            self.assertIsInstance(k8s_cronjob, K8sCronJob)

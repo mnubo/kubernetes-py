@@ -15,8 +15,8 @@ class CronJobTemplate(object):
     def __init__(self, model=None):
         super(CronJobTemplate, self).__init__()
 
-        self._metadata = None
-        self._spec = None
+        self._metadata = ObjectMeta()
+        self._spec = JobSpec()
 
         if model is not None:
             self._build_with_model(model)
