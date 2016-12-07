@@ -9,6 +9,8 @@
 import json
 import yaml
 
+from kubernetes.utils import is_valid_string
+
 
 class DeleteOptions(object):
     """
@@ -26,6 +28,30 @@ class DeleteOptions(object):
         self._grace_period_seconds = 0
         self._orphan_dependents = False
 
+    # -------------------------------------------------------------------------------------  kind
+
+    @property
+    def kind(self):
+        return self._kind
+
+    @kind.setter
+    def kind(self, k=0):
+        if not is_valid_string(k):
+            raise SyntaxError('DeleteOptions: kind: [ {0} ] is invalid.'.format(k))
+        self._kind = k
+
+    # -------------------------------------------------------------------------------------  apiVersion
+
+    @property
+    def api_version(self):
+        return self._api_version
+
+    @api_version.setter
+    def api_version(self, v=0):
+        if not is_valid_string(v):
+            raise SyntaxError('DeleteOptions: api_version: [ {0} ] is invalid.'.format(v))
+        self._kind = v
+
     # -------------------------------------------------------------------------------------  grace period seconds
 
     @property
@@ -38,14 +64,30 @@ class DeleteOptions(object):
             raise SyntaxError('DeleteOptions: grace_period_seconds: [ {0} ] is invalid.'.format(secs))
         self._grace_period_seconds = secs
 
+    # -------------------------------------------------------------------------------------  orphanDependents
+
+    @property
+    def orphan_dependents(self):
+        return self._orphan_dependents
+
+    @orphan_dependents.setter
+    def orphan_dependents(self, orphan=False):
+        if not isinstance(orphan, bool):
+            raise SyntaxError('DeleteOptions: orphan_dependents: [ {0} ] is invalid.'.format(orphan))
+        self._orphan_dependents = orphan
+
     # -------------------------------------------------------------------------------------  serialize
 
     def serialize(self):
         data = {}
-        data['kind'] = self._kind
-        data['apiVersion'] = self._api_version
-        data['gracePeriodSeconds'] = self._grace_period_seconds
-        data['orphanDependents'] = self._orphan_dependents
+        if self.kind is not None:
+            data['kind'] = self.kind
+        if self.api_version is not None:
+            data['apiVersion'] = self.api_version
+        if self.grace_period_seconds is not None:
+            data['gracePeriodSeconds'] = self.grace_period_seconds
+        if self.orphan_dependents is not None:
+            data['orphanDependents'] = self.orphan_dependents
         return data
 
     def as_json(self):

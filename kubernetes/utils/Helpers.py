@@ -10,6 +10,8 @@ import copy
 import socket
 import importlib
 
+from kubernetes.K8sExceptions import NotFoundException
+
 
 def is_valid_string(target=None):
     if target is None:
@@ -67,11 +69,23 @@ def filter_model(model=None):
 
 
 def str_to_class(obj_type=None):
-    _import_path_v1 = "kubernetes.models.v1.{}".format(obj_type)
-    _import_path_v1beta1 = "kubernetes.models.v1beta1.{}".format(obj_type)
-    try:
-        _module = importlib.import_module(_import_path_v1)
-    except ImportError:
-        _module = importlib.import_module(_import_path_v1beta1)
-    _class = getattr(_module, obj_type)()
-    return _class
+    import_paths = [
+        "kubernetes.models.unversioned.{}".format(obj_type),
+        "kubernetes.models.v1.{}".format(obj_type),
+        "kubernetes.models.v1beta1.{}".format(obj_type),
+        "kubernetes.models.v2alpha1.{}".format(obj_type),
+    ]
+
+    module = None
+    for path in import_paths:
+        try:
+            module = importlib.import_module(path)
+            break
+        except ImportError:
+            pass
+
+    if module is not None:
+        _class = getattr(module, obj_type)()
+        return _class
+
+    raise NotFoundException("Could not import obj_type: [ {} ]".format(obj_type))

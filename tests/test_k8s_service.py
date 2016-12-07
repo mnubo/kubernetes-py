@@ -391,12 +391,12 @@ class K8sServiceTest(unittest.TestCase):
         with self.assertRaises(SyntaxError):
             svc.annotations = labels
 
-    def test_set_annotations_invalid_dict(self):
+    def test_set_annotations_str_int(self):
         name = "yoservice"
         svc = utils.create_service(name=name)
         labels = {'yokey': 1234}
-        with self.assertRaises(SyntaxError):
-            svc.annotations = labels
+        svc.annotations = labels
+        self.assertEqual(svc.annotations, labels)
 
     def test_set_annotations(self):
         name = "yoservice"

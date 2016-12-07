@@ -11,8 +11,10 @@ import socket
 
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sContainer import K8sContainer
+from kubernetes.K8sCronJob import K8sCronJob
 from kubernetes.K8sDeployment import K8sDeployment
 from kubernetes.K8sExceptions import NotFoundException
+from kubernetes.K8sJob import K8sJob
 from kubernetes.K8sObject import K8sObject
 from kubernetes.K8sPersistentVolume import K8sPersistentVolume
 from kubernetes.K8sPersistentVolumeClaim import K8sPersistentVolumeClaim
@@ -55,7 +57,6 @@ def is_reachable(api_host):
 
 # --------------------------------------------------------------------------------- detecting api server
 
-
 def _is_api_server(service=None):
     if not isinstance(service, dict):
         return False
@@ -75,7 +76,6 @@ def _is_api_server(service=None):
 
 
 # --------------------------------------------------------------------------------- create
-
 
 def create_container(model=None, name=None, image="redis"):
     if model is None:
@@ -205,8 +205,27 @@ def create_pvc(config=None, name=None):
     return obj
 
 
-# --------------------------------------------------------------------------------- delete
+def create_job(config=None, name=None):
+    if config is None:
+        config = create_config()
+    obj = K8sJob(
+        config=config,
+        name=name
+    )
+    return obj
 
+
+def create_cronjob(config=None, name=None):
+    if config is None:
+        config = create_config()
+    obj = K8sCronJob(
+        config=config,
+        name=name
+    )
+    return obj
+
+
+# --------------------------------------------------------------------------------- delete
 
 def cleanup_objects():
     config = K8sConfig(kubeconfig=kubeconfig_fallback)
@@ -335,81 +354,392 @@ def cleanup_pvc():
             claims = ref.list()
 
 
+def cleanup_jobs():
+    ref = create_job(name="throwaway")
+    if is_reachable(ref.config.api_host):
+        jobs = ref.list()
+        while len(jobs) > 0:
+            for j in jobs:
+                try:
+                    job = K8sJob(config=ref.config, name=j['metadata']['name']).get()
+                    job.delete()
+                except NotFoundException:
+                    continue
+            jobs = ref.list()
+
+
+def cleanup_cronjobs():
+    ref = create_cronjob(name="throwaway")
+    if is_reachable(ref.config.api_host):
+        jobs = ref.list()
+        while len(jobs) > 0:
+            for j in jobs:
+                try:
+                    job = K8sCronJob(config=ref.config, name=j['metadata']['name']).get()
+                    job.delete()
+                except NotFoundException:
+                    continue
+            jobs = ref.list()
+
+
 # --------------------------------------------------------------------------------- front-end replication controller
 
 def frontend():
     return {
-            "kind": "ReplicationController",
-            "apiVersion": "v1",
-            "metadata": {
+        "kind": "ReplicationController",
+        "apiVersion": "v1",
+        "metadata": {
+            "name": "frontend",
+            "namespace": "default",
+            "labels": {
                 "name": "frontend",
-                "namespace": "default",
-                "labels": {
-                    "name": "frontend",
-                    "rc_version": "780e750d-a0f7-491e-9038-1ee238c012fa"
+                "rc_version": "780e750d-a0f7-491e-9038-1ee238c012fa"
+            }
+        },
+        "spec": {
+            "replicas": 2,
+            "selector": {
+                "name": "frontend",
+                "rc_version": "780e750d-a0f7-491e-9038-1ee238c012fa"
+            },
+            "template": {
+                "metadata": {
+                    "labels": {
+                        "name": "frontend",
+                        "rc_version": "780e750d-a0f7-491e-9038-1ee238c012fa"
+                    }
+                },
+                "spec": {
+                    "containers": [
+                        {
+                            "name": "frontend",
+                            "image": "nginx:latest",
+                            "ports": [
+                                {
+                                    "name": "feport",
+                                    "containerPort": 80,
+                                    "protocol": "TCP"
+                                }
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "cpu": "100m",
+                                    "memory": "32M"
+                                }
+                            },
+                            "livenessProbe": {
+                                "tcpSocket": {
+                                    "port": "feport"
+                                },
+                                "initialDelaySeconds": 15,
+                                "timeoutSeconds": 1,
+                                "periodSeconds": 10,
+                                "successThreshold": 1,
+                                "failureThreshold": 3
+                            },
+                            "readinessProbe": {
+                                "httpGet": {
+                                    "path": "/",
+                                    "port": "feport",
+                                    "scheme": "HTTP"
+                                },
+                                "timeoutSeconds": 1,
+                                "periodSeconds": 10,
+                                "successThreshold": 1,
+                                "failureThreshold": 3
+                            },
+                            "terminationMessagePath": "/dev/termination-log",
+                            "imagePullPolicy": "IfNotPresent"
+                        },
+                    ],
+                    "restartPolicy": "Always",
+                    "terminationGracePeriodSeconds": 30,
+                    "dnsPolicy": "ClusterFirst",
+                    "securityContext": {},
+                }
+            }
+        }
+    }
+
+
+# --------------------------------------------------------------------------------- admintool replication controller
+
+def admintool():
+    return {
+        'status': {
+            'observedGeneration': 0,
+            'readyReplicas': 0,
+            'fullyLabeledReplicas': 0,
+            'replicas': 0
+        },
+        'kind': 'ReplicationController',
+        'spec': {
+            'selector': {
+                'name': 'admintool',
+                'rc_version': '1926c7e1-74e5-4088-86d6-af7b21d38741'
+            },
+            'template': {
+                'spec': {
+                    'dnsPolicy': 'ClusterFirst',
+                    'terminationGracePeriodSeconds': 30,
+                    'restartPolicy': 'Always',
+
+                    # docker in docker is evil
+                    # 'volumes': [{
+                    #     'hostPath': {
+                    #         'path': '/root/.docker/config.json'
+                    #     },
+                    #     'name': 'dockercred'
+                    # }, {
+                    #     'hostPath': {
+                    #         'path': '/usr/bin/docker'
+                    #     },
+                    #     'name': 'dockerbin'
+                    # }, {
+                    #     'hostPath': {
+                    #         'path': '/var/run/docker.sock'
+                    #     },
+                    #     'name': 'dockersock'
+                    # }, {
+                    #     'hostPath': {
+                    #         'path': '/root/.docker'
+                    #     },
+                    #     'name': 'dockerconfig'
+                    # }],
+
+                    'imagePullSecrets': [{'name': 'privateregistry'}],
+                    'containers': [{
+                        'livenessProbe': {
+                            'initialDelaySeconds': 15,
+                            'tcpSocket': {
+                                'port': 'admintoolport'
+                            },
+                            'timeoutSeconds': 1
+                        },
+                        'name': 'admintool',
+                        'image': 'nginx:latest',
+
+                        # docker in docker is evil
+                        # 'volumeMounts': [{
+                        #     'mountPath': '/root/.dockercfg',
+                        #     'name': 'dockercred',
+                        #     'readOnly': True
+                        # }, {
+                        #     'mountPath': '/usr/bin/docker',
+                        #     'name': 'dockerbin',
+                        #     'readOnly': True
+                        # }, {
+                        #     'mountPath': '/var/run/docker.sock',
+                        #     'name': 'dockersock',
+                        #     'readOnly': True
+                        # }, {
+                        #     'mountPath': '/root/.docker',
+                        #     'name': 'dockerconfig',
+                        #     'readOnly': True
+                        # }],
+
+                        'env': [{
+                            'name': 'docker_env',
+                            'value': 'prod'
+                        }, {
+                            'name': 'DATADOG_PORT_8125_UDP_ADDR',
+                            'value': '10.101.1.52'
+                        }, {
+                            'name': 'docker_repository',
+                            'value': 'dockerep-1.mtl.mnubo.com:4329'
+                        }, {
+                            'name': 'ENV',
+                            'value': 'prod'
+                        }, {
+                            'name': 'DOCKER_TAG',
+                            'value': 'latest'
+                        }],
+                        'imagePullPolicy': 'IfNotPresent',
+                        'readinessProbe': {
+                            'httpGet': {
+                                'path': '/',
+                                'scheme': 'HTTP',
+                                'port': 'admintoolport'
+                            }
+                        },
+                        'ports': [{
+                            'protocol': 'TCP',
+                            'containerPort': 80,
+                            'name': 'admintoolport',
+                            'hostPort': 80
+                        }],
+                        'resources': {
+                            'requests': {
+                                'cpu': '100m',
+                                'memory': '32M'
+                            }
+                        }
+                    }]
+                },
+                'metadata': {
+                    'labels': {
+                        'name': 'admintool',
+                        'rc_version': '1926c7e1-74e5-4088-86d6-af7b21d38741'
+                    }
                 }
             },
-            "spec": {
-                "replicas": 2,
-                "selector": {
-                    "name": "frontend",
-                    "rc_version": "780e750d-a0f7-491e-9038-1ee238c012fa"
+            'replicas': 1
+        },
+        'apiVersion': 'v1',
+        'metadata': {
+            'labels': {
+                'name': 'admintool',
+                'rc_version': '1926c7e1-74e5-4088-86d6-af7b21d38741'
+            },
+            'name': 'admintool'
+        }
+    }
+
+
+# --------------------------------------------------------------------------------- jobs
+
+def job():
+    """
+    http://kubernetes.io/docs/user-guide/jobs/#running-an-example-job
+    """
+
+    return {
+        'apiVersion': 'batch/v1',
+        'kind': 'Job',
+        'metadata': {
+            'name': 'pi'
+        },
+        'spec': {
+            'template': {
+                'metadata': {
+                    'name': 'pi'
                 },
-                "template": {
-                    "metadata": {
-                        "labels": {
-                            "name": "frontend",
-                            "rc_version": "780e750d-a0f7-491e-9038-1ee238c012fa"
+                'spec': {
+                    'containers': [
+                        {
+                            'name': 'pi',
+                            'image': 'perl',
+                            'command': ["perl", "-Mbignum=bpi", "-wle", "print bpi(2000)"]
                         }
-                    },
-                    "spec": {
-                        "containers": [
-                            {
-                                "name": "frontend",
-                                "image": "nginx:latest",
-                                "ports": [
-                                    {
-                                        "name": "feport",
-                                        "containerPort": 80,
-                                        "protocol": "TCP"
-                                    }
-                                ],
-                                "resources": {
-                                    "requests": {
-                                        "cpu": "100m",
-                                        "memory": "32M"
-                                    }
-                                },
-                                "livenessProbe": {
-                                    "tcpSocket": {
-                                        "port": "feport"
-                                    },
-                                    "initialDelaySeconds": 15,
-                                    "timeoutSeconds": 1,
-                                    "periodSeconds": 10,
-                                    "successThreshold": 1,
-                                    "failureThreshold": 3
-                                },
-                                "readinessProbe": {
-                                    "httpGet": {
-                                        "path": "/",
-                                        "port": "feport",
-                                        "scheme": "HTTP"
-                                    },
-                                    "timeoutSeconds": 1,
-                                    "periodSeconds": 10,
-                                    "successThreshold": 1,
-                                    "failureThreshold": 3
-                                },
-                                "terminationMessagePath": "/dev/termination-log",
-                                "imagePullPolicy": "IfNotPresent"
-                            },
-                        ],
-                        "restartPolicy": "Always",
-                        "terminationGracePeriodSeconds": 30,
-                        "dnsPolicy": "ClusterFirst",
-                        "securityContext": {},
+                    ],
+                    'restartPolicy': 'Never'
+                }
+            }
+        }
+    }
+
+
+def scheduledjob():
+    """
+    http://kubernetes.io/docs/user-guide/cron-jobs/#creating-a-cron-job
+
+    Note:: ScheduledJob resource was introduced in Kubernetes version 1.4,
+    but starting from version 1.5 its current name is CronJob.
+    """
+
+    return {
+        "apiVersion": "batch/v2alpha1",
+        "kind": "ScheduledJob",
+        "metadata": {
+            "name": "hello"
+        },
+        "spec": {
+            "schedule": "*/1 * * * *",
+            "jobTemplate": {
+                "spec": {
+                    "template": {
+                        "spec": {
+                            "containers": [
+                                {
+                                    "name": "hello",
+                                    "image": "busybox",
+                                    "args": [
+                                        "/bin/sh",
+                                        "-c",
+                                        "date; echo Hello from the Kubernetes cluster"
+                                    ]
+                                }
+                            ],
+                            "restartPolicy": "OnFailure"
+                        }
                     }
                 }
             }
         }
+    }
+
+
+def scheduledjob_90():
+    """
+    Job running for 90s scheduled every minute
+    """
+
+    return {
+        "apiVersion": "batch/v2alpha1",
+        "kind": "ScheduledJob",
+        "metadata": {
+            "name": "wait"
+        },
+        "spec": {
+            "schedule": "*/1 * * * *",
+            "jobTemplate": {
+                "spec": {
+                    "template": {
+                        "spec": {
+                            "containers": [
+                                {
+                                    "name": "wait",
+                                    "image": "busybox",
+                                    "args": [
+                                        "/bin/sh",
+                                        "-c",
+                                        "date; echo Sleeping; sleep 90"
+                                    ]
+                                }
+                            ],
+                            "restartPolicy": "OnFailure"
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+def cronjob():
+    """
+    http://kubernetes.io/docs/user-guide/cron-jobs/#creating-a-cron-job
+
+    Note:: ScheduledJob resource was introduced in Kubernetes version 1.4,
+    but starting from version 1.5 its current name is CronJob.
+    """
+
+    return {
+        "apiVersion": "batch/v2alpha1",
+        "kind": "CronJob",
+        "metadata": {
+            "name": "hello"
+        },
+        "spec": {
+            "schedule": "*/1 * * * *",
+            "jobTemplate": {
+                "spec": {
+                    "template": {
+                        "spec": {
+                            "containers": [
+                                {
+                                    "name": "hello",
+                                    "image": "busybox",
+                                    "args": [
+                                        "/bin/sh",
+                                        "-c",
+                                        "date; echo Hello from the Kubernetes cluster"
+                                    ]
+                                }
+                            ],
+                            "restartPolicy": "OnFailure"
+                        }
+                    }
+                }
+            }
+        }
+    }

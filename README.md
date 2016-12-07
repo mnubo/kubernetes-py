@@ -8,10 +8,13 @@ Kubernetes API bindings in Python.
 Currently supported Kubernetes objects:
 
 * ~/.kube/config
+* Container
+* CronJob
 * Deployment
-* Pod
+* Job
 * PersistentVolume
 * PersistentVolumeClaim
+* Pod
 * ReplicationController
 * Secret
 * Service
@@ -76,6 +79,37 @@ This module assumes the default container runtime.
     )
 
 
+### CronJobs
+
+##### Creating a CronJob
+
+    from kubernetes import K8sCronJob
+    
+    cj = K8sCronJob(
+        config=cfg_cert,
+        name='my_cronjob',
+    )
+    cj.schedule = '*/1 * * * *'
+    cj.concurrency_policy = 'Forbid'
+    cj.starting_deadline_seconds = 10
+    cj.create()
+
+##### Updating a CronJob
+
+    from kubernetes import K8sCronJob
+    
+    cj = K8sCronJob(config=cfg_cert, name='my_cronjob').get()
+    cj.suspend = True
+    cj.update()
+    
+##### Deleting a CronJob
+
+    from kubernetes import K8sCronJob
+    
+    cj = K8sCronJob(config=cfg_cert, name='my_cronjob').get()
+    cj.delete()
+
+
 ### Deployments
 
 ##### Creating a Deployment:
@@ -138,8 +172,34 @@ This module assumes the default container runtime.
     deployment.delete()    
 
 
-### Persistent Volumes
+### Jobs
 
+##### Creating a Job
+
+    from kubernetes import K8sJob
+    
+    job = K8sJob(config=cfg_cert, name='my_job')
+    job.parallelism = 10
+    job.completions = 20
+    job.create()
+    
+##### Updating a Job
+
+    from kubernetes import K8sJob
+    
+    job = K8sJob(config=cfg_cert, name='my_job').get()
+    job.parallelism = 5
+    job.update()
+    
+##### Deleting a Job
+
+    from kubernetes import K8sJob
+    
+    job = K8sJob(config=cfg_cert, name='my_job').get()
+    job.delete()
+    
+
+### Persistent Volumes
 
 ##### Creating an AWS EBS Persistent Volume:
 
