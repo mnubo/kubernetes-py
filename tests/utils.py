@@ -368,6 +368,20 @@ def cleanup_jobs():
             jobs = ref.list()
 
 
+def cleanup_cronjobs():
+    ref = create_cronjob(name="throwaway")
+    if is_reachable(ref.config.api_host):
+        jobs = ref.list()
+        while len(jobs) > 0:
+            for j in jobs:
+                try:
+                    job = K8sCronJob(config=ref.config, name=j['metadata']['name']).get()
+                    job.delete()
+                except NotFoundException:
+                    continue
+            jobs = ref.list()
+
+
 # --------------------------------------------------------------------------------- front-end replication controller
 
 def frontend():
@@ -654,6 +668,42 @@ def scheduledjob():
         }
     }
 
+
+def scheduledjob_90():
+    """
+    Job running for 90s scheduled every minute
+    """
+
+    return {
+        "apiVersion": "batch/v2alpha1",
+        "kind": "ScheduledJob",
+        "metadata": {
+            "name": "wait"
+        },
+        "spec": {
+            "schedule": "*/1 * * * *",
+            "jobTemplate": {
+                "spec": {
+                    "template": {
+                        "spec": {
+                            "containers": [
+                                {
+                                    "name": "wait",
+                                    "image": "busybox",
+                                    "args": [
+                                        "/bin/sh",
+                                        "-c",
+                                        "date; echo Sleeping; sleep 90"
+                                    ]
+                                }
+                            ],
+                            "restartPolicy": "OnFailure"
+                        }
+                    }
+                }
+            }
+        }
+    }
 
 def cronjob():
     """
