@@ -426,15 +426,16 @@ class K8sReplicationController(K8sObject):
     def _check_pod_readiness(self):
         if self.current_replicas == self.desired_replicas:
             pods = K8sPod.get_by_labels(config=self.config, labels=self.pod_labels)
-            try:
-                for pod in pods:
+            for pod in pods:
+                try:
                     if not pod.is_ready():
                         raise PodNotReadyException(pod.name)
-            except NotFoundException:
-                pass
-            except PodNotReadyException:
-                return False
-        return True
+                except NotFoundException:
+                    pass
+                except PodNotReadyException:
+                    return False
+            return True
+        return False
 
     def _check_timeout(self, start_time=None):
         elapsed_time = time.time() - start_time
