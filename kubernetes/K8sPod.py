@@ -45,6 +45,8 @@ class K8sPod(K8sObject):
         self._wait_for_readiness()
         return self
 
+    # -------------------------------------------------------------------------------------  wait
+
     def _wait_for_readiness(self):
         start_time = time.time()
         while not self.is_ready():

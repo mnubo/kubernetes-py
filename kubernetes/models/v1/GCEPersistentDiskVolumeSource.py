@@ -18,6 +18,7 @@ class GCEPersistentDiskVolumeSource(object):
 
     def __init__(self, model=None):
         super(GCEPersistentDiskVolumeSource, self).__init__()
+
         self._pd_name = None
         self._fs_type = None
         self._partition = None

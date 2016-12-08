@@ -6,6 +6,7 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+from kubernetes.models.unversioned.BaseModel import BaseModel
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.models.v1.ServiceSpec import ServiceSpec
 from kubernetes.models.v1.ServiceStatus import ServiceStatus
@@ -13,7 +14,7 @@ from kubernetes.models.v1.ServicePort import ServicePort
 from kubernetes.utils import is_valid_dict, is_valid_string
 
 
-class Service(object):
+class Service(BaseModel):
     """
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_service
     """
@@ -21,11 +22,10 @@ class Service(object):
     def __init__(self, model=None):
         super(Service, self).__init__()
 
-        self._kind = 'Service'
-        self._api_version = 'v1'
-        self._metadata = ObjectMeta()
-        self._spec = ServiceSpec()
-        self._status = ServiceStatus()
+        self.kind = 'Service'
+        self.api_version = 'v1'
+        self.spec = ServiceSpec()
+        self.status = ServiceStatus()
 
         if model is not None:
             self._build_with_model(model)
@@ -94,55 +94,6 @@ class Service(object):
         s.update(selector)
         self.spec.selector = s
 
-    # ------------------------------------------------------------------------------------- kind
-
-    @property
-    def kind(self):
-        return self._kind
-
-    @kind.setter
-    def kind(self, k=None):
-        if not is_valid_string(k):
-            raise SyntaxError('Service: kind: [ {0} ] is invalid.'.format(k))
-        self._kind = k
-
-    # ------------------------------------------------------------------------------------- apiVersion
-
-    @property
-    def api_version(self):
-        return self._api_version
-
-    @api_version.setter
-    def api_version(self, v=None):
-        if not is_valid_string(v):
-            raise SyntaxError('Service: api_version: [ {0} ] is invalid.'.format(v))
-        self._api_version = v
-
-    # ------------------------------------------------------------------------------------- name
-
-    @property
-    def name(self):
-        return self.metadata.name
-
-    @name.setter
-    def name(self, name=None):
-        if not is_valid_string(name):
-            raise SyntaxError('Service: name: [ {0} ] is invalid.'.format(name))
-        self.metadata.name = name
-        self.add_label('name', name)
-
-    # ------------------------------------------------------------------------------------- metadata
-
-    @property
-    def metadata(self):
-        return self._metadata
-
-    @metadata.setter
-    def metadata(self, metadata=None):
-        if not isinstance(metadata, ObjectMeta):
-            raise SyntaxError('Service: metadata: [ {0} ] is invalid.'.format(metadata))
-        self._metadata = metadata
-
     # ------------------------------------------------------------------------------------- spec
 
     @property
@@ -170,13 +121,7 @@ class Service(object):
     # ------------------------------------------------------------------------------------- serialize
 
     def serialize(self):
-        data = {}
-        if self.kind:
-            data['kind'] = self.kind
-        if self.api_version:
-            data['apiVersion'] = self.api_version
-        if self.metadata is not None:
-            data['metadata'] = self.metadata.serialize()
+        data = super(Service, self).serialize()
         if self.spec is not None:
             data['spec'] = self.spec.serialize()
         if self.status is not None:

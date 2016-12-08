@@ -6,7 +6,6 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from BaseUrls import BaseUrls
 from Container import Container
 from ContainerPort import ContainerPort
 from ContainerStatus import ContainerStatus

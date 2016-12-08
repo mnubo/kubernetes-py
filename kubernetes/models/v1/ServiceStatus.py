@@ -6,9 +6,7 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1 import (
-    LoadBalancerStatus
-)
+from kubernetes.models.v1.LoadBalancerStatus import LoadBalancerStatus
 
 
 class ServiceStatus(object):

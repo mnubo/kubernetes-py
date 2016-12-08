@@ -6,13 +6,13 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+from kubernetes.models.unversioned.BaseModel import BaseModel
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.models.v1.PersistentVolumeClaimSpec import PersistentVolumeClaimSpec
 from kubernetes.models.v1.PersistentVolumeClaimStatus import PersistentVolumeClaimStatus
-from kubernetes.utils import is_valid_string
 
 
-class PersistentVolumeClaim(object):
+class PersistentVolumeClaim(BaseModel):
     """
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_persistentvolumeclaim
     """
@@ -20,11 +20,10 @@ class PersistentVolumeClaim(object):
     def __init__(self, model=None):
         super(PersistentVolumeClaim, self).__init__()
 
-        self._kind = 'PersistentVolumeClaim'
-        self._api_version = 'v1'
-        self._metadata = ObjectMeta()
-        self._spec = PersistentVolumeClaimSpec()
-        self._status = PersistentVolumeClaimStatus()
+        self.kind = 'PersistentVolumeClaim'
+        self.api_version = 'v1'
+        self.spec = PersistentVolumeClaimSpec()
+        self.status = PersistentVolumeClaimStatus()
 
         if model is not None:
             self._build_with_model(model)
@@ -40,42 +39,6 @@ class PersistentVolumeClaim(object):
             self.spec = PersistentVolumeClaimSpec(model=model['spec'])
         if 'status' in model:
             self.status = PersistentVolumeClaimStatus(model=model['status'])
-
-    # ------------------------------------------------------------------------------------- kind
-
-    @property
-    def kind(self):
-        return self._kind
-
-    @kind.setter
-    def kind(self, k=None):
-        if not is_valid_string(k):
-            raise SyntaxError('PersistentVolumeClaim: kind: [ {0} ] is invalid.'.format(k))
-        self._kind = k
-
-    # ------------------------------------------------------------------------------------- apiVersion
-
-    @property
-    def api_version(self):
-        return self._api_version
-
-    @api_version.setter
-    def api_version(self, v=None):
-        if not is_valid_string(v):
-            raise SyntaxError('PersistentVolumeClaim: api_version: [ {0} ] is invalid.'.format(v))
-        self._api_version = v
-
-    # ------------------------------------------------------------------------------------- metadata
-
-    @property
-    def metadata(self):
-        return self._metadata
-
-    @metadata.setter
-    def metadata(self, meta=None):
-        if not isinstance(meta, ObjectMeta):
-            raise SyntaxError('PersistentVolumeClaim: metadata: [ {0} ] is invalid.'.format(meta))
-        self._metadata = meta
 
     # ------------------------------------------------------------------------------------- spec
 
@@ -104,13 +67,7 @@ class PersistentVolumeClaim(object):
     # ------------------------------------------------------------------------------------- serialize
 
     def serialize(self):
-        data = {}
-        if self.kind is not None:
-            data['kind'] = self.kind
-        if self.api_version is not None:
-            data['apiVersion'] = self.api_version
-        if self.metadata is not None:
-            data['metadata'] = self.metadata.serialize()
+        data = super(PersistentVolumeClaim, self).serialize()
         if self.spec is not None:
             data['spec'] = self.spec.serialize()
         if self.status is not None:

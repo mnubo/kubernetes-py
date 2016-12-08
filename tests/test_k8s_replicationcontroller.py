@@ -15,6 +15,7 @@ from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.models.v1.Probe import Probe
 from kubernetes.models.v1.ReplicationController import ReplicationController
 from kubernetes.models.v1.ReplicationControllerSpec import ReplicationControllerSpec
+from kubernetes.models.v1.ReplicationControllerStatus import ReplicationControllerStatus
 from tests import utils
 
 
@@ -83,7 +84,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         self.assertIsInstance(rc.model, ReplicationController)
         self.assertIsInstance(rc.model.metadata, ObjectMeta)
         self.assertIsInstance(rc.model.spec, ReplicationControllerSpec)
-        self.assertIsNone(rc.model.status)
+        self.assertIsInstance(rc.model.status, ReplicationControllerStatus)
 
     # --------------------------------------------------------------------------------- add annotation
 
@@ -913,7 +914,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
             rc.create()
             rc.desired_replicas = 2
             rc.update()
-            rc.wait_for_replicas()
+            rc._wait_for_desired_replicas()
             from_get = rc.get()
             self.assertEqual(rc.desired_replicas, from_get.desired_replicas)
             self.assertEqual(rc.current_replicas, from_get.current_replicas)

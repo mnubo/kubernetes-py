@@ -16,6 +16,7 @@ class GitRepoVolumeSource(object):
 
     def __init__(self, model=None):
         super(GitRepoVolumeSource, self).__init__()
+
         self._repository = None
         self._revision = None
         self._directory = None
@@ -25,7 +26,12 @@ class GitRepoVolumeSource(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        pass
+        if 'repository' in model:
+            self.repository = model['repository']
+        if 'revision' in model:
+            self.revision = model['revision']
+        if 'directory' in model:
+            self.directory = model['directory']
 
     # ------------------------------------------------------------------------------------- repository
 

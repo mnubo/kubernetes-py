@@ -16,6 +16,7 @@ class KeyToPath(object):
 
     def __init__(self, model=None):
         super(KeyToPath, self).__init__()
+
         self._key = None
         self._path = None
         self._mode = None

@@ -6,13 +6,13 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+from kubernetes.models.unversioned.BaseModel import BaseModel
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.models.v1beta1.DeploymentSpec import DeploymentSpec
 from kubernetes.models.v1beta1.DeploymentStatus import DeploymentStatus
-from kubernetes.utils import is_valid_string
 
 
-class Deployment(object):
+class Deployment(BaseModel):
     """
     http://kubernetes.io/docs/api-reference/extensions/v1beta1/definitions/#_v1beta1_deployment
     """
@@ -20,11 +20,10 @@ class Deployment(object):
     def __init__(self, model=None):
         super(Deployment, self).__init__()
 
-        self._kind = 'Deployment'
-        self._api_version = 'extensions/v1beta1'
-        self._metadata = ObjectMeta()
-        self._spec = DeploymentSpec()
-        self._status = DeploymentStatus()
+        self.kind = 'Deployment'
+        self.api_version = 'extensions/v1beta1'
+        self.spec = DeploymentSpec()
+        self.status = DeploymentStatus()
 
         if model is not None:
             self._build_with_model(model)
@@ -40,42 +39,6 @@ class Deployment(object):
             self.spec = DeploymentSpec(model=model['spec'])
         if 'status' in model:
             self.status = DeploymentStatus(model=model['status'])
-
-    # ------------------------------------------------------------------------------------- kind
-
-    @property
-    def kind(self):
-        return self._kind
-
-    @kind.setter
-    def kind(self, k=None):
-        if not is_valid_string(k):
-            raise SyntaxError('Deployment: kind: [ {} ] is invalid.'.format(k))
-        self._kind = k
-
-    # ------------------------------------------------------------------------------------- apiVersion
-
-    @property
-    def api_version(self):
-        return self._api_version
-
-    @api_version.setter
-    def api_version(self, v=None):
-        if not is_valid_string(v):
-            raise SyntaxError('Deployment: api_version: [ {} ] is invalid.'.format(v))
-        self._api_version = v
-
-    # ------------------------------------------------------------------------------------- metadata
-
-    @property
-    def metadata(self):
-        return self._metadata
-
-    @metadata.setter
-    def metadata(self, meta=None):
-        if not isinstance(meta, ObjectMeta):
-            raise SyntaxError('Deployment: metadata: [ {} ] is invalid.'.format(meta))
-        self._metadata = meta
 
     # ------------------------------------------------------------------------------------- spec
 
@@ -104,13 +67,7 @@ class Deployment(object):
     # ------------------------------------------------------------------------------------- serialize
 
     def serialize(self):
-        data = {}
-        if self.kind is not None:
-            data['kind'] = self.kind
-        if self.api_version is not None:
-            data['apiVersion'] = self.api_version
-        if self.metadata is not None:
-            data['metadata'] = self.metadata.serialize()
+        data = super(Deployment, self).serialize()
         if self.spec is not None:
             data['spec'] = self.spec.serialize()
         if self.status is not None:

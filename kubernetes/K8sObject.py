@@ -7,11 +7,12 @@
 #
 
 import json
+
 import yaml
 
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sExceptions import *
-from kubernetes.models.v1.BaseUrls import BaseUrls
+from kubernetes.models.unversioned.BaseUrls import BaseUrls
 from kubernetes.models.v1.DeleteOptions import DeleteOptions
 from kubernetes.utils import HttpRequest, is_valid_dict, str_to_class
 

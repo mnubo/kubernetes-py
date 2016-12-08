@@ -6,8 +6,8 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.unversioned.LabelSelector import LabelSelector
 from kubernetes.models.v1.PodTemplateSpec import PodTemplateSpec
+from kubernetes.models.v1beta1.LabelSelector import LabelSelector
 
 
 class ReplicaSetSpec(object):

@@ -52,14 +52,14 @@ class K8sReplicationController(K8sObject):
         _hash = base64.b64encode(self.as_json())
         self.add_annotation('kubernetes.io/deployment', _hash)
         super(K8sReplicationController, self).create()
-        self.wait_for_replicas()
+        self._wait_for_desired_replicas()
         return self
 
     def update(self):
         _hash = base64.b64encode(self.as_json())
         self.add_annotation('kubernetes.io/deployment', _hash)
         super(K8sReplicationController, self).update()
-        self.get()
+        self._wait_for_desired_replicas()
         return self
 
     # -------------------------------------------------------------------------------------  add
@@ -410,35 +410,38 @@ class K8sReplicationController(K8sObject):
     def volumes(self, v=None):
         self.model.spec.template.spec.volumes = v
 
-    # -------------------------------------------------------------------------------------  wait for replicas
+    # -------------------------------------------------------------------------------------  wait
 
-    def wait_for_replicas(self):
+    def _wait_for_desired_replicas(self):
         start_time = time.time()
-        is_ready = False
         print('Scaling RC: [ {0} ] to replica count: [ {1} ]'.format(self.name, self.desired_replicas))
-        self.get()
+        is_ready = False
         while not is_ready:
-            if self.current_replicas == self.desired_replicas:
-                pods = K8sPod.get_by_labels(config=self.config, labels=self.pod_labels)
-                if pods:
-                    try:
-                        for pod in pods:
-                            if not pod.is_ready():
-                                break
-                            is_ready = True
-                    except NotFoundException:
-                        pass
-                else:
-                    is_ready = True
-            if not is_ready:
-                elapsed_time = time.time() - start_time
-                if elapsed_time >= self.SCALE_WAIT_TIMEOUT_SECONDS:  # timeout
-                    raise TimedOutException(
-                        "Timed out scaling RC: [ {0} ] "
-                        "to replica count: [ {1} ]".format(self.name, self.desired_replicas))
-                time.sleep(0.2)
-                self.get()
+            time.sleep(0.5)
+            self.get()
+            is_ready = self._check_pod_readiness()
+            self._check_timeout(start_time)
         return self
+
+    def _check_pod_readiness(self):
+        if self.current_replicas == self.desired_replicas:
+            pods = K8sPod.get_by_labels(config=self.config, labels=self.pod_labels)
+            try:
+                for pod in pods:
+                    if not pod.is_ready():
+                        raise PodNotReadyException(pod.name)
+            except NotFoundException:
+                pass
+            except PodNotReadyException:
+                return False
+        return True
+
+    def _check_timeout(self, start_time=None):
+        elapsed_time = time.time() - start_time
+        if elapsed_time >= self.SCALE_WAIT_TIMEOUT_SECONDS:  # timeout
+            raise TimedOutException(
+                "Timed out scaling RC: [ {0} ] "
+                "to replica count: [ {1} ]".format(self.name, self.desired_replicas))
 
     # -------------------------------------------------------------------------------------  get by name
 
@@ -482,7 +485,7 @@ class K8sReplicationController(K8sObject):
         rc = K8sReplicationController(config=config, name=name).get()
         rc.desired_replicas = replicas
         rc.update()
-        rc.wait_for_replicas()
+        rc._wait_for_desired_replicas()
         return rc
 
     # -------------------------------------------------------------------------------------  rolling update

@@ -8,7 +8,7 @@
 
 from kubernetes.models.v1.PersistentVolumeSpec import PersistentVolumeSpec
 from kubernetes.models.v1.ResourceRequirements import ResourceRequirements
-from kubernetes.models.unversioned.LabelSelector import LabelSelector
+from kubernetes.models.v1beta1.LabelSelector import LabelSelector
 from kubernetes.utils import is_valid_list, is_valid_string
 
 
