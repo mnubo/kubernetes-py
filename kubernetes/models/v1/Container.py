@@ -22,8 +22,8 @@ class Container(object):
     VALID_PULL_POLICIES = ['Always', 'Never', 'IfNotPresent']
 
     def __init__(self, model=None):
-
         super(Container, self).__init__()
+
         self._args = None
         self._command = None
         self._env = None

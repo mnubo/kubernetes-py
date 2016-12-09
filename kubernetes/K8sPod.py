@@ -15,7 +15,7 @@ from kubernetes.K8sObject import K8sObject
 from kubernetes.models.v1.Pod import Pod
 from kubernetes.models.v1.PodStatus import PodStatus
 from kubernetes.models.v1.Probe import Probe
-from kubernetes.utils import is_valid_dict, is_valid_string
+from kubernetes.utils import is_valid_dict, is_valid_string, is_valid_list
 
 
 class K8sPod(K8sObject):
@@ -44,6 +44,8 @@ class K8sPod(K8sObject):
         self.get()
         self._wait_for_readiness()
         return self
+
+    # -------------------------------------------------------------------------------------  wait
 
     def _wait_for_readiness(self):
         start_time = time.time()
@@ -136,7 +138,8 @@ class K8sPod(K8sObject):
 
     @containers.setter
     def containers(self, containers=None):
-        self.model.spec.containers = containers
+        if not is_valid_list(containers, K8sContainer):
+            self.model.spec.containers = [x.model for x in containers]
 
     # ------------------------------------------------------------------------------------- dnsPolicy
 

@@ -9,22 +9,21 @@
 import base64
 import json
 
+from kubernetes.models.unversioned.BaseModel import BaseModel
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.utils import is_valid_string, is_valid_dict
 
 
-class Secret(object):
+class Secret(BaseModel):
     """
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_secret
     """
 
     def __init__(self, model=None):
-
         super(Secret, self).__init__()
 
-        self._kind = 'Secret'
-        self._api_version = 'v1'
-        self._metadata = ObjectMeta()
+        self.kind = 'Secret'
+        self.api_version = 'v1'
         self._data = {}
         self._string_data = None
         self._type = None
@@ -48,12 +47,6 @@ class Secret(object):
             self.string_data = model['stringData']
         if 'type' in model:
             self.type = model['type']
-
-    def __eq__(self, other):
-        # see https://github.com/kubernetes/kubernetes/blob/release-1.3/docs/design/identifiers.md
-        if isinstance(other, self.__class__):
-            return self.metadata.name == other.metadata.name
-        return NotImplemented
 
     # ------------------------------------------------------------------------------------- add
 
@@ -186,8 +179,9 @@ class Secret(object):
     def set_service_account_token(self, account_name=None, account_uid=None,
                                   token=None, kubecfg_data=None, cacert=None):
 
-        if not is_valid_string(account_name):
-            raise SyntaxError('Secret.set_service_account() account_name: [ {} ] is invalid.'.format(account_name))
+        for x in [account_name, account_uid, token]:
+            if not is_valid_string(x):
+                raise SyntaxError('Secret.set_service_account() account_name: [ {} ] is invalid.'.format(x))
         if not is_valid_string(account_uid):
             raise SyntaxError('Secret.set_service_account() account_uid: [ {} ] is invalid.'.format(account_uid))
         if not is_valid_string(token):
@@ -217,13 +211,7 @@ class Secret(object):
     # ------------------------------------------------------------------------------------- serialize
 
     def serialize(self):
-        data = {}
-        if self.kind is not None:
-            data['kind'] = self.kind
-        if self.api_version is not None:
-            data['apiVersion'] = self.api_version
-        if self.metadata is not None:
-            data['metadata'] = self.metadata.serialize()
+        data = super(Secret, self).serialize()
         if self.data is not None:
             d = {}
             for k, v in self.data.items():

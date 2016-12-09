@@ -16,6 +16,7 @@ class ContainerStateTerminated(object):
 
     def __init__(self, model=None):
         super(ContainerStateTerminated, self).__init__()
+
         self._exit_code = None
         self._signal = None
         self._reason = None

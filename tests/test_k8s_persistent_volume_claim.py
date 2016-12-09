@@ -12,6 +12,7 @@ import uuid
 from kubernetes.K8sExceptions import TimedOutException
 from kubernetes.K8sPersistentVolume import K8sPersistentVolume
 from kubernetes.K8sPersistentVolumeClaim import K8sPersistentVolumeClaim
+from kubernetes.K8sPod import K8sPod
 from kubernetes.models.v1.ResourceRequirements import ResourceRequirements
 from tests import utils
 
@@ -19,6 +20,7 @@ from tests import utils
 class K8sPersistentVolumeClaimTest(unittest.TestCase):
 
     def setUp(self):
+        K8sPod.POD_READY_TIMEOUT_SECONDS = 20
         utils.cleanup_pods()
         utils.cleanup_pvc()
         utils.cleanup_pv()

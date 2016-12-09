@@ -8,37 +8,37 @@
 
 from kubernetes.models.unversioned.BaseModel import BaseModel
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
-from kubernetes.models.v1.PersistentVolumeClaimSpec import PersistentVolumeClaimSpec
-from kubernetes.models.v1.PersistentVolumeClaimStatus import PersistentVolumeClaimStatus
+from kubernetes.models.v2alpha1.CronJobSpec import CronJobSpec
+from kubernetes.models.v2alpha1.CronJobStatus import CronJobStatus
 
 
-class PersistentVolumeClaim(BaseModel):
+class CronJob(BaseModel):
     """
-    http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_persistentvolumeclaim
+    http://kubernetes.io/docs/user-guide/cron-jobs/#creating-a-cron-job
     """
 
     def __init__(self, model=None):
-        super(PersistentVolumeClaim, self).__init__()
+        super(CronJob, self).__init__()
 
-        self.kind = 'PersistentVolumeClaim'
-        self.api_version = 'v1'
-        self.spec = PersistentVolumeClaimSpec()
-        self.status = PersistentVolumeClaimStatus()
+        self.kind = 'CronJob'
+        self.api_version = "batch/v2alpha1"
+        self.spec = CronJobSpec()
+        self.status = CronJobStatus()
 
         if model is not None:
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'kind' in model:
-            self.kind = model['kind']
         if 'apiVersion' in model:
             self.api_version = model['apiVersion']
+        if 'kind' in model:
+            self.kind = model['kind']
         if 'metadata' in model:
             self.metadata = ObjectMeta(model=model['metadata'])
         if 'spec' in model:
-            self.spec = PersistentVolumeClaimSpec(model=model['spec'])
+            self.spec = CronJobSpec(model=model['spec'])
         if 'status' in model:
-            self.status = PersistentVolumeClaimStatus(model=model['status'])
+            self.status = CronJobStatus(model=model['status'])
 
     # ------------------------------------------------------------------------------------- spec
 
@@ -48,8 +48,8 @@ class PersistentVolumeClaim(BaseModel):
 
     @spec.setter
     def spec(self, spec=None):
-        if not isinstance(spec, PersistentVolumeClaimSpec):
-            raise SyntaxError('PersistentVolumeClaim: spec: [ {0} ] is invalid.'.format(spec))
+        if not isinstance(spec, CronJobSpec):
+            raise SyntaxError('CronJob: spec: [ {} ] is invalid.'.format(spec))
         self._spec = spec
 
     # ------------------------------------------------------------------------------------- status
@@ -60,14 +60,14 @@ class PersistentVolumeClaim(BaseModel):
 
     @status.setter
     def status(self, status=None):
-        if not isinstance(status, PersistentVolumeClaimStatus):
-            raise SyntaxError('PersistentVolumeClaim: status: [ {0} ] is invalid.'.format(status))
+        if not isinstance(status, CronJobStatus):
+            raise SyntaxError('CronJob: status: [ {} ] is invalid.'.format(status))
         self._status = status
 
     # ------------------------------------------------------------------------------------- serialize
 
     def serialize(self):
-        data = super(PersistentVolumeClaim, self).serialize()
+        data = super(CronJob, self).serialize()
         if self.spec is not None:
             data['spec'] = self.spec.serialize()
         if self.status is not None:

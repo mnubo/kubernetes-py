@@ -16,6 +16,7 @@ class ContainerStateRunning(object):
 
     def __init__(self, model=None):
         super(ContainerStateRunning, self).__init__()
+
         self._started_at = None
 
         if model is not None:

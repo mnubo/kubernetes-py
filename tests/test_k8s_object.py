@@ -135,9 +135,10 @@ class K8sObjectTest(unittest.TestCase):
             if len(r):
                 secret = r[0]
                 self.assertIsInstance(secret, dict)
-                self.assertEqual(2, len(secret))
-                for i in ['metadata', 'type']:
+                self.assertEqual(3, len(secret))
+                for i in ['data', 'metadata', 'type']:
                     self.assertIn(i, secret)
+                self.assertIsInstance(secret['data'], dict)
                 self.assertIsInstance(secret['metadata'], dict)
                 self.assertIsInstance(secret['type'], str)
 

@@ -6,13 +6,14 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+from kubernetes.models.unversioned.BaseModel import BaseModel
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.models.v1.PodSpec import PodSpec
 from kubernetes.models.v1.PodStatus import PodStatus
-from kubernetes.utils import filter_model, is_valid_string
+from kubernetes.utils import filter_model
 
 
-class Pod(object):
+class Pod(BaseModel):
     """
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_pod
     """
@@ -20,23 +21,14 @@ class Pod(object):
     def __init__(self, model=None):
         super(Pod, self).__init__()
 
-        self._kind = 'Pod'
-        self._api_version = 'v1'
-        self._metadata = ObjectMeta()
-        self._spec = PodSpec()
-        self._status = PodStatus()
+        self.kind = 'Pod'
+        self.api_version = 'v1'
+        self.spec = PodSpec()
+        self.status = PodStatus()
 
         if model is not None:
             m = filter_model(model)
             self._build_with_model(m)
-
-    def __eq__(self, other):
-        # see https://github.com/kubernetes/kubernetes/blob/release-1.3/docs/design/identifiers.md
-        if isinstance(other, self.__class__):
-            # Uniquely name (via a name) an object across space.
-            return self.metadata.namespace == other.metadata.namespace \
-                   and self.metadata.name == other.metadata.name
-        return NotImplemented
 
     def _build_with_model(self, model=None):
         if 'kind' in model:
@@ -44,50 +36,11 @@ class Pod(object):
         if 'apiVersion' in model:
             self.api_version = model['apiVersion']
         if 'metadata' in model:
-            metadata = ObjectMeta(model=model['metadata'])
-            self.metadata = metadata
+            self.metadata = ObjectMeta(model=model['metadata'])
         if 'spec' in model:
-            spec = PodSpec(model=model['spec'])
-            self.spec = spec
+            self.spec = PodSpec(model=model['spec'])
         if 'status' in model:
-            status = PodStatus(model=model['status'])
-            self.status = status
-
-    # ------------------------------------------------------------------------------------- kind
-
-    @property
-    def kind(self):
-        return self._kind
-
-    @kind.setter
-    def kind(self, k=None):
-        if not is_valid_string(k):
-            raise SyntaxError('Pod: kind: [ {0} ] is invalid.'.format(k))
-        self._kind = k
-
-    # ------------------------------------------------------------------------------------- apiVersion
-
-    @property
-    def api_version(self):
-        return self._api_version
-
-    @api_version.setter
-    def api_version(self, v=None):
-        if not is_valid_string(v):
-            raise SyntaxError('Pod: api_version: [ {0} ] is invalid.'.format(v))
-        self._api_version = v
-
-    # ------------------------------------------------------------------------------------- metadata
-
-    @property
-    def metadata(self):
-        return self._metadata
-
-    @metadata.setter
-    def metadata(self, metadata=None):
-        if not isinstance(metadata, ObjectMeta):
-            raise SyntaxError('Pod: metadata: [ {0} ] is invalid.'.format(metadata))
-        self._metadata = metadata
+            self.status = PodStatus(model=model['status'])
 
     # ------------------------------------------------------------------------------------- spec
 
@@ -116,13 +69,7 @@ class Pod(object):
     # ------------------------------------------------------------------------------------- serialize
 
     def serialize(self):
-        data = {}
-        if self.kind is not None:
-            data['kind'] = self.kind
-        if self.api_version is not None:
-            data['apiVersion'] = self.api_version
-        if self.metadata is not None:
-            data['metadata'] = self.metadata.serialize()
+        data = super(Pod, self).serialize()
         if self.spec is not None:
             data['spec'] = self.spec.serialize()
         if self.status is not None:

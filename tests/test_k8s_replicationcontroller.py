@@ -15,12 +15,14 @@ from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.models.v1.Probe import Probe
 from kubernetes.models.v1.ReplicationController import ReplicationController
 from kubernetes.models.v1.ReplicationControllerSpec import ReplicationControllerSpec
+from kubernetes.models.v1.ReplicationControllerStatus import ReplicationControllerStatus
 from tests import utils
 
 
 class K8sReplicationControllerTest(unittest.TestCase):
+
     def setUp(self):
-        K8sReplicationController.SCALE_WAIT_TIMEOUT_SECONDS = 20
+        K8sReplicationController.SCALE_WAIT_TIMEOUT_SECONDS = 30
         utils.cleanup_rc()
         utils.cleanup_pods()
 
@@ -82,7 +84,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         self.assertIsInstance(rc.model, ReplicationController)
         self.assertIsInstance(rc.model.metadata, ObjectMeta)
         self.assertIsInstance(rc.model.spec, ReplicationControllerSpec)
-        self.assertIsNone(rc.model.status)
+        self.assertIsInstance(rc.model.status, ReplicationControllerStatus)
 
     # --------------------------------------------------------------------------------- add annotation
 
@@ -912,7 +914,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
             rc.create()
             rc.desired_replicas = 2
             rc.update()
-            rc.wait_for_replicas()
+            rc._wait_for_desired_replicas()
             from_get = rc.get()
             self.assertEqual(rc.desired_replicas, from_get.desired_replicas)
             self.assertEqual(rc.current_replicas, from_get.current_replicas)
@@ -1147,13 +1149,13 @@ class K8sReplicationControllerTest(unittest.TestCase):
                 for c in p.containers:
                     self.assertIn(c.image, [new_image, image_2])
 
-    def test_rolling_update_two_containers_size_3(self):
+    def test_rolling_update_two_containers_size_2(self):
         cont_name_1 = "redis"
         cont_name_2 = "nginx"
         image_1 = "redis:3.2.0"
         image_2 = "nginx:1.10"
         new_image = "redis:3.2.3"
-        count = 3
+        count = 2
         container_1 = utils.create_container(name=cont_name_1, image=image_1)
         container_2 = utils.create_container(name=cont_name_2, image=image_2)
         name = "yorc-{0}".format(str(uuid.uuid4()))
@@ -1290,13 +1292,13 @@ class K8sReplicationControllerTest(unittest.TestCase):
                 for c in p.containers:
                     self.assertIn(c.image, [new_image, image_2])
 
-    def test_rolling_update_two_containers_size_3_new_rc(self):
+    def test_rolling_update_two_containers_size_2_new_rc(self):
         cont_name_1 = "redis"
         cont_name_2 = "nginx"
         image_1 = "redis:3.2.0"
         image_2 = "nginx:1.10"
         new_image = "redis:3.2.3"
-        count = 3
+        count = 2
 
         container_1 = utils.create_container(name=cont_name_1, image=image_1)
         container_2 = utils.create_container(name=cont_name_2, image=image_2)
@@ -1610,7 +1612,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
         name = "redis-{}".format(str(uuid.uuid4()))
         image_1 = "redis:3.2.0"
         new_image = "redis:3.2.3"
-        count = 3
+        count = 2
         container = utils.create_container(name=name, image=image_1)
         rc = utils.create_rc(name=name)
         rc.add_container(container)
@@ -1621,3 +1623,29 @@ class K8sReplicationControllerTest(unittest.TestCase):
             rc.get()
             self.assertNotEqual(rc.container_image[name], image_1)
             self.assertEqual(rc.container_image[name], new_image)
+
+    # ------------------------------------------------------------------------------------- api - bad cattle
+
+    def test_restart(self):
+        cont_name_1 = "redis"
+        cont_name_2 = "nginx"
+        image_1 = "redis:3.2.0"
+        image_2 = "nginx:1.10"
+        count = 2
+
+        container_1 = utils.create_container(name=cont_name_1, image=image_1)
+        container_2 = utils.create_container(name=cont_name_2, image=image_2)
+
+        name_1 = "yorc-{0}".format(str(uuid.uuid4()))
+        rc_1 = utils.create_rc(name=name_1)
+        rc_1.add_container(container_1)
+        rc_1.add_container(container_2)
+        rc_1.desired_replicas = count
+
+        if utils.is_reachable(rc_1.config.api_host):
+            rc_1.create()
+            rc_2 = rc_1.restart()
+            self.assertIn(cont_name_1, rc_2.container_image)
+            self.assertIn(cont_name_2, rc_2.container_image)
+            self.assertEqual(image_1, rc_2.container_image[cont_name_1])
+            self.assertEqual(image_2, rc_2.container_image[cont_name_2])

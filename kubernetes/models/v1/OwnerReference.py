@@ -13,6 +13,7 @@ class OwnerReference(object):
 
     def __init__(self, model=None):
         super(OwnerReference, self).__init__()
+
         self._api_version = None
         self._kind = None
         self._name = None

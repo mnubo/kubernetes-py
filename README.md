@@ -8,18 +8,23 @@ Kubernetes API bindings in Python.
 Currently supported Kubernetes objects:
 
 * ~/.kube/config
+* Container
+* CronJob
 * Deployment
-* Pod
+* Job
 * PersistentVolume
 * PersistentVolumeClaim
+* Pod
 * ReplicationController
 * Secret
 * Service
 * Volume
 
+
 ## Usage
 
 Find some code snippets below to help understand how to use this module.
+
 
 ### Configuration
 
@@ -74,6 +79,37 @@ This module assumes the default container runtime.
         host_port=6379, 
         name='redis'
     )
+
+
+### CronJobs
+
+##### Creating a CronJob
+
+    from kubernetes import K8sCronJob
+    
+    cj = K8sCronJob(
+        config=cfg_cert,
+        name='my_cronjob',
+    )
+    cj.schedule = '*/1 * * * *'
+    cj.concurrency_policy = 'Forbid'
+    cj.starting_deadline_seconds = 10
+    cj.create()
+
+##### Updating a CronJob
+
+    from kubernetes import K8sCronJob
+    
+    cj = K8sCronJob(config=cfg_cert, name='my_cronjob').get()
+    cj.suspend = True
+    cj.update()
+    
+##### Deleting a CronJob
+
+    from kubernetes import K8sCronJob
+    
+    cj = K8sCronJob(config=cfg_cert, name='my_cronjob').get()
+    cj.delete()
 
 
 ### Deployments
@@ -138,8 +174,34 @@ This module assumes the default container runtime.
     deployment.delete()    
 
 
-### Persistent Volumes
+### Jobs
 
+##### Creating a Job
+
+    from kubernetes import K8sJob
+    
+    job = K8sJob(config=cfg_cert, name='my_job')
+    job.parallelism = 10
+    job.completions = 20
+    job.create()
+    
+##### Updating a Job
+
+    from kubernetes import K8sJob
+    
+    job = K8sJob(config=cfg_cert, name='my_job').get()
+    job.parallelism = 5
+    job.update()
+    
+##### Deleting a Job
+
+    from kubernetes import K8sJob
+    
+    job = K8sJob(config=cfg_cert, name='my_job').get()
+    job.delete()
+    
+
+### Persistent Volumes
 
 ##### Creating an AWS EBS Persistent Volume:
 
@@ -379,7 +441,7 @@ Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
     pod.create()
 
 
-### Unit tests
+## Unit tests
 
 Development of features and unit tests was done against both a full Kubernetes cluster, as well as using 
 the [minikube](https://github.com/kubernetes/minikube) tool. You will find a `./bin/minukube.sh` script in the 

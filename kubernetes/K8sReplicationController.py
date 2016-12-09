@@ -49,17 +49,17 @@ class K8sReplicationController(K8sObject):
     # -------------------------------------------------------------------------------------  override
 
     def create(self):
-        _hash = base64.b64encode(self.as_json())
-        self.add_annotation('kubernetes.io/deployment', _hash)
+        # _hash = base64.b64encode(self.as_json())
+        # self.add_annotation('kubernetes.io/deployment', _hash)
         super(K8sReplicationController, self).create()
-        self.wait_for_replicas()
+        self._wait_for_desired_replicas()
         return self
 
     def update(self):
-        _hash = base64.b64encode(self.as_json())
-        self.add_annotation('kubernetes.io/deployment', _hash)
+        # _hash = base64.b64encode(self.as_json())
+        # self.add_annotation('kubernetes.io/deployment', _hash)
         super(K8sReplicationController, self).update()
-        self.get()
+        self._wait_for_desired_replicas()
         return self
 
     # -------------------------------------------------------------------------------------  add
@@ -410,35 +410,39 @@ class K8sReplicationController(K8sObject):
     def volumes(self, v=None):
         self.model.spec.template.spec.volumes = v
 
-    # -------------------------------------------------------------------------------------  wait for replicas
+    # -------------------------------------------------------------------------------------  wait
 
-    def wait_for_replicas(self):
+    def _wait_for_desired_replicas(self):
         start_time = time.time()
-        is_ready = False
         print('Scaling RC: [ {0} ] to replica count: [ {1} ]'.format(self.name, self.desired_replicas))
-        self.get()
+        is_ready = False
         while not is_ready:
-            if self.current_replicas == self.desired_replicas:
-                pods = K8sPod.get_by_labels(config=self.config, labels=self.pod_labels)
-                if pods:
-                    try:
-                        for pod in pods:
-                            if not pod.is_ready():
-                                break
-                            is_ready = True
-                    except NotFoundException:
-                        pass
-                else:
-                    is_ready = True
-            if not is_ready:
-                elapsed_time = time.time() - start_time
-                if elapsed_time >= self.SCALE_WAIT_TIMEOUT_SECONDS:  # timeout
-                    raise TimedOutException(
-                        "Timed out scaling RC: [ {0} ] "
-                        "to replica count: [ {1} ]".format(self.name, self.desired_replicas))
-                time.sleep(0.2)
-                self.get()
+            time.sleep(0.5)
+            self.get()
+            is_ready = self._check_pod_readiness()
+            self._check_timeout(start_time)
         return self
+
+    def _check_pod_readiness(self):
+        if self.current_replicas == self.desired_replicas:
+            pods = K8sPod.get_by_labels(config=self.config, labels=self.pod_labels)
+            for pod in pods:
+                try:
+                    if not pod.is_ready():
+                        raise PodNotReadyException(pod.name)
+                except NotFoundException:
+                    pass
+                except PodNotReadyException:
+                    return False
+            return True
+        return False
+
+    def _check_timeout(self, start_time=None):
+        elapsed_time = time.time() - start_time
+        if elapsed_time >= self.SCALE_WAIT_TIMEOUT_SECONDS:  # timeout
+            raise TimedOutException(
+                "Timed out scaling RC: [ {0} ] "
+                "to replica count: [ {1} ]".format(self.name, self.desired_replicas))
 
     # -------------------------------------------------------------------------------------  get by name
 
@@ -463,7 +467,7 @@ class K8sReplicationController(K8sObject):
 
         return rc_list
 
-    # -------------------------------------------------------------------------------------  resize
+    # -------------------------------------------------------------------------------------  scale
 
     @staticmethod
     def scale(config=None, name=None, replicas=None):
@@ -482,7 +486,7 @@ class K8sReplicationController(K8sObject):
         rc = K8sReplicationController(config=config, name=name).get()
         rc.desired_replicas = replicas
         rc.update()
-        rc.wait_for_replicas()
+        rc._wait_for_desired_replicas()
         return rc
 
     # -------------------------------------------------------------------------------------  rolling update
@@ -515,7 +519,7 @@ class K8sReplicationController(K8sObject):
             raise SyntaxError('K8sReplicationController: name: [ {0} ] cannot be None.'.format(name))
         if image is None and rc_new is None:
             raise SyntaxError("K8sReplicationController: please specify either 'image' or 'rc_new'")
-        if name is not None and image is not None and rc_new is not None:
+        if container_name is not None and image is not None and rc_new is not None:
             raise SyntaxError(
                 'K8sReplicationController: rc_new is mutually exclusive with an (container_name, image) pair.')
 
@@ -550,11 +554,15 @@ class K8sReplicationController(K8sObject):
 
             if rc_new is not None:
                 foo_next = copy.deepcopy(rc_new)
+
             else:
                 foo_next = K8sReplicationController(config=config, name=name)
 
             foo_old = copy.deepcopy(foo)
             foo_old.name = "{}-old".format(foo.name)
+            foo_old.selector = foo.selector
+            foo_old.pod_labels = foo.pod_labels
+
             foo.delete(orphan=True)
             foo_old.create()
 
@@ -639,3 +647,18 @@ class K8sReplicationController(K8sObject):
                                     'No pending rollout of RC: [ {} ] to abort; perform a new rollout.'.format(name))
         if foo is None:
             raise NotFoundException('K8sReplicationController.rolling_update() RC: [ {} ] not found.'.format(name))
+
+    # -------------------------------------------------------------------------------------  bad cattle
+
+    def restart(self):
+        """
+        Restart will force a rolling update of the current ReplicationController to the current revision.
+        This essentially spawns a fresh copy of the RC and its pods. Useful when something is misbehaving.
+        """
+
+        rc_new = copy.deepcopy(self)
+        return K8sReplicationController.rolling_update(
+            config=self.config,
+            name=self.name,
+            rc_new=rc_new
+        )
