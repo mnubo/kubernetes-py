@@ -7,6 +7,7 @@
 #
 
 import json
+import time
 
 import yaml
 
@@ -32,6 +33,9 @@ VALID_K8s_OBJS = [
 
 
 class K8sObject(object):
+
+    DELETE_TIMEOUT_SECONDS = 60
+
     def __init__(self, config=None, obj_type=None, name=None):
         super(K8sObject, self).__init__()
 
@@ -293,5 +297,17 @@ class K8sObject(object):
             if int(status) == 404:
                 raise NotFoundException(message)
             raise BadRequestException(message)
+
+        if state.get('success'):
+            start_time = time.time()
+            try:
+                while True:
+                    time.sleep(0.2)
+                    self.get_model()
+                    elapsed_time = time.time() - start_time
+                    if elapsed_time >= self.DELETE_TIMEOUT_SECONDS:
+                        raise TimedOutException("Timed out on DELETE object: [ {0} ]".format(self.name))
+            except NotFoundException:
+                pass
 
         return self
