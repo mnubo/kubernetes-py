@@ -138,8 +138,8 @@ class K8sObject(object):
 
     @name.setter
     def name(self, name=None):
-        self.model.metadata.labels['name'] = name
         self.model.metadata.name = name
+        self.model.metadata.labels['name'] = name
 
     # ------------------------------------------------------------------------------------- serialize
 
