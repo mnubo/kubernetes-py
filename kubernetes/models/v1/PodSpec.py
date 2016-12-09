@@ -25,7 +25,7 @@ class PodSpec(object):
 
         self._active_deadline_seconds = None
         self._containers = []
-        self._dns_policy = 'ClusterFirst'
+        self._dns_policy = 'Default'
         self._host_ipc = None
         self._host_network = None
         self._host_pid = None
