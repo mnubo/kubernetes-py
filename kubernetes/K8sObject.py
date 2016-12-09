@@ -19,6 +19,7 @@ from kubernetes.utils import HttpRequest, is_valid_dict, str_to_class
 
 VALID_K8s_OBJS = [
     'CronJob',
+    'DaemonSet',
     'Deployment',
     'Job',
     'PersistentVolume',

@@ -12,6 +12,7 @@ import socket
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sCronJob import K8sCronJob
+from kubernetes.K8sDaemonSet import K8sDaemonSet
 from kubernetes.K8sDeployment import K8sDeployment
 from kubernetes.K8sExceptions import NotFoundException
 from kubernetes.K8sJob import K8sJob
@@ -219,6 +220,16 @@ def create_cronjob(config=None, name=None):
     if config is None:
         config = create_config()
     obj = K8sCronJob(
+        config=config,
+        name=name
+    )
+    return obj
+
+
+def create_daemonset(config=None, name=None):
+    if config is None:
+        config = create_config()
+    obj = K8sDaemonSet(
         config=config,
         name=name
     )
