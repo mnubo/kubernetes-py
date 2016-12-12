@@ -765,7 +765,7 @@ def cassandra_service():
         "kind": "Service",
         "metadata": {
             "labels": {
-                "app": "cassandra"
+                "name": "cassandra"
             },
             "name": "cassandra"
         },
@@ -776,7 +776,7 @@ def cassandra_service():
                 }
             ],
             "selector": {
-                "app": "cassandra"
+                "name": "cassandra"
             }
         }
     }
@@ -794,7 +794,7 @@ def cassandra_rc():
             "template": {
                 "metadata": {
                     "labels": {
-                        "app": "cassandra"
+                        "name": "cassandra"
                     }
                 },
                 "spec": {
@@ -888,7 +888,7 @@ def cassandra_daemonset():
             "template": {
                 "metadata": {
                     "labels": {
-                        "app": "cassandra"
+                        "name": "cassandra"
                     }
                 },
                 "spec": {

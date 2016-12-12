@@ -11,6 +11,8 @@ import unittest
 from kubernetes.models.v1.Service import Service
 from kubernetes.models.v1.ReplicationController import ReplicationController
 from kubernetes.models.v1beta1.DaemonSet import DaemonSet
+from kubernetes.K8sService import K8sService
+from kubernetes.K8sReplicationController import K8sReplicationController
 
 import utils
 
@@ -18,10 +20,12 @@ import utils
 class CloudNativeCassandraTests(unittest.TestCase):
 
     def setUp(self):
-        pass
+        utils.cleanup_services()
+        utils.cleanup_rc()
 
     def tearDown(self):
-        pass
+        utils.cleanup_services()
+        utils.cleanup_rc()
 
     def test_cassandra_setup(self):
         svc = Service(model=utils.cassandra_service())
@@ -37,5 +41,7 @@ class CloudNativeCassandraTests(unittest.TestCase):
         k8s_ds.model = ds
 
         if utils.is_reachable(k8s_rc.config.api_host):
-           k8s_service.create()
-           k8s_rc.create()
+            k8s_service.create()
+            k8s_rc.create()
+            self.assertIsInstance(k8s_service, K8sService)
+            self.assertIsInstance(k8s_rc, K8sReplicationController)
