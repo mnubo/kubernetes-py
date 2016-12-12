@@ -31,7 +31,7 @@ class EnvVar(object):
         if 'value' in model:
             self.value = model['value']
         if 'valueFrom' in model:
-            self.value_from = model['valueFrom']
+            self.value_from = EnvVarSource(model=model['valueFrom'])
 
     # ------------------------------------------------------------------------------------- name
 
