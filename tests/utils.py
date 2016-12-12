@@ -12,6 +12,7 @@ import socket
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sCronJob import K8sCronJob
+from kubernetes.K8sDaemonSet import K8sDaemonSet
 from kubernetes.K8sDeployment import K8sDeployment
 from kubernetes.K8sExceptions import NotFoundException
 from kubernetes.K8sJob import K8sJob
@@ -219,6 +220,16 @@ def create_cronjob(config=None, name=None):
     if config is None:
         config = create_config()
     obj = K8sCronJob(
+        config=config,
+        name=name
+    )
+    return obj
+
+
+def create_daemonset(config=None, name=None):
+    if config is None:
+        config = create_config()
+    obj = K8sDaemonSet(
         config=config,
         name=name
     )
@@ -705,6 +716,7 @@ def scheduledjob_90():
         }
     }
 
+
 def cronjob():
     """
     http://kubernetes.io/docs/user-guide/cron-jobs/#creating-a-cron-job
@@ -739,6 +751,217 @@ def cronjob():
                             "restartPolicy": "OnFailure"
                         }
                     }
+                }
+            }
+        }
+    }
+
+
+# --------------------------------------------------------------------------------- cloud-native cassandra example
+
+def cassandra_service():
+    return {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+            "labels": {
+                "app": "cassandra"
+            },
+            "name": "cassandra"
+        },
+        "spec": {
+            "ports": [
+                {
+                    "port": 9042
+                }
+            ],
+            "selector": {
+                "app": "cassandra"
+            }
+        }
+    }
+
+
+def cassandra_rc():
+    return {
+        "apiVersion": "v1",
+        "kind": "ReplicationController",
+        "metadata": {
+            "name": "cassandra"
+        },
+        "spec": {
+            "replicas": 2,
+            "template": {
+                "metadata": {
+                    "labels": {
+                        "app": "cassandra"
+                    }
+                },
+                "spec": {
+                    "containers": [
+                        {
+                            "command": [
+                                "/run.sh"
+                            ],
+                            "resources": {
+                                "limits": {
+                                    "cpu": 0.5
+                                }
+                            },
+                            "env": [
+                                {
+                                    "name": "MAX_HEAP_SIZE",
+                                    "value": "512M"
+                                },
+                                {
+                                    "name": "HEAP_NEWSIZE",
+                                    "value": "100M"
+                                },
+                                {
+                                    "name": "POD_NAMESPACE",
+                                    "valueFrom": {
+                                        "fieldRef": {
+                                            "fieldPath": "metadata.namespace"
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "POD_IP",
+                                    "valueFrom": {
+                                        "fieldRef": {
+                                            "fieldPath": "status.podIP"
+                                        }
+                                    }
+                                }
+                            ],
+                            "image": "gcr.io/google-samples/cassandra:v9",
+                            "name": "cassandra",
+                            "ports": [
+                                {
+                                    "containerPort": 7000,
+                                    "name": "intra-node"
+                                },
+                                {
+                                    "containerPort": 7001,
+                                    "name": "tls-intra-node"
+                                },
+                                {
+                                    "containerPort": 7199,
+                                    "name": "jmx"
+                                },
+                                {
+                                    "containerPort": 9042,
+                                    "name": "cql"
+                                }
+                            ],
+                            "volumeMounts": [
+                                {
+                                    "mountPath": "/cassandra_data",
+                                    "name": "data"
+                                }
+                            ]
+                        }
+                    ],
+                    "volumes": [
+                        {
+                            "name": "data",
+                            "emptyDir": {}
+                        }
+                    ]
+                }
+            }
+        }
+    }
+
+
+def cassandra_daemonset():
+    return {
+        "apiVersion": "extensions/v1beta1",
+        "kind": "DaemonSet",
+        "metadata": {
+            "labels": {
+                "name": "cassandra"
+            },
+            "name": "cassandra"
+        },
+        "spec": {
+            "template": {
+                "metadata": {
+                    "labels": {
+                        "app": "cassandra"
+                    }
+                },
+                "spec": {
+                    "containers": [
+                        {
+                            "command": [
+                                "/run.sh"
+                            ],
+                            "env": [
+                                {
+                                    "name": "MAX_HEAP_SIZE",
+                                    "value": "512M"
+                                },
+                                {
+                                    "name": "HEAP_NEWSIZE",
+                                    "value": "100M"
+                                },
+                                {
+                                    "name": "POD_NAMESPACE",
+                                    "valueFrom": {
+                                        "fieldRef": {
+                                            "fieldPath": "metadata.namespace"
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "POD_IP",
+                                    "valueFrom": {
+                                        "fieldRef": {
+                                            "fieldPath": "status.podIP"
+                                        }
+                                    }
+                                }
+                            ],
+                            "image": "gcr.io/google-samples/cassandra:v9",
+                            "name": "cassandra",
+                            "ports": [
+                                {
+                                    "containerPort": 7000,
+                                    "name": "intra-node"
+                                },
+                                {
+                                    "containerPort": 7001,
+                                    "name": "tls-intra-node"
+                                },
+                                {
+                                    "containerPort": 7199,
+                                    "name": "jmx"
+                                },
+                                {
+                                    "containerPort": 9042,
+                                    "name": "cql"
+                                }
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "cpu": 0.5
+                                }
+                            },
+                            "volumeMounts": [
+                                {
+                                    "mountPath": "/cassandra_data",
+                                    "name": "data"
+                                }
+                            ]
+                        }
+                    ],
+                    "volumes": [
+                        {
+                            "name": "data",
+                            "emptyDir": {}
+                        }
+                    ]
                 }
             }
         }

@@ -9,7 +9,6 @@
 import copy
 import time
 import uuid
-import base64
 
 from kubernetes import K8sConfig
 from kubernetes.K8sContainer import K8sContainer
@@ -17,9 +16,8 @@ from kubernetes.K8sExceptions import *
 from kubernetes.K8sObject import K8sObject
 from kubernetes.K8sPod import K8sPod
 from kubernetes.K8sVolume import K8sVolume
-
-from kubernetes.models.v1.ReplicationController import ReplicationController
 from kubernetes.models.v1.Probe import Probe
+from kubernetes.models.v1.ReplicationController import ReplicationController
 from kubernetes.utils import is_valid_string
 
 
@@ -82,7 +80,8 @@ class K8sReplicationController(K8sObject):
 
     def add_container(self, container=None):
         if not isinstance(container, K8sContainer):
-            raise SyntaxError('K8sReplicationController.add_container() container: [ {0} ] is invalid.'.format(container))
+            raise SyntaxError(
+                'K8sReplicationController.add_container() container: [ {0} ] is invalid.'.format(container))
         containers = self.model.spec.template.spec.containers
         if containers is None:
             containers = []
@@ -611,9 +610,9 @@ class K8sReplicationController(K8sObject):
         foo_next = K8sReplicationController(config=config, name=name).get()
 
         while foo_next.current_replicas < int(foo_next.get_annotation('kubernetes.io/desired-replicas')):
-            K8sReplicationController.scale(config, name, foo_next.current_replicas+1)
+            K8sReplicationController.scale(config, name, foo_next.current_replicas + 1)
             if foo.current_replicas > 0:
-                K8sReplicationController.scale(config, name_old, foo.current_replicas-1)
+                K8sReplicationController.scale(config, name_old, foo.current_replicas - 1)
             foo.get()
             foo_next.get()
 

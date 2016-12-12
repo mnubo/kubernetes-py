@@ -18,6 +18,7 @@ class K8sVolumeMount(object):
         super(K8sVolumeMount, self).__init__()
 
         self.model = VolumeMount()
+
         if name is not None:
             self.name = name
         if mount_path is not None:

@@ -13,6 +13,7 @@ from kubernetes.models.v1.Volume import Volume
 
 
 class K8sVolume(object):
+
     VALID_VOLUME_TYPES = Volume.VOLUME_TYPES_TO_SOURCE_MAP.keys()
 
     def __init__(self, name=None, type=None):

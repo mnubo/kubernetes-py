@@ -17,6 +17,7 @@ READY_WAIT_TIMEOUT_SECONDS = 60
 
 
 class K8sPersistentVolume(K8sObject):
+
     VALID_VOLUME_TYPES = filter(lambda x: x not in ['emptyDir', 'gitRepo', 'secret'], Volume.VOLUME_TYPES_TO_SOURCE_MAP.keys())
 
     def __init__(self, config=None, name=None, type=None):
