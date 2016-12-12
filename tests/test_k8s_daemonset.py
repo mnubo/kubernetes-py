@@ -7,20 +7,23 @@
 #
 
 import unittest
-import uuid
 
 import utils
-from kubernetes.models.v1beta1.DaemonSet import DaemonSet
 from kubernetes.K8sDaemonSet import K8sDaemonSet
+from kubernetes.models.v1beta1.DaemonSet import DaemonSet
 
 
 class K8sDaemonSetTests(unittest.TestCase):
 
     def setUp(self):
-        pass
+        utils.cleanup_ds()
+        utils.cleanup_rs()
+        utils.cleanup_pods()
 
     def tearDown(self):
-        pass
+        utils.cleanup_ds()
+        utils.cleanup_rs()
+        utils.cleanup_pods()
 
     # --------------------------------------------------------------------------------- init
 

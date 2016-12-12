@@ -393,6 +393,20 @@ def cleanup_cronjobs():
             jobs = ref.list()
 
 
+def cleanup_ds():
+    ref = create_daemonset(name="throwaway")
+    if is_reachable(ref.config.api_host):
+        ds = ref.list()
+        while len(ds) > 0:
+            for d in ds:
+                try:
+                    dset = K8sDaemonSet(config=ref.config, name=d['metadata']['name']).get()
+                    dset.delete()
+                except NotFoundException:
+                    continue
+            ds = ref.list()
+
+
 # --------------------------------------------------------------------------------- front-end replication controller
 
 def frontend():
