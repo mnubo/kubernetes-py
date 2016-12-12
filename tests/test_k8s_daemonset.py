@@ -7,8 +7,10 @@
 #
 
 import unittest
+import uuid
 
 import utils
+from kubernetes.models.v1beta1.DaemonSet import DaemonSet
 from kubernetes.K8sDaemonSet import K8sDaemonSet
 
 
@@ -49,3 +51,14 @@ class K8sDaemonSetTests(unittest.TestCase):
         self.assertIsNotNone(rc)
         self.assertIsInstance(rc, K8sDaemonSet)
         self.assertEqual(rc.name, name)
+
+    # --------------------------------------------------------------------------------- api - create
+
+    def test_api_create(self):
+        name = "job-{}".format(uuid.uuid4())
+        job = DaemonSet(model=utils.scheduledjob())
+        k8s_ds = utils.create_daemonset(name=name)
+        k8s_ds.model = job
+        if utils.is_reachable(k8s_ds.config.api_host):
+            k8s_ds.create()
+            self.assertIsInstance(k8s_ds, K8sDaemonSet)
