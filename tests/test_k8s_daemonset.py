@@ -7,20 +7,23 @@
 #
 
 import unittest
-import uuid
 
 import utils
-from kubernetes.models.v1beta1.DaemonSet import DaemonSet
 from kubernetes.K8sDaemonSet import K8sDaemonSet
+from kubernetes.models.v1beta1.DaemonSet import DaemonSet
 
 
 class K8sDaemonSetTests(unittest.TestCase):
 
     def setUp(self):
-        pass
+        utils.cleanup_ds()
+        utils.cleanup_rs()
+        utils.cleanup_pods()
 
     def tearDown(self):
-        pass
+        utils.cleanup_ds()
+        utils.cleanup_rs()
+        utils.cleanup_pods()
 
     # --------------------------------------------------------------------------------- init
 
@@ -55,10 +58,9 @@ class K8sDaemonSetTests(unittest.TestCase):
     # --------------------------------------------------------------------------------- api - create
 
     def test_api_create(self):
-        name = "job-{}".format(uuid.uuid4())
-        job = DaemonSet(model=utils.scheduledjob())
-        k8s_ds = utils.create_daemonset(name=name)
-        k8s_ds.model = job
+        ds = DaemonSet(model=utils.fluentd_daemonset())
+        k8s_ds = utils.create_daemonset(name=ds.name)
+        k8s_ds.model = ds
         if utils.is_reachable(k8s_ds.config.api_host):
             k8s_ds.create()
             self.assertIsInstance(k8s_ds, K8sDaemonSet)

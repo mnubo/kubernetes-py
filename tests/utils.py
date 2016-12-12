@@ -393,6 +393,20 @@ def cleanup_cronjobs():
             jobs = ref.list()
 
 
+def cleanup_ds():
+    ref = create_daemonset(name="throwaway")
+    if is_reachable(ref.config.api_host):
+        ds = ref.list()
+        while len(ds) > 0:
+            for d in ds:
+                try:
+                    dset = K8sDaemonSet(config=ref.config, name=d['metadata']['name']).get()
+                    dset.delete()
+                except NotFoundException:
+                    continue
+            ds = ref.list()
+
+
 # --------------------------------------------------------------------------------- front-end replication controller
 
 def frontend():
@@ -765,7 +779,7 @@ def cassandra_service():
         "kind": "Service",
         "metadata": {
             "labels": {
-                "app": "cassandra"
+                "name": "cassandra"
             },
             "name": "cassandra"
         },
@@ -776,7 +790,7 @@ def cassandra_service():
                 }
             ],
             "selector": {
-                "app": "cassandra"
+                "name": "cassandra"
             }
         }
     }
@@ -794,7 +808,7 @@ def cassandra_rc():
             "template": {
                 "metadata": {
                     "labels": {
-                        "app": "cassandra"
+                        "name": "cassandra"
                     }
                 },
                 "spec": {
@@ -888,7 +902,7 @@ def cassandra_daemonset():
             "template": {
                 "metadata": {
                     "labels": {
-                        "app": "cassandra"
+                        "name": "cassandra"
                     }
                 },
                 "spec": {
@@ -960,6 +974,83 @@ def cassandra_daemonset():
                         {
                             "name": "data",
                             "emptyDir": {}
+                        }
+                    ]
+                }
+            }
+        }
+    }
+
+
+# --------------------------------------------------------------------------------- fluentd
+
+def fluentd_daemonset():
+    return {
+        "apiVersion": "extensions/v1beta1",
+        "kind": "DaemonSet",
+        "metadata": {
+            "labels": {
+                "k8s-app": "fluentd-logging",
+                "version": "v1"
+            },
+            "name": "fluentd-elasticsearch-v1",
+            "namespace": "default"
+        },
+        "spec": {
+            "selector": {
+                "matchLabels": {
+                    "k8s-app": "fluentd-logging",
+                    "version": "v1"
+                }
+            },
+            "template": {
+                "metadata": {
+                    "labels": {
+                        "k8s-app": "fluentd-logging",
+                        "version": "v1"
+                    },
+                    "name": "fluentd-elasticsearch-v1"
+                },
+                "spec": {
+                    "containers": [
+                        {
+                            "image": "gcr.io/google_containers/fluentd-elasticsearch:1.17",
+                            "name": "fluentd-elasticsearch",
+                            "resources": {
+                                "limits": {
+                                    "memory": "200Mi"
+                                },
+                                "requests": {
+                                    "cpu": "100m",
+                                    "memory": "200Mi"
+                                }
+                            },
+                            "volumeMounts": [
+                                {
+                                    "mountPath": "/var/log",
+                                    "name": "varlog"
+                                },
+                                {
+                                    "mountPath": "/var/lib/docker/containers",
+                                    "name": "varlibdockercontainers",
+                                    "readOnly": True
+                                }
+                            ]
+                        }
+                    ],
+                    "terminationGracePeriodSeconds": 30,
+                    "volumes": [
+                        {
+                            "hostPath": {
+                                "path": "/var/log"
+                            },
+                            "name": "varlog"
+                        },
+                        {
+                            "hostPath": {
+                                "path": "/var/lib/docker/containers"
+                            },
+                            "name": "varlibdockercontainers"
                         }
                     ]
                 }
