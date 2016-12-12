@@ -16,7 +16,12 @@ class K8sReplicaSet(K8sObject):
     """
 
     def __init__(self, config=None, name=None):
-        super(K8sReplicaSet, self).__init__(config=config, obj_type='ReplicaSet', name=name)
+
+        super(K8sReplicaSet, self).__init__(
+            config=config,
+            obj_type='ReplicaSet',
+            name=name
+        )
 
     # -------------------------------------------------------------------------------------  get
 
