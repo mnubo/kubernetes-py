@@ -12,6 +12,7 @@ from kubernetes.K8sObject import K8sObject
 class K8sDaemonSet(K8sObject):
 
     def __init__(self, config=None, name=None):
+
         super(K8sDaemonSet, self).__init__(
             config=config,
             name=name,

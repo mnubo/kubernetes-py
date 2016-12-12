@@ -9,6 +9,7 @@
 from kubernetes.models.unversioned.BaseModel import BaseModel
 from kubernetes.models.v1beta1.DaemonSetSpec import DaemonSetSpec
 from kubernetes.models.v1beta1.DaemonSetStatus import DaemonSetStatus
+from kubernetes.models.v1.ObjectMeta import ObjectMeta
 
 
 class DaemonSet(BaseModel):
@@ -29,6 +30,8 @@ class DaemonSet(BaseModel):
             self.kind = model['kind']
         if 'apiVersion' in model:
             self.api_version = model['apiVersion']
+        if 'metadata' in model:
+            self.metadata = ObjectMeta(model=model['metadata'])
         if 'spec' in model:
             self.spec = DaemonSetSpec(model=model['spec'])
         if 'status' in model:
