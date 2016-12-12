@@ -18,14 +18,21 @@ import utils
 
 
 class CloudNativeCassandraTests(unittest.TestCase):
+    """
+    https://github.com/kubernetes/kubernetes/tree/master/examples/storage/cassandra
+
+    Currently incomplete.
+    """
 
     def setUp(self):
         utils.cleanup_services()
         utils.cleanup_rc()
+        utils.cleanup_pods()
 
     def tearDown(self):
         utils.cleanup_services()
         utils.cleanup_rc()
+        utils.cleanup_pods()
 
     def test_cassandra_setup(self):
         svc = Service(model=utils.cassandra_service())
