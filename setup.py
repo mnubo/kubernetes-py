@@ -26,6 +26,7 @@ setup(
         'kubernetes.models',
         'kubernetes.models.unversioned',
         'kubernetes.models.v1',
+        'kubernetes.models.v1alpha1',
         'kubernetes.models.v1beta1',
         'kubernetes.models.v2alpha1',
         'kubernetes.utils'
