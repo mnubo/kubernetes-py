@@ -1057,3 +1057,62 @@ def fluentd_daemonset():
             }
         }
     }
+
+
+def myweb_container():
+    return {
+        "name": "myweb",
+        "image": "nginx:1.10",
+        "ports": [
+            {
+                "containerPort": 80,
+                "name": "myweb",
+                "protocol": "TCP"
+            }
+        ],
+        "volumeMounts": [
+            {
+                "name": "dockercred",
+                "mountPath": "/root/.dockercfg",
+                "readOnly": True
+            },
+            {
+                "name": "dockerbin",
+                "mountPath": "/usr/bin/docker",
+                "readOnly": True
+            },
+            {
+                "name": "dockersock",
+                "mountPath": "/var/run/docker.sock",
+                "readOnly": True
+            }
+        ],
+        "livenessProbe": {
+            "tcpSocket": {
+                "port": "myweb"
+            },
+            "initialDelaySeconds": 15,
+            "timeoutSeconds": 1
+        },
+        "readinessProbe": {
+            "httpGet": {
+                "path": "/",
+                "port": "myweb"
+            }
+        }
+    }
+
+
+def myweb_envs():
+    return {
+        "ENV": "sandbox",
+        "DATADOG_PORT_8125_UDP_ADDR": "10.0.1.1",
+        "A": {
+            "valueFrom": {
+                "fieldRef": {
+                    "fieldPath": "status.podIP"
+                }
+            }
+        },
+        "DOCKER_HOST": "tcp://$(A):2375"
+    }
