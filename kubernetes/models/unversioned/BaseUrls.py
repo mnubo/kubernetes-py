@@ -14,14 +14,17 @@ class BaseUrls(object):
     """
 
     default_api_version = 'v1'
+    default_apps_version = 'v1alpha1'
     default_batch_version = 'v1'
     default_extensions_version = 'v1beta1'
     default_cron_version = 'v2alpha1'
 
-    def __init__(self, namespace='default', api=None, extensions=None, batch=None, cron=None):
+    def __init__(self, namespace='default', api=None, apps=None, extensions=None, batch=None, cron=None):
 
         if api is None:
             api = self.default_api_version
+        if apps is None:
+            apps = self.default_apps_version
         if batch is None:
             batch = self.default_batch_version
         if extensions is None:
@@ -38,6 +41,9 @@ class BaseUrls(object):
         self.urls['ReplicationController'] = '/api/{0}/namespaces/{1}/replicationcontrollers'.format(api, namespace)
         self.urls['Service'] = '/api/{0}/namespaces/{1}/services'.format(api, namespace)
         self.urls['Secret'] = '/api/{0}/namespaces/{1}/secrets'.format(api, namespace)
+
+        # apps
+        self.urls['PetSet'] = '/apis/apps/{0}/petsets'.format(apps)
 
         # batch
         self.urls['Job'] = '/apis/batch/{0}/namespaces/{1}/jobs'.format(batch, namespace)
