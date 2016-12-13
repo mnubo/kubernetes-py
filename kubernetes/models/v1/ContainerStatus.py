@@ -17,6 +17,7 @@ class ContainerStatus(object):
 
     def __init__(self, model=None):
         super(ContainerStatus, self).__init__()
+
         self._name = None
         self._state = None
         self._last_state = None

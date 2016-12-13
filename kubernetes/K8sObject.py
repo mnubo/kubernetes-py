@@ -7,16 +7,19 @@
 #
 
 import json
+import time
+
 import yaml
 
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sExceptions import *
-from kubernetes.models.v1.BaseUrls import BaseUrls
+from kubernetes.models.unversioned.BaseUrls import BaseUrls
 from kubernetes.models.v1.DeleteOptions import DeleteOptions
 from kubernetes.utils import HttpRequest, is_valid_dict, str_to_class
 
 VALID_K8s_OBJS = [
     'CronJob',
+    'DaemonSet',
     'Deployment',
     'Job',
     'PersistentVolume',
@@ -31,6 +34,9 @@ VALID_K8s_OBJS = [
 
 
 class K8sObject(object):
+
+    DELETE_TIMEOUT_SECONDS = 60
+
     def __init__(self, config=None, obj_type=None, name=None):
         super(K8sObject, self).__init__()
 
@@ -137,8 +143,8 @@ class K8sObject(object):
 
     @name.setter
     def name(self, name=None):
-        self.model.metadata.labels['name'] = name
         self.model.metadata.name = name
+        self.model.metadata.labels['name'] = name
 
     # ------------------------------------------------------------------------------------- serialize
 
@@ -292,5 +298,17 @@ class K8sObject(object):
             if int(status) == 404:
                 raise NotFoundException(message)
             raise BadRequestException(message)
+
+        if state.get('success'):
+            start_time = time.time()
+            try:
+                while True:
+                    time.sleep(0.2)
+                    self.get_model()
+                    elapsed_time = time.time() - start_time
+                    if elapsed_time >= self.DELETE_TIMEOUT_SECONDS:
+                        raise TimedOutException("Timed out on DELETE object: [ {0} ]".format(self.name))
+            except NotFoundException:
+                pass
 
         return self

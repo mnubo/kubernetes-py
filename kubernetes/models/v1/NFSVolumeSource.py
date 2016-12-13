@@ -16,6 +16,7 @@ class NFSVolumeSource(object):
 
     def __init__(self, model=None):
         super(NFSVolumeSource, self).__init__()
+
         self._server = None
         self._path = None
         self._read_only = None

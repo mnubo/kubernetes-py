@@ -18,6 +18,7 @@ class SecretVolumeSource(object):
 
     def __init__(self, model=None):
         super(SecretVolumeSource, self).__init__()
+
         self._secret_name = None
         self._items = None
         self._default_mode = None

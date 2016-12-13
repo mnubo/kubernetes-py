@@ -20,9 +20,11 @@ Currently supported Kubernetes objects:
 * Service
 * Volume
 
+
 ## Usage
 
 Find some code snippets below to help understand how to use this module.
+
 
 ### Configuration
 
@@ -439,7 +441,7 @@ Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
     pod.create()
 
 
-### Unit tests
+## Unit tests
 
 Development of features and unit tests was done against both a full Kubernetes cluster, as well as using 
 the [minikube](https://github.com/kubernetes/minikube) tool. You will find a `./bin/minukube.sh` script in the 

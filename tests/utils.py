@@ -12,6 +12,7 @@ import socket
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sCronJob import K8sCronJob
+from kubernetes.K8sDaemonSet import K8sDaemonSet
 from kubernetes.K8sDeployment import K8sDeployment
 from kubernetes.K8sExceptions import NotFoundException
 from kubernetes.K8sJob import K8sJob
@@ -225,6 +226,16 @@ def create_cronjob(config=None, name=None):
     return obj
 
 
+def create_daemonset(config=None, name=None):
+    if config is None:
+        config = create_config()
+    obj = K8sDaemonSet(
+        config=config,
+        name=name
+    )
+    return obj
+
+
 # --------------------------------------------------------------------------------- delete
 
 def cleanup_objects():
@@ -380,6 +391,20 @@ def cleanup_cronjobs():
                 except NotFoundException:
                     continue
             jobs = ref.list()
+
+
+def cleanup_ds():
+    ref = create_daemonset(name="throwaway")
+    if is_reachable(ref.config.api_host):
+        ds = ref.list()
+        while len(ds) > 0:
+            for d in ds:
+                try:
+                    dset = K8sDaemonSet(config=ref.config, name=d['metadata']['name']).get()
+                    dset.delete()
+                except NotFoundException:
+                    continue
+            ds = ref.list()
 
 
 # --------------------------------------------------------------------------------- front-end replication controller
@@ -705,6 +730,7 @@ def scheduledjob_90():
         }
     }
 
+
 def cronjob():
     """
     http://kubernetes.io/docs/user-guide/cron-jobs/#creating-a-cron-job
@@ -742,4 +768,351 @@ def cronjob():
                 }
             }
         }
+    }
+
+
+# --------------------------------------------------------------------------------- cloud-native cassandra example
+
+def cassandra_service():
+    return {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+            "labels": {
+                "name": "cassandra"
+            },
+            "name": "cassandra"
+        },
+        "spec": {
+            "ports": [
+                {
+                    "port": 9042
+                }
+            ],
+            "selector": {
+                "name": "cassandra"
+            }
+        }
+    }
+
+
+def cassandra_rc():
+    return {
+        "apiVersion": "v1",
+        "kind": "ReplicationController",
+        "metadata": {
+            "name": "cassandra"
+        },
+        "spec": {
+            "replicas": 2,
+            "template": {
+                "metadata": {
+                    "labels": {
+                        "name": "cassandra"
+                    }
+                },
+                "spec": {
+                    "containers": [
+                        {
+                            "command": [
+                                "/run.sh"
+                            ],
+                            "resources": {
+                                "limits": {
+                                    "cpu": 0.5
+                                }
+                            },
+                            "env": [
+                                {
+                                    "name": "MAX_HEAP_SIZE",
+                                    "value": "512M"
+                                },
+                                {
+                                    "name": "HEAP_NEWSIZE",
+                                    "value": "100M"
+                                },
+                                {
+                                    "name": "POD_NAMESPACE",
+                                    "valueFrom": {
+                                        "fieldRef": {
+                                            "fieldPath": "metadata.namespace"
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "POD_IP",
+                                    "valueFrom": {
+                                        "fieldRef": {
+                                            "fieldPath": "status.podIP"
+                                        }
+                                    }
+                                }
+                            ],
+                            "image": "gcr.io/google-samples/cassandra:v9",
+                            "name": "cassandra",
+                            "ports": [
+                                {
+                                    "containerPort": 7000,
+                                    "name": "intra-node"
+                                },
+                                {
+                                    "containerPort": 7001,
+                                    "name": "tls-intra-node"
+                                },
+                                {
+                                    "containerPort": 7199,
+                                    "name": "jmx"
+                                },
+                                {
+                                    "containerPort": 9042,
+                                    "name": "cql"
+                                }
+                            ],
+                            "volumeMounts": [
+                                {
+                                    "mountPath": "/cassandra_data",
+                                    "name": "data"
+                                }
+                            ]
+                        }
+                    ],
+                    "volumes": [
+                        {
+                            "name": "data",
+                            "emptyDir": {}
+                        }
+                    ]
+                }
+            }
+        }
+    }
+
+
+def cassandra_daemonset():
+    return {
+        "apiVersion": "extensions/v1beta1",
+        "kind": "DaemonSet",
+        "metadata": {
+            "labels": {
+                "name": "cassandra"
+            },
+            "name": "cassandra"
+        },
+        "spec": {
+            "template": {
+                "metadata": {
+                    "labels": {
+                        "name": "cassandra"
+                    }
+                },
+                "spec": {
+                    "containers": [
+                        {
+                            "command": [
+                                "/run.sh"
+                            ],
+                            "env": [
+                                {
+                                    "name": "MAX_HEAP_SIZE",
+                                    "value": "512M"
+                                },
+                                {
+                                    "name": "HEAP_NEWSIZE",
+                                    "value": "100M"
+                                },
+                                {
+                                    "name": "POD_NAMESPACE",
+                                    "valueFrom": {
+                                        "fieldRef": {
+                                            "fieldPath": "metadata.namespace"
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "POD_IP",
+                                    "valueFrom": {
+                                        "fieldRef": {
+                                            "fieldPath": "status.podIP"
+                                        }
+                                    }
+                                }
+                            ],
+                            "image": "gcr.io/google-samples/cassandra:v9",
+                            "name": "cassandra",
+                            "ports": [
+                                {
+                                    "containerPort": 7000,
+                                    "name": "intra-node"
+                                },
+                                {
+                                    "containerPort": 7001,
+                                    "name": "tls-intra-node"
+                                },
+                                {
+                                    "containerPort": 7199,
+                                    "name": "jmx"
+                                },
+                                {
+                                    "containerPort": 9042,
+                                    "name": "cql"
+                                }
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "cpu": 0.5
+                                }
+                            },
+                            "volumeMounts": [
+                                {
+                                    "mountPath": "/cassandra_data",
+                                    "name": "data"
+                                }
+                            ]
+                        }
+                    ],
+                    "volumes": [
+                        {
+                            "name": "data",
+                            "emptyDir": {}
+                        }
+                    ]
+                }
+            }
+        }
+    }
+
+
+# --------------------------------------------------------------------------------- fluentd
+
+def fluentd_daemonset():
+    return {
+        "apiVersion": "extensions/v1beta1",
+        "kind": "DaemonSet",
+        "metadata": {
+            "labels": {
+                "k8s-app": "fluentd-logging",
+                "version": "v1"
+            },
+            "name": "fluentd-elasticsearch-v1",
+            "namespace": "default"
+        },
+        "spec": {
+            "selector": {
+                "matchLabels": {
+                    "k8s-app": "fluentd-logging",
+                    "version": "v1"
+                }
+            },
+            "template": {
+                "metadata": {
+                    "labels": {
+                        "k8s-app": "fluentd-logging",
+                        "version": "v1"
+                    },
+                    "name": "fluentd-elasticsearch-v1"
+                },
+                "spec": {
+                    "containers": [
+                        {
+                            "image": "gcr.io/google_containers/fluentd-elasticsearch:1.17",
+                            "name": "fluentd-elasticsearch",
+                            "resources": {
+                                "limits": {
+                                    "memory": "200Mi"
+                                },
+                                "requests": {
+                                    "cpu": "100m",
+                                    "memory": "200Mi"
+                                }
+                            },
+                            "volumeMounts": [
+                                {
+                                    "mountPath": "/var/log",
+                                    "name": "varlog"
+                                },
+                                {
+                                    "mountPath": "/var/lib/docker/containers",
+                                    "name": "varlibdockercontainers",
+                                    "readOnly": True
+                                }
+                            ]
+                        }
+                    ],
+                    "terminationGracePeriodSeconds": 30,
+                    "volumes": [
+                        {
+                            "hostPath": {
+                                "path": "/var/log"
+                            },
+                            "name": "varlog"
+                        },
+                        {
+                            "hostPath": {
+                                "path": "/var/lib/docker/containers"
+                            },
+                            "name": "varlibdockercontainers"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+
+
+def myweb_container():
+    return {
+        "name": "myweb",
+        "image": "nginx:1.10",
+        "ports": [
+            {
+                "containerPort": 80,
+                "name": "myweb",
+                "protocol": "TCP"
+            }
+        ],
+        "volumeMounts": [
+            {
+                "name": "dockercred",
+                "mountPath": "/root/.dockercfg",
+                "readOnly": True
+            },
+            {
+                "name": "dockerbin",
+                "mountPath": "/usr/bin/docker",
+                "readOnly": True
+            },
+            {
+                "name": "dockersock",
+                "mountPath": "/var/run/docker.sock",
+                "readOnly": True
+            }
+        ],
+        "livenessProbe": {
+            "tcpSocket": {
+                "port": "myweb"
+            },
+            "initialDelaySeconds": 15,
+            "timeoutSeconds": 1
+        },
+        "readinessProbe": {
+            "httpGet": {
+                "path": "/",
+                "port": "myweb"
+            }
+        }
+    }
+
+
+def myweb_envs():
+    return {
+        "ENV": "sandbox",
+        "DATADOG_PORT_8125_UDP_ADDR": "10.0.1.1",
+        "A": {
+            "valueFrom": {
+                "fieldRef": {
+                    "fieldPath": "status.podIP"
+                }
+            }
+        },
+        "DOCKER_HOST": "tcp://$(A):2375"
     }

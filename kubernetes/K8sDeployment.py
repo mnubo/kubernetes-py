@@ -13,9 +13,9 @@ from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sExceptions import BadRequestException
 from kubernetes.K8sExceptions import TimedOutException, NotFoundException
 from kubernetes.K8sObject import K8sObject
-from kubernetes.models.unversioned.LabelSelector import LabelSelector
 from kubernetes.models.v1beta1.Deployment import Deployment
 from kubernetes.models.v1beta1.DeploymentRollback import DeploymentRollback
+from kubernetes.models.v1beta1.LabelSelector import LabelSelector
 
 
 class K8sDeployment(K8sObject):
@@ -59,11 +59,12 @@ class K8sDeployment(K8sObject):
             self._wait_for_desired_replicas()
         return self
 
-    # -------------------------------------------------------------------------------------  checking rollout success
+    # -------------------------------------------------------------------------------------  wait
 
     def _wait_for_desired_replicas(self):
         start_time = time.time()
         while not self._has_desired_replicas():
+            time.sleep(0.5)
             self.get()
             self._check_timeout(start_time)
 
@@ -78,12 +79,9 @@ class K8sDeployment(K8sObject):
         elapsed_time = time.time() - start_time
         if elapsed_time >= self.SCALE_WAIT_TIMEOUT_SECONDS:  # timeout
             raise TimedOutException(
-                "Timed out scaling replicas to: [ {0} ] with labels: [ {1} ]".format(
-                    self.model.spec.replicas,
-                    self.model.spec.selector.match_labels
-                )
-            )
-        time.sleep(0.2)
+                "Timed out scaling Deployment: [ {} ] to replica count: [ {1} ]".format(
+                    self.name,
+                    self.desired_replicas))
 
     # -------------------------------------------------------------------------------------  add
 

@@ -11,6 +11,7 @@ import time
 from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sObject import K8sObject
 from kubernetes.models.v1.Job import Job
+from kubernetes.K8sExceptions import TimedOutException
 
 
 class K8sJob(K8sObject):
@@ -29,6 +30,7 @@ class K8sJob(K8sObject):
     """
 
     VALID_RESTART_POLICIES = ['OnFailure', 'Never']
+    SCALE_WAIT_TIMEOUT_SECONDS = 120
 
     def __init__(self, config=None, name=None):
 
@@ -60,16 +62,25 @@ class K8sJob(K8sObject):
 
     # ------------------------------------------------------------------------------------- scale
 
-    def scale(self, replicas=None):
-        self.parallelism = replicas
+    def scale(self, p=None):
+        self.parallelism = p
         self.update()
-        self._wait_for_desired_parallelism(replicas)
+        self._wait_for_desired_parallelism(p)
+
+    # ------------------------------------------------------------------------------------- wait
 
     def _wait_for_desired_parallelism(self, p=None):
-        self.get()
+        start_time = time.time()
         while self.parallelism != p:
+            time.sleep(0.5)
             self.get()
-            time.sleep(0.2)
+            self._check_timeout(start_time, p)
+
+    def _check_timeout(self, start_time=None, p=None):
+        elapsed_time = time.time() - start_time
+        if elapsed_time >= self.SCALE_WAIT_TIMEOUT_SECONDS:  # timeout
+            raise TimedOutException(
+                "Timed out scaling job: [ {0} ] to parallelism: [ {1} ]".format(self.name, p))
 
     # ------------------------------------------------------------------------------------- parallelism
 

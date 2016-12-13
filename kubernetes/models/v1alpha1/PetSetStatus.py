@@ -27,7 +27,7 @@ class PetSetStatus(object):
         if 'replicas' in model:
             self.replicas = model['replicas']
 
-    # -------------------------------------------------------------------------------------  observedGeneration
+    # ------------------------------------------------------------------------------------- observedGeneration
 
     @property
     def observed_generation(self):
@@ -36,10 +36,10 @@ class PetSetStatus(object):
     @observed_generation.setter
     def observed_generation(self, og=None):
         if not isinstance(og, int):
-            raise SyntaxError('PetSetStatus: observed_generation: [ {} ] is invalid.'.format(og))
+            raise SyntaxError('PetSetStatus: observed_generation: [ {} ] is not None.'.format(og))
         self._observed_generation = og
 
-    # -------------------------------------------------------------------------------------  replicas
+    # ------------------------------------------------------------------------------------- replicas
 
     @property
     def replicas(self):
@@ -48,10 +48,10 @@ class PetSetStatus(object):
     @replicas.setter
     def replicas(self, r=None):
         if not isinstance(r, int):
-            raise SyntaxError('PetSetStatus: replicas: [ {} ] is invalid.'.format(r))
+            raise SyntaxError('PetSetStatus: replicas: [ {} ] is not None.'.format(r))
         self._replicas = r
 
-    # -------------------------------------------------------------------------------------  serialize
+    # ------------------------------------------------------------------------------------- serialize
 
     def serialize(self):
         data = {}

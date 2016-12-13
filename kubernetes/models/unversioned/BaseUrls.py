@@ -44,6 +44,7 @@ class BaseUrls(object):
         self.urls['CronJob'] = '/apis/batch/{0}/namespaces/{1}/scheduledjobs'.format(cron, namespace)
 
         # extensions
+        self.urls['DaemonSet'] = '/apis/extensions/{0}/namespaces/{1}/daemonsets'.format(extensions, namespace)
         self.urls['Deployment'] = '/apis/extensions/{0}/namespaces/{1}/deployments'.format(extensions, namespace)
         self.urls['ReplicaSet'] = '/apis/extensions/{0}/namespaces/{1}/replicasets'.format(extensions, namespace)
 
@@ -51,7 +52,9 @@ class BaseUrls(object):
         self.urls['Volume'] = None
 
     def get_base_url(self, object_type=None):
-        if object_type is None or not isinstance(object_type, str) or object_type not in self.urls.keys():
+        if object_type is None \
+                or not isinstance(object_type, str) \
+                or object_type not in self.urls.keys():
             types = ', '.join(self.urls.keys())
-            raise SyntaxError('object_type: [ {0} ] must be in: [ {1} ]'.format(object_type, types))
+            raise SyntaxError('BaseUrls: object_type: [ {0} ] must be in: [ {1} ]'.format(object_type, types))
         return self.urls[object_type]

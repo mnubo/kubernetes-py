@@ -6,19 +6,15 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1.PodTemplateSpec import PodTemplateSpec
 from kubernetes.models.v1beta1.LabelSelector import LabelSelector
+from kubernetes.models.v1.PodTemplateSpec import PodTemplateSpec
 
 
-class ReplicaSetSpec(object):
-    """
-    http://kubernetes.io/docs/api-reference/extensions/v1beta1/definitions/#_v1beta1_replicasetspec
-    """
+class DaemonSetSpec(object):
 
     def __init__(self, model=None):
-        super(ReplicaSetSpec, self).__init__()
+        super(DaemonSetSpec, self).__init__()
 
-        self._replicas = 0
         self._selector = LabelSelector()
         self._template = PodTemplateSpec()
 
@@ -26,24 +22,10 @@ class ReplicaSetSpec(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'replicas' in model:
-            self.replicas = model['replicas']
         if 'selector' in model:
             self.selector = LabelSelector(model=model['selector'])
         if 'template' in model:
             self.template = PodTemplateSpec(model=model['template'])
-
-    # ------------------------------------------------------------------------------------- replicas
-
-    @property
-    def replicas(self):
-        return self._replicas
-
-    @replicas.setter
-    def replicas(self, reps=None):
-        if not isinstance(reps, int):
-            raise SyntaxError('ReplicaSetSpec: replicas: [ {} ] is invalid.'.format(reps))
-        self._replicas = reps
 
     # ------------------------------------------------------------------------------------- selector
 
@@ -52,10 +34,10 @@ class ReplicaSetSpec(object):
         return self._selector
 
     @selector.setter
-    def selector(self, sel=None):
-        if not isinstance(sel, LabelSelector):
-            raise SyntaxError('ReplicaSetSpec: selector: [ {} ] is invalid.'.format(sel))
-        self._selector = sel
+    def selector(self, s=None):
+        if not isinstance(s, LabelSelector):
+            raise SyntaxError('DaemonSetSpec: selector: [ {} ] is invalid.'.format(s))
+        self._selector = s
 
     # ------------------------------------------------------------------------------------- template
 
@@ -66,15 +48,13 @@ class ReplicaSetSpec(object):
     @template.setter
     def template(self, t=None):
         if not isinstance(t, PodTemplateSpec):
-            raise SyntaxError('ReplicaSetSpec: template: [ {} ] is invalid.'.format(t))
+            raise SyntaxError('DaemonSetSpec: template: [ {} ] is invalid.'.format(t))
         self._template = t
 
     # ------------------------------------------------------------------------------------- serialize
 
     def serialize(self):
         data = {}
-        if self.replicas is not None:
-            data['replicas'] = self.replicas
         if self.selector is not None:
             data['selector'] = self.selector.serialize()
         if self.template is not None:

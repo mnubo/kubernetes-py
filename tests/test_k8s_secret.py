@@ -6,14 +6,13 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import base64
 import json
 import unittest
 import uuid
 
 from kubernetes import K8sSecret, K8sConfig
 from kubernetes.K8sExceptions import *
-from kubernetes.models.v1 import Secret, ObjectMeta
+from kubernetes.models.v1 import Secret
 from tests import utils
 
 
@@ -416,5 +415,9 @@ class K8sSecretTest(unittest.TestCase):
         self.assertIn('.dockerconfigjson', secret.data)
         self.assertEqual(data, secret.dockerconfigjson)
         if utils.is_reachable(secret.config.api_host):
+            try:
+                secret.delete()
+            except NotFoundException:
+                pass
             s = secret.create()
             self.assertIsInstance(s, K8sSecret)

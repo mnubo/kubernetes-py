@@ -7,11 +7,12 @@
 #
 
 from kubernetes.models.v1.ContainerPort import ContainerPort
+from kubernetes.models.v1.EnvVar import EnvVar
 from kubernetes.models.v1.Probe import Probe
 from kubernetes.models.v1.ResourceRequirements import ResourceRequirements
 from kubernetes.models.v1.SecurityContext import SecurityContext
 from kubernetes.models.v1.VolumeMount import VolumeMount
-from kubernetes.utils import is_valid_list, is_valid_dict, is_valid_string, filter_model
+from kubernetes.utils import is_valid_list, is_valid_string, filter_model
 
 
 class Container(object):
@@ -22,11 +23,11 @@ class Container(object):
     VALID_PULL_POLICIES = ['Always', 'Never', 'IfNotPresent']
 
     def __init__(self, model=None):
-
         super(Container, self).__init__()
+
         self._args = None
         self._command = None
-        self._env = None
+        self._env = []
         self._image = None
         self._image_pull_policy = 'IfNotPresent'
         self._liveness_probe = None
@@ -60,7 +61,11 @@ class Container(object):
         if 'command' in model:
             self.command = model['command']
         if 'env' in model:
-            self.env = model['env']
+            envs = []
+            for e in model['env']:
+                env = EnvVar(model=e)
+                envs.append(env)
+            self.env = envs
         if 'image' in model:
             self.image = model['image']
         if 'imagePullPolicy' in model:
@@ -125,12 +130,8 @@ class Container(object):
 
     @env.setter
     def env(self, env=None):
-        msg = "Container: env: [ {0} ] is invalid.".format(env)
-        if not is_valid_list(env, dict):
-            raise SyntaxError(msg)
-        for x in env:
-            if not is_valid_dict(x, ['name', 'value']):
-                raise SyntaxError(msg)
+        if not is_valid_list(env, EnvVar):
+            raise SyntaxError("Container: env: [ {0} ] is invalid.".format(env))
         self._env = env
 
     # ------------------------------------------------------------------------------------- image
@@ -261,7 +262,7 @@ class Container(object):
         if self.command is not None:
             data['command'] = self.command
         if self.env is not None:
-            data['env'] = self.env
+            data['env'] = [x.serialize() for x in self.env]
         if self.image is not None:
             data['image'] = self.image
         if self.image_pull_policy is not None:

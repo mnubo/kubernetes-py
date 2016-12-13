@@ -27,6 +27,7 @@ setup(
         'kubernetes.models.unversioned',
         'kubernetes.models.v1',
         'kubernetes.models.v1beta1',
+        'kubernetes.models.v2alpha1',
         'kubernetes.utils'
     ],
     install_requires=[

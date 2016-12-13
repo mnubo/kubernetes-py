@@ -18,6 +18,7 @@ class AWSElasticBlockStoreVolumeSource(object):
 
     def __init__(self, model=None):
         super(AWSElasticBlockStoreVolumeSource, self).__init__()
+
         self._fs_type = None
         self._partition = None
         self._read_only = None

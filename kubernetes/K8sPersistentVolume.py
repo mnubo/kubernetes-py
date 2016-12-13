@@ -17,6 +17,7 @@ READY_WAIT_TIMEOUT_SECONDS = 60
 
 
 class K8sPersistentVolume(K8sObject):
+
     VALID_VOLUME_TYPES = filter(lambda x: x not in ['emptyDir', 'gitRepo', 'secret'], Volume.VOLUME_TYPES_TO_SOURCE_MAP.keys())
 
     def __init__(self, config=None, name=None, type=None):
@@ -42,15 +43,20 @@ class K8sPersistentVolume(K8sObject):
         self.model = PersistentVolume(model=self.get_model())
         return self
 
+    # ------------------------------------------------------------------------------------- wait
+
     def _wait_for_available(self):
         start_time = time.time()
         while not self.model.status.phase == 'Available':
+            time.sleep(0.5)
             self.get()
-            elapsed_time = time.time() - start_time
-            if elapsed_time >= READY_WAIT_TIMEOUT_SECONDS:  # timeout
-                raise TimedOutException(
-                    "Timed out waiting on readiness of PersistentVolume: [ {} ]".format(self.name)
-                )
+            self._check_timeout(start_time)
+
+    def _check_timeout(self, start_time=None):
+        elapsed_time = time.time() - start_time
+        if elapsed_time >= READY_WAIT_TIMEOUT_SECONDS:  # timeout
+            raise TimedOutException(
+                "Timed out waiting on readiness of PersistentVolume: [ {} ]".format(self.name))
 
     # ------------------------------------------------------------------------------------- name
 

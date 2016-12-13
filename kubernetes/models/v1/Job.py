@@ -6,13 +6,13 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+from kubernetes.models.unversioned.BaseModel import BaseModel
 from kubernetes.models.v1.JobSpec import JobSpec
 from kubernetes.models.v1.JobStatus import JobStatus
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
-from kubernetes.utils import is_valid_string
 
 
-class Job(object):
+class Job(BaseModel):
     """
     http://kubernetes.io/docs/api-reference/batch/v1/definitions/#_v1_job
     """
@@ -20,11 +20,10 @@ class Job(object):
     def __init__(self, model=None):
         super(Job, self).__init__()
 
-        self._kind = 'Job'
-        self._api_version = 'batch/v1'
-        self._metadata = ObjectMeta()
-        self._spec = JobSpec()
-        self._status = None
+        self.kind = 'Job'
+        self.api_version = 'batch/v1'
+        self.spec = JobSpec()
+        self.status = JobStatus()
 
         if model is not None:
             self._build_with_model(model)
@@ -40,42 +39,6 @@ class Job(object):
             self.spec = JobSpec(model=model['spec'])
         if 'status' in model:
             self.status = JobStatus(model=model['spec'])
-
-    # --------------------------------------------------------------------------------- kind
-
-    @property
-    def kind(self):
-        return self._kind
-
-    @kind.setter
-    def kind(self, k=None):
-        if not is_valid_string(k):
-            raise SyntaxError('Job: kind: [ {} ] is invalid.'.format(k))
-        self._kind = k
-
-    # --------------------------------------------------------------------------------- apiVersion
-
-    @property
-    def api_version(self):
-        return self._api_version
-
-    @api_version.setter
-    def api_version(self, v=None):
-        if not is_valid_string(v):
-            raise SyntaxError('Job: api_version: [ {} ] is invalid.'.format(v))
-        self._api_version = v
-
-    # --------------------------------------------------------------------------------- metadata
-
-    @property
-    def metadata(self):
-        return self._metadata
-
-    @metadata.setter
-    def metadata(self, meta=None):
-        if not isinstance(meta, ObjectMeta):
-            raise SyntaxError('Job: metadata: [ {} ] is invalid.'.format(meta))
-        self._metadata = meta
 
     # --------------------------------------------------------------------------------- spec
 
@@ -104,13 +67,7 @@ class Job(object):
     # --------------------------------------------------------------------------------- serialize
 
     def serialize(self):
-        data = {}
-        if self.kind is not None:
-            data['kind'] = self.kind
-        if self.api_version is not None:
-            data['apiVersion'] = self.api_version
-        if self.metadata is not None:
-            data['metadata'] = self.metadata.serialize()
+        data = super(Job, self).serialize()
         if self.spec is not None:
             data['spec'] = self.spec.serialize()
         if self.status is not None:

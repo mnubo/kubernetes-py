@@ -16,6 +16,7 @@ class HostPathVolumeSource(object):
 
     def __init__(self, model=None):
         super(HostPathVolumeSource, self).__init__()
+
         self._path = None
 
         if model is not None:

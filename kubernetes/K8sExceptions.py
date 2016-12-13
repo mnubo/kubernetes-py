@@ -35,3 +35,8 @@ class AlreadyExistsException(Exception):
 class TimedOutException(Exception):
     def __init__(self, *args, **kwargs):
         super(TimedOutException, self).__init__(*args, **kwargs)
+
+
+class PodNotReadyException(Exception):
+    def __init__(self, *args, **kwargs):
+        super(PodNotReadyException, self).__init__(*args, **kwargs)

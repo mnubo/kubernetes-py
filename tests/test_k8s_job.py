@@ -12,6 +12,7 @@ import uuid
 from kubernetes.K8sJob import K8sJob
 from kubernetes.models.v1.Job import Job
 from kubernetes.models.v1.JobSpec import JobSpec
+from kubernetes.models.v1.JobStatus import JobStatus
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from tests import utils
 
@@ -24,6 +25,7 @@ class K8sJobTests(unittest.TestCase):
 
     def tearDown(self):
         utils.cleanup_jobs()
+        utils.cleanup_pods()
 
     # --------------------------------------------------------------------------------- init
 
@@ -71,7 +73,7 @@ class K8sJobTests(unittest.TestCase):
         self.assertIsInstance(job.model, Job)
         self.assertIsInstance(job.model.metadata, ObjectMeta)
         self.assertIsInstance(job.model.spec, JobSpec)
-        self.assertIsNone(job.model.status)
+        self.assertIsInstance(job.model.status, JobStatus)
 
     # --------------------------------------------------------------------------------- parallelism
 

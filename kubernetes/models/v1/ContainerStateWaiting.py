@@ -16,6 +16,7 @@ class ContainerStateWaiting(object):
 
     def __init__(self, model=None):
         super(ContainerStateWaiting, self).__init__()
+
         self._reason = None
         self._message = None
 

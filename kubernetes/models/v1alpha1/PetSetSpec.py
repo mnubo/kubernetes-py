@@ -6,7 +6,7 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.unversioned.LabelSelector import LabelSelector
+from kubernetes.models.v1beta1.LabelSelector import LabelSelector
 from kubernetes.models.v1.PodTemplateSpec import PodTemplateSpec
 from kubernetes.models.v1.PersistentVolumeClaim import PersistentVolumeClaim
 from kubernetes.utils import is_valid_list, is_valid_string
@@ -20,7 +20,7 @@ class PetSetSpec(object):
     def __init__(self, model=None):
         super(PetSetSpec, self).__init__()
 
-        self._replicas = 0
+        self._replicas = 1
         self._selector = LabelSelector()
         self._template = PodTemplateSpec()
         self._volume_claim_templates = []
@@ -37,15 +37,15 @@ class PetSetSpec(object):
         if 'template' in model:
             self.template = PodTemplateSpec(model=model['template'])
         if 'volumeClaimTemplates' in model:
-            _list = []
-            for claim in model['volumeClaimTemplates']:
-                vc = PersistentVolumeClaim(model=claim)
-                _list.append(vc)
-            self.volume_claim_templates = _list
+            claims = []
+            for x in model['volumeClaimTemplates']:
+                claim = PersistentVolumeClaim(model=x)
+                claims.append(claim)
+            self.volume_claim_templates = claims
         if 'serviceName' in model:
             self.service_name = model['serviceName']
 
-    # -------------------------------------------------------------------------------------  replicas
+    # ------------------------------------------------------------------------------------- replicas
 
     @property
     def replicas(self):
@@ -57,7 +57,7 @@ class PetSetSpec(object):
             raise SyntaxError('PetSetSpec: replicas: [ {} ] is invalid.'.format(r))
         self._replicas = r
 
-    # -------------------------------------------------------------------------------------  selector
+    # ------------------------------------------------------------------------------------- selector
 
     @property
     def selector(self):
@@ -69,7 +69,7 @@ class PetSetSpec(object):
             raise SyntaxError('PetSetSpec: selector: [ {} ] is invalid.'.format(s))
         self._selector = s
 
-    # -------------------------------------------------------------------------------------  template
+    # ------------------------------------------------------------------------------------- template
 
     @property
     def template(self):
@@ -81,31 +81,31 @@ class PetSetSpec(object):
             raise SyntaxError('PetSetSpec: template: [ {} ] is invalid.'.format(t))
         self._template = t
 
-    # -------------------------------------------------------------------------------------  volumeClaimTemplates
+    # ------------------------------------------------------------------------------------- volumeClaimTemplates
 
     @property
     def volume_claim_templates(self):
         return self._volume_claim_templates
 
     @volume_claim_templates.setter
-    def volume_claim_templates(self, vct=None):
-        if not is_valid_list(vct, PersistentVolumeClaim):
-            raise SyntaxError('PetSetSpec: volume_claim_templates: [ {} ] is invalid.'.format(vct))
-        self._volume_claim_templates = vct
+    def volume_claim_templates(self, t=None):
+        if not is_valid_list(t, PersistentVolumeClaim):
+            raise SyntaxError('PetSetSpec: volume_claim_templates: [ {} ] is invalid.'.format(t))
+        self._volume_claim_templates = t
 
-    # -------------------------------------------------------------------------------------  serviceName
+    # ------------------------------------------------------------------------------------- serviceName
 
     @property
     def service_name(self):
         return self._service_name
 
     @service_name.setter
-    def service_name(self, name=None):
-        if not is_valid_string(name):
-            raise SyntaxError('PetSetSpec: service_name: [ {} ] is invalid.'.format(name))
-        self._service_name = name
+    def service_name(self, sn=None):
+        if not is_valid_string(sn):
+            raise SyntaxError('PetSetSpec: service_name: [ {} ] is invalid.'.format(sn))
+        self._service_name = sn
 
-    # -------------------------------------------------------------------------------------  serialize
+    # ------------------------------------------------------------------------------------- serialize
 
     def serialize(self):
         data = {}

@@ -19,6 +19,7 @@ class ContainerState(object):
 
     def __init__(self, model=None):
         super(ContainerState, self).__init__()
+
         self._waiting = None
         self._running = None
         self._terminated = None

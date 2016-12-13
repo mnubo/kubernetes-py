@@ -14,6 +14,7 @@ class ReplicationControllerStatus(object):
 
     def __init__(self, model=None):
         super(ReplicationControllerStatus, self).__init__()
+
         self._replicas = 0
         self._fully_labeled_replicas = 0
         self._ready_replicas = 0
