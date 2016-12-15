@@ -7,6 +7,7 @@
 #
 
 import json
+
 import yaml
 
 from kubernetes.K8sVolumeMount import K8sVolumeMount
@@ -14,6 +15,7 @@ from kubernetes.models.v1.Container import Container
 from kubernetes.models.v1.ContainerPort import ContainerPort
 from kubernetes.models.v1.Probe import Probe
 from kubernetes.models.v1.ResourceRequirements import ResourceRequirements
+from kubernetes.models.v1.EnvVar import EnvVar
 
 
 class K8sContainer(object):
@@ -55,11 +57,21 @@ class K8sContainer(object):
         self.model.ports = ports
 
     def add_env(self, name=None, value=None):
-        e = {'name': name, 'value': value}
+        e = {'name': name}
+
+        if isinstance(value, dict):
+            if 'valueFrom' in value and len(value) == 1:
+                e['valueFrom'] = value['valueFrom']
+        elif isinstance(value, str):
+            e['value'] = value
+        else:
+            raise SyntaxError('K8sContainer.add_env() value: [ {} ] is invalid.')
+
+        env_var = EnvVar(model=e)
         env = self.model.env
         if env is None:
             env = []
-        env.append(e)
+        env.append(env_var)
         self.model.env = env
 
     def add_volume_mount(self, mount=None):
@@ -97,6 +109,19 @@ class K8sContainer(object):
     @command.setter
     def command(self, cmd=None):
         self.model.command = cmd
+
+    # -------------------------------------------------------------------------------------  env
+
+    @property
+    def env(self):
+        env = []
+        for x in self.model.env:
+            env.append(x)
+        return env
+
+    @env.setter
+    def env(self, env=None):
+        raise NotImplementedError()
 
     # -------------------------------------------------------------------------------------  ports
 

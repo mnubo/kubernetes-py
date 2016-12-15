@@ -24,6 +24,7 @@ VALID_K8s_OBJS = [
     'Job',
     'PersistentVolume',
     'PersistentVolumeClaim',
+    'PetSet',
     'Pod',
     'ReplicaSet',
     'ReplicationController',

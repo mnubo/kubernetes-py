@@ -26,6 +26,7 @@ from kubernetes.K8sSecret import K8sSecret
 from kubernetes.K8sService import K8sService
 from kubernetes.K8sVolume import K8sVolume
 from kubernetes.K8sVolumeMount import K8sVolumeMount
+from kubernetes.K8sPetSet import K8sPetSet
 
 kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
 
@@ -236,6 +237,16 @@ def create_daemonset(config=None, name=None):
     return obj
 
 
+def create_petset(config=None, name=None):
+    if config is None:
+        config = create_config()
+    obj = K8sPetSet(
+        config=config,
+        name=name
+    )
+    return obj
+
+
 # --------------------------------------------------------------------------------- delete
 
 def cleanup_objects():
@@ -405,6 +416,20 @@ def cleanup_ds():
                 except NotFoundException:
                     continue
             ds = ref.list()
+
+
+def cleanup_petset():
+    ref = create_petset(name="throwaway")
+    if is_reachable(ref.config.api_host):
+        ps = ref.list()
+        while len(ps) > 0:
+            for p in ps:
+                try:
+                    petset = K8sPetSet(config=ref.config, name=p['metadata']['name']).get()
+                    petset.delete()
+                except NotFoundException:
+                    continue
+            ps = ref.list()
 
 
 # --------------------------------------------------------------------------------- front-end replication controller
@@ -1055,5 +1080,157 @@ def fluentd_daemonset():
                     ]
                 }
             }
+        }
+    }
+
+
+# --------------------------------------------------------------------------------- myweb
+
+def myweb_container():
+    return {
+        "name": "myweb",
+        "image": "nginx:1.10",
+        "ports": [
+            {
+                "containerPort": 80,
+                "name": "myweb",
+                "protocol": "TCP"
+            }
+        ],
+        "volumeMounts": [
+            {
+                "name": "dockercred",
+                "mountPath": "/root/.dockercfg",
+                "readOnly": True
+            },
+            {
+                "name": "dockerbin",
+                "mountPath": "/usr/bin/docker",
+                "readOnly": True
+            },
+            {
+                "name": "dockersock",
+                "mountPath": "/var/run/docker.sock",
+                "readOnly": True
+            }
+        ],
+        "livenessProbe": {
+            "tcpSocket": {
+                "port": "myweb"
+            },
+            "initialDelaySeconds": 15,
+            "timeoutSeconds": 1
+        },
+        "readinessProbe": {
+            "httpGet": {
+                "path": "/",
+                "port": "myweb"
+            }
+        }
+    }
+
+
+def myweb_envs():
+    return {
+        "ENV": "sandbox",
+        "DATADOG_PORT_8125_UDP_ADDR": "10.0.1.1",
+        "A": {
+            "valueFrom": {
+                "fieldRef": {
+                    "fieldPath": "status.podIP"
+                }
+            }
+        },
+        "DOCKER_HOST": "tcp://$(A):2375"
+    }
+
+
+# --------------------------------------------------------------------------------- petset
+
+def nginx_service():
+    return {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+            "name": "nginx",
+            "labels": {
+                "app": "nginx"
+            }
+        },
+        "spec": {
+            "ports": [
+                {
+                    "port": 80,
+                    "name": "web"
+                }
+            ],
+            "clusterIP": "None",
+            "selector": {
+                "app": "nginx"
+            }
+        }
+    }
+
+def nginx_petset():
+    return {
+        "apiVersion": "apps/v1alpha1",
+        "kind": "PetSet",
+        "metadata": {
+            "name": "web"
+        },
+        "spec": {
+            "replicas": 2,
+            "serviceName": "nginx",
+            "template": {
+                "metadata": {
+                    "annotations": {
+                        "pod.alpha.kubernetes.io/initialized": "true"
+                    },
+                    "labels": {
+                        "app": "nginx"
+                    }
+                },
+                "spec": {
+                    "containers": [
+                        {
+                            "image": "gcr.io/google_containers/nginx-slim:0.8",
+                            "name": "nginx",
+                            "ports": [
+                                {
+                                    "containerPort": 80,
+                                    "name": "web"
+                                }
+                            ],
+                            "volumeMounts": [
+                                {
+                                    "mountPath": "/usr/share/nginx/html",
+                                    "name": "www"
+                                }
+                            ]
+                        }
+                    ],
+                    "terminationGracePeriodSeconds": 0
+                }
+            },
+            "volumeClaimTemplates": [
+                {
+                    "metadata": {
+                        "annotations": {
+                            "volume.alpha.kubernetes.io/storage-class": "anything"
+                        },
+                        "name": "www"
+                    },
+                    "spec": {
+                        "accessModes": [
+                            "ReadWriteOnce"
+                        ],
+                        "resources": {
+                            "requests": {
+                                "storage": "1Gi"
+                            }
+                        }
+                    }
+                }
+            ]
         }
     }

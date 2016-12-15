@@ -8,37 +8,37 @@
 
 from kubernetes.models.unversioned.BaseModel import BaseModel
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
-from kubernetes.models.v2alpha1.CronJobSpec import CronJobSpec
-from kubernetes.models.v2alpha1.CronJobStatus import CronJobStatus
+from kubernetes.models.v1alpha1.PetSetSpec import PetSetSpec
+from kubernetes.models.v1alpha1.PetSetStatus import PetSetStatus
 
 
-class CronJob(BaseModel):
+class PetSet(BaseModel):
     """
-    http://kubernetes.io/docs/user-guide/cron-jobs/#creating-a-cron-job
+    http://kubernetes.io/docs/api-reference/apps/v1alpha1/definitions/#_v1alpha1_petset
     """
 
     def __init__(self, model=None):
-        super(CronJob, self).__init__()
+        super(PetSet, self).__init__()
 
-        self.kind = 'ScheduledJob'
-        self.api_version = "batch/v2alpha1"
-        self.spec = CronJobSpec()
-        self.status = CronJobStatus()
+        self._kind = 'PetSet'
+        self._api_version = 'apps/v1alpha1'
+        self._spec = PetSetSpec()
+        self._status = PetSetStatus()
 
         if model is not None:
             self._build_with_model(model)
 
-    def _build_with_model(self, model=None):
-        if 'apiVersion' in model:
-            self.api_version = model['apiVersion']
+    def _build_with_model(self, model):
         if 'kind' in model:
             self.kind = model['kind']
+        if 'apiVersion' in model:
+            self.api_version = model['apiVersion']
         if 'metadata' in model:
             self.metadata = ObjectMeta(model=model['metadata'])
         if 'spec' in model:
-            self.spec = CronJobSpec(model=model['spec'])
+            self.spec = PetSetSpec(model=model['spec'])
         if 'status' in model:
-            self.status = CronJobStatus(model=model['status'])
+            self.status = PetSetStatus(model=model['status'])
 
     # ------------------------------------------------------------------------------------- spec
 
@@ -48,8 +48,8 @@ class CronJob(BaseModel):
 
     @spec.setter
     def spec(self, spec=None):
-        if not isinstance(spec, CronJobSpec):
-            raise SyntaxError('CronJob: spec: [ {} ] is invalid.'.format(spec))
+        if not isinstance(spec, PetSetSpec):
+            raise SyntaxError('PetSet: spec: [ {} ] is invalid.'.format(spec))
         self._spec = spec
 
     # ------------------------------------------------------------------------------------- status
@@ -60,14 +60,14 @@ class CronJob(BaseModel):
 
     @status.setter
     def status(self, status=None):
-        if not isinstance(status, CronJobStatus):
-            raise SyntaxError('CronJob: status: [ {} ] is invalid.'.format(status))
+        if not isinstance(status, PetSetStatus):
+            raise SyntaxError('PetSet: status: [ {} ] is invalid.'.format(status))
         self._status = status
 
     # ------------------------------------------------------------------------------------- serialize
 
     def serialize(self):
-        data = super(CronJob, self).serialize()
+        data = super(PetSet, self).serialize()
         if self.spec is not None:
             data['spec'] = self.spec.serialize()
         if self.status is not None:
