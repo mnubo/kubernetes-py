@@ -15,6 +15,7 @@ from kubernetes.utils import is_valid_list
 class K8sCronJob(K8sObject):
 
     def __init__(self, config=None, name=None):
+
         super(K8sCronJob, self).__init__(
             config=config,
             obj_type='CronJob',
@@ -153,3 +154,13 @@ class K8sCronJob(K8sObject):
             found[0].image = image
             new.append(found[0])
             self.containers = new
+
+    # -------------------------------------------------------------------------------------  restartPolicy
+
+    @property
+    def restart_policy(self):
+        return self.model.spec.job_template.spec.template.spec.restart_policy
+
+    @restart_policy.setter
+    def restart_policy(self, p=None):
+        self.model.spec.job_template.spec.template.spec.restart_policy = p
