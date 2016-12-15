@@ -56,6 +56,26 @@ class K8sCronJobTests(unittest.TestCase):
         self.assertIsInstance(rc, K8sCronJob)
         self.assertEqual(rc.name, name)
 
+    # --------------------------------------------------------------------------------- containers
+
+    def test_containers(self):
+        c_name = "redis"
+        c_image = "redis:latest"
+        c_image_2 = "redis:3.2.3"
+        container = utils.create_container(name=c_name, image=c_image)
+        name = "job-{}".format(uuid.uuid4())
+
+        cj = utils.create_cronjob(name=name)
+        cj.add_container(container)
+        self.assertEqual(1, len(cj.containers))
+        self.assertIn(c_name, cj.container_image)
+        self.assertEqual(c_image, cj.container_image[c_name])
+
+        container = utils.create_container(name=c_name, image=c_image_2)
+        cj.add_container(container)
+        self.assertEqual(1, len(cj.containers))
+        self.assertEqual(c_image_2, cj.container_image[c_name])
+
     # --------------------------------------------------------------------------------- api - create
 
     def test_api_create(self):

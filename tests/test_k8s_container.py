@@ -15,6 +15,7 @@ from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sVolumeMount import K8sVolumeMount
 from kubernetes.models.v1.Container import Container
 from kubernetes.models.v1.Probe import Probe
+import utils
 
 
 class K8sContainerTest(unittest.TestCase):
@@ -140,6 +141,17 @@ class K8sContainerTest(unittest.TestCase):
         self.assertEqual(c.readiness_probe.http_get_action.port, probe['httpGet']['port'])
         data = c.readiness_probe.serialize()
         self.assertEqual(probe, data)
+
+    # ------------------------------------------------------------------------------------- add env
+
+    def test_add_env(self):
+        cont = Container(model=utils.myweb_container())
+        k8s_container = utils.create_container(name=cont.name)
+        k8s_container.model = cont
+        envs = utils.myweb_envs()
+        for k, v in envs.items():
+            k8s_container.add_env(k, v)
+        self.assertEqual(4, len(k8s_container.env))
 
     # ------------------------------------------------------------------------------------- serialize
 

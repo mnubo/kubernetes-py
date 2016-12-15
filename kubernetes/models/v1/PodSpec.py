@@ -322,7 +322,9 @@ class PodSpec(object):
 
     @termination_grace_period_seconds.setter
     def termination_grace_period_seconds(self, secs=None):
-        if not isinstance(secs, int) or not secs > 0:
+        if isinstance(secs, str) and secs.isdigit():
+            secs = int(secs)
+        if not isinstance(secs, int) or not secs >= 0:
             raise SyntaxError('PodSpec: termination_grace_period_seconds: [ {0} ] is invalid.'.format(secs))
         self._termination_grace_period_seconds = secs
 

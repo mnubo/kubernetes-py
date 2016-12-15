@@ -72,6 +72,7 @@ def str_to_class(obj_type=None):
     import_paths = [
         "kubernetes.models.unversioned.{}".format(obj_type),
         "kubernetes.models.v1.{}".format(obj_type),
+        "kubernetes.models.v1alpha1.{}".format(obj_type),
         "kubernetes.models.v1beta1.{}".format(obj_type),
         "kubernetes.models.v2alpha1.{}".format(obj_type),
     ]
