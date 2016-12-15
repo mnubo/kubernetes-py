@@ -87,4 +87,4 @@ class K8sPersistentVolumeClaim(K8sObject):
         if not is_valid_dict(sel):
             raise SyntaxError('K8sPersistentVolumeClaim: selector: [ {} ] is invalid.'.format(sel))
         selector = LabelSelector(model=sel)
-        self.model.spec.resources = selector
+        self.model.spec.selector = selector
