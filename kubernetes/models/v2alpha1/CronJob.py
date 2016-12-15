@@ -20,7 +20,7 @@ class CronJob(BaseModel):
     def __init__(self, model=None):
         super(CronJob, self).__init__()
 
-        self.kind = 'CronJob'
+        self.kind = 'ScheduledJob'
         self.api_version = "batch/v2alpha1"
         self.spec = CronJobSpec()
         self.status = CronJobStatus()
