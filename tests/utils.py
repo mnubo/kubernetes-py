@@ -27,6 +27,7 @@ from kubernetes.K8sService import K8sService
 from kubernetes.K8sVolume import K8sVolume
 from kubernetes.K8sVolumeMount import K8sVolumeMount
 from kubernetes.K8sPetSet import K8sPetSet
+from kubernetes.K8sServiceAccount import K8sServiceAccount
 
 kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
 
@@ -79,15 +80,8 @@ def _is_api_server(service=None):
 
 # --------------------------------------------------------------------------------- create
 
-def create_container(model=None, name=None, image="redis"):
-    if model is None:
-        obj = K8sContainer(
-            name=name,
-            image=image
-        )
-    else:
-        obj = K8sContainer(model=model)
-    return obj
+def create_container(name=None, image="redis"):
+    return K8sContainer(name=name, image=image)
 
 
 def create_config():
@@ -247,6 +241,16 @@ def create_petset(config=None, name=None):
     return obj
 
 
+def create_service_account(config=None, name=None):
+    if config is None:
+        config = create_config()
+    obj = K8sServiceAccount(
+        config=config,
+        name=name
+    )
+    return obj
+
+
 # --------------------------------------------------------------------------------- delete
 
 def cleanup_objects():
@@ -265,174 +269,195 @@ def cleanup_objects():
 def cleanup_pods():
     ref = create_pod(name="throwaway")
     if is_reachable(ref.config.api_host):
-        pods = ref.list()
-        while len(pods) > 0:
-            for p in pods:
+        _list = ref.list()
+        while len(_list) > 0:
+            for p in _list:
                 try:
                     pod = K8sPod(config=ref.config, name=p['metadata']['name']).get()
                     pod.delete()
                 except NotFoundException:
                     continue
-            pods = ref.list()
+            _list = ref.list()
 
 
 def cleanup_rc():
     ref = create_rc(name="throwaway")
     if is_reachable(ref.config.api_host):
-        rcs = ref.list()
-        while len(rcs) > 0:
-            for rc in rcs:
+        _list = ref.list()
+        while len(_list) > 0:
+            for rc in _list:
                 try:
                     obj = K8sReplicationController(config=ref.config, name=rc['metadata']['name']).get()
                     obj.delete()
                 except NotFoundException:
                     continue
-            rcs = ref.list()
+            _list = ref.list()
 
 
 def cleanup_secrets():
     ref = create_secret(name="throwaway")
     if is_reachable(ref.config.api_host):
-        secrets = ref.list()
-        while len(secrets) > 1:
-            for secret in secrets:
+        _list = ref.list()
+        while len(_list) > 1:
+            for secret in _list:
                 try:
                     obj = K8sSecret(config=ref.config, name=secret['metadata']['name']).get()
                     if 'service-account-token' != obj.type:
                         obj.delete()
                 except NotFoundException:
                     continue
-            secrets = ref.list()
+            _list = ref.list()
 
 
 def cleanup_services():
     ref = create_service(name="throwaway")
     if is_reachable(ref.config.api_host):
-        services = ref.list()
-        while len(services) > 1:
-            for service in services:
+        _list = ref.list()
+        while len(_list) > 1:
+            for service in _list:
                 try:
                     obj = K8sService(config=ref.config, name=service['metadata']['name']).get()
                     if not _is_api_server(service):
                         obj.delete()
                 except NotFoundException:
                     continue
-            services = ref.list()
+            _list = ref.list()
 
 
 def cleanup_rs():
     ref = create_rs(name="throwaway")
     if is_reachable(ref.config.api_host):
-        rs_list = ref.list()
-        while len(rs_list) > 0:
-            for rs in rs_list:
+        _list = ref.list()
+        while len(_list) > 0:
+            for rs in _list:
                 try:
                     obj = K8sReplicaSet(config=ref.config, name=rs['metadata']['name']).get()
                     obj.delete()
                 except NotFoundException:
                     continue
-            rs_list = ref.list()
+            _list = ref.list()
 
 
 def cleanup_deployments():
     ref = create_deployment(name="throwaway")
     if is_reachable(ref.config.api_host):
-        deps = ref.list()
-        while len(deps) > 0:
-            for d in deps:
+        _list = ref.list()
+        while len(_list) > 0:
+            for d in _list:
                 try:
                     obj = K8sDeployment(config=ref.config, name=d['metadata']['name']).get()
                     obj.delete()
                 except NotFoundException:
                     continue
-            deps = ref.list()
+            _list = ref.list()
 
 
 def cleanup_pv():
     ref = create_pv(name="throwaway", type="hostPath")
     if is_reachable(ref.config.api_host):
-        vols = ref.list()
-        while len(vols) > 0:
-            for v in vols:
+        _list = ref.list()
+        while len(_list) > 0:
+            for v in _list:
                 try:
                     vol = K8sPersistentVolume(config=ref.config, name=v['metadata']['name'], type=ref.type).get()
                     vol.delete()
                 except NotFoundException:
                     continue
-            vols = ref.list()
+            _list = ref.list()
 
 
 def cleanup_pvc():
     ref = create_pvc(name="throwaway")
     if is_reachable(ref.config.api_host):
-        claims = ref.list()
-        while len(claims) > 0:
-            for c in claims:
+        _list = ref.list()
+        while len(_list) > 0:
+            for c in _list:
                 try:
                     claim = K8sPersistentVolumeClaim(config=ref.config, name=c['metadata']['name']).get()
                     claim.delete()
                 except NotFoundException:
                     continue
-            claims = ref.list()
+            _list = ref.list()
 
 
 def cleanup_jobs():
     ref = create_job(name="throwaway")
     if is_reachable(ref.config.api_host):
-        jobs = ref.list()
-        while len(jobs) > 0:
-            for j in jobs:
+        _list = ref.list()
+        while len(_list) > 0:
+            for j in _list:
                 try:
                     job = K8sJob(config=ref.config, name=j['metadata']['name']).get()
                     job.delete()
                 except NotFoundException:
                     continue
-            jobs = ref.list()
+            _list = ref.list()
 
 
 def cleanup_cronjobs():
     ref = create_cronjob(name="throwaway")
     if is_reachable(ref.config.api_host):
-        jobs = ref.list()
-        while len(jobs) > 0:
-            for j in jobs:
+        _list = ref.list()
+        while len(_list) > 0:
+            for j in _list:
                 try:
                     job = K8sCronJob(config=ref.config, name=j['metadata']['name']).get()
                     job.delete()
                 except NotFoundException:
                     continue
-            jobs = ref.list()
+            _list = ref.list()
 
 
 def cleanup_ds():
     ref = create_daemonset(name="throwaway")
     if is_reachable(ref.config.api_host):
-        ds = ref.list()
-        while len(ds) > 0:
-            for d in ds:
+        _list = ref.list()
+        while len(_list) > 0:
+            for d in _list:
                 try:
                     dset = K8sDaemonSet(config=ref.config, name=d['metadata']['name']).get()
                     dset.delete()
                 except NotFoundException:
                     continue
-            ds = ref.list()
+            _list = ref.list()
 
 
 def cleanup_petset():
     ref = create_petset(name="throwaway")
     if is_reachable(ref.config.api_host):
-        ps = ref.list()
-        while len(ps) > 0:
-            for p in ps:
+        _list = ref.list()
+        while len(_list) > 0:
+            for p in _list:
                 try:
                     petset = K8sPetSet(config=ref.config, name=p['metadata']['name']).get()
                     petset.delete()
                 except NotFoundException:
                     continue
-            ps = ref.list()
+            _list = ref.list()
 
+
+def cleanup_service_accounts():
+    ref = create_service_account(name="throwaway")
+    if is_reachable(ref.config.api_host):
+        _list = ref.list()
+        try:
+            while len(_list) > 0:
+                for p in _list:
+                    try:
+                        name = p['metadata']['name']
+                        if name != 'default':
+                            sa = K8sServiceAccount(config=ref.config, name=name).get()
+                            sa.delete()
+                        if len(_list) == 1 and name == 'default':
+                            raise StopIteration
+                    except NotFoundException:
+                        continue
+                _list = ref.list()
+        except StopIteration:
+            pass
 
 # --------------------------------------------------------------------------------- front-end replication controller
+
 
 def frontend():
     return {

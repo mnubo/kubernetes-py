@@ -40,6 +40,7 @@ class BaseUrls(object):
         self.urls['PersistentVolumeClaim'] = '/api/{0}/namespaces/{1}/persistentvolumeclaims'.format(api, namespace)
         self.urls['ReplicationController'] = '/api/{0}/namespaces/{1}/replicationcontrollers'.format(api, namespace)
         self.urls['Service'] = '/api/{0}/namespaces/{1}/services'.format(api, namespace)
+        self.urls['ServiceAccount'] = '/api/{0}/namespaces/{1}/serviceaccounts'.format(api, namespace)
         self.urls['Secret'] = '/api/{0}/namespaces/{1}/secrets'.format(api, namespace)
 
         # apps
