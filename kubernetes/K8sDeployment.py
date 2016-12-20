@@ -79,7 +79,7 @@ class K8sDeployment(K8sObject):
         elapsed_time = time.time() - start_time
         if elapsed_time >= self.SCALE_WAIT_TIMEOUT_SECONDS:  # timeout
             raise TimedOutException(
-                "Timed out scaling Deployment: [ {} ] to replica count: [ {1} ]".format(
+                "Timed out scaling Deployment: [ {} ] to replica count: [ {} ]".format(
                     self.name,
                     self.desired_replicas))
 
