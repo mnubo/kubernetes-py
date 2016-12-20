@@ -220,8 +220,8 @@ class K8sObject(object):
         if not state.get('success'):
             status = state.get('status', '')
             reason = state.get('data', dict()).get('message', None)
-            message = 'K8sObject: GET [ {0}:{1} ] failed: HTTP {2} : {3} '.format(self.obj_type, self.name, status,
-                                                                                  reason)
+            message = 'K8sObject: GET [ {0}:{1} ] failed: HTTP {2} : {3} '.format(
+                self.obj_type, self.name, status, reason)
             raise NotFoundException(message)
 
         model = state.get('data')
