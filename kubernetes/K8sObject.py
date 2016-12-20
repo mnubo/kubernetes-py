@@ -268,7 +268,8 @@ class K8sObject(object):
         self.model.metadata.strip(self.model.kind)  # strip server-generated metadata before posting updates
 
         url = '{base}/{name}'.format(base=self.base_url, name=self.name)
-        state = self.request(method='PUT', url=url, data=self.serialize())
+        post_data = self.serialize()
+        state = self.request(method='PUT', url=url, data=post_data)
 
         if not state.get('success'):
             status = state.get('status', '')
