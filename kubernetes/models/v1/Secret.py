@@ -24,6 +24,7 @@ class Secret(BaseModel):
 
         self.kind = 'Secret'
         self.api_version = 'v1'
+
         self._data = {}
         self._string_data = None
         self._type = None

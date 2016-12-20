@@ -37,6 +37,13 @@ class K8sServiceAccount(K8sObject):
         self.get()
         return self
 
+    # ------------------------------------------------------------------------------------- add API token
+
+    def add_api_token(self):
+        return K8sSecret.create_service_account_api_token(
+            config=self.config,
+            name=self.name)
+
     # ------------------------------------------------------------------------------------- secrets
 
     @property

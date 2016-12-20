@@ -10,6 +10,7 @@ import uuid
 import unittest
 
 from kubernetes.K8sConfig import K8sConfig
+from kubernetes.K8sSecret import K8sSecret
 from kubernetes.K8sServiceAccount import K8sServiceAccount
 import utils
 
@@ -70,9 +71,20 @@ class K8sServiceAccountTests(unittest.TestCase):
     # --------------------------------------------------------------------------------- api - create
 
     def test_create(self):
-        name = "mnubo.com-{0}".format(str(uuid.uuid4().get_hex()[:4]))
+        name = "mnubo.com-sa-{0}".format(str(uuid.uuid4().get_hex()[:4]))
         acct = utils.create_service_account(name=name)
         if utils.is_reachable(acct.config.api_host):
             acct.create()
             from_get = acct.get()
             self.assertEqual(acct, from_get)
+
+    # --------------------------------------------------------------------------------- api - add API token
+
+    def test_add_api_token(self):
+        name = "mnubo.com-sa-{0}".format(str(uuid.uuid4().get_hex()[:4]))
+        acct = utils.create_service_account(name=name)
+        if utils.is_reachable(acct.config.api_host):
+            acct.create()
+            acct.add_api_token()
+            secrets = K8sSecret.api_tokens_for_service_account(config=acct.config, name=acct.name)
+            self.assertEqual(2, len(secrets))

@@ -38,6 +38,32 @@ class K8sSecret(K8sObject):
         self.get()
         return self
 
+    # -------------------------------------------------------------------------------------  service accounts
+
+    @staticmethod
+    def create_service_account_api_token(config=None, name=None):
+        s = Secret()
+        s.name = "{}-secret".format(name)
+        s.add_annotation('kubernetes.io/service-account.name', name)
+        s.type = 'kubernetes.io/service-account-token'
+        k8s = K8sSecret(config=config, name=s.name)
+        k8s.model = s
+        k8s.create()
+        return k8s
+
+    @staticmethod
+    def api_tokens_for_service_account(config=None, name=None):
+        _list = K8sSecret(config=config, name="throwaway").list()
+        _tokens = []
+        for x in _list:
+            s = Secret(model=x)
+            if s.type == 'kubernetes.io/service-account-token':
+                if s.metadata.annotations['kubernetes.io/service-account.name'] == name:
+                    k8s = K8sSecret(config=config, name=s.name)
+                    k8s.model = s
+                    _tokens.append(k8s)
+        return _tokens
+
     # ------------------------------------------------------------------------------------- data
 
     @property
