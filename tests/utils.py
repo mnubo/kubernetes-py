@@ -8,6 +8,7 @@
 
 import os
 import socket
+import re
 
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sContainer import K8sContainer
@@ -297,16 +298,24 @@ def cleanup_rc():
 def cleanup_secrets():
     ref = create_secret(name="throwaway")
     if is_reachable(ref.config.api_host):
-        _list = ref.list()
-        while len(_list) > 1:
-            for secret in _list:
-                try:
-                    obj = K8sSecret(config=ref.config, name=secret['metadata']['name']).get()
-                    if 'service-account-token' != obj.type:
-                        obj.delete()
-                except NotFoundException:
-                    continue
+        try:
             _list = ref.list()
+            while len(_list) > 0:
+                for secret in _list:
+                    try:
+                        name = secret['metadata']['name']
+                        obj = K8sSecret(config=ref.config, name=name).get()
+                        if obj.type != 'kubernetes.io/service-account-token':
+                            obj.delete()
+                        if obj.type == 'kubernetes.io/service-account-token' and not re.search(r'default', name):
+                            obj.delete()
+                        if len(_list) == 1 and re.search(r'default', name):
+                            raise StopIteration
+                    except NotFoundException:
+                        continue
+                _list = ref.list()
+        except StopIteration:
+            pass
 
 
 def cleanup_services():
