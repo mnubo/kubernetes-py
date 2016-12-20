@@ -6,6 +6,7 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+import uuid
 import unittest
 
 from kubernetes.K8sConfig import K8sConfig
@@ -17,9 +18,11 @@ class K8sServiceAccountTests(unittest.TestCase):
 
     def setUp(self):
         utils.cleanup_service_accounts()
+        utils.cleanup_secrets()
 
     def tearDown(self):
         utils.cleanup_service_accounts()
+        utils.cleanup_secrets()
 
     # --------------------------------------------------------------------------------- init
 
@@ -63,3 +66,13 @@ class K8sServiceAccountTests(unittest.TestCase):
         self.assertEqual(secret.name, name)
         self.assertEqual(secret.config.namespace, nspace)
         self.assertEqual('ServiceAccount', secret.obj_type)
+
+    # --------------------------------------------------------------------------------- api - create
+
+    def test_create(self):
+        name = "mnubo.com-{0}".format(str(uuid.uuid4().get_hex()[:4]))
+        acct = utils.create_service_account(name=name)
+        if utils.is_reachable(acct.config.api_host):
+            acct.create()
+            from_get = acct.get()
+            self.assertEqual(acct, from_get)
