@@ -7,7 +7,7 @@
 #
 
 import json
-import yaml
+import uuid
 
 from kubernetes.K8sObject import K8sObject
 from kubernetes.models.v1.Secret import Secret
@@ -37,6 +37,45 @@ class K8sSecret(K8sObject):
         super(K8sSecret, self).update()
         self.get()
         return self
+
+    # -------------------------------------------------------------------------------------  image pull secrets
+
+    @staticmethod
+    def create_image_pull_secret(config=None, prefix=None, name=None, data=None):
+        s = Secret()
+
+        if name is not None:
+            s.name = name
+        elif name is None and prefix is not None:
+            s.name = "{0}-docker-{1}".format(prefix, str(uuid.uuid4().get_hex()[:5]))
+        else:
+            s.name = "docker-{0}".format(str(uuid.uuid4().get_hex()[:5]))
+
+        s.dockerconfigjson = data
+        k8s = K8sSecret(config=config, name=s.name)
+        k8s.model = s
+        k8s.create()
+        return k8s
+
+    @staticmethod
+    def list_image_pull_secrets(config=None):
+        _list = K8sSecret(config=config, name="throwaway").list()
+        _secrets = []
+        for x in _list:
+            s = Secret(model=x)
+            if s.type == 'kubernetes.io/dockerconfigjson':
+                k8s = K8sSecret(config=config, name=s.name)
+                k8s.model = s
+                _secrets.append(k8s)
+        return _secrets
+
+    @staticmethod
+    def image_pull_secret_with_name(config=None, name=None):
+        _secrets = K8sSecret.list_image_pull_secrets(config=config)
+        _list = filter(lambda x: x.name == name, _secrets)
+        if len(_list):
+            return _list[0]
+        return None
 
     # -------------------------------------------------------------------------------------  service accounts
 

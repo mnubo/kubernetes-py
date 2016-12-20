@@ -9,6 +9,7 @@
 from kubernetes.K8sObject import K8sObject
 from kubernetes.K8sSecret import K8sSecret
 from kubernetes.models.v1.ServiceAccount import ServiceAccount
+from kubernetes.models.v1.LocalObjectReference import LocalObjectReference
 
 
 class K8sServiceAccount(K8sObject):
@@ -37,12 +38,23 @@ class K8sServiceAccount(K8sObject):
         self.get()
         return self
 
-    # ------------------------------------------------------------------------------------- add API token
+    # ------------------------------------------------------------------------------------- add
 
     def add_api_token(self):
         return K8sSecret.create_service_account_api_token(
             config=self.config,
-            name=self.name)
+            name=self.name
+        )
+
+    def add_image_pull_secret(self, secret=None):
+        if not isinstance(secret, K8sSecret):
+            raise SyntaxError('K8sServiceAccount.add_image_pull_secret() secret: [ {} ] is invalid.'.format(secret))
+        ref = LocalObjectReference()
+        ref.name = secret.name
+        refs = self.image_pull_secrets_refs
+        refs.append(ref)
+        self.image_pull_secrets = refs
+        self.update()
 
     # ------------------------------------------------------------------------------------- secrets
 
@@ -62,9 +74,23 @@ class K8sServiceAccount(K8sObject):
     # ------------------------------------------------------------------------------------- imagePullSecrets
 
     @property
+    def image_pull_secrets_refs(self):
+        refs = self.model.image_pull_secrets
+        return refs
+
+    @image_pull_secrets_refs.setter
+    def image_pull_secrets_refs(self, s=None):
+        raise NotImplementedError()
+
+    @property
     def image_pull_secrets(self):
-        return self.model.image_pull_secrets
+        refs = self.model.image_pull_secrets
+        secrets = []
+        for ref in refs:
+            s = K8sSecret(config=self.config, name=ref.name).get()
+            secrets.append(s)
+        return secrets
 
     @image_pull_secrets.setter
     def image_pull_secrets(self, s=None):
-        raise NotImplementedError()
+        self.model.image_pull_secrets = s

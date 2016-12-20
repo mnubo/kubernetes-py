@@ -71,7 +71,7 @@ class K8sServiceAccountTests(unittest.TestCase):
     # --------------------------------------------------------------------------------- api - create
 
     def test_create(self):
-        name = "mnubo.com-sa-{0}".format(str(uuid.uuid4().get_hex()[:4]))
+        name = "mnubo.com-sa-{0}".format(str(uuid.uuid4().get_hex()[:5]))
         acct = utils.create_service_account(name=name)
         if utils.is_reachable(acct.config.api_host):
             acct.create()
@@ -81,10 +81,23 @@ class K8sServiceAccountTests(unittest.TestCase):
     # --------------------------------------------------------------------------------- api - add API token
 
     def test_add_api_token(self):
-        name = "mnubo.com-sa-{0}".format(str(uuid.uuid4().get_hex()[:4]))
+        name = "mnubo.com-sa-{0}".format(str(uuid.uuid4().get_hex()[:5]))
         acct = utils.create_service_account(name=name)
         if utils.is_reachable(acct.config.api_host):
             acct.create()
             acct.add_api_token()
             secrets = K8sSecret.api_tokens_for_service_account(config=acct.config, name=acct.name)
             self.assertEqual(2, len(secrets))
+
+    # --------------------------------------------------------------------------------- api - add image pull secret
+
+    def test_add_image_pull_secret(self):
+        name = "mnubo.com-sa-{0}".format(str(uuid.uuid4().get_hex()[:5]))
+        acct = utils.create_service_account(name=name)
+        data = {"auths": {"repo:port": {"auth": "authstring", "email": "you@company.com"}}}
+        if utils.is_reachable(acct.config.api_host):
+            acct.create()
+            secret = K8sSecret.create_image_pull_secret(config=acct.config, name=acct.name, data=data)
+            acct.add_image_pull_secret(secret)
+            secrets = K8sSecret.list_image_pull_secrets()
+            self.assertEqual(1, len(secrets))
