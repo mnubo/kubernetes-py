@@ -7,12 +7,14 @@
 #
 
 from kubernetes.K8sObject import K8sObject
+from kubernetes.K8sSecret import K8sSecret
 from kubernetes.models.v1.ServiceAccount import ServiceAccount
 
 
 class K8sServiceAccount(K8sObject):
 
     def __init__(self, config=None, name=None):
+
         super(K8sServiceAccount, self).__init__(
             config=config,
             name=name,
@@ -34,3 +36,28 @@ class K8sServiceAccount(K8sObject):
         super(K8sServiceAccount, self).update()
         self.get()
         return self
+
+    # ------------------------------------------------------------------------------------- secrets
+
+    @property
+    def secrets(self):
+        refs = self.model.secrets
+        secrets = []
+        for ref in refs:
+            s = K8sSecret(config=self.config, name=ref.name).get()
+            secrets.append(s)
+        return secrets
+
+    @secrets.setter
+    def secrets(self, s=None):
+        raise NotImplementedError()
+
+    # ------------------------------------------------------------------------------------- imagePullSecrets
+
+    @property
+    def image_pull_secrets(self):
+        return self.model.image_pull_secrets
+
+    @image_pull_secrets.setter
+    def image_pull_secrets(self, s=None):
+        raise NotImplementedError()
