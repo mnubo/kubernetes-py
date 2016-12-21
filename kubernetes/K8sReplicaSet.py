@@ -26,5 +26,5 @@ class K8sReplicaSet(K8sObject):
     # -------------------------------------------------------------------------------------  get
 
     def get(self):
-        self.model = ReplicaSet(model=self.get_model())
+        self.model = ReplicaSet(self.get_model())
         return self

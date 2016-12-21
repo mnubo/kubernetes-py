@@ -33,13 +33,13 @@ class PetSetSpec(object):
         if 'replicas' in model:
             self.replicas = model['replicas']
         if 'selector' in model:
-            self.selector = LabelSelector(model=model['selector'])
+            self.selector = LabelSelector(model['selector'])
         if 'template' in model:
-            self.template = PodTemplateSpec(model=model['template'])
+            self.template = PodTemplateSpec(model['template'])
         if 'volumeClaimTemplates' in model:
             claims = []
             for x in model['volumeClaimTemplates']:
-                claim = PersistentVolumeClaim(model=x)
+                claim = PersistentVolumeClaim(x)
                 claims.append(claim)
             self.volume_claim_templates = claims
         if 'serviceName' in model:

@@ -38,11 +38,11 @@ class Probe(object):
 
     def _build_with_model(self, model=None):
         if 'exec' in model:
-            self.exec_action = ExecAction(model=model['execAction'])
+            self.exec_action = ExecAction(model['execAction'])
         if 'httpGet' in model:
-            self.http_get_action = HTTPGetAction(model=model['httpGet'])
+            self.http_get_action = HTTPGetAction(model['httpGet'])
         if 'tcpSocket' in model:
-            self.tcp_socket_action = TCPSocketAction(model=model['tcpSocket'])
+            self.tcp_socket_action = TCPSocketAction(model['tcpSocket'])
         if 'initialDelaySeconds' in model:
             self.initial_delay_seconds = model['initialDelaySeconds']
         if 'timeoutSeconds' in model:

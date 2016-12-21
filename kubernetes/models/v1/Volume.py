@@ -66,31 +66,30 @@ class Volume(object):
             self._build_with_model(m)
 
     def __eq__(self, other):
-        # see https://github.com/kubernetes/kubernetes/blob/release-1.3/docs/design/identifiers.md
+        # see https://github.com/kubernetes/kubernetes/blob/master/docs/design/identifiers.md
         if isinstance(other, self.__class__):
-            # Uniquely name (via a name) an object across space.
             return self.name == other.name
         return NotImplemented
 
     def _build_with_model(self, model=None):
         if 'awsElasticBlockStore' in model:
-            self.awsElasticBlockStore = AWSElasticBlockStoreVolumeSource(model=model['awsElasticBlockStore'])
+            self.awsElasticBlockStore = AWSElasticBlockStoreVolumeSource(model['awsElasticBlockStore'])
         if 'emptyDir' in model:
-            self.emptyDir = EmptyDirVolumeSource(model=model['emptyDir'])
+            self.emptyDir = EmptyDirVolumeSource(model['emptyDir'])
         if 'gcePersistentDisk' in model:
-            self.gcePersistentDisk = GCEPersistentDiskVolumeSource(model=model['gcePersistentDisk'])
+            self.gcePersistentDisk = GCEPersistentDiskVolumeSource(model['gcePersistentDisk'])
         if 'gitRepo' in model:
-            self.gitRepo = GitRepoVolumeSource(model=model['gitRepo'])
+            self.gitRepo = GitRepoVolumeSource(model['gitRepo'])
         if 'hostPath' in model:
-            self.hostPath = HostPathVolumeSource(model=model['hostPath'])
+            self.hostPath = HostPathVolumeSource(model['hostPath'])
         if 'name' in model:
             self.name = model['name']
         if 'nfs' in model:
-            self.nfs = NFSVolumeSource(model=model['nfs'])
+            self.nfs = NFSVolumeSource(model['nfs'])
         if 'secret' in model:
-            self.secret = SecretVolumeSource(model=model['secret'])
+            self.secret = SecretVolumeSource(model['secret'])
         if 'persistentVolumeClaim' in model:
-            self.persistentVolumeClaim = PersistentVolumeClaimVolumeSource(model=model['persistentVolumeClaim'])
+            self.persistentVolumeClaim = PersistentVolumeClaimVolumeSource(model['persistentVolumeClaim'])
 
     @staticmethod
     def vol_type_to_source(vol_type=None):

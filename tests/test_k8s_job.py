@@ -193,7 +193,7 @@ class K8sJobTests(unittest.TestCase):
 
     def test_api_create(self):
         name = "job-{}".format(uuid.uuid4())
-        job = Job(model=utils.job())
+        job = Job(utils.job())
         k8s_job = utils.create_job(name=name)
         k8s_job.model = job
         if utils.is_reachable(k8s_job.config.api_host):
@@ -204,7 +204,7 @@ class K8sJobTests(unittest.TestCase):
 
     def test_api_update(self):
         name = "job-{}".format(uuid.uuid4())
-        job = Job(model=utils.job())
+        job = Job(utils.job())
         k8s_job = utils.create_job(name=name)
         k8s_job.model = job
         k8s_job.completions = 30
@@ -218,7 +218,7 @@ class K8sJobTests(unittest.TestCase):
 
     def test_api_scale(self):
         name = "job-{}".format(uuid.uuid4())
-        job = Job(model=utils.job())
+        job = Job(utils.job())
         k8s_job = utils.create_job(name=name)
         k8s_job.model = job
         k8s_job.completions = 30

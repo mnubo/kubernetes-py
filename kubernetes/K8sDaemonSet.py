@@ -35,5 +35,5 @@ class K8sDaemonSet(K8sObject):
     # -------------------------------------------------------------------------------------  get
 
     def get(self):
-        self.model = DaemonSet(model=self.get_model())
+        self.model = DaemonSet(self.get_model())
         return self

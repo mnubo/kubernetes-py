@@ -38,11 +38,11 @@ class JobSpec(object):
         if 'activeDeadlineSeconds' in model:
             self.active_deadline_seconds = model['activeDeadlineSeconds']
         if 'selector' in model:
-            self.selector = LabelSelector(model=model['selector'])
+            self.selector = LabelSelector(model['selector'])
         if 'manualSelector' in model:
             self.manual_selector = model['manualSelector']
         if 'template' in model:
-            self.template = PodTemplateSpec(model=model['template'])
+            self.template = PodTemplateSpec(model['template'])
 
     # --------------------------------------------------------------------------------- parallelism
 

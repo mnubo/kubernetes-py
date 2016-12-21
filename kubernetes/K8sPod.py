@@ -86,7 +86,7 @@ class K8sPod(K8sObject):
     # ------------------------------------------------------------------------------------- get
 
     def get(self):
-        self.model = Pod(model=self.get_model())
+        self.model = Pod(self.get_model())
         return self
 
     # ------------------------------------------------------------------------------------- polling readiness
@@ -317,7 +317,7 @@ class K8sPod(K8sObject):
 
         for pod in pods:
             try:
-                p = Pod(model=pod)
+                p = Pod(pod)
                 k8s_pod = K8sPod(config=config, name=p.metadata.name).get()
                 pod_list.append(k8s_pod)
             except NotFoundException:
@@ -340,7 +340,7 @@ class K8sPod(K8sObject):
 
         for pod in pods:
             try:
-                p = Pod(model=pod)
+                p = Pod(pod)
                 k8s_pod = K8sPod(config=config, name=p.metadata.name).get()
                 pod_list.append(k8s_pod)
             except NotFoundException:

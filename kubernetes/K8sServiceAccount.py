@@ -25,7 +25,7 @@ class K8sServiceAccount(K8sObject):
     # -------------------------------------------------------------------------------------  override
 
     def get(self):
-        self.model = ServiceAccount(model=self.get_model())
+        self.model = ServiceAccount(self.get_model())
         return self
 
     def create(self):

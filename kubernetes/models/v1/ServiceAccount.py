@@ -34,13 +34,13 @@ class ServiceAccount(BaseModel):
         if 'secrets' in model:
             secrets = []
             for x in model['secrets']:
-                s = ObjectReference(model=x)
+                s = ObjectReference(x)
                 secrets.append(s)
             self.secrets = secrets
         if 'imagePullSecrets' in model:
             secrets = []
             for x in model['imagePullSecrets']:
-                s = LocalObjectReference(model=x)
+                s = LocalObjectReference(x)
                 secrets.append(s)
             self.image_pull_secrets = secrets
 

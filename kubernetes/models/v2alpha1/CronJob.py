@@ -34,11 +34,11 @@ class CronJob(BaseModel):
         if 'kind' in model:
             self.kind = model['kind']
         if 'metadata' in model:
-            self.metadata = ObjectMeta(model=model['metadata'])
+            self.metadata = ObjectMeta(model['metadata'])
         if 'spec' in model:
-            self.spec = CronJobSpec(model=model['spec'])
+            self.spec = CronJobSpec(model['spec'])
         if 'status' in model:
-            self.status = CronJobStatus(model=model['status'])
+            self.status = CronJobStatus(model['status'])
 
     # ------------------------------------------------------------------------------------- spec
 

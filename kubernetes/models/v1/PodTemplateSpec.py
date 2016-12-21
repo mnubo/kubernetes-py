@@ -26,9 +26,9 @@ class PodTemplateSpec(object):
 
     def _build_with_model(self, model=None):
         if 'metadata' in model:
-            self.metadata = ObjectMeta(model=model['metadata'])
+            self.metadata = ObjectMeta(model['metadata'])
         if 'spec' in model:
-            self.spec = PodSpec(model=model['spec'])
+            self.spec = PodSpec(model['spec'])
 
     # ------------------------------------------------------------------------------------- metadata
 

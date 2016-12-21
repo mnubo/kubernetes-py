@@ -35,15 +35,15 @@ class CloudNativeCassandraTests(unittest.TestCase):
         utils.cleanup_pods()
 
     def test_cassandra_setup(self):
-        svc = Service(model=utils.cassandra_service())
+        svc = Service(utils.cassandra_service())
         k8s_service = utils.create_service(name="cassandra")
         k8s_service.model = svc
 
-        rc = ReplicationController(model=utils.cassandra_rc())
+        rc = ReplicationController(utils.cassandra_rc())
         k8s_rc = utils.create_rc(name="cassandra")
         k8s_rc.model = rc
 
-        ds = DaemonSet(model=utils.cassandra_daemonset())
+        ds = DaemonSet(utils.cassandra_daemonset())
         k8s_ds = utils.create_daemonset(name="cassandra")
         k8s_ds.model = ds
 

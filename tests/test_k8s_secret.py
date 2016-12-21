@@ -329,7 +329,7 @@ class K8sSecretTest(unittest.TestCase):
             self.assertGreaterEqual(1, len(_list))  # service-account-token on GCE
             secrets = []
             for x in _list:
-                s = Secret(model=x)
+                s = Secret(x)
                 k8s = K8sSecret(config=secret.config, name=x['metadata']['name'])
                 k8s.model = s
                 secrets.append(k8s)

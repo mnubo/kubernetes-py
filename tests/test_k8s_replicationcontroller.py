@@ -1344,7 +1344,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
     def test_update_from_full_model_with_liveness_probes(self):
         data = utils.frontend()
 
-        rc = ReplicationController(model=data)
+        rc = ReplicationController(data)
         k8s_rc = utils.create_rc(name=rc.metadata.name)
         k8s_rc.model = rc
         self.assertEqual(1, len(k8s_rc.liveness_probes))
@@ -1381,7 +1381,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
     def test_update_from_full_model_with_readiness_probes(self):
         data = utils.frontend()
 
-        rc = ReplicationController(model=data)
+        rc = ReplicationController(data)
         k8s_rc = utils.create_rc(name=rc.metadata.name)
         k8s_rc.model = rc
         self.assertEqual(1, len(k8s_rc.liveness_probes))
@@ -1447,7 +1447,7 @@ class K8sReplicationControllerTest(unittest.TestCase):
 
     def test_create_from_full_model(self):
         model = utils.admintool()
-        model = ReplicationController(model=model)
+        model = ReplicationController(model)
         self.assertIsInstance(model, ReplicationController)
 
         rc = utils.create_rc(name=model.metadata.name)

@@ -35,13 +35,13 @@ class PodStatus(object):
         if 'conditions' in model:
             conditions = []
             for c in model['conditions']:
-                condition = PodCondition(model=c)
+                condition = PodCondition(c)
                 conditions.append(condition)
             self.conditions = conditions
         if 'containerStatuses' in model:
             statuses = []
             for s in model['containerStatuses']:
-                status = ContainerStatus(model=s)
+                status = ContainerStatus(s)
                 statuses.append(status)
             self.container_statuses = statuses
         if 'phase' in model:

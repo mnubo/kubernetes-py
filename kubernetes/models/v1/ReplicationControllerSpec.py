@@ -31,7 +31,7 @@ class ReplicationControllerSpec(object):
         if 'selector' in model:
             self.selector = model['selector']
         if 'template' in model:
-            self.template = PodTemplateSpec(model=model['template'])
+            self.template = PodTemplateSpec(model['template'])
 
     # ------------------------------------------------------------------------------------- template
 

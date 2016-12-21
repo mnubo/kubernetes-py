@@ -36,11 +36,11 @@ class DeploymentSpec(object):
         if 'replicas' in model:
             self.replicas = model['replicas']
         if 'selector' in model:
-            self.selector = LabelSelector(model=model['selector'])
+            self.selector = LabelSelector(model['selector'])
         if 'template' in model:
-            self.template = PodTemplateSpec(model=model['template'])
+            self.template = PodTemplateSpec(model['template'])
         if 'strategy' in model:
-            self.strategy = DeploymentStrategy(model=model['strategy'])
+            self.strategy = DeploymentStrategy(model['strategy'])
         if 'minReadySeconds' in model:
             self.min_ready_seconds = model['minReadySeconds']
         if 'revisionHistoryLimit' in model:

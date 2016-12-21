@@ -40,7 +40,7 @@ class K8sPersistentVolume(K8sObject):
         return self
 
     def get(self):
-        self.model = PersistentVolume(model=self.get_model())
+        self.model = PersistentVolume(self.get_model())
         return self
 
     # ------------------------------------------------------------------------------------- wait

@@ -51,7 +51,7 @@ class PodSpec(object):
         if 'containers' in model:
             containers = []
             for c in model['containers']:
-                container = Container(model=c)
+                container = Container(c)
                 containers.append(container)
             self.containers = containers
         if 'dnsPolicy' in model:
@@ -73,7 +73,7 @@ class PodSpec(object):
         if 'restartPolicy' in model:
             self.restart_policy = model['restartPolicy']
         if 'securityContext' in model:
-            self.security_context = PodSecurityContext(model=model['securityContext'])
+            self.security_context = PodSecurityContext(model['securityContext'])
         if 'serviceAccount' in model:
             self.service_account = model['serviceAccount']
         if 'serviceAccountName' in model:
@@ -85,7 +85,7 @@ class PodSpec(object):
         if 'volumes' in model:
             volumes = []
             for v in model['volumes']:
-                volume = Volume(model=v)
+                volume = Volume(v)
                 volumes.append(volume)
             self.volumes = volumes
 

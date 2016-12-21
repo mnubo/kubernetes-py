@@ -25,7 +25,7 @@ class K8sSecret(K8sObject):
     # -------------------------------------------------------------------------------------  override
 
     def get(self):
-        self.model = Secret(model=self.get_model())
+        self.model = Secret(self.get_model())
         return self
 
     def create(self):
@@ -62,7 +62,7 @@ class K8sSecret(K8sObject):
         _list = K8sSecret(config=config, name="throwaway").list()
         _secrets = []
         for x in _list:
-            s = Secret(model=x)
+            s = Secret(x)
             if s.type == 'kubernetes.io/dockerconfigjson':
                 k8s = K8sSecret(config=config, name=s.name)
                 k8s.model = s
@@ -95,7 +95,7 @@ class K8sSecret(K8sObject):
         _list = K8sSecret(config=config, name="throwaway").list()
         _tokens = []
         for x in _list:
-            s = Secret(model=x)
+            s = Secret(x)
             if s.type == 'kubernetes.io/service-account-token':
                 if s.metadata.annotations['kubernetes.io/service-account.name'] == name:
                     k8s = K8sSecret(config=config, name=s.name)

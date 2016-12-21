@@ -101,7 +101,7 @@ class K8sDeployment(K8sObject):
     # -------------------------------------------------------------------------------------  get
 
     def get(self):
-        self.model = Deployment(model=self.get_model())
+        self.model = Deployment(self.get_model())
         return self
 
     # ------------------------------------------------------------------------------------- namespace
@@ -257,7 +257,7 @@ class K8sDeployment(K8sObject):
 
         for dep in deps:
             try:
-                d = Deployment(model=dep)
+                d = Deployment(dep)
                 dep_name = d.metadata.name
                 dep_list.append(K8sDeployment(config=config, name=dep_name).get())
             except NotFoundException:

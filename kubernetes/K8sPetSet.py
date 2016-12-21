@@ -29,7 +29,7 @@ class K8sPetSet(K8sObject):
     # -------------------------------------------------------------------------------------  override
 
     def get(self):
-        self.model = PetSet(model=self.get_model())
+        self.model = PetSet(self.get_model())
         return self
 
     def create(self):

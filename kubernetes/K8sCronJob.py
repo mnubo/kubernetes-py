@@ -37,7 +37,7 @@ class K8sCronJob(K8sObject):
     # -------------------------------------------------------------------------------------  get
 
     def get(self):
-        self.model = CronJob(model=self.get_model())
+        self.model = CronJob(self.get_model())
         return self
 
     # -------------------------------------------------------------------------------------  add

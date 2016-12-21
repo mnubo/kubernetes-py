@@ -145,7 +145,7 @@ class K8sContainerTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------- add env
 
     def test_add_env(self):
-        cont = Container(model=utils.myweb_container())
+        cont = Container(utils.myweb_container())
         k8s_container = utils.create_container(name=cont.name)
         k8s_container.model = cont
         envs = utils.myweb_envs()

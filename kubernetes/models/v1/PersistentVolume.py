@@ -34,11 +34,11 @@ class PersistentVolume(BaseModel):
         if 'apiVersion' in model:
             self.api_version = model['apiVersion']
         if 'metadata' in model:
-            self.metadata = ObjectMeta(model=model['metadata'])
+            self.metadata = ObjectMeta(model['metadata'])
         if 'spec' in model:
-            self.spec = PersistentVolumeSpec(model=model['spec'])
+            self.spec = PersistentVolumeSpec(model['spec'])
         if 'status' in model:
-            self.status = PersistentVolumeStatus(model=model['status'])
+            self.status = PersistentVolumeStatus(model['status'])
 
     # ------------------------------------------------------------------------------------- spec
 

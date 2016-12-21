@@ -30,11 +30,11 @@ class ContainerState(object):
 
     def _build_with_model(self, model=None):
         if 'waiting' in model:
-            self.waiting = ContainerStateWaiting(model=model['waiting'])
+            self.waiting = ContainerStateWaiting(model['waiting'])
         if 'running' in model:
-            self.running = ContainerStateRunning(model=model['running'])
+            self.running = ContainerStateRunning(model['running'])
         if 'terminated' in model:
-            self.terminated = ContainerStateTerminated(model=model['terminated'])
+            self.terminated = ContainerStateTerminated(model['terminated'])
 
     # ------------------------------------------------------------------------------------- waiting
 

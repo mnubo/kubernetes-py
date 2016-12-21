@@ -80,7 +80,7 @@ class K8sCronJobTests(unittest.TestCase):
 
     def test_api_create(self):
         name = "job-{}".format(uuid.uuid4())
-        job = CronJob(model=utils.scheduledjob())
+        job = CronJob(utils.scheduledjob())
         k8s_cronjob = utils.create_cronjob(name=name)
         k8s_cronjob.model = job
         if utils.is_reachable(k8s_cronjob.config.api_host):
@@ -89,7 +89,7 @@ class K8sCronJobTests(unittest.TestCase):
 
     def test_api_create_long_running_with_concurrency(self):
         name = "job-{}".format(uuid.uuid4())
-        job = CronJob(model=utils.scheduledjob_90())
+        job = CronJob(utils.scheduledjob_90())
 
         k8s_cronjob = utils.create_cronjob(name=name)
         k8s_cronjob.model = job
@@ -102,7 +102,7 @@ class K8sCronJobTests(unittest.TestCase):
 
     def test_api_create_long_running_no_concurrency(self):
         name = "job-{}".format(uuid.uuid4())
-        job = CronJob(model=utils.scheduledjob_90())
+        job = CronJob(utils.scheduledjob_90())
 
         k8s_cronjob = utils.create_cronjob(name=name)
         k8s_cronjob.model = job

@@ -34,11 +34,11 @@ class Job(BaseModel):
         if 'apiVersion' in model:
             self.api_version = model['apiVersion']
         if 'metadata' in model:
-            self.metadata = ObjectMeta(model=model['metadata'])
+            self.metadata = ObjectMeta(model['metadata'])
         if 'spec' in model:
-            self.spec = JobSpec(model=model['spec'])
+            self.spec = JobSpec(model['spec'])
         if 'status' in model:
-            self.status = JobStatus(model=model['spec'])
+            self.status = JobStatus(model['spec'])
 
     # --------------------------------------------------------------------------------- spec
 

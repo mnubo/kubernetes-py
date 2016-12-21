@@ -27,7 +27,7 @@ class CronJobStatus(object):
         if 'active' in model:
             refs = []
             for j in model['active']:
-                ref = ObjectReference(model=j)
+                ref = ObjectReference(j)
                 refs.append(ref)
             self.active = refs
         if 'successful' in model:
