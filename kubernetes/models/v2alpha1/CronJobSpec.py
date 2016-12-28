@@ -30,7 +30,7 @@ class CronJobSpec(object):
         if 'schedule' in model:
             self.schedule = model['schedule']
         if 'jobTemplate' in model:
-            self.job_template = CronJobTemplate(model=model['jobTemplate'])
+            self.job_template = CronJobTemplate(model['jobTemplate'])
         if 'startingDeadlineSeconds' in model:
             self.starting_deadline_seconds = model['startingDeadlineSeconds']
         if 'concurrencyPolicy' in model:

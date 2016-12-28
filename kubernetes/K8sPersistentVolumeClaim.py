@@ -35,7 +35,7 @@ class K8sPersistentVolumeClaim(K8sObject):
         return self
 
     def get(self):
-        self.model = PersistentVolumeClaim(model=self.get_model())
+        self.model = PersistentVolumeClaim(self.get_model())
         return self
 
     # ------------------------------------------------------------------------------------- wait
@@ -73,7 +73,7 @@ class K8sPersistentVolumeClaim(K8sObject):
     def resources(self, res=None):
         if not is_valid_dict(res):
             raise SyntaxError('K8sPersistentVolumeClaim: resources: [ {} ] is invalid.'.format(res))
-        resources = ResourceRequirements(model=res)
+        resources = ResourceRequirements(res)
         self.model.spec.resources = resources
 
     # ------------------------------------------------------------------------------------- selector
@@ -86,5 +86,5 @@ class K8sPersistentVolumeClaim(K8sObject):
     def selector(self, sel=None):
         if not is_valid_dict(sel):
             raise SyntaxError('K8sPersistentVolumeClaim: selector: [ {} ] is invalid.'.format(sel))
-        selector = LabelSelector(model=sel)
+        selector = LabelSelector(sel)
         self.model.spec.selector = selector

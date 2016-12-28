@@ -23,9 +23,9 @@ class DaemonSetSpec(object):
 
     def _build_with_model(self, model=None):
         if 'selector' in model:
-            self.selector = LabelSelector(model=model['selector'])
+            self.selector = LabelSelector(model['selector'])
         if 'template' in model:
-            self.template = PodTemplateSpec(model=model['template'])
+            self.template = PodTemplateSpec(model['template'])
 
     # ------------------------------------------------------------------------------------- selector
 

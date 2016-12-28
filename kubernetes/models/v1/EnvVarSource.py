@@ -30,13 +30,13 @@ class EnvVarSource(object):
 
     def _build_with_model(self, model=None):
         if 'fieldRef' in model:
-            self.field_ref = ObjectFieldSelector(model=model['fieldRef'])
+            self.field_ref = ObjectFieldSelector(model['fieldRef'])
         if 'resourceFieldRef' in model:
-            self.resource_field_ref = ResourceFieldSelector(model=model['resourceFieldRef'])
+            self.resource_field_ref = ResourceFieldSelector(model['resourceFieldRef'])
         if 'configMapKeyRef' in model:
-            self.config_map_key_ref = ConfigMapKeySelector(model=model['configMapKeyRef'])
+            self.config_map_key_ref = ConfigMapKeySelector(model['configMapKeyRef'])
         if 'secretKeyRef' is model:
-            self.secret_key_ref = SecretKeySelector(model=model['secretKeyRef'])
+            self.secret_key_ref = SecretKeySelector(model['secretKeyRef'])
 
     # ------------------------------------------------------------------------------------- fieldRef
 

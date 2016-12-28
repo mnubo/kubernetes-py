@@ -21,6 +21,14 @@ class BaseModel(object):
         self._spec = None
         self._status = None
 
+    def build_with_model(self, model=None):
+        if 'apiVersion' in model:
+            self.api_version = model['apiVersion']
+        if 'kind' in model:
+            self.kind = model['kind']
+        if 'metadata' in model:
+            self.metadata = ObjectMeta(model['metadata'])
+
     def __eq__(self, other):
         # see https://github.com/kubernetes/kubernetes/blob/master/docs/design/identifiers.md
         if isinstance(other, self.__class__):

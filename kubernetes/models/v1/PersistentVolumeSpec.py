@@ -76,27 +76,27 @@ class PersistentVolumeSpec(object):
 
     def _build_with_model(self, model=None):
         if 'awsElasticBlockStore' in model:
-            self.awsElasticBlockStore = AWSElasticBlockStoreVolumeSource(model=model['awsElasticBlockStore'])
+            self.awsElasticBlockStore = AWSElasticBlockStoreVolumeSource(model['awsElasticBlockStore'])
         if 'gcePersistentDisk' in model:
-            self.gcePersistentDisk = GCEPersistentDiskVolumeSource(model=model['gcePersistentDisk'])
+            self.gcePersistentDisk = GCEPersistentDiskVolumeSource(model['gcePersistentDisk'])
         if 'hostPath' in model:
-            self.hostPath = HostPathVolumeSource(model=model['hostPath'])
+            self.hostPath = HostPathVolumeSource(model['hostPath'])
         if 'name' in model:
             self.name = model['name']
         if 'nfs' in model:
-            self.nfs = NFSVolumeSource(model=model['nfs'])
+            self.nfs = NFSVolumeSource(model['nfs'])
         if 'secret' in model:
-            self.secret = SecretVolumeSource(model=model['secret'])
+            self.secret = SecretVolumeSource(model['secret'])
         if 'capacity' in model:
             self.capacity = model['capacity']
         if 'accessModes' in model:
             self.access_modes = model['accessModes']
         if 'claimRef' in model:
-            self.claim_ref = ObjectReference(model=model['claimRef'])
+            self.claim_ref = ObjectReference(model['claimRef'])
         if 'persistentVolumeReclaimPolicy' in model:
             self.reclaim_policy = model['persistentVolumeReclaimPolicy']
         if 'persistentVolumeClaim' in model:
-            self.persistentVolumeClaim = PersistentVolumeClaimVolumeSource(model=model['persistentVolumeClaim'])
+            self.persistentVolumeClaim = PersistentVolumeClaimVolumeSource(model['persistentVolumeClaim'])
 
     # ------------------------------------------------------------------------------------- aws ebs
 

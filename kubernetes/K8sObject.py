@@ -30,6 +30,7 @@ VALID_K8s_OBJS = [
     'ReplicationController',
     'Secret',
     'Service',
+    'ServiceAccount',
     'Volume'
 ]
 
@@ -220,8 +221,8 @@ class K8sObject(object):
         if not state.get('success'):
             status = state.get('status', '')
             reason = state.get('data', dict()).get('message', None)
-            message = 'K8sObject: GET [ {0}:{1} ] failed: HTTP {2} : {3} '.format(self.obj_type, self.name, status,
-                                                                                  reason)
+            message = 'K8sObject: GET [ {0}:{1} ] failed: HTTP {2} : {3} '.format(
+                self.obj_type, self.name, status, reason)
             raise NotFoundException(message)
 
         model = state.get('data')
@@ -267,7 +268,8 @@ class K8sObject(object):
         self.model.metadata.strip(self.model.kind)  # strip server-generated metadata before posting updates
 
         url = '{base}/{name}'.format(base=self.base_url, name=self.name)
-        state = self.request(method='PUT', url=url, data=self.serialize())
+        post_data = self.serialize()
+        state = self.request(method='PUT', url=url, data=post_data)
 
         if not state.get('success'):
             status = state.get('status', '')

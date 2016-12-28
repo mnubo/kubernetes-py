@@ -33,7 +33,7 @@ class SecretVolumeSource(object):
         if 'items' in model:
             items = []
             for i in model['items']:
-                item = KeyToPath(model=i)
+                item = KeyToPath(i)
                 items.append(item)
             self.items = items
         if 'defaultMode' in model:

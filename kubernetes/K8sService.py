@@ -63,7 +63,7 @@ class K8sService(K8sObject):
     # ------------------------------------------------------------------------------------- get
 
     def get(self):
-        self.model = Service(model=self.get_model())
+        self.model = Service(self.get_model())
         return self
 
     def get_annotation(self, k=None):
@@ -174,6 +174,6 @@ class K8sService(K8sObject):
         data = {'labelSelector': 'name={}'.format(name)}
         services = K8sService(config=config, name=name).get_with_params(data=data)
         for svc in services:
-            service_name = Service(model=svc).metadata.name
+            service_name = Service(svc).metadata.name
             service_list.append(K8sService(config=config, name=service_name).get())
         return service_list

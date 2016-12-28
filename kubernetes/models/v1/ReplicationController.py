@@ -34,11 +34,11 @@ class ReplicationController(BaseModel):
         if 'kind' in model:
             self.kind = model['kind']
         if 'metadata' in model:
-            self.metadata = ObjectMeta(model=model['metadata'])
+            self.metadata = ObjectMeta(model['metadata'])
         if 'spec' in model:
-            self.spec = ReplicationControllerSpec(model=model['spec'])
+            self.spec = ReplicationControllerSpec(model['spec'])
         if 'status' in model:
-            self.status = ReplicationControllerStatus(model=model['status'])
+            self.status = ReplicationControllerStatus(model['status'])
 
     # ------------------------------------------------------------------------------------- spec
 

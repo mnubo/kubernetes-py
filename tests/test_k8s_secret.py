@@ -17,10 +17,13 @@ from tests import utils
 
 
 class K8sSecretTest(unittest.TestCase):
+
     def setUp(self):
+        utils.cleanup_service_accounts()
         utils.cleanup_secrets()
 
     def tearDown(self):
+        utils.cleanup_service_accounts()
         utils.cleanup_secrets()
 
     # --------------------------------------------------------------------------------- init
@@ -324,6 +327,13 @@ class K8sSecretTest(unittest.TestCase):
         if utils.is_reachable(secret.config.api_host):
             _list = secret.list()
             self.assertGreaterEqual(1, len(_list))  # service-account-token on GCE
+            secrets = []
+            for x in _list:
+                s = Secret(x)
+                k8s = K8sSecret(config=secret.config, name=x['metadata']['name'])
+                k8s.model = s
+                secrets.append(k8s)
+            # print(secrets)
 
     def test_list(self):
         count = 10
@@ -421,3 +431,18 @@ class K8sSecretTest(unittest.TestCase):
                 pass
             s = secret.create()
             self.assertIsInstance(s, K8sSecret)
+
+    # --------------------------------------------------------------------------------- api - create API token
+
+    def test_create_service_account_api_token(self):
+        sa = utils.create_service_account(name='build-robot')
+        if utils.is_reachable(sa.config.api_host):
+            sa.create()
+            secret = K8sSecret.create_service_account_api_token(
+                config=sa.config,
+                name=sa.name)
+            self.assertIsInstance(secret, K8sSecret)
+            secrets = K8sSecret.api_tokens_for_service_account(
+                config=sa.config,
+                name=sa.name)
+            self.assertEqual(2, len(secrets))

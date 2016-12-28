@@ -34,11 +34,11 @@ class ReplicaSet(BaseModel):
         if 'apiVersion' in model:
             self.api_version = model['apiVersion']
         if 'metadata' in model:
-            self.metadata = ObjectMeta(model=model['metadata'])
+            self.metadata = ObjectMeta(model['metadata'])
         if 'spec' in model:
-            self.spec = ReplicaSetSpec(model=model['spec'])
+            self.spec = ReplicaSetSpec(model['spec'])
         if 'status' in model:
-            self.status = ReplicaSetStatus(model=model['status'])
+            self.status = ReplicaSetStatus(model['status'])
 
     # ------------------------------------------------------------------------------------- spec
 

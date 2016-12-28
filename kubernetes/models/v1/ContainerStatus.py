@@ -35,9 +35,9 @@ class ContainerStatus(object):
         if 'name' in model:
             self.name = model['name']
         if 'state' in model:
-            self.state = ContainerState(model=model['state'])
+            self.state = ContainerState(model['state'])
         if 'lastState' in model:
-            self.last_state = ContainerState(model=model['state'])
+            self.last_state = ContainerState(model['state'])
         if 'ready' in model:
             self.ready = model['ready']
         if 'restartCount' in model:

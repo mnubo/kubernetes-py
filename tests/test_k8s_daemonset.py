@@ -58,7 +58,7 @@ class K8sDaemonSetTests(unittest.TestCase):
     # --------------------------------------------------------------------------------- api - create
 
     def test_api_create(self):
-        ds = DaemonSet(model=utils.fluentd_daemonset())
+        ds = DaemonSet(utils.fluentd_daemonset())
         k8s_ds = utils.create_daemonset(name=ds.name)
         k8s_ds.model = ds
         if utils.is_reachable(k8s_ds.config.api_host):

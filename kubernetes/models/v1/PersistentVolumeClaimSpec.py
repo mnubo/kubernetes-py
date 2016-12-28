@@ -37,9 +37,9 @@ class PersistentVolumeClaimSpec(object):
         if 'accessModes' in model:
             self.access_modes = model['accessModes']
         if 'selector' in model:
-            self.selector = LabelSelector(model=model['selector'])
+            self.selector = LabelSelector(model['selector'])
         if 'resources' in model:
-            self.resources = ResourceRequirements(model=model['resources'])
+            self.resources = ResourceRequirements(model['resources'])
         if 'volumeName' in model:
             self.volume_name = model['volumeName']
 

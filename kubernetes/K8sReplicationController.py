@@ -126,7 +126,7 @@ class K8sReplicationController(K8sObject):
     # -------------------------------------------------------------------------------------  get
 
     def get(self):
-        self.model = ReplicationController(model=self.get_model())
+        self.model = ReplicationController(self.get_model())
         return self
 
     def get_pod_annotation(self, k=None):
@@ -458,7 +458,7 @@ class K8sReplicationController(K8sObject):
 
         for rc in rcs:
             try:
-                model = ReplicationController(model=rc)
+                model = ReplicationController(rc)
                 obj = K8sReplicationController(config=config, name=model.metadata.name)
                 rc_list.append(obj.get())
             except NotFoundException:

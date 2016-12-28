@@ -66,7 +66,7 @@ class ObjectMeta(object):
         if 'ownerReferences' in model:
             refs = []
             for o in model['ownerReferences']:
-                ref = OwnerReference(model=o)
+                ref = OwnerReference(o)
                 refs.append(ref)
             self.owner_references = refs
         if 'finalizers' in model:

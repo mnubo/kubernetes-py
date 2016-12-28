@@ -79,7 +79,7 @@ class K8sDeployment(K8sObject):
         elapsed_time = time.time() - start_time
         if elapsed_time >= self.SCALE_WAIT_TIMEOUT_SECONDS:  # timeout
             raise TimedOutException(
-                "Timed out scaling Deployment: [ {} ] to replica count: [ {1} ]".format(
+                "Timed out scaling Deployment: [ {} ] to replica count: [ {} ]".format(
                     self.name,
                     self.desired_replicas))
 
@@ -101,7 +101,7 @@ class K8sDeployment(K8sObject):
     # -------------------------------------------------------------------------------------  get
 
     def get(self):
-        self.model = Deployment(model=self.get_model())
+        self.model = Deployment(self.get_model())
         return self
 
     # ------------------------------------------------------------------------------------- namespace
@@ -257,7 +257,7 @@ class K8sDeployment(K8sObject):
 
         for dep in deps:
             try:
-                d = Deployment(model=dep)
+                d = Deployment(dep)
                 dep_name = d.metadata.name
                 dep_list.append(K8sDeployment(config=config, name=dep_name).get())
             except NotFoundException:

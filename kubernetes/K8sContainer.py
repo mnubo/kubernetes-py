@@ -67,7 +67,7 @@ class K8sContainer(object):
         else:
             raise SyntaxError('K8sContainer.add_env() value: [ {} ] is invalid.')
 
-        env_var = EnvVar(model=e)
+        env_var = EnvVar(e)
         env = self.model.env
         if env is None:
             env = []
@@ -83,11 +83,11 @@ class K8sContainer(object):
         self.model.volume_mounts = mounts
 
     def add_liveness_probe(self, **kwargs):
-        probe = Probe(model=kwargs)
+        probe = Probe(kwargs)
         self.liveness_probe = probe
 
     def add_readiness_probe(self, **kwargs):
-        probe = Probe(model=kwargs)
+        probe = Probe(kwargs)
         self.readiness_probe = probe
 
     # -------------------------------------------------------------------------------------  args
@@ -161,7 +161,7 @@ class K8sContainer(object):
 
     @resources.setter
     def resources(self, res=None):
-        r = ResourceRequirements(model=res)
+        r = ResourceRequirements(res)
         self.model.resources = r
 
     # -------------------------------------------------------------------------------------  name

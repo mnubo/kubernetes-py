@@ -24,6 +24,7 @@ class Secret(BaseModel):
 
         self.kind = 'Secret'
         self.api_version = 'v1'
+
         self._data = {}
         self._string_data = None
         self._type = None
@@ -37,7 +38,7 @@ class Secret(BaseModel):
         if 'apiVersion' in model:
             self.api_version = model['apiVersion']
         if 'metadata' in model:
-            self.metadata = ObjectMeta(model=model['metadata'])
+            self.metadata = ObjectMeta(model['metadata'])
         if 'data' in model:
             d = {}
             for k, v in model['data'].items():

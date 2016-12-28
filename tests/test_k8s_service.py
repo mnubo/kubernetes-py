@@ -742,7 +742,7 @@ class K8sServiceTest(unittest.TestCase):
             }
         }
 
-        svc = Service(model=data)
+        svc = Service(data)
         k8s_service = utils.create_service(name=svc.name)
         k8s_service.model = svc
 

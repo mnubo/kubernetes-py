@@ -36,11 +36,11 @@ class Service(BaseModel):
         if 'apiVersion' in model:
             self.api_version = model['apiVersion']
         if 'metadata' in model:
-            self.metadata = ObjectMeta(model=model['metadata'])
+            self.metadata = ObjectMeta(model['metadata'])
         if 'spec' in model:
-            self.spec = ServiceSpec(model=model['spec'])
+            self.spec = ServiceSpec(model['spec'])
         if 'status' in model:
-            self.status = ServiceStatus(model=model['status'])
+            self.status = ServiceStatus(model['status'])
 
     # ------------------------------------------------------------------------------------- add
 

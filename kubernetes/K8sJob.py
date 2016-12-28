@@ -57,7 +57,7 @@ class K8sJob(K8sObject):
     # ------------------------------------------------------------------------------------- get
 
     def get(self):
-        self.model = Job(model=self.get_model())
+        self.model = Job(self.get_model())
         return self
 
     # ------------------------------------------------------------------------------------- scale

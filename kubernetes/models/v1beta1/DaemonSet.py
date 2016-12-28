@@ -31,11 +31,11 @@ class DaemonSet(BaseModel):
         if 'apiVersion' in model:
             self.api_version = model['apiVersion']
         if 'metadata' in model:
-            self.metadata = ObjectMeta(model=model['metadata'])
+            self.metadata = ObjectMeta(model['metadata'])
         if 'spec' in model:
-            self.spec = DaemonSetSpec(model=model['spec'])
+            self.spec = DaemonSetSpec(model['spec'])
         if 'status' in model:
-            self.status = DaemonSetStatus(model=model['status'])
+            self.status = DaemonSetStatus(model['status'])
 
     # ------------------------------------------------------------------------------------- spec
 

@@ -63,7 +63,7 @@ class Container(object):
         if 'env' in model:
             envs = []
             for e in model['env']:
-                env = EnvVar(model=e)
+                env = EnvVar(e)
                 envs.append(env)
             self.env = envs
         if 'image' in model:
@@ -71,28 +71,28 @@ class Container(object):
         if 'imagePullPolicy' in model:
             self.image_pull_policy = model['imagePullPolicy']
         if 'livenessProbe' in model:
-            self.liveness_probe = Probe(model=model['livenessProbe'])
+            self.liveness_probe = Probe(model['livenessProbe'])
         if 'name' in model:
             self.name = model['name']
         if 'ports' in model:
             ports = []
             for p in model['ports']:
-                port = ContainerPort(model=p)
+                port = ContainerPort(p)
                 ports.append(port)
             self.ports = ports
         if 'readinessProbe' in model:
-            self.readiness_probe = Probe(model=model['readinessProbe'])
+            self.readiness_probe = Probe(model['readinessProbe'])
         if 'resources' in model:
-            r = ResourceRequirements(model=model['resources'])
+            r = ResourceRequirements(model['resources'])
             self.resources = r
         if 'securityContext' in model:
-            self.security_context = SecurityContext(model=model['securityContext'])
+            self.security_context = SecurityContext(model['securityContext'])
         if 'terminationMessagePath' in model:
             self.termination_message_path = model['terminationMessagePath']
         if 'volumeMounts' in model:
             mounts = []
             for v in model['volumeMounts']:
-                mount = VolumeMount(model=v)
+                mount = VolumeMount(v)
                 mounts.append(mount)
             self.volume_mounts = mounts
         if 'workingDir' in model:

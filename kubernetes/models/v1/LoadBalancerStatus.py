@@ -28,7 +28,7 @@ class LoadBalancerStatus(object):
         if 'ingress' in model:
             statuses = []
             for i in model['ingress']:
-                status = LoadBalancerIngress(model=i)
+                status = LoadBalancerIngress(i)
                 statuses.append(status)
             self.ingress = statuses
 

@@ -20,7 +20,7 @@ class ServiceStatus(object):
 
     def _build_with_model(self, model=None):
         if 'loadBalancer' in model:
-            self.load_balancer = LoadBalancerStatus(model=model['loadBalancer'])
+            self.load_balancer = LoadBalancerStatus(model['loadBalancer'])
 
     # ------------------------------------------------------------------------------------- load balancer
 

@@ -32,7 +32,7 @@ class JobStatus(object):
         if 'conditions' in model:
             conds = []
             for c in model['conditions']:
-                cond = JobCondition(model=c)
+                cond = JobCondition(c)
                 conds.append(cond)
             self.conditions = conds
         if 'startTime' in model:

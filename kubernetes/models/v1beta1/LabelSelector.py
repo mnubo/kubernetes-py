@@ -30,7 +30,7 @@ class LabelSelector(object):
         if 'matchExpressions' in model:
             exps = []
             for me in model['matchExpressions']:
-                exp = LabelSelectorRequirement(model=me)
+                exp = LabelSelectorRequirement(me)
                 exps.append(exp)
             self.match_expressions = exps
 
