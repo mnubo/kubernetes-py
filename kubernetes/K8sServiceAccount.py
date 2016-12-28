@@ -60,11 +60,7 @@ class K8sServiceAccount(K8sObject):
 
     @property
     def secrets(self):
-        refs = self.model.secrets
-        secrets = []
-        for ref in refs:
-            s = K8sSecret(config=self.config, name=ref.name).get()
-            secrets.append(s)
+        secrets = K8sSecret.api_tokens_for_service_account(config=self.config, name=self.name)
         return secrets
 
     @secrets.setter
