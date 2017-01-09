@@ -169,8 +169,8 @@ class Secret(BaseModel):
     @dockerconfigjson.setter
     def dockerconfigjson(self, secret=None):
         if not is_valid_dict(secret):
-            raise SyntaxError('Secret: dockercfgjson: [ {} ] is invalid.'.format(secret))
-        self.type = 'kubernetes.io/dockerconfigjson'
+            raise SyntaxError('Secret: .dockerconfigjson: [ {} ] is invalid.'.format(secret))
+        self.type = 'kubernetes.io/.dockerconfigjson'
         s = json.dumps(secret)
         utf = s.encode('utf-8')
         self.data = {'.dockerconfigjson': utf}
