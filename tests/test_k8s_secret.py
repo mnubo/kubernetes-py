@@ -407,7 +407,7 @@ class K8sSecretTest(unittest.TestCase):
         secret = utils.create_secret(name=name)
         data = {"auths": {"repo:port": {"auth": "authstring", "email": "you@company.com"}}}
         secret.dockerconfigjson = data
-        self.assertEqual('kubernetes.io/dockerconfigjson', secret.type)
+        self.assertEqual('kubernetes.io/.dockerconfigjson', secret.type)
         self.assertIn('.dockerconfigjson', secret.data)
         self.assertEqual(data, secret.dockerconfigjson)
         if utils.is_reachable(secret.config.api_host):
@@ -421,7 +421,7 @@ class K8sSecretTest(unittest.TestCase):
         secret = utils.create_secret(config=config, name=name)
         data = {"auths": {"repo:port": {"auth": "authstring", "email": "you@company.com"}}}
         secret.dockerconfigjson = data
-        self.assertEqual('kubernetes.io/dockerconfigjson', secret.type)
+        self.assertEqual('kubernetes.io/.dockerconfigjson', secret.type)
         self.assertIn('.dockerconfigjson', secret.data)
         self.assertEqual(data, secret.dockerconfigjson)
         if utils.is_reachable(secret.config.api_host):

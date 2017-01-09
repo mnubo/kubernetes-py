@@ -63,7 +63,7 @@ class K8sSecret(K8sObject):
         _secrets = []
         for x in _list:
             s = Secret(x)
-            if s.type == 'kubernetes.io/dockerconfigjson':
+            if s.type == 'kubernetes.io/.dockerconfigjson':
                 k8s = K8sSecret(config=config, name=s.name)
                 k8s.model = s
                 _secrets.append(k8s)
