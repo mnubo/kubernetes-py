@@ -560,6 +560,19 @@ class K8sReplicationControllerTest(unittest.TestCase):
         rc = utils.create_rc(name=name, replicas=count)
         self.assertEqual(count, rc.desired_replicas)
 
+    # --------------------------------------------------------------------------------- get dns policy
+
+    def test_get_dns_policy_default(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        self.assertEqual('Default', rc.dns_policy)
+
+    def test_get_dns_policy(self):
+        name = "yorc"
+        rc = utils.create_rc(name=name)
+        rc.dns_policy = 'ClusterFirst'
+        self.assertEqual('ClusterFirst', rc.dns_policy)
+
     # --------------------------------------------------------------------------------- get pod restart policy
 
     def test_rc_get_pod_restart_policy_none(self):

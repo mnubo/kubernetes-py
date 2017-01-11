@@ -279,6 +279,16 @@ class K8sReplicationController(K8sObject):
     def desired_replicas(self, reps=None):
         self.model.spec.replicas = reps
 
+    # -------------------------------------------------------------------------------------  dnsPolicy
+
+    @property
+    def dns_policy(self):
+        return self.model.spec.template.spec.dns_policy
+
+    @dns_policy.setter
+    def dns_policy(self, policy='Default'):
+        self.model.spec.template.spec.dns_policy = policy
+
     # -------------------------------------------------------------------------------------  observedReplicas
 
     @property
@@ -559,8 +569,8 @@ class K8sReplicationController(K8sObject):
 
             foo_old = copy.deepcopy(foo)
             foo_old.name = "{}-old".format(foo.name)
-            foo_old.selector = foo.selector
-            foo_old.pod_labels = foo.pod_labels
+            foo_old.selector = copy.deepcopy(foo.selector)
+            foo_old.pod_labels = copy.deepcopy(foo.pod_labels)
 
             foo.delete(orphan=True)
             foo_old.create()
