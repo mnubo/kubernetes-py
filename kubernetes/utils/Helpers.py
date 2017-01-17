@@ -90,3 +90,10 @@ def str_to_class(obj_type=None):
         return _class
 
     raise NotFoundException("Could not import obj_type: [ {} ]".format(obj_type))
+
+
+def server_version():
+    from kubernetes.K8sObject import K8sObject
+    obj = K8sObject(obj_type='Pod', name='obj')
+    v = obj.server_version()
+    return v

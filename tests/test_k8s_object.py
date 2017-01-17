@@ -362,3 +362,17 @@ class K8sObjectTest(unittest.TestCase):
             obj = utils.create_object(config=config, name=name, obj_type=ot)
             with self.assertRaises(NotFoundException):
                 obj.delete()
+
+    # ------------------------------------------------------------------------------------- api - version
+
+    def test_object_version(self):
+        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        ot = "Pod"
+        name = "yomama-{}".format(str(uuid.uuid4()))
+        if config.api_host is not None and utils.is_reachable(config.api_host):
+            obj = utils.create_object(config=config, name=name, obj_type=ot)
+            v = obj.server_version()
+            self.assertIn('gitCommit', v)
+            self.assertIn('gitVersion', v)
+            self.assertIn('major', v)
+            self.assertIn('minor', v)

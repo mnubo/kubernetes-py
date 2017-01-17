@@ -18,7 +18,7 @@ from kubernetes.models.v1.DeleteOptions import DeleteOptions
 from kubernetes.utils import HttpRequest, is_valid_dict, str_to_class
 
 VALID_K8s_OBJS = [
-    'CronJob',
+    'CronJob',  # server version >= 1.5
     'DaemonSet',
     'Deployment',
     'Job',
@@ -28,6 +28,7 @@ VALID_K8s_OBJS = [
     'Pod',
     'ReplicaSet',
     'ReplicationController',
+    'ScheduledJob',  # server version == 1.4
     'Secret',
     'Service',
     'ServiceAccount',
@@ -315,3 +316,15 @@ class K8sObject(object):
                 pass
 
         return self
+
+    def server_version(self):
+        url = '/version'
+
+        state = self.request(method='GET', url=url)
+        if not state.get('success'):
+            status = state.get('status', '')
+            reason = state.get('data', dict()).get('message', None)
+            message = 'K8sObject: GET failed: HTTP {0} : {1}'.format(status, reason)
+            raise BadRequestException(message)
+
+        return state['data']
