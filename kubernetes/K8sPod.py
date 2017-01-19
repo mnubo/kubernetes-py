@@ -45,6 +45,18 @@ class K8sPod(K8sObject):
         self._wait_for_readiness()
         return self
 
+    def list(self, pattern=None):
+        ls = super(K8sPod, self).list()
+        pods = map(lambda x: Pod(x), ls)
+        if pattern is not None:
+            pods = filter(lambda x: pattern in x.name, pods)
+        k8s = []
+        for x in pods:
+            p = K8sPod(config=self.config, name=x.name)
+            p.model = x
+            k8s.append(p)
+        return k8s
+
     # -------------------------------------------------------------------------------------  wait
 
     def _wait_for_readiness(self):
@@ -301,6 +313,26 @@ class K8sPod(K8sObject):
     @volumes.setter
     def volumes(self, v=None):
         self.model.spec.volumes = v
+
+    # -------------------------------------------------------------------------------------  start time
+
+    @property
+    def start_time(self):
+        return self.model.status.start_time
+
+    @start_time.setter
+    def start_time(self, t=None):
+        raise NotImplementedError()
+
+    # -------------------------------------------------------------------------------------  phase
+
+    @property
+    def phase(self):
+        return self.model.status.phase
+
+    @phase.setter
+    def phase(self, p=None):
+        raise NotImplementedError()
 
     # ------------------------------------------------------------------------------------- filtering
 
