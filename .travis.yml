@@ -9,3 +9,5 @@ script:
   nosetests --with-coverage --cover-package=kubernetes
 after_success:
   coveralls
+env:
+  TRAVIS_SKIP_SERVER_VERSION: 1
