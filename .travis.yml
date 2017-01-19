@@ -10,4 +10,4 @@ script:
 after_success:
   coveralls
 env:
-  TRAVIS_SKIP_SERVER_VERSION: 1
+  - TRAVIS_SKIP_SERVER_VERSION: 1
