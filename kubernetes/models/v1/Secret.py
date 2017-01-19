@@ -127,8 +127,16 @@ class Secret(BaseModel):
     @data.setter
     def data(self, data=None):
         msg = 'Secret: data: [ {0} ] is invalid.'.format(data)
+
+        if isinstance(data, str):
+            try:
+                data = json.loads(data)
+            except ValueError:
+                raise SyntaxError(msg)
+
         if not is_valid_dict(data):
             raise SyntaxError(msg)
+
         for k, v in data.items():
             if not is_valid_string(k) or not is_valid_string(v):
                 raise SyntaxError(msg)
