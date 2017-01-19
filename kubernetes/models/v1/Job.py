@@ -38,7 +38,7 @@ class Job(BaseModel):
         if 'spec' in model:
             self.spec = JobSpec(model['spec'])
         if 'status' in model:
-            self.status = JobStatus(model['spec'])
+            self.status = JobStatus(model['status'])
 
     # --------------------------------------------------------------------------------- spec
 
