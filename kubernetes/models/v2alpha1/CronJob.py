@@ -22,7 +22,7 @@ class CronJob(BaseModel):
     def __init__(self, model=None):
         super(CronJob, self).__init__()
 
-        if os.environ['TRAVIS_SKIP_SERVER_VERSION'] == 1:
+        if bool(os.environ.get('TRAVIS_SKIP_SERVER_VERSION', 0)):
             self.kind = 'ScheduledJob'
         else:
             v = server_version()
