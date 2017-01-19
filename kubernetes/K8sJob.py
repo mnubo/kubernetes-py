@@ -54,6 +54,18 @@ class K8sJob(K8sObject):
         self.get()
         return self
 
+    def list(self, pattern=None):
+        ls = super(K8sJob, self).list()
+        jobs = map(lambda x: Job(x), ls)
+        if pattern is not None:
+            jobs = filter(lambda x: pattern in x.name, jobs)
+        k8s = []
+        for x in jobs:
+            j = K8sJob(config=self.config, name=x.name)
+            j.model = x
+            k8s.append(j)
+        return k8s
+
     # ------------------------------------------------------------------------------------- get
 
     def get(self):
@@ -148,3 +160,43 @@ class K8sJob(K8sObject):
         if policy not in self.VALID_RESTART_POLICIES:
             raise SyntaxError('K8sJob: restart_policy: [ {} ] is invalid.'.format(policy))
         self.model.spec.template.spec.restart_policy = policy
+
+    # -------------------------------------------------------------------------------------  start time
+
+    @property
+    def start_time(self):
+        return self.model.status.start_time
+
+    @start_time.setter
+    def start_time(self, t=None):
+        raise NotImplementedError()
+
+    # -------------------------------------------------------------------------------------  completion time
+
+    @property
+    def completion_time(self):
+        return self.model.status.completion_time
+
+    @completion_time.setter
+    def completion_time(self, t=None):
+        raise NotImplementedError()
+
+    # -------------------------------------------------------------------------------------  failed
+
+    @property
+    def failed(self):
+        return self.model.status.failed
+
+    @failed.setter
+    def failed(self, t=None):
+        raise NotImplementedError()
+
+    # -------------------------------------------------------------------------------------  succeeded
+
+    @property
+    def succeeded(self):
+        return self.model.status.succeeded
+
+    @succeeded.setter
+    def succeeded(self, t=None):
+        raise NotImplementedError()
