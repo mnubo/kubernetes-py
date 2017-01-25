@@ -66,13 +66,16 @@ class K8sConfig(object):
             self.clusters = dotconf['clusters']
             self.contexts = dotconf['contexts']
             self.current_context = dotconf['current-context']
+            self.current_context_dict = [context['context']
+                                         for context in self.contexts
+                                         if context['name'] == self.current_context][0]
             self.preferences = dotconf['preferences']
             self.pull_secret = pull_secret
             self.users = dotconf['users']
             self.version = dotconf['apiVersion']
 
             for cluster in self.clusters:
-                if cluster['name'] == self.current_context:
+                if cluster['name'] == self.current_context_dict['cluster']:
                     if 'server' in cluster['cluster']:
                         self.api_host = cluster['cluster']['server']
                     if 'certificate-authority' in cluster['cluster']:
@@ -81,7 +84,7 @@ class K8sConfig(object):
                         self.ca_cert_data = cluster['cluster']['certificate-authority-data']
 
             for user in self.users:
-                if user['name'] == self.current_context:
+                if user['name'] == self.current_context_dict['user']:
                     if 'username' in user['user'] and 'password' in user['user']:
                         self.auth = (user['user']['username'], user['user']['password'])
                     if 'token' in user['user']:
