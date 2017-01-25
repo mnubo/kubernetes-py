@@ -14,6 +14,9 @@ from ExecAction import ExecAction
 from HTTPGetAction import HTTPGetAction
 from LoadBalancerIngress import LoadBalancerIngress
 from LoadBalancerStatus import LoadBalancerStatus
+from Namespace import Namespace
+from NamespaceSpec import NamespaceSpec
+from NamespaceStatus import NamespaceStatus
 from ObjectMeta import ObjectMeta
 from PersistentVolumeSpec import PersistentVolumeSpec
 from Pod import Pod

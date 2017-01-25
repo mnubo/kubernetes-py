@@ -11,6 +11,7 @@ from K8sContainer import K8sContainer
 from K8sDeployment import K8sDeployment
 from K8sExceptions import *
 from K8sJob import K8sJob
+from K8sNamespace import K8sNamespace
 from K8sObject import K8sObject
 from K8sPersistentVolume import K8sPersistentVolume
 from K8sPersistentVolumeClaim import K8sPersistentVolumeClaim

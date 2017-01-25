@@ -18,6 +18,7 @@ from kubernetes.K8sDeployment import K8sDeployment
 from kubernetes.K8sExceptions import NotFoundException
 from kubernetes.K8sJob import K8sJob
 from kubernetes.K8sObject import K8sObject
+from kubernetes.K8sNamespace import K8sNamespace
 from kubernetes.K8sPersistentVolume import K8sPersistentVolume
 from kubernetes.K8sPersistentVolumeClaim import K8sPersistentVolumeClaim
 from kubernetes.K8sPod import K8sPod
@@ -110,6 +111,16 @@ def create_object(config=None, name=None, obj_type=None):
         config=config,
         name=name,
         obj_type=obj_type
+    )
+    return obj
+
+
+def create_namespace(config=None, name=None):
+    if config is None:
+        config = create_config()
+    obj = K8sNamespace(
+        config=config,
+        name=name
     )
     return obj
 
@@ -265,6 +276,22 @@ def cleanup_objects():
         cleanup_pvc()
         cleanup_secrets()
         cleanup_services()
+        cleanup_namespaces()
+
+
+def cleanup_namespaces():
+    ref = create_namespace(name="throwaway")
+    if is_reachable(ref.config.api_host):
+        _list = ref.list()
+        while len(_list) > 2:
+            for p in _list:
+                try:
+                    if p['metadata']['name'] not in ['kube-system', 'default']:
+                        ns = K8sNamespace(config=ref.config, name=p['metadata']['name']).get()
+                        ns.delete()
+                except NotFoundException:
+                    continue
+            _list = ref.list()
 
 
 def cleanup_pods():
