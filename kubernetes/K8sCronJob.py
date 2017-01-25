@@ -55,6 +55,10 @@ class K8sCronJob(K8sObject):
         self.model.spec.job_template.spec.template.spec.containers = filtered
         return self
 
+    def add_image_pull_secrets(self, secrets=None):
+        self.model.spec.add_image_pull_secrets(secrets)
+        return self
+
     def add_volume(self, volume=None):
         if not isinstance(volume, K8sVolume):
             raise SyntaxError('K8sCronJob.add_volume() volume: [ {0} ] is invalid.'.format(volume))
