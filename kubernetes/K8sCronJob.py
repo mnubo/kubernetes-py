@@ -8,6 +8,7 @@
 
 from kubernetes.K8sObject import K8sObject
 from kubernetes.K8sContainer import K8sContainer
+from kubernetes.K8sVolume import K8sVolume
 from kubernetes.models.v2alpha1.CronJob import CronJob
 from kubernetes.utils import is_valid_list
 
@@ -52,6 +53,15 @@ class K8sCronJob(K8sObject):
         filtered = filter(lambda x: x.name != container.name, containers)
         filtered.append(container.model)
         self.model.spec.job_template.spec.template.spec.containers = filtered
+        return self
+
+    def add_volume(self, volume=None):
+        if not isinstance(volume, K8sVolume):
+            raise SyntaxError('K8sCronJob.add_volume() volume: [ {0} ] is invalid.'.format(volume))
+        volumes = self.model.spec.job_template.spec.template.spec.volumes
+        if volume.model not in volumes:
+            volumes.append(volume.model)
+        self.model.spec.job_template.spec.template.spec.volumes = volumes
         return self
 
     # -------------------------------------------------------------------------------------  schedule
