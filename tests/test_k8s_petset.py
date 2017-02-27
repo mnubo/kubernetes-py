@@ -11,6 +11,14 @@ from kubernetes.K8sPetSet import K8sPetSet
 import utils
 
 
+def should_skip():
+    config = utils.create_config()
+    return utils.assert_server_version(
+        api_host=config.api_host,
+        major=1, minor=4
+    )
+
+
 class K8sPetSetTests(unittest.TestCase):
 
     def setUp(self):
@@ -23,6 +31,7 @@ class K8sPetSetTests(unittest.TestCase):
 
     # --------------------------------------------------------------------------------- init
 
+    @unittest.skipUnless(should_skip(), "Incorrect Server Version")
     def test_init_no_args(self):
         try:
             K8sPetSet()
@@ -34,16 +43,19 @@ class K8sPetSetTests(unittest.TestCase):
         except Exception as err:
             self.fail("Unhandled exception: [ {0} ]".format(err.__class__.__name__))
 
+    @unittest.skipUnless(should_skip(), "Incorrect Server Version")
     def test_init_with_invalid_config(self):
         config = object()
         with self.assertRaises(SyntaxError):
             K8sPetSet(config=config)
 
+    @unittest.skipUnless(should_skip(), "Incorrect Server Version")
     def test_init_with_invalid_name(self):
         name = object()
         with self.assertRaises(SyntaxError):
             utils.create_petset(name=name)
 
+    @unittest.skipUnless(should_skip(), "Incorrect Server Version")
     def test_init_with_name(self):
         name = "yomama"
         rc = utils.create_petset(name=name)
