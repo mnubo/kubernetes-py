@@ -7,8 +7,8 @@
 #
 
 import os
-import socket
 import re
+import socket
 
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sContainer import K8sContainer
@@ -16,20 +16,22 @@ from kubernetes.K8sCronJob import K8sCronJob
 from kubernetes.K8sDaemonSet import K8sDaemonSet
 from kubernetes.K8sDeployment import K8sDeployment
 from kubernetes.K8sExceptions import NotFoundException
+from kubernetes.K8sExceptions import VersionMismatchException
 from kubernetes.K8sJob import K8sJob
-from kubernetes.K8sObject import K8sObject
 from kubernetes.K8sNamespace import K8sNamespace
+from kubernetes.K8sObject import K8sObject
 from kubernetes.K8sPersistentVolume import K8sPersistentVolume
 from kubernetes.K8sPersistentVolumeClaim import K8sPersistentVolumeClaim
+from kubernetes.K8sPetSet import K8sPetSet
 from kubernetes.K8sPod import K8sPod
 from kubernetes.K8sReplicaSet import K8sReplicaSet
 from kubernetes.K8sReplicationController import K8sReplicationController
 from kubernetes.K8sSecret import K8sSecret
 from kubernetes.K8sService import K8sService
+from kubernetes.K8sServiceAccount import K8sServiceAccount
 from kubernetes.K8sVolume import K8sVolume
 from kubernetes.K8sVolumeMount import K8sVolumeMount
-from kubernetes.K8sPetSet import K8sPetSet
-from kubernetes.K8sServiceAccount import K8sServiceAccount
+from kubernetes.utils import server_version
 
 kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
 
@@ -57,6 +59,23 @@ def is_reachable(api_host):
             s.close()
         return True
     except Exception as err:
+        return False
+
+
+def assert_server_version(api_host=None, major=None, minor=None, type='exact'):
+    try:
+        if not api_host:
+            return False
+        if is_reachable(api_host):
+            v = server_version()
+            if type == 'exact':
+                if int(v['major']) != major or int(v['minor'] != minor):
+                    msg = 'Desired: [ {}.{} ]. Observed: [ {}.{} ].'.format(major, minor, v['major'], v['minor'])
+                    raise VersionMismatchException(msg)
+            return True
+        return False
+
+    except VersionMismatchException:
         return False
 
 
@@ -301,8 +320,7 @@ def cleanup_pods():
         while len(_list) > 0:
             for p in _list:
                 try:
-                    pod = K8sPod(config=ref.config, name=p['metadata']['name']).get()
-                    pod.delete()
+                    p.delete()
                 except NotFoundException:
                     continue
             _list = ref.list()
@@ -423,8 +441,7 @@ def cleanup_jobs():
         while len(_list) > 0:
             for j in _list:
                 try:
-                    job = K8sJob(config=ref.config, name=j['metadata']['name']).get()
-                    job.delete()
+                    j.delete()
                 except NotFoundException:
                     continue
             _list = ref.list()
@@ -491,6 +508,7 @@ def cleanup_service_accounts():
                 _list = ref.list()
         except StopIteration:
             pass
+
 
 # --------------------------------------------------------------------------------- front-end replication controller
 
@@ -1231,6 +1249,7 @@ def nginx_service():
             }
         }
     }
+
 
 def nginx_petset():
     return {
