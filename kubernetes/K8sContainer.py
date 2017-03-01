@@ -83,10 +83,14 @@ class K8sContainer(object):
         self.model.volume_mounts = mounts
 
     def add_liveness_probe(self, **kwargs):
+        if not isinstance(kwargs, dict):
+            raise SyntaxError('K8sContainer: could not add liveness_probe: [ {} ]'.format(kwargs))
         probe = Probe(kwargs)
         self.liveness_probe = probe
 
     def add_readiness_probe(self, **kwargs):
+        if not isinstance(kwargs, dict):
+            raise SyntaxError('K8sContainer: could not add readiness_probe: [ {} ]'.format(kwargs))
         probe = Probe(kwargs)
         self.readiness_probe = probe
 
