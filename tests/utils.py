@@ -69,7 +69,7 @@ def assert_server_version(api_host=None, major=None, minor=None, type='exact'):
         if is_reachable(api_host):
             v = server_version()
             if type == 'exact':
-                if int(v['major']) != major or int(v['minor'] != minor):
+                if int(v['major']) != major or int(v['minor']) != minor:
                     msg = 'Desired: [ {}.{} ]. Observed: [ {}.{} ].'.format(major, minor, v['major'], v['minor'])
                     raise VersionMismatchException(msg)
             return True
