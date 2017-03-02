@@ -10,6 +10,7 @@
 from kubernetes.models.unversioned import BaseModel
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.models.v1beta1.StatefulSetSpec import StatefulSetSpec
+from kubernetes.models.v1beta1.StatefulSetStatus import StatefulSetStatus
 
 
 class StatefulSet(BaseModel):
