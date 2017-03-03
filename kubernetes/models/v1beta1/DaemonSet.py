@@ -7,9 +7,9 @@
 #
 
 from kubernetes.models.unversioned.BaseModel import BaseModel
+from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.models.v1beta1.DaemonSetSpec import DaemonSetSpec
 from kubernetes.models.v1beta1.DaemonSetStatus import DaemonSetStatus
-from kubernetes.models.v1.ObjectMeta import ObjectMeta
 
 
 class DaemonSet(BaseModel):
