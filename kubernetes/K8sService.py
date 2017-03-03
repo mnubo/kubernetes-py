@@ -6,9 +6,6 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import json
-import yaml
-
 from kubernetes.K8sObject import K8sObject
 from kubernetes.models.v1.Service import Service
 
