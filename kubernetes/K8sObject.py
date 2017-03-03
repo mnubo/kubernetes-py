@@ -25,7 +25,7 @@ VALID_K8s_OBJS = [
     'Namespace',
     'PersistentVolume',
     'PersistentVolumeClaim',
-    'PetSet',
+    'PetSet',  # server version == 1.4
     'Pod',
     'ReplicaSet',
     'ReplicationController',
@@ -33,6 +33,7 @@ VALID_K8s_OBJS = [
     'Secret',
     'Service',
     'ServiceAccount',
+    'StatefulSet',  # server version >= 1.5
     'Volume'
 ]
 
@@ -203,7 +204,7 @@ class K8sObject(object):
             status = state.get('status', '')
             state_data = state.get('data', dict())
             reason = state_data['message'] if 'message' in state_data else state_data
-            message = 'K8sObject: CREATE failed : HTTP {0} : {1}'.format(status, reason)
+            message = 'K8sObject: LIST failed : HTTP {0} : {1}'.format(status, reason)
             if int(status) == 401:
                 raise UnauthorizedException(message)
             if int(status) == 409:

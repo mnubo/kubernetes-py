@@ -108,7 +108,7 @@ class StatefulSetSpec(object):
         if self.selector is not None:
             data['selector'] = self.selector
         if self.template is not None:
-            data['template'] = self.template
+            data['template'] = self.template.serialize()
         if self.volume_claim_templates is not None:
             data['volumeClaimTemplates'] = [x.serialize() for x in self.volume_claim_templates]
         if self.service_name is not None:

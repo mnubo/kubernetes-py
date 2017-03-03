@@ -6,8 +6,7 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-
-from kubernetes.models.unversioned import BaseModel
+from kubernetes.models.unversioned.BaseModel import BaseModel
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.models.v1beta1.StatefulSetSpec import StatefulSetSpec
 from kubernetes.models.v1beta1.StatefulSetStatus import StatefulSetStatus
@@ -19,7 +18,7 @@ class StatefulSet(BaseModel):
         super(StatefulSet, self).__init__()
 
         self.kind = 'StatefulSet'
-        self.api_version = 'extensions/v1beta1'
+        self.api_version = 'apps/v1beta1'
         self.spec = StatefulSetSpec()
         self.status = StatefulSetStatus()
 

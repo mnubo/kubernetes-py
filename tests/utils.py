@@ -32,6 +32,7 @@ from kubernetes.K8sServiceAccount import K8sServiceAccount
 from kubernetes.K8sVolume import K8sVolume
 from kubernetes.K8sVolumeMount import K8sVolumeMount
 from kubernetes.utils import server_version
+from kubernetes.K8sStatefulSet import K8sStatefulSet
 
 kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
 
@@ -282,6 +283,16 @@ def create_service_account(config=None, name=None):
     return obj
 
 
+def create_stateful_set(config=None, name=None):
+    if config is None:
+        config = create_config()
+    obj = K8sStatefulSet(
+        config=config,
+        name=name
+    )
+    return obj
+
+
 # --------------------------------------------------------------------------------- delete
 
 def cleanup_objects():
@@ -484,6 +495,20 @@ def cleanup_petset():
                 try:
                     petset = K8sPetSet(config=ref.config, name=p['metadata']['name']).get()
                     petset.delete()
+                except NotFoundException:
+                    continue
+            _list = ref.list()
+
+
+def cleanup_stateful_sets():
+    ref = create_stateful_set(name="throwaway")
+    if is_reachable(ref.config.api_host):
+        _list = ref.list()
+        while len(_list) > 0:
+            for p in _list:
+                try:
+                    sset = K8sStatefulSet(config=ref.config, name=p['metadata']['name']).get()
+                    sset.delete()
                 except NotFoundException:
                     continue
             _list = ref.list()

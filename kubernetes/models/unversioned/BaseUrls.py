@@ -45,7 +45,8 @@ class BaseUrls(object):
         self.urls['Secret'] = '/api/{0}/namespaces/{1}/secrets'.format(api, namespace)
 
         # apps
-        self.urls['PetSet'] = '/apis/apps/{0}/namespaces/{1}/petsets'.format(apps, namespace)
+        self.urls['PetSet'] = '/apis/apps/v1alpha1/namespaces/{}/petsets'.format(namespace)
+        self.urls['StatefulSet'] = '/apis/apps/v1beta1/namespaces/{}/statefulsets'.format(namespace)
 
         # batch
         self.urls['Job'] = '/apis/batch/{0}/namespaces/{1}/jobs'.format(batch, namespace)
