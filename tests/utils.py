@@ -29,10 +29,11 @@ from kubernetes.K8sReplicationController import K8sReplicationController
 from kubernetes.K8sSecret import K8sSecret
 from kubernetes.K8sService import K8sService
 from kubernetes.K8sServiceAccount import K8sServiceAccount
+from kubernetes.K8sStatefulSet import K8sStatefulSet
+from kubernetes.K8sStorageClass import K8sStorageClass
 from kubernetes.K8sVolume import K8sVolume
 from kubernetes.K8sVolumeMount import K8sVolumeMount
 from kubernetes.utils import server_version
-from kubernetes.K8sStatefulSet import K8sStatefulSet
 
 kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
 
@@ -293,6 +294,16 @@ def create_stateful_set(config=None, name=None):
     return obj
 
 
+def create_storage_class(config=None, name=None):
+    if config is None:
+        config = create_config()
+    obj = K8sStorageClass(
+        config=config,
+        name=name
+    )
+    return obj
+
+
 # --------------------------------------------------------------------------------- delete
 
 def cleanup_objects():
@@ -533,6 +544,20 @@ def cleanup_service_accounts():
                 _list = ref.list()
         except StopIteration:
             pass
+
+
+def cleanup_storage_class():
+    ref = create_storage_class(name="throwaway")
+    if is_reachable(ref.config.api_host):
+        _list = ref.list()
+        while len(_list) > 0:
+            for p in _list:
+                try:
+                    sc = K8sStorageClass(config=ref.config, name=p['metadata']['name']).get()
+                    sc.delete()
+                except NotFoundException:
+                    continue
+            _list = ref.list()
 
 
 # --------------------------------------------------------------------------------- front-end replication controller

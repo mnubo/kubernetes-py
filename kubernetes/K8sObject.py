@@ -34,6 +34,7 @@ VALID_K8s_OBJS = [
     'Service',
     'ServiceAccount',
     'StatefulSet',  # server version >= 1.5
+    'StorageClass',
     'Volume'
 ]
 

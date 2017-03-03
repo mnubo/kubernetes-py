@@ -11,13 +11,17 @@ from kubernetes.utils import is_valid_string, is_valid_dict
 
 
 class StorageClass(object):
+    """
+    https://github.com/kubernetes/kubernetes/tree/master/examples/persistent-volume-provisioning/
+    https://kubernetes.io/docs/user-guide/persistent-volumes/#storageclasses
+    """
 
     def __init__(self, model=None):
         super(StorageClass, self).__init__()
 
         self._kind = 'StorageClass'
-        self._api_version = 'v1beta1/StorageClass'
-        self._metadata = None
+        self._api_version = 'storage.k8s.io/v1beta1'
+        self._metadata = ObjectMeta()
         self._provisioner = None
         self._parameters = None
 

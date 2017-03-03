@@ -24,7 +24,7 @@ class BaseUrls(object):
         if api is None:
             api = self.default_api_version
         if apps is None:
-            apps = self.default_apps_version
+            api = self.default_apps_version
         if batch is None:
             batch = self.default_batch_version
         if extensions is None:
@@ -43,6 +43,7 @@ class BaseUrls(object):
         self.urls['Service'] = '/api/{0}/namespaces/{1}/services'.format(api, namespace)
         self.urls['ServiceAccount'] = '/api/{0}/namespaces/{1}/serviceaccounts'.format(api, namespace)
         self.urls['Secret'] = '/api/{0}/namespaces/{1}/secrets'.format(api, namespace)
+        self.urls['StorageClass'] = '/apis/storage.k8s.io/v1beta1/storageclasses'
 
         # apps
         self.urls['PetSet'] = '/apis/apps/v1alpha1/namespaces/{}/petsets'.format(namespace)
