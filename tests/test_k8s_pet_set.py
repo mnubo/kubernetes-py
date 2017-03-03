@@ -22,11 +22,11 @@ def should_skip():
 class K8sPetSetTests(unittest.TestCase):
 
     def setUp(self):
-        utils.cleanup_petset()
+        utils.cleanup_petsets()
         utils.cleanup_pods()
 
     def tearDown(self):
-        utils.cleanup_petset()
+        utils.cleanup_petsets()
         utils.cleanup_pods()
 
     # --------------------------------------------------------------------------------- init

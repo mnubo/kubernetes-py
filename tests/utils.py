@@ -486,7 +486,7 @@ def cleanup_ds():
             _list = ref.list()
 
 
-def cleanup_petset():
+def cleanup_petsets():
     ref = create_petset(name="throwaway")
     if is_reachable(ref.config.api_host):
         _list = ref.list()
