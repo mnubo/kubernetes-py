@@ -23,6 +23,7 @@ VALID_K8s_OBJS = [
     'Deployment',
     'Job',
     'Namespace',
+    'Node',
     'PersistentVolume',
     'PersistentVolumeClaim',
     'PetSet',

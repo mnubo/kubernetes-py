@@ -35,7 +35,8 @@ class BaseUrls(object):
         self.urls = dict()
 
         # api
-        self.urls['Namespace'] = '/api/{0}/namespaces'.format(api, namespace)
+        self.urls['Namespace'] = '/api/{0}/namespaces'.format(api)
+        self.urls['Node'] = '/api/{0}/nodes'.format(api)
         self.urls['Pod'] = '/api/{0}/namespaces/{1}/pods'.format(api, namespace)
         self.urls['PersistentVolume'] = '/api/{0}/persistentvolumes'.format(api)
         self.urls['PersistentVolumeClaim'] = '/api/{0}/namespaces/{1}/persistentvolumeclaims'.format(api, namespace)
