@@ -20,6 +20,8 @@ from kubernetes.K8sExceptions import VersionMismatchException
 from kubernetes.K8sJob import K8sJob
 from kubernetes.K8sNamespace import K8sNamespace
 from kubernetes.K8sObject import K8sObject
+from kubernetes.K8sNamespace import K8sNamespace
+from kubernetes.K8sNode import K8sNode
 from kubernetes.K8sPersistentVolume import K8sPersistentVolume
 from kubernetes.K8sPersistentVolumeClaim import K8sPersistentVolumeClaim
 from kubernetes.K8sPetSet import K8sPetSet
@@ -140,6 +142,16 @@ def create_namespace(config=None, name=None):
     if config is None:
         config = create_config()
     obj = K8sNamespace(
+        config=config,
+        name=name
+    )
+    return obj
+
+
+def create_node(config=None, name=None):
+    if config is None:
+        config = create_config()
+    obj = K8sNode(
         config=config,
         name=name
     )
@@ -330,6 +342,22 @@ def cleanup_namespaces():
                     if p['metadata']['name'] not in ['kube-system', 'default']:
                         ns = K8sNamespace(config=ref.config, name=p['metadata']['name']).get()
                         ns.delete()
+                except NotFoundException:
+                    continue
+            _list = ref.list()
+
+
+def cleanup_nodes():
+    # TODO(sebastienc): This is really dangerous. it's not to be used outside minikube.
+    ref = create_node(name="throwaway")
+    if is_reachable(ref.config.api_host):
+        _list = ref.list()
+        while len(_list) > 1:
+            for p in _list:
+                try:
+                    if p['metadata']['name'] not in ['minikube']:
+                        n = K8sNode(config=ref.config, name=p['metadata']['name']).get()
+                        n.delete()
                 except NotFoundException:
                     continue
             _list = ref.list()
