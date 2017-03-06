@@ -24,7 +24,7 @@ class BaseUrls(object):
         if api is None:
             api = self.default_api_version
         if apps is None:
-            api = self.default_apps_version
+            apps = self.default_apps_version
         if batch is None:
             batch = self.default_batch_version
         if extensions is None:
