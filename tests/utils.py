@@ -353,15 +353,16 @@ def cleanup_nodes():
     if is_reachable(ref.config.api_host):
         node_pattern = re.compile("yo\-")
         _list = ref.list()
-        while len(_list) > 1:
-            for p in _list:
+        _filtered = filter(lambda x: node_pattern.match(x['metadata']['name']) is not None, _list)
+        while len(_filtered) > 1:
+            for p in _filtered:
                 try:
-                    if node_pattern.match(p['metadata']['name']):
-                        n = K8sNode(config=ref.config, name=p['metadata']['name']).get()
-                        n.delete()
+                    n = K8sNode(config=ref.config, name=p['metadata']['name']).get()
+                    n.delete()
                 except NotFoundException:
                     continue
             _list = ref.list()
+            _filtered = filter(lambda x: node_pattern.match(x['metadata']['name']) is not None, _list)
 
 
 def cleanup_pods():
