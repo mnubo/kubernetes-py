@@ -288,6 +288,7 @@ def cleanup_objects():
         cleanup_secrets()
         cleanup_services()
         cleanup_namespaces()
+        cleanup_nodes()
 
 
 def cleanup_namespaces():
@@ -306,14 +307,14 @@ def cleanup_namespaces():
 
 
 def cleanup_nodes():
-    # TODO(sebastienc): This is really dangerous. it's not to be used outside minikube.
     ref = create_node(name="throwaway")
     if is_reachable(ref.config.api_host):
+        node_pattern = re.compile("yo\-")
         _list = ref.list()
         while len(_list) > 1:
             for p in _list:
                 try:
-                    if p['metadata']['name'] not in ['minikube']:
+                    if node_pattern.match(p['metadata']['name']):
                         n = K8sNode(config=ref.config, name=p['metadata']['name']).get()
                         n.delete()
                 except NotFoundException:
