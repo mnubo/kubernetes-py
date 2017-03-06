@@ -20,11 +20,9 @@ from tests import utils
 
 class K8sNodeTest(unittest.TestCase):
     def setUp(self):
-        # TODO(sebastienc): WE SHOULD NOT RUN THIS OUTSIDE MINIKUBE
         utils.cleanup_nodes()
 
     def tearDown(self):
-        # TODO(sebastienc): WE SHOULD NOT RUN THIS OUTSIDE MINIKUBE
         utils.cleanup_nodes()
 
     # --------------------------------------------------------------------------------- init
@@ -51,7 +49,7 @@ class K8sNodeTest(unittest.TestCase):
             utils.create_namespace(name=name)
 
     def test_init_with_name(self):
-        name = "yoname"
+        name = "yo-name"
         n = utils.create_node(name=name)
         self.assertIsNotNone(n)
         self.assertIsInstance(n, K8sNode)
@@ -62,7 +60,7 @@ class K8sNodeTest(unittest.TestCase):
     def test_init_with_name_and_config(self):
         nspace = "default"
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback, namespace=nspace)
-        name = "yoname"
+        name = "yo-name"
         n = utils.create_node(config=config, name=name)
         self.assertIsNotNone(n)
         self.assertIsInstance(n, K8sNode)
@@ -73,7 +71,7 @@ class K8sNodeTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- struct
 
     def test_struct_k8s_node(self):
-        name = "yoname"
+        name = "yo-name"
         n = utils.create_node(name=name)
         self.assertIsInstance(n, K8sNode)
         self.assertIsInstance(n.base_url, str)
@@ -83,7 +81,7 @@ class K8sNodeTest(unittest.TestCase):
         self.assertIsInstance(n.obj_type, str)
 
     def test_struct_node(self):
-        name = "yoname"
+        name = "yo-name"
         n = utils.create_node(name=name)
         self.assertIsInstance(n, K8sNode)
         self.assertIsInstance(n.model, Node)
@@ -94,7 +92,7 @@ class K8sNodeTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- add annotation
 
     def test_add_annotation_none_args(self):
-        name = "yonode"
+        name = "yo-node"
         n = utils.create_node(name=name)
         try:
             n.add_annotation()
@@ -103,7 +101,7 @@ class K8sNodeTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_add_annotation_invalid_args(self):
-        name = "yonode"
+        name = "yo-node"
         n = utils.create_node(name=name)
         k = object()
         v = object()
@@ -114,7 +112,7 @@ class K8sNodeTest(unittest.TestCase):
             self.assertIsInstance(err, SyntaxError)
 
     def test_add_annotation(self):
-        name = "yonode"
+        name = "yo-node"
         n = utils.create_node(name=name)
         k = "yokey"
         v = "yovalue"
@@ -125,13 +123,13 @@ class K8sNodeTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- add label
 
     def test_add_label_none_args(self):
-        name = "yonode"
+        name = "yo-node"
         n = utils.create_node(name=name)
         with self.assertRaises(SyntaxError):
             n.add_label()
 
     def test_add_label_invalid_args(self):
-        name = "yonode"
+        name = "yo-node"
         n = utils.create_node(name=name)
         k = object()
         v = object()
@@ -139,7 +137,7 @@ class K8sNodeTest(unittest.TestCase):
             n.add_label(k, v)
 
     def test_add_label(self):
-        name = "yonode"
+        name = "yo-node"
         n = utils.create_node(name=name)
         k = "yokey"
         v = "yovalue"
@@ -150,7 +148,7 @@ class K8sNodeTest(unittest.TestCase):
     # --------------------------------------------------------------------------------- get
 
     def test_get_nonexistent(self):
-        name = "yonode"
+        name = "yo-node"
         n = utils.create_node(name=name)
         if utils.is_reachable(n.config.api_host):
             with self.assertRaises(NotFoundException):
