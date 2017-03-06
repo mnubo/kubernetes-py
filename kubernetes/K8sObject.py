@@ -263,6 +263,8 @@ class K8sObject(object):
             message = 'K8sObject: CREATE failed : HTTP {0} : {1} : {2}'.format(status, reason, post_data)
             if int(status) == 401:
                 raise UnauthorizedException(message)
+            if int(status) == 404:
+                raise NotFoundException(message)
             if int(status) == 409:
                 raise AlreadyExistsException(message)
             if int(status) == 422:
