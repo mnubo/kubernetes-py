@@ -8,6 +8,7 @@
 
 import unittest
 import uuid
+import re
 
 from kubernetes import K8sNode, K8sConfig
 from kubernetes.models.v1.Node import Node
@@ -164,16 +165,16 @@ class K8sNodeTest(unittest.TestCase):
             self.assertEqual(n, from_get)
 
     # --------------------------------------------------------------------------------- api - list
-    # --------------------------------------------------------------------------------- api - list
 
     def test_list_without_create(self):
         name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
         nodes = utils.create_node(name=name)
         if utils.is_reachable(nodes.config.api_host):
             _list = nodes.list()
-            self.assertIsInstance(_list, list)
-            self.assertEqual(1, len(_list))  # kube-system and default exist already.
-            self.assertIsInstance(_list[0], dict)
+            node_pattern = re.compile("yo\-")
+            _filtered = filter(lambda x: node_pattern.match(x['metadata']['name']) is not None, _list)
+            self.assertIsInstance(_filtered, list)
+            self.assertEqual(0, len(_filtered))
 
     def test_list(self):
         name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
@@ -181,9 +182,11 @@ class K8sNodeTest(unittest.TestCase):
         if utils.is_reachable(nodes.config.api_host):
             nodes.create()
             _list = nodes.list()
-            self.assertIsInstance(_list, list)
-            self.assertEqual(2, len(_list))  # kube-system and default exist already.
-            from_query = _list[1]
+            node_pattern = re.compile("yo\-")
+            _filtered = filter(lambda x: node_pattern.match(x['metadata']['name']) is not None, _list)
+            self.assertIsInstance(_filtered, list)
+            self.assertEqual(1, len(_filtered))
+            from_query = _filtered[0]
             self.assertIsInstance(from_query, dict)
             self.assertEqual(name, from_query['metadata']['name'])
 
