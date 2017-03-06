@@ -1662,3 +1662,38 @@ class K8sReplicationControllerTest(unittest.TestCase):
             self.assertIn(cont_name_2, rc_2.container_image)
             self.assertEqual(image_1, rc_2.container_image[cont_name_1])
             self.assertEqual(image_2, rc_2.container_image[cont_name_2])
+
+    # ------------------------------------------------------------------------------------- api - Probe periodSeconds
+
+    def test_probe_period_seconds(self):
+        data = utils.frontend()
+        rc = ReplicationController(data)
+        k8s_rc = utils.create_rc(name=rc.metadata.name)
+        k8s_rc.model = rc
+        self.assertEqual(1, len(k8s_rc.liveness_probes))
+        self.assertEqual(1, len(k8s_rc.readiness_probes))
+
+        if utils.is_reachable(k8s_rc.config.api_host):
+            k8s_rc.create()
+            probe = k8s_rc.liveness_probes['frontend']
+            probe.period_seconds = 60
+            k8s_rc.liveness_probes = ('frontend', probe)
+            k8s_rc.update()
+            rc = k8s_rc.get()
+            self.assertEqual(60, rc.liveness_probes['frontend'].period_seconds)
+
+    def test_probe_period_seconds_with_model(self):
+        data = utils.frontend()
+        rc = ReplicationController(data)
+        k8s_rc = utils.create_rc(name=rc.metadata.name)
+        k8s_rc.model = rc
+        self.assertEqual(1, len(k8s_rc.liveness_probes))
+        self.assertEqual(1, len(k8s_rc.readiness_probes))
+
+        if utils.is_reachable(k8s_rc.config.api_host):
+            k8s_rc.create()
+            liveness = k8s_rc.liveness_probes['frontend']
+            liveness.period_seconds = 60
+            dict = liveness.serialize()
+            container = k8s_rc.containers[0]
+            container.add_liveness_probe(**dict)

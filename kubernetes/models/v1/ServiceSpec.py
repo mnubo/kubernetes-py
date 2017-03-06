@@ -66,7 +66,7 @@ class ServiceSpec(object):
 
     @cluster_ip.setter
     def cluster_ip(self, ip=None):
-        if not is_valid_string(ip) or not is_reachable(ip):
+        if not is_valid_string(ip):
             raise SyntaxError('ServiceSpec: cluster_ip: [ {0} ] is invalid.'.format(ip))
         self._cluster_ip = ip
 

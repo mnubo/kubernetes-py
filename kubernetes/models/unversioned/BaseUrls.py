@@ -35,7 +35,8 @@ class BaseUrls(object):
         self.urls = dict()
 
         # api
-        self.urls['Namespace'] = '/api/{0}/namespaces'.format(api, namespace)
+        self.urls['Namespace'] = '/api/{0}/namespaces'.format(api)
+        self.urls['Node'] = '/api/{0}/nodes'.format(api)
         self.urls['Pod'] = '/api/{0}/namespaces/{1}/pods'.format(api, namespace)
         self.urls['PersistentVolume'] = '/api/{0}/persistentvolumes'.format(api)
         self.urls['PersistentVolumeClaim'] = '/api/{0}/namespaces/{1}/persistentvolumeclaims'.format(api, namespace)
@@ -43,9 +44,11 @@ class BaseUrls(object):
         self.urls['Service'] = '/api/{0}/namespaces/{1}/services'.format(api, namespace)
         self.urls['ServiceAccount'] = '/api/{0}/namespaces/{1}/serviceaccounts'.format(api, namespace)
         self.urls['Secret'] = '/api/{0}/namespaces/{1}/secrets'.format(api, namespace)
+        self.urls['StorageClass'] = '/apis/storage.k8s.io/v1beta1/storageclasses'
 
         # apps
-        self.urls['PetSet'] = '/apis/apps/{0}/namespaces/{1}/petsets'.format(apps, namespace)
+        self.urls['PetSet'] = '/apis/apps/v1alpha1/namespaces/{}/petsets'.format(namespace)
+        self.urls['StatefulSet'] = '/apis/apps/v1beta1/namespaces/{}/statefulsets'.format(namespace)
 
         # batch
         self.urls['Job'] = '/apis/batch/{0}/namespaces/{1}/jobs'.format(batch, namespace)

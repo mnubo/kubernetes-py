@@ -423,9 +423,13 @@ class K8sServiceTest(unittest.TestCase):
     def test_set_cluster_ip_invalid_ip_address(self):
         name = "yoservice"
         svc = utils.create_service(name=name)
-        ip = "192.168.00000.1234345"
-        with self.assertRaises(SyntaxError):
+        svc.add_port('http', 80, 80, 'TCP')
+        if utils.is_reachable(svc.config.api_host):
+            svc.create()
+            ip = "192.168.00000.1234345"
             svc.cluster_ip = ip
+            with self.assertRaises(UnprocessableEntityException):
+                svc.update()
 
     def test_set_cluster_ip(self):
         name = "yoservice"

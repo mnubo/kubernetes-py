@@ -17,7 +17,7 @@ from kubernetes.K8sReplicationController import K8sReplicationController
 import utils
 
 
-class CloudNativeCassandraTests(unittest.TestCase):
+class StatefulSetCassandraTests(unittest.TestCase):
     """
     https://github.com/kubernetes/kubernetes/tree/master/examples/storage/cassandra
 

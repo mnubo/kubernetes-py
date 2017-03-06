@@ -23,9 +23,10 @@ VALID_K8s_OBJS = [
     'Deployment',
     'Job',
     'Namespace',
+    'Node',
     'PersistentVolume',
     'PersistentVolumeClaim',
-    'PetSet',
+    'PetSet',  # server version == 1.4
     'Pod',
     'ReplicaSet',
     'ReplicationController',
@@ -33,6 +34,8 @@ VALID_K8s_OBJS = [
     'Secret',
     'Service',
     'ServiceAccount',
+    'StatefulSet',  # server version >= 1.5
+    'StorageClass',
     'Volume'
 ]
 
@@ -203,7 +206,7 @@ class K8sObject(object):
             status = state.get('status', '')
             state_data = state.get('data', dict())
             reason = state_data['message'] if 'message' in state_data else state_data
-            message = 'K8sObject: CREATE failed : HTTP {0} : {1}'.format(status, reason)
+            message = 'K8sObject: LIST failed : HTTP {0} : {1}'.format(status, reason)
             if int(status) == 401:
                 raise UnauthorizedException(message)
             if int(status) == 409:
@@ -211,7 +214,8 @@ class K8sObject(object):
             if int(status) == 422:
                 raise UnprocessableEntityException(message)
             raise BadRequestException(message)
-        return state.get('data', dict()).get('items', list())
+        items = state.get('data', dict()).get('items', list())
+        return items if items is not None else []
 
     def get_model(self):
         if self.name is None:
@@ -235,7 +239,10 @@ class K8sObject(object):
             raise SyntaxError('K8sObject.get_with_params(): data: [ {0} ] is invalid.'.format(data))
         url = '{base}'.format(base=self.base_url)
         state = self.request(method='GET', url=url, data=data)
-        return state.get('data', None).get('items', list())
+        items = state.get('data', None).get('items', list())
+        if items is None:
+            return []
+        return items
 
     def create(self):
         if self.name is None:
@@ -256,6 +263,8 @@ class K8sObject(object):
             message = 'K8sObject: CREATE failed : HTTP {0} : {1} : {2}'.format(status, reason, post_data)
             if int(status) == 401:
                 raise UnauthorizedException(message)
+            if int(status) == 404:
+                raise NotFoundException(message)
             if int(status) == 409:
                 raise AlreadyExistsException(message)
             if int(status) == 422:
@@ -322,10 +331,19 @@ class K8sObject(object):
         url = '/version'
 
         state = self.request(method='GET', url=url)
+
         if not state.get('success'):
             status = state.get('status', '')
-            reason = state.get('data', dict()).get('message', None)
+            data = state.get('data', dict())
+
+            if isinstance(data, dict) and 'message' in data:
+                reason = data.get('message', None)
+            else:
+                reason = data
             message = 'K8sObject: GET failed: HTTP {0} : {1}'.format(status, reason)
+
+            if status == 401:
+                raise UnauthorizedException(message)
             raise BadRequestException(message)
 
         return state['data']

@@ -10,6 +10,7 @@ from kubernetes.models.unversioned.BaseModel import BaseModel
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.models.v1alpha1.PetSetSpec import PetSetSpec
 from kubernetes.models.v1alpha1.PetSetStatus import PetSetStatus
+from kubernetes.utils import server_version
 
 
 class PetSet(BaseModel):
@@ -19,6 +20,12 @@ class PetSet(BaseModel):
 
     def __init__(self, model=None):
         super(PetSet, self).__init__()
+
+        v = server_version()
+        if int(v['major']) <= 1 and int(v['minor']) < 4:
+            raise NotImplementedError('PetSets exist only on Kubernetes == 1.4.x.')
+        if int(v['major']) >= 1 and int(v['minor']) >= 5:
+            raise NotImplementedError('PetSets were refactored into StatefulSets on Kubernetes >= 1.5.x.')
 
         self._kind = 'PetSet'
         self._api_version = 'apps/v1alpha1'

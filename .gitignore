@@ -3,6 +3,7 @@
 
 # virtualenv
 .env
+.venv
 
 # minikube
 /bin/minikube*

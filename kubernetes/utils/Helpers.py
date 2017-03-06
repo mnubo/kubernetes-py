@@ -7,8 +7,10 @@
 #
 
 import copy
-import socket
 import importlib
+import socket
+
+from dateutil.parser import parse
 
 from kubernetes.K8sExceptions import NotFoundException
 
@@ -48,6 +50,19 @@ def is_valid_dict(target=None, keys=None, type=None):
             if x not in keys:
                 return False
     return True
+
+
+def is_valid_date_time(target=None):
+    rc = True
+    if target is None:
+        rc = False
+    else:
+        try:
+            parse(target)
+        except ValueError:
+            rc = False
+            pass
+    return rc
 
 
 def is_reachable(ip=None):

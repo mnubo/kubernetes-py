@@ -8,22 +8,27 @@
 
 from kubernetes.models.unversioned.BaseModel import BaseModel
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
-from kubernetes.models.v1beta1.DaemonSetSpec import DaemonSetSpec
-from kubernetes.models.v1beta1.DaemonSetStatus import DaemonSetStatus
+from kubernetes.models.v1.NodeSpec import NodeSpec
+from kubernetes.models.v1.NodeStatus import NodeStatus
+from kubernetes.utils import filter_model
 
 
-class DaemonSet(BaseModel):
+class Node(BaseModel):
+    """
+    https://kubernetes.io/docs/api-reference/v1/definitions/#_v1_node
+    """
 
     def __init__(self, model=None):
-        super(DaemonSet, self).__init__()
+        super(Node, self).__init__()
 
-        self.kind = 'DaemonSet'
-        self.api_version = 'extensions/v1beta1'
-        self.spec = DaemonSetSpec()
-        self.status = DaemonSetStatus()
+        self.kind = 'Node'
+        self.api_version = 'v1'
+        self.spec = NodeSpec()
+        self.status = NodeStatus()
 
         if model is not None:
-            self._build_with_model(model)
+            m = filter_model(model)
+            self._build_with_model(m)
 
     def _build_with_model(self, model=None):
         if 'kind' in model:
@@ -33,9 +38,9 @@ class DaemonSet(BaseModel):
         if 'metadata' in model:
             self.metadata = ObjectMeta(model['metadata'])
         if 'spec' in model:
-            self.spec = DaemonSetSpec(model['spec'])
+            self.spec = NodeSpec(model['spec'])
         if 'status' in model:
-            self.status = DaemonSetStatus(model['status'])
+            self.status = NodeStatus(model['status'])
 
     # ------------------------------------------------------------------------------------- spec
 
@@ -45,8 +50,8 @@ class DaemonSet(BaseModel):
 
     @spec.setter
     def spec(self, spec=None):
-        if not isinstance(spec, DaemonSetSpec):
-            raise SyntaxError('DaemonSet: spec: [ {} ] is invalid.'.format(spec))
+        if not isinstance(spec, NodeSpec):
+            raise SyntaxError('Node: spec: [ {0} ] is invalid.'.format(spec))
         self._spec = spec
 
     # ------------------------------------------------------------------------------------- status
@@ -57,14 +62,14 @@ class DaemonSet(BaseModel):
 
     @status.setter
     def status(self, status=None):
-        if not isinstance(status, DaemonSetStatus):
-            raise SyntaxError('DaemonSet: status: [ {} ] is invalid.'.format(status))
+        if not isinstance(status, NodeStatus):
+            raise SyntaxError('Node: status: [ {0} ] is invalid.'.format(status))
         self._status = status
 
     # ------------------------------------------------------------------------------------- serialize
 
     def serialize(self):
-        data = super(DaemonSet, self).serialize()
+        data = super(Node, self).serialize()
         if self.spec is not None:
             data['spec'] = self.spec.serialize()
         if self.status is not None:

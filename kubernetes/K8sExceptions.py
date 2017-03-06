@@ -40,3 +40,8 @@ class TimedOutException(Exception):
 class PodNotReadyException(Exception):
     def __init__(self, *args, **kwargs):
         super(PodNotReadyException, self).__init__(*args, **kwargs)
+
+
+class VersionMismatchException(Exception):
+    def __init__(self, *args, **kwargs):
+        super(VersionMismatchException, self).__init__(*args, **kwargs)
