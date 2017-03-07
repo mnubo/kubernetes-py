@@ -1,6 +1,7 @@
 import os
 
 from pip.req import parse_requirements
+from pip.download import PipSession
 
 try:
     from setuptools import setup
@@ -10,7 +11,8 @@ except ImportError:
 # See https://github.com/pybuilder/pybuilder/issues/56
 del os.link
 
-install_reqs = parse_requirements(os.path.abspath(__file__).replace('setup.py', 'requirements.txt'))
+install_reqs = parse_requirements(os.path.abspath(__file__).replace('setup.py', 'requirements.txt'),
+                                  session=PipSession())
 reqs = [str(ir.req) for ir in install_reqs]
 
 
