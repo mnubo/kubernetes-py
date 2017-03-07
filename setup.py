@@ -1,8 +1,5 @@
 import os
 
-from pip.req import parse_requirements
-from pip.download import PipSession
-
 try:
     from setuptools import setup
 except ImportError:
@@ -11,9 +8,9 @@ except ImportError:
 # See https://github.com/pybuilder/pybuilder/issues/56
 del os.link
 
-install_reqs = parse_requirements(os.path.abspath(__file__).replace('setup.py', 'requirements.txt'),
-                                  session=PipSession())
-reqs = [str(ir.req) for ir in install_reqs]
+# install_reqs = parse_requirements(os.path.abspath(__file__).replace('setup.py', 'requirements.txt'),
+#                                   session=PipSession())
+# reqs = [str(ir.req) for ir in install_reqs]
 
 
 def version():
@@ -40,7 +37,13 @@ setup(
         'kubernetes.models.v2alpha1',
         'kubernetes.utils'
     ],
-    install_requires=reqs,
+    install_requires=[
+        'importlib>=1.0.3',
+        'PyYAML==3.11',
+        'requests>=2.10.0',
+        'uuid==1.30',
+        'python-dateutil>=2.6.0'
+    ],
     scripts=[],
     test_suite='nose.collector',
     tests_require=[
