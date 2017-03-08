@@ -6,6 +6,7 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+from K8sComponentStatus import K8sComponentStatus
 from K8sConfig import K8sConfig
 from K8sContainer import K8sContainer
 from K8sDeployment import K8sDeployment

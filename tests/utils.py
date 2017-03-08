@@ -10,6 +10,7 @@ import os
 import re
 import socket
 
+from kubernetes.K8sComponentStatus import K8sComponentStatus
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sCronJob import K8sCronJob
@@ -104,6 +105,15 @@ def _is_api_server(service=None):
 
 
 # --------------------------------------------------------------------------------- create
+def create_component_status(config=None, name=None):
+    if config is None:
+        config = create_config()
+    obj = K8sComponentStatus(
+        config=config,
+        name=name
+    )
+    return obj
+
 
 def create_container(name=None, image="redis"):
     return K8sContainer(name=name, image=image)
@@ -1393,4 +1403,23 @@ def nginx_petset():
                 }
             ]
         }
+    }
+
+
+# --------------------------------------------------------------------------------- component_status
+
+def component_status_scheduler():
+    return {
+        "metadata": {
+            "name": "scheduler",
+            "selfLink": "/api/v1/componentstatuses/scheduler",
+            "creationTimestamp": None
+        },
+        "conditions": [
+            {
+                "type": "Healthy",
+                "status": "True",
+                "message": "ok",
+            }
+        ]
     }

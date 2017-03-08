@@ -18,6 +18,7 @@ from kubernetes.models.v1.DeleteOptions import DeleteOptions
 from kubernetes.utils import HttpRequest, is_valid_dict, str_to_class
 
 VALID_K8s_OBJS = [
+    'ComponentStatus',
     'CronJob',  # server version >= 1.5
     'DaemonSet',
     'Deployment',
