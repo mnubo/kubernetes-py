@@ -26,7 +26,7 @@ class K8sComponentStatus(K8sObject):
     def update(self):
         return self
 
-    def delete(self):
+    def delete(self, orphan=False):
         return self
 
     # ------------------------------------------------------------------------------------- get
