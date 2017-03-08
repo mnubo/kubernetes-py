@@ -6,21 +6,21 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.unversioned.ListMeta import ListMeta
 from kubernetes.models.unversioned.ListModel import ListModel
-from kubernetes.models.v1.Node import Node
+from kubernetes.models.unversioned.ListMeta import ListMeta
+from kubernetes.models.v1.ComponentStatus import ComponentStatus
 from kubernetes.utils import filter_model, is_valid_list
 
 
-class NodeList(ListModel):
+class ComponentStatusList(ListModel):
     """
-    https://kubernetes.io/docs/api-reference/v1/definitions/#_v1_nodelist
+    https://kubernetes.io/docs/api-reference/v1/definitions/#_v1_componentstatuslist
     """
 
     def __init__(self, model=None):
-        super(NodeList, self).__init__()
+        super(ComponentStatusList, self).__init__()
 
-        self.kind = 'NodeList'
+        self.kind = 'ComponentStatusList'
         self.api_version = 'v1'
 
         if model is not None:
@@ -38,10 +38,10 @@ class NodeList(ListModel):
             if isinstance(model['items'], list):
                 l = list()
                 for i in model['items']:
-                    l.append(Node(model=i))
+                    l.append(ComponentStatus(model=i))
                 self.items = l
             else:
-                raise SyntaxError('NodeList: items: [ {0} ] is invalid.'.format(model['items']))
+                raise SyntaxError('ComponentStatusList: items: [ {0} ] is invalid.'.format(model['items']))
 
     # ------------------------------------------------------------------------------------- items
 
@@ -51,12 +51,12 @@ class NodeList(ListModel):
 
     @items.setter
     def items(self, i=None):
-        if not is_valid_list(target=i, element_class=Node):
-            raise SyntaxError('NodeList: items: [ {0} ] is invalid.'.format(i))
+        if not is_valid_list(target=i, element_class=ComponentStatus):
+            raise SyntaxError('ComponentStatusList: items: [ {0} ] is invalid.'.format(i))
         self._items = i
 
     # ------------------------------------------------------------------------------------- serialize
 
     def serialize(self):
-        data = super(NodeList, self).serialize()
+        data = super(ComponentStatusList, self).serialize()
         return data

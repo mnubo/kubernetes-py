@@ -7,6 +7,9 @@
 #
 
 from AttachedVolume import AttachedVolume
+from ComponentCondition import ComponentCondition
+from ComponentStatus import ComponentStatus
+from ComponentStatusList import ComponentStatusList
 from Container import Container
 from ContainerImage import ContainerImage
 from ContainerPort import ContainerPort
