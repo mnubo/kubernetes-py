@@ -6,20 +6,19 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import unittest
 import uuid
 
+from BaseTest import BaseTest
 from kubernetes import K8sNamespace, K8sConfig
 from kubernetes.K8sExceptions import *
-from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.models.v1.Namespace import Namespace
-from kubernetes.models.v1.NamespaceStatus import NamespaceStatus
 from kubernetes.models.v1.NamespaceSpec import NamespaceSpec
+from kubernetes.models.v1.NamespaceStatus import NamespaceStatus
+from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from tests import utils
 
 
-class K8sNamespaceTest(unittest.TestCase):
-
+class K8sNamespaceTest(BaseTest):
     def setUp(self):
         utils.cleanup_namespaces()
 

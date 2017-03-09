@@ -6,16 +6,15 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import unittest
-
 import utils
+from BaseTest import BaseTest
 from kubernetes.K8sService import K8sService
 from kubernetes.K8sStatefulSet import K8sStatefulSet
 from kubernetes.models.v1.Service import Service
 from kubernetes.models.v1beta1.StatefulSet import StatefulSet
 
 
-class StatefulSetNginxTests(unittest.TestCase):
+class StatefulSetNginxTests(BaseTest):
     """
     https://kubernetes.io/docs/tutorials/stateful-application/basic-stateful-set/
     """

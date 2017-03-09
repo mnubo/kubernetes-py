@@ -6,9 +6,9 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import unittest
 import uuid
 
+from BaseTest import BaseTest
 from kubernetes.K8sExceptions import TimedOutException
 from kubernetes.K8sPersistentVolume import K8sPersistentVolume
 from kubernetes.K8sPersistentVolumeClaim import K8sPersistentVolumeClaim
@@ -17,8 +17,7 @@ from kubernetes.models.v1.ResourceRequirements import ResourceRequirements
 from tests import utils
 
 
-class K8sPersistentVolumeClaimTest(unittest.TestCase):
-
+class K8sPersistentVolumeClaimTest(BaseTest):
     def setUp(self):
         K8sPod.POD_READY_TIMEOUT_SECONDS = 20
         utils.cleanup_pods()

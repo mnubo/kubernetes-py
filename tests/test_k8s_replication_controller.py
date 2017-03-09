@@ -17,9 +17,10 @@ from kubernetes.models.v1.ReplicationController import ReplicationController
 from kubernetes.models.v1.ReplicationControllerSpec import ReplicationControllerSpec
 from kubernetes.models.v1.ReplicationControllerStatus import ReplicationControllerStatus
 from tests import utils
+from BaseTest import BaseTest
 
 
-class K8sReplicationControllerTest(unittest.TestCase):
+class K8sReplicationControllerTest(BaseTest):
 
     def setUp(self):
         K8sReplicationController.SCALE_WAIT_TIMEOUT_SECONDS = 30

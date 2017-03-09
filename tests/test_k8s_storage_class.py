@@ -6,15 +6,13 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import unittest
 import utils
-
-from kubernetes.models.v1beta1.StorageClass import StorageClass
+from BaseTest import BaseTest
 from kubernetes.K8sStorageClass import K8sStorageClass
+from kubernetes.models.v1beta1.StorageClass import StorageClass
 
 
-class K8sStorageClassTests(unittest.TestCase):
-
+class K8sStorageClassTests(BaseTest):
     def setUp(self):
         utils.cleanup_storage_class()
 
@@ -42,4 +40,3 @@ class K8sStorageClassTests(unittest.TestCase):
             k8s_sc.create()
             from_get = k8s_sc.get()
             self.assertIsInstance(from_get, K8sStorageClass)
-

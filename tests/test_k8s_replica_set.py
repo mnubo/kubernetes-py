@@ -6,14 +6,14 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import unittest
 import uuid
+
 import utils
+from BaseTest import BaseTest
 from kubernetes.K8sExceptions import *
 
 
-class K8sReplicaSetTests(unittest.TestCase):
-
+class K8sReplicaSetTests(BaseTest):
     def setUp(self):
         pass
 

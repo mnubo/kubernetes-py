@@ -7,8 +7,10 @@
 #
 
 import unittest
-from kubernetes.K8sPetSet import K8sPetSet
+
 import utils
+from BaseTest import BaseTest
+from kubernetes.K8sPetSet import K8sPetSet
 
 
 def should_skip():
@@ -19,8 +21,7 @@ def should_skip():
     )
 
 
-class K8sPetSetTests(unittest.TestCase):
-
+class K8sPetSetTests(BaseTest):
     def setUp(self):
         utils.cleanup_petsets()
         utils.cleanup_pods()

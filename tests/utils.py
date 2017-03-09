@@ -20,9 +20,8 @@ from kubernetes.K8sExceptions import NotFoundException
 from kubernetes.K8sExceptions import VersionMismatchException
 from kubernetes.K8sJob import K8sJob
 from kubernetes.K8sNamespace import K8sNamespace
-from kubernetes.K8sObject import K8sObject
-from kubernetes.K8sNamespace import K8sNamespace
 from kubernetes.K8sNode import K8sNode
+from kubernetes.K8sObject import K8sObject
 from kubernetes.K8sPersistentVolume import K8sPersistentVolume
 from kubernetes.K8sPersistentVolumeClaim import K8sPersistentVolumeClaim
 from kubernetes.K8sPetSet import K8sPetSet
@@ -46,7 +45,6 @@ kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(
 
 def is_reachable(api_host):
     port = None
-    s = None
     try:
         scheme, host, port = api_host.replace("//", "").split(':')
     except ValueError:  # no port specified
@@ -361,13 +359,15 @@ def cleanup_namespaces():
 def cleanup_nodes():
     ref = create_node(name="throwaway")
     if is_reachable(ref.config.api_host):
-        node_pattern = re.compile("yo\-")
+        node_pattern = re.compile(r'yo-')
         _list = ref.list()
         _filtered = filter(lambda x: node_pattern.match(x['metadata']['name']) is not None, _list)
         while len(_filtered) > 1:
             for p in _filtered:
                 try:
-                    n = K8sNode(config=ref.config, name=p['metadata']['name']).get()
+                    assert isinstance(p, dict)
+                    node_name = p['metadata']['name']
+                    n = K8sNode(config=ref.config, name=node_name).get()
                     n.delete()
                 except NotFoundException:
                     continue
