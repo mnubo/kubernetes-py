@@ -6,6 +6,8 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+import re
+
 
 class RollingUpdateDeployment(object):
     """
@@ -17,6 +19,8 @@ class RollingUpdateDeployment(object):
 
         self._max_unavailable = 1
         self._max_surge = 1
+
+        self.percent_pattern = re.compile(r"^\d+%*$")
 
         if model is not None:
             self._build_with_model(model)
@@ -35,7 +39,9 @@ class RollingUpdateDeployment(object):
 
     @max_unavailable.setter
     def max_unavailable(self, mu=None):
-        if not isinstance(mu, int):
+        if not (isinstance(mu, int) or isinstance(mu, str)):
+            raise SyntaxError('RollingUpdateDeployment: max_unavailable: [ {} ] is invalid.'.format(mu))
+        if isinstance(mu, str) and not self.percent_pattern.match(mu):
             raise SyntaxError('RollingUpdateDeployment: max_unavailable: [ {} ] is invalid.'.format(mu))
         self._max_unavailable = mu
 
@@ -47,8 +53,10 @@ class RollingUpdateDeployment(object):
 
     @max_surge.setter
     def max_surge(self, ms=None):
-        if not isinstance(ms, int):
+        if not (isinstance(ms, int) or isinstance(ms, str)):
             raise SyntaxError('RollingUpdateDeployment: max_surge: [ {} ] is invalid.'.format(ms))
+        if isinstance(ms, str) and not self.percent_pattern.match(ms):
+            raise SyntaxError('RollingUpdateDeployment: max_unavailable: [ {} ] is invalid.'.format(ms))
         self._max_surge = ms
 
     # ------------------------------------------------------------------------------------- serialize
