@@ -7,18 +7,18 @@
 #
 
 import json
-import unittest
 
 import yaml
 
+import utils
+from BaseTest import BaseTest
 from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sVolumeMount import K8sVolumeMount
 from kubernetes.models.v1.Container import Container
 from kubernetes.models.v1.Probe import Probe
-import utils
 
 
-class K8sContainerTest(unittest.TestCase):
+class K8sContainerTest(BaseTest):
     def setUp(self):
         pass
 

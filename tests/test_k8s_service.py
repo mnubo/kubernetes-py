@@ -6,20 +6,19 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import unittest
 import uuid
 
+from BaseTest import BaseTest
 from kubernetes import K8sService, K8sConfig
 from kubernetes.K8sExceptions import *
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.models.v1.Service import Service
-from kubernetes.models.v1.ServiceStatus import ServiceStatus
 from kubernetes.models.v1.ServiceSpec import ServiceSpec
+from kubernetes.models.v1.ServiceStatus import ServiceStatus
 from tests import utils
 
 
-class K8sServiceTest(unittest.TestCase):
-
+class K8sServiceTest(BaseTest):
     def setUp(self):
         utils.cleanup_services()
 

@@ -14,9 +14,10 @@ from kubernetes import K8sSecret, K8sConfig
 from kubernetes.K8sExceptions import *
 from kubernetes.models.v1 import Secret
 from tests import utils
+from BaseTest import BaseTest
 
 
-class K8sSecretTest(unittest.TestCase):
+class K8sSecretTest(BaseTest):
 
     def setUp(self):
         utils.cleanup_service_accounts()

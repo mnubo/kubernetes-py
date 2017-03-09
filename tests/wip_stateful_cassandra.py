@@ -6,18 +6,16 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import unittest
-
-from kubernetes.models.v1.Service import Service
-from kubernetes.models.v1.ReplicationController import ReplicationController
-from kubernetes.models.v1beta1.DaemonSet import DaemonSet
-from kubernetes.K8sService import K8sService
-from kubernetes.K8sReplicationController import K8sReplicationController
-
 import utils
+from BaseTest import BaseTest
+from kubernetes.K8sReplicationController import K8sReplicationController
+from kubernetes.K8sService import K8sService
+from kubernetes.models.v1.ReplicationController import ReplicationController
+from kubernetes.models.v1.Service import Service
+from kubernetes.models.v1beta1.DaemonSet import DaemonSet
 
 
-class StatefulSetCassandraTests(unittest.TestCase):
+class StatefulSetCassandraTests(BaseTest):
     """
     https://github.com/kubernetes/kubernetes/tree/master/examples/storage/cassandra
 

@@ -7,16 +7,15 @@
 #
 
 import uuid
-import unittest
 
+import utils
+from BaseTest import BaseTest
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sSecret import K8sSecret
 from kubernetes.K8sServiceAccount import K8sServiceAccount
-import utils
 
 
-class K8sServiceAccountTests(unittest.TestCase):
-
+class K8sServiceAccountTests(BaseTest):
     def setUp(self):
         utils.cleanup_service_accounts()
         utils.cleanup_secrets()

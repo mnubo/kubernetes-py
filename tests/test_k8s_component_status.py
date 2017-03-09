@@ -6,10 +6,10 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import unittest
-import uuid
 import re
+import uuid
 
+from BaseTest import BaseTest
 from kubernetes.K8sComponentStatus import K8sComponentStatus
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sExceptions import *
@@ -19,7 +19,7 @@ from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from tests import utils
 
 
-class K8sComponentStatusTest(unittest.TestCase):
+class K8sComponentStatusTest(BaseTest):
     def setUp(self):
         pass
 

@@ -6,8 +6,7 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import unittest
-
+from BaseTest import BaseTest
 from kubernetes.K8sPersistentVolume import K8sPersistentVolume
 from kubernetes.models.v1.AWSElasticBlockStoreVolumeSource import AWSElasticBlockStoreVolumeSource
 from kubernetes.models.v1.GCEPersistentDiskVolumeSource import GCEPersistentDiskVolumeSource
@@ -16,7 +15,7 @@ from kubernetes.models.v1.NFSVolumeSource import NFSVolumeSource
 from tests import utils
 
 
-class K8sPersistentVolumeTest(unittest.TestCase):
+class K8sPersistentVolumeTest(BaseTest):
     def setUp(self):
         utils.cleanup_pv()
 

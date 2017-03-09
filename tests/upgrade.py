@@ -6,16 +6,16 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import unittest
-import requests
 import time
 
+import requests
+
+from BaseTest import BaseTest
 from kubernetes.K8sService import K8sService
 from tests import utils
 
 
-class K8sUpgradeTest(unittest.TestCase):
-
+class K8sUpgradeTest(BaseTest):
     def setUp(self):
         pass
 

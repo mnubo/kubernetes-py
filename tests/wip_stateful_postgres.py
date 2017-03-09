@@ -6,10 +6,10 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import unittest
+from BaseTest import BaseTest
 
 
-class StatefulSetPostgresTests(unittest.TestCase):
+class StatefulSetPostgresTests(BaseTest):
     """
     https://github.com/CrunchyData/crunchy-containers/tree/master/examples/kube/statefulset
     """

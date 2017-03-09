@@ -6,16 +6,15 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import unittest
 import uuid
 
-from kubernetes.models.v2alpha1.CronJob import CronJob
+from BaseTest import BaseTest
 from kubernetes.K8sCronJob import K8sCronJob
+from kubernetes.models.v2alpha1.CronJob import CronJob
 from tests import utils
 
 
-class K8sCronJobTests(unittest.TestCase):
-
+class K8sCronJobTests(BaseTest):
     def setUp(self):
         utils.cleanup_cronjobs()
         utils.cleanup_jobs()

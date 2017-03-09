@@ -6,16 +6,15 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import unittest
 import uuid
 
 import utils
+from BaseTest import BaseTest
 from kubernetes import K8sDeployment, K8sConfig
 from kubernetes.K8sExceptions import *
 
 
-class K8sDeploymentTests(unittest.TestCase):
-
+class K8sDeploymentTests(BaseTest):
     def setUp(self):
         utils.cleanup_deployments()
         utils.cleanup_rs()

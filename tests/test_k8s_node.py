@@ -6,20 +6,20 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import unittest
-import uuid
 import re
+import uuid
 
+from BaseTest import BaseTest
 from kubernetes import K8sNode, K8sConfig
+from kubernetes.K8sExceptions import *
 from kubernetes.models.v1.Node import Node
 from kubernetes.models.v1.NodeSpec import NodeSpec
 from kubernetes.models.v1.NodeStatus import NodeStatus
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
-from kubernetes.K8sExceptions import *
 from tests import utils
 
 
-class K8sNodeTest(unittest.TestCase):
+class K8sNodeTest(BaseTest):
     def setUp(self):
         utils.cleanup_nodes()
 
@@ -178,17 +178,21 @@ class K8sNodeTest(unittest.TestCase):
 
     def test_list(self):
         name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
-        nodes = utils.create_node(name=name)
-        if utils.is_reachable(nodes.config.api_host):
-            nodes.create()
-            _list = nodes.list()
-            node_pattern = re.compile("yo\-")
-            _filtered = filter(lambda x: node_pattern.match(x['metadata']['name']) is not None, _list)
+        node = utils.create_node(name=name)
+        if utils.is_reachable(node.config.api_host):
+            node_pattern = re.compile(r'yo-')
+            _pre_list = node.list()
+            _filtered = filter(lambda x: node_pattern.match(x['metadata']['name']) is not None, _pre_list)
+            pre_create_length = len(_filtered)
+            node.create()
+            _post_list = node.list()
+            _filtered = filter(lambda x: node_pattern.match(x['metadata']['name']) is not None, _post_list)
+            post_create_length = len(_filtered)
             self.assertIsInstance(_filtered, list)
-            self.assertEqual(1, len(_filtered))
-            from_query = _filtered[0]
-            self.assertIsInstance(from_query, dict)
-            self.assertEqual(name, from_query['metadata']['name'])
+            self.assertEqual(1+pre_create_length, post_create_length)
+            from_query = filter(lambda x: x['metadata']['name'] == name, _filtered)
+            self.assertIsInstance(from_query, list)
+            self.assertEqual(len(from_query), 1)
 
     # --------------------------------------------------------------------------------- api - create
 

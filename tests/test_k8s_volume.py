@@ -6,14 +6,14 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import unittest
 import uuid
 
+from BaseTest import BaseTest
 from kubernetes.K8sExceptions import TimedOutException
-from kubernetes.K8sVolume import K8sVolume
-from kubernetes.K8sVolumeMount import K8sVolumeMount
 from kubernetes.K8sPod import K8sPod
 from kubernetes.K8sReplicationController import K8sReplicationController
+from kubernetes.K8sVolume import K8sVolume
+from kubernetes.K8sVolumeMount import K8sVolumeMount
 from kubernetes.models.v1.AWSElasticBlockStoreVolumeSource import AWSElasticBlockStoreVolumeSource
 from kubernetes.models.v1.EmptyDirVolumeSource import EmptyDirVolumeSource
 from kubernetes.models.v1.GCEPersistentDiskVolumeSource import GCEPersistentDiskVolumeSource
@@ -24,8 +24,7 @@ from kubernetes.models.v1.SecretVolumeSource import SecretVolumeSource
 from tests import utils
 
 
-class K8sVolumeTest(unittest.TestCase):
-
+class K8sVolumeTest(BaseTest):
     def setUp(self):
         K8sPod.POD_READY_TIMEOUT_SECONDS = 20
         K8sReplicationController.SCALE_WAIT_TIMEOUT_SECONDS = 20

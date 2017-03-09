@@ -6,7 +6,7 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import unittest
+from BaseTest import BaseTest
 from kubernetes import K8sConfig
 from tests import utils
 
@@ -15,8 +15,7 @@ DEFAULT_API_VERSION = "v1"
 DEFAULT_NAMESPACE = "default"
 
 
-class K8sConfigTest(unittest.TestCase):
-
+class K8sConfigTest(BaseTest):
     def setUp(self):
         pass
 

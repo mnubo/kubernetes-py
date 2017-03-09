@@ -6,16 +6,16 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import unittest
 import uuid
 
+from BaseTest import BaseTest
 from kubernetes import K8sPod, K8sConfig, K8sContainer
 from kubernetes.K8sExceptions import *
 from kubernetes.models.v1 import Pod, ObjectMeta, PodSpec, PodStatus
 from tests import utils
 
 
-class K8sPodTest(unittest.TestCase):
+class K8sPodTest(BaseTest):
     def setUp(self):
         pass
 

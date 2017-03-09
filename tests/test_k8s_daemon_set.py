@@ -6,15 +6,13 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import unittest
-
 import utils
+from BaseTest import BaseTest
 from kubernetes.K8sDaemonSet import K8sDaemonSet
 from kubernetes.models.v1beta1.DaemonSet import DaemonSet
 
 
-class K8sDaemonSetTests(unittest.TestCase):
-
+class K8sDaemonSetTests(BaseTest):
     def setUp(self):
         utils.cleanup_ds()
         utils.cleanup_rs()
