@@ -19,6 +19,10 @@ class Secret(BaseModel):
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_secret
     """
 
+    K8s_ANNOTATION_SERVICE_ACCOUNT_NAME = "kubernetes.io/service-account.name"
+    K8s_TYPE_DOCKER_CONFIG = "kubernetes.io/.dockerconfigjson"
+    K8s_TYPE_SERVICE_ACCOUNT = "kubernetes.io/service-account-token"
+
     def __init__(self, model=None):
         super(Secret, self).__init__()
 

@@ -8,6 +8,7 @@
 
 import uuid
 
+import utils
 from BaseTest import BaseTest
 from kubernetes import K8sNamespace, K8sConfig
 from kubernetes.K8sExceptions import *
@@ -15,10 +16,10 @@ from kubernetes.models.v1.Namespace import Namespace
 from kubernetes.models.v1.NamespaceSpec import NamespaceSpec
 from kubernetes.models.v1.NamespaceStatus import NamespaceStatus
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
-from tests import utils
 
 
 class K8sNamespaceTest(BaseTest):
+
     def setUp(self):
         utils.cleanup_namespaces()
 
@@ -340,9 +341,10 @@ class K8sNamespaceTest(BaseTest):
         ns = utils.create_namespace(name=name)
         if utils.is_reachable(ns.config.api_host):
             _list = ns.list()
+            for x in _list:
+                self.assertIsInstance(x, K8sNamespace)
             self.assertIsInstance(_list, list)
-            self.assertEqual(2, len(_list))  # kube-system and default exist already.
-            self.assertIsInstance(_list[0], dict)
+            self.assertEqual(2, len(_list))
 
     def test_list(self):
         name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
@@ -350,11 +352,12 @@ class K8sNamespaceTest(BaseTest):
         if utils.is_reachable(ns.config.api_host):
             ns.create()
             _list = ns.list()
+            for x in _list:
+                self.assertIsInstance(x, K8sNamespace)
             self.assertIsInstance(_list, list)
-            self.assertEqual(3, len(_list))  # kube-system and default exist already.
+            self.assertEqual(3, len(_list))
             from_query = _list[2]
-            self.assertIsInstance(from_query, dict)
-            self.assertEqual(name, from_query['metadata']['name'])
+            self.assertEqual(name, from_query.name)
 
     # --------------------------------------------------------------------------------- api - create
 
@@ -398,8 +401,8 @@ class K8sNamespaceTest(BaseTest):
         if utils.is_reachable(ns.config.api_host):
             ns.create()
             from_get = K8sNamespace.get_by_name(ns.config, ns.name)
-            self.assertIsInstance(from_get, list)
-            self.assertIn(ns, from_get)
+            self.assertIsInstance(from_get, K8sNamespace)
+            self.assertEqual(name, from_get.name)
             ns.delete()
             from_get = K8sNamespace.get_by_name(ns.config, ns.name)
-            self.assertNotIn(ns, from_get)
+            self.assertIsNone(from_get)

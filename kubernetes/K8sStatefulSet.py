@@ -37,3 +37,13 @@ class K8sStatefulSet(K8sObject):
         super(K8sStatefulSet, self).update()
         self.get()
         return self
+
+    def list(self):
+        ssets = super(K8sStatefulSet, self).list()
+        k8s_ssets = []
+        for x in ssets:
+            y = StatefulSet(x)
+            k8s = K8sStatefulSet(config=self.config, name=self.name)
+            k8s.model = y
+            k8s_ssets.append(k8s)
+        return k8s_ssets

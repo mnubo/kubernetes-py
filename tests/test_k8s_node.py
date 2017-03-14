@@ -20,6 +20,7 @@ from tests import utils
 
 
 class K8sNodeTest(BaseTest):
+
     def setUp(self):
         utils.cleanup_nodes()
 
@@ -171,26 +172,35 @@ class K8sNodeTest(BaseTest):
         nodes = utils.create_node(name=name)
         if utils.is_reachable(nodes.config.api_host):
             _list = nodes.list()
+            for x in _list:
+                self.assertIsInstance(x, K8sNode)
             node_pattern = re.compile("yo\-")
-            _filtered = filter(lambda x: node_pattern.match(x['metadata']['name']) is not None, _list)
+            _filtered = filter(lambda x: node_pattern.match(x.name) is not None, _list)
             self.assertIsInstance(_filtered, list)
             self.assertEqual(0, len(_filtered))
 
     def test_list(self):
         name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
         node = utils.create_node(name=name)
+
         if utils.is_reachable(node.config.api_host):
             node_pattern = re.compile(r'yo-')
             _pre_list = node.list()
-            _filtered = filter(lambda x: node_pattern.match(x['metadata']['name']) is not None, _pre_list)
+            for x in _pre_list:
+                self.assertIsInstance(x, K8sNode)
+            _filtered = filter(lambda x: node_pattern.match(x.name) is not None, _pre_list)
             pre_create_length = len(_filtered)
+
             node.create()
             _post_list = node.list()
-            _filtered = filter(lambda x: node_pattern.match(x['metadata']['name']) is not None, _post_list)
+            for x in _post_list:
+                self.assertIsInstance(x, K8sNode)
+            _filtered = filter(lambda x: node_pattern.match(x.name) is not None, _post_list)
             post_create_length = len(_filtered)
             self.assertIsInstance(_filtered, list)
             self.assertEqual(1+pre_create_length, post_create_length)
-            from_query = filter(lambda x: x['metadata']['name'] == name, _filtered)
+
+            from_query = filter(lambda x: x.name == name, _filtered)
             self.assertIsInstance(from_query, list)
             self.assertEqual(len(from_query), 1)
 
@@ -236,8 +246,8 @@ class K8sNodeTest(BaseTest):
         if utils.is_reachable(node.config.api_host):
             node.create()
             from_get = K8sNode.get_by_name(node.config, node.name)
-            self.assertIsInstance(from_get, list)
-            self.assertIn(node, from_get)
+            self.assertIsInstance(from_get, K8sNode)
+            self.assertEqual(from_get.name, name)
             node.delete()
             from_get = K8sNode.get_by_name(node.config, node.name)
-            self.assertNotIn(node, from_get)
+            self.assertIsNone(from_get)

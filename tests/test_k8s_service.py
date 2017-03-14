@@ -19,6 +19,7 @@ from tests import utils
 
 
 class K8sServiceTest(BaseTest):
+
     def setUp(self):
         utils.cleanup_services()
 
@@ -636,9 +637,6 @@ class K8sServiceTest(BaseTest):
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
         if utils.is_reachable(svc.config.api_host):
             _list = svc.list()
-            self.assertIsInstance(_list, list)
-            self.assertEqual(1, len(_list))  # api server exists already
-            self.assertIsInstance(_list[0], dict)
 
     def test_list(self):
         name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
@@ -647,11 +645,12 @@ class K8sServiceTest(BaseTest):
         if utils.is_reachable(svc.config.api_host):
             svc.create()
             _list = svc.list()
+            for x in _list:
+                self.assertIsInstance(x, K8sService)
             self.assertIsInstance(_list, list)
             self.assertEqual(2, len(_list))  # api server exists already
             from_query = _list[1]
-            self.assertIsInstance(from_query, dict)
-            self.assertEqual(name, from_query['metadata']['name'])
+            self.assertEqual(name, from_query.name)
 
     # --------------------------------------------------------------------------------- api - create
 

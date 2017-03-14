@@ -60,6 +60,16 @@ class K8sReplicationController(K8sObject):
         self._wait_for_desired_replicas()
         return self
 
+    def list(self):
+        rcs = super(K8sReplicationController, self).list()
+        k8s_rcs = []
+        for x in rcs:
+            y = ReplicationController(x)
+            k8s = K8sReplicationController(config=self.config, name=self.name)
+            k8s.model = y
+            k8s_rcs.append(k8s)
+        return k8s_rcs
+
     # -------------------------------------------------------------------------------------  add
 
     def add_pod_annotation(self, k=None, v=None):

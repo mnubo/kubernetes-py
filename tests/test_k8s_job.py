@@ -18,6 +18,7 @@ from tests import utils
 
 
 class K8sJobTests(BaseTest):
+
     def setUp(self):
         utils.cleanup_jobs()
         utils.cleanup_pods()
@@ -198,6 +199,19 @@ class K8sJobTests(BaseTest):
         if utils.is_reachable(k8s_job.config.api_host):
             k8s_job.create()
             self.assertIsInstance(k8s_job, K8sJob)
+
+    # --------------------------------------------------------------------------------- api - list
+
+    def test_api_list(self):
+        name = "job-{}".format(uuid.uuid4())
+        job = Job(utils.job())
+        k8s_job = utils.create_job(name=name)
+        k8s_job.model = job
+        if utils.is_reachable(k8s_job.config.api_host):
+            k8s_job.create()
+            _list = k8s_job.list()
+            for x in _list:
+                self.assertIsInstance(x, K8sJob)
 
     # --------------------------------------------------------------------------------- api - update
 

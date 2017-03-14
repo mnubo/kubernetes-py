@@ -38,6 +38,16 @@ class K8sPersistentVolumeClaim(K8sObject):
         self.model = PersistentVolumeClaim(self.get_model())
         return self
 
+    def list(self):
+        pvcs = super(K8sPersistentVolumeClaim, self).list()
+        k8s_pvcs = []
+        for x in pvcs:
+            y = PersistentVolumeClaim(x)
+            k8s = K8sPersistentVolumeClaim(config=self.config, name=self.name)
+            k8s.model = y
+            k8s_pvcs.append(k8s)
+        return k8s_pvcs
+
     # ------------------------------------------------------------------------------------- wait
 
     def _wait_for_available(self):

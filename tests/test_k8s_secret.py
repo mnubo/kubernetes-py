@@ -328,13 +328,8 @@ class K8sSecretTest(BaseTest):
         if utils.is_reachable(secret.config.api_host):
             _list = secret.list()
             self.assertGreaterEqual(1, len(_list))  # service-account-token on GCE
-            secrets = []
             for x in _list:
-                s = Secret(x)
-                k8s = K8sSecret(config=secret.config, name=x['metadata']['name'])
-                k8s.model = s
-                secrets.append(k8s)
-            # print(secrets)
+                self.assertIsInstance(x, K8sSecret)
 
     def test_list(self):
         count = 10
@@ -346,6 +341,8 @@ class K8sSecretTest(BaseTest):
                 secret.create()
             secret = utils.create_secret(name="yosecret")
             _list = secret.list()
+            for x in _list:
+                self.assertIsInstance(x, K8sSecret)
             self.assertGreaterEqual(count + 1, len(_list))  # including service-account-token on GCE
 
     # --------------------------------------------------------------------------------- api - update

@@ -35,3 +35,13 @@ class K8sStorageClass(K8sObject):
         super(K8sStorageClass, self).update()
         self.get()
         return self
+
+    def list(self):
+        sclass = super(K8sStorageClass, self).list()
+        k8s_sclass = []
+        for x in sclass:
+            y = StorageClass(x)
+            k8s = K8sStorageClass(config=self.config, name=self.name)
+            k8s.model = y
+            k8s_sclass.append(k8s)
+        return k8s_sclass

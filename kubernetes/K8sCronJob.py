@@ -35,6 +35,16 @@ class K8sCronJob(K8sObject):
         self.get()
         return self
 
+    def list(self):
+        cronjobs = super(K8sCronJob, self).list()
+        k8s_cronjobs = []
+        for x in cronjobs:
+            cj = CronJob(x)
+            k8s = K8sCronJob(config=self.config, name=self.name)
+            k8s.model = cj
+            k8s_cronjobs.append(k8s)
+        return k8s_cronjobs
+
     # -------------------------------------------------------------------------------------  get
 
     def get(self):

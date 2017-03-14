@@ -38,6 +38,16 @@ class K8sServiceAccount(K8sObject):
         self.get()
         return self
 
+    def list(self):
+        sas = super(K8sServiceAccount, self).list()
+        k8s_sas = []
+        for x in sas:
+            y = ServiceAccount(x)
+            k8s = K8sServiceAccount(config=self.config, name=self.name)
+            k8s.model = y
+            k8s_sas.append(k8s)
+        return k8s_sas
+
     # ------------------------------------------------------------------------------------- add
 
     def add_api_token(self):

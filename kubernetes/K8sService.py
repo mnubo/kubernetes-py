@@ -31,6 +31,16 @@ class K8sService(K8sObject):
         self.get()
         return self
 
+    def list(self):
+        svcs = super(K8sService, self).list()
+        k8s_svc = []
+        for x in svcs:
+            y = Service(x)
+            k8s = K8sService(config=self.config, name=self.name)
+            k8s.model = y
+            k8s_svc.append(k8s)
+        return k8s_svc
+
     # ------------------------------------------------------------------------------------- add
 
     def add_annotation(self, k=None, v=None):

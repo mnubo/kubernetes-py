@@ -6,16 +6,17 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+import utils
 from BaseTest import BaseTest
 from kubernetes.K8sPersistentVolume import K8sPersistentVolume
 from kubernetes.models.v1.AWSElasticBlockStoreVolumeSource import AWSElasticBlockStoreVolumeSource
 from kubernetes.models.v1.GCEPersistentDiskVolumeSource import GCEPersistentDiskVolumeSource
 from kubernetes.models.v1.HostPathVolumeSource import HostPathVolumeSource
 from kubernetes.models.v1.NFSVolumeSource import NFSVolumeSource
-from tests import utils
 
 
 class K8sPersistentVolumeTest(BaseTest):
+
     def setUp(self):
         utils.cleanup_pv()
 
@@ -321,3 +322,19 @@ class K8sPersistentVolumeTest(BaseTest):
             self.assertIsInstance(vol, K8sPersistentVolume)
             self.assertEqual(vol.nfs_server, server)
             self.assertEqual(vol.nfs_path, path)
+
+    # --------------------------------------------------------------------------------- api - list
+
+    def test_list(self):
+        name = "yoname"
+        type = "gcePersistentDisk"
+        pd_name = "mnubo-disk1"
+        fs_type = 'xfs'
+        vol = utils.create_pv(name=name, type=type)
+        vol.pd_name = pd_name
+        vol.fs_type = fs_type
+        if utils.is_reachable(vol.config.api_host):
+            vol.create()
+            _list = vol.list()
+            for x in _list:
+                self.assertIsInstance(x, K8sPersistentVolume)

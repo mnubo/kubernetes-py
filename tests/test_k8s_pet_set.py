@@ -22,6 +22,7 @@ def should_skip():
 
 
 class K8sPetSetTests(BaseTest):
+
     def setUp(self):
         utils.cleanup_petsets()
         utils.cleanup_pods()

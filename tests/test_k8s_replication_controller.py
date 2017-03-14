@@ -1472,13 +1472,17 @@ class K8sReplicationControllerTest(BaseTest):
 
     # ------------------------------------------------------------------------------------- api - list
 
-    def test_list_nonexistent(self):
-        name = "yorc-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=name)
+    def test_list(self):
+        model = utils.admintool()
+        model = ReplicationController(model)
+        self.assertIsInstance(model, ReplicationController)
+        rc = utils.create_rc(name=model.metadata.name)
+        rc.model = model
         if utils.is_reachable(rc.config.api_host):
+            rc.create()
             objs = rc.list()
-            self.assertIsInstance(objs, list)
-            self.assertEqual(0, len(objs))
+            for x in objs:
+                self.assertIsInstance(x, K8sReplicationController)
 
     def test_list_multiple(self):
         name = "yocontainer"
