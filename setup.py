@@ -23,7 +23,7 @@ setup(
     version=version(),
     description='A python module for Kubernetes.',
     author='mnubo inc.',
-    author_email='scoutu@mnubo.com, francis@mnubo.com',
+    author_email='it-admin@mnubo.com',
     url='https://github.com/mnubo/kubernetes-py',
     download_url='https://github.com/mnubo/kubernetes-py/tarball/' + version(),
     keywords=['kubernetes', 'k8s'],
