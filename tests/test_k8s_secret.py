@@ -7,14 +7,13 @@
 #
 
 import json
-import unittest
 import uuid
 
+from tests import utils
+from tests.BaseTest import BaseTest
 from kubernetes import K8sSecret, K8sConfig
 from kubernetes.K8sExceptions import *
 from kubernetes.models.v1 import Secret
-from tests import utils
-from BaseTest import BaseTest
 
 
 class K8sSecretTest(BaseTest):

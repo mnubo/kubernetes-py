@@ -9,14 +9,14 @@
 import re
 import uuid
 
-from BaseTest import BaseTest
+from tests import utils
+from tests.BaseTest import BaseTest
 from kubernetes import K8sNode, K8sConfig
 from kubernetes.K8sExceptions import *
 from kubernetes.models.v1.Node import Node
 from kubernetes.models.v1.NodeSpec import NodeSpec
 from kubernetes.models.v1.NodeStatus import NodeStatus
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
-from tests import utils
 
 
 class K8sNodeTest(BaseTest):

@@ -6,7 +6,7 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from BaseTest import BaseTest
+from tests.BaseTest import BaseTest
 
 
 class StatefulSetPostgresTests(BaseTest):

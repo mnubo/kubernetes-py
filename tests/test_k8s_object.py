@@ -8,10 +8,10 @@
 
 import uuid
 
-from BaseTest import BaseTest
+from tests import utils
+from tests.BaseTest import BaseTest
 from kubernetes import K8sObject, K8sConfig
 from kubernetes.K8sExceptions import UnprocessableEntityException, NotFoundException
-from tests import utils
 
 
 class K8sObjectTest(BaseTest):

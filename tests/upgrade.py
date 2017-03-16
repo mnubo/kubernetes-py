@@ -10,9 +10,9 @@ import time
 
 import requests
 
-from BaseTest import BaseTest
-from kubernetes.K8sService import K8sService
 from tests import utils
+from tests.BaseTest import BaseTest
+from kubernetes.K8sService import K8sService
 
 
 class K8sUpgradeTest(BaseTest):

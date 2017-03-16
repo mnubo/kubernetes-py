@@ -8,8 +8,8 @@
 
 import uuid
 
-import utils
-from BaseTest import BaseTest
+from tests import utils
+from tests.BaseTest import BaseTest
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sSecret import K8sSecret
 from kubernetes.K8sServiceAccount import K8sServiceAccount

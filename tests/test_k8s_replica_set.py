@@ -8,8 +8,8 @@
 
 import uuid
 
-import utils
-from BaseTest import BaseTest
+from tests import utils
+from tests.BaseTest import BaseTest
 from kubernetes.K8sExceptions import *
 
 

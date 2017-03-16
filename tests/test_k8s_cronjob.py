@@ -8,10 +8,10 @@
 
 import uuid
 
-from BaseTest import BaseTest
+from tests import utils
+from tests.BaseTest import BaseTest
 from kubernetes.K8sCronJob import K8sCronJob
 from kubernetes.models.v2alpha1.CronJob import CronJob
-from tests import utils
 
 
 class K8sCronJobTests(BaseTest):

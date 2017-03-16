@@ -8,11 +8,11 @@
 
 import uuid
 
-from BaseTest import BaseTest
+from tests import utils
+from tests.BaseTest import BaseTest
 from kubernetes import K8sPod, K8sConfig, K8sContainer
 from kubernetes.K8sExceptions import *
 from kubernetes.models.v1 import Pod, ObjectMeta, PodSpec, PodStatus
-from tests import utils
 
 
 class K8sPodTest(BaseTest):

@@ -8,8 +8,8 @@
 
 import uuid
 
-import utils
-from BaseTest import BaseTest
+from tests import utils
+from tests.BaseTest import BaseTest
 from kubernetes import K8sNamespace, K8sConfig
 from kubernetes.K8sExceptions import *
 from kubernetes.models.v1.Namespace import Namespace
