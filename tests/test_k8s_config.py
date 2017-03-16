@@ -16,6 +16,7 @@ DEFAULT_NAMESPACE = "default"
 
 
 class K8sConfigTest(BaseTest):
+
     def setUp(self):
         pass
 

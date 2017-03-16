@@ -11,6 +11,7 @@ import time
 from kubernetes import K8sObject
 from kubernetes.K8sExceptions import TimedOutException
 from kubernetes.models.v1.PersistentVolume import PersistentVolume
+from kubernetes.models.v1.PersistentVolumeSpec import PersistentVolumeSpec
 from kubernetes.models.v1.Volume import Volume
 
 READY_WAIT_TIMEOUT_SECONDS = 60
@@ -42,6 +43,17 @@ class K8sPersistentVolume(K8sObject):
     def get(self):
         self.model = PersistentVolume(self.get_model())
         return self
+
+    def list(self):
+        pvs = super(K8sPersistentVolume, self).list()
+        k8s_pvs = []
+        for x in pvs:
+            _types = filter(lambda z: z in PersistentVolumeSpec.VOLUME_TYPES_TO_SOURCE_MAP, x['spec'].keys())
+            y = PersistentVolume(x)
+            k8s = K8sPersistentVolume(config=self.config, name=self.name, type=_types[0])
+            k8s.model = y
+            k8s_pvs.append(k8s)
+        return k8s_pvs
 
     # ------------------------------------------------------------------------------------- wait
 

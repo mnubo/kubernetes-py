@@ -34,6 +34,16 @@ class K8sNamespace(K8sObject):
         self.get()
         return self
 
+    def list(self):
+        ns = super(K8sNamespace, self).list()
+        k8s_ns = []
+        for x in ns:
+            y = Namespace(x)
+            k8s = K8sNamespace(config=self.config, name=self.name)
+            k8s.model = y
+            k8s_ns.append(k8s)
+        return k8s_ns
+
     # ------------------------------------------------------------------------------------- get
 
     def get(self):
@@ -80,10 +90,8 @@ class K8sNamespace(K8sObject):
 
     @staticmethod
     def get_by_name(config=None, name=None):
-        namespace_list = []
         namespaces = K8sNamespace(config=config, name=name).list()
-        for ns in namespaces:
-            namespace_name = Namespace(ns).metadata.name
-            if namespace_name == name:
-                namespace_list.append(K8sNamespace(config=config, name=namespace_name).get())
-        return namespace_list
+        filtered = filter(lambda x: x.name == name, namespaces)
+        if filtered:
+            return filtered[0]
+        return None

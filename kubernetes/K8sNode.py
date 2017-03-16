@@ -30,6 +30,16 @@ class K8sNode(K8sObject):
         self.get()
         return self
 
+    def list(self):
+        nodes = super(K8sNode, self).list()
+        k8s_nodes = []
+        for x in nodes:
+            y = Node(x)
+            k8s = K8sNode(config=self.config, name=self.name)
+            k8s.model = y
+            k8s_nodes.append(k8s)
+        return k8s_nodes
+
     # ------------------------------------------------------------------------------------- get
 
     def get(self):
@@ -106,10 +116,8 @@ class K8sNode(K8sObject):
 
     @staticmethod
     def get_by_name(config=None, name=None):
-        node_list = []
         nodes = K8sNode(config=config, name=name).list()
-        for n in nodes:
-            node_name = Node(n).metadata.name
-            if node_name == name:
-                node_list.append(K8sNode(config=config, name=node_name).get())
-        return node_list
+        filtered = filter(lambda x: x.name == name, nodes)
+        if filtered:
+            return filtered[0]
+        return None

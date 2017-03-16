@@ -15,6 +15,7 @@ from tests import utils
 
 
 class K8sCronJobTests(BaseTest):
+
     def setUp(self):
         utils.cleanup_cronjobs()
         utils.cleanup_jobs()
@@ -113,3 +114,20 @@ class K8sCronJobTests(BaseTest):
             self.assertIsInstance(k8s_cronjob, K8sCronJob)
             self.assertEqual('Forbid', k8s_cronjob.concurrency_policy)
             self.assertEqual(10, k8s_cronjob.starting_deadline_seconds)
+
+    # --------------------------------------------------------------------------------- api - list
+
+    def test_list(self):
+        name = "job-{}".format(uuid.uuid4())
+        job = CronJob(utils.scheduledjob_90())
+
+        k8s_cronjob = utils.create_cronjob(name=name)
+        k8s_cronjob.model = job
+        k8s_cronjob.concurrency_policy = "Forbid"
+        k8s_cronjob.starting_deadline_seconds = 10
+
+        if utils.is_reachable(k8s_cronjob.config.api_host):
+            k8s_cronjob.create()
+            crons = k8s_cronjob.list()
+            for c in crons:
+                self.assertIsInstance(c, K8sCronJob)

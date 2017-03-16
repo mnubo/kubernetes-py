@@ -16,6 +16,7 @@ from kubernetes.K8sServiceAccount import K8sServiceAccount
 
 
 class K8sServiceAccountTests(BaseTest):
+
     def setUp(self):
         utils.cleanup_service_accounts()
         utils.cleanup_secrets()
@@ -76,6 +77,17 @@ class K8sServiceAccountTests(BaseTest):
             acct.create()
             from_get = acct.get()
             self.assertEqual(acct, from_get)
+
+    # --------------------------------------------------------------------------------- api - list
+
+    def test_list(self):
+        name = "mnubo.com-sa-{0}".format(str(uuid.uuid4().get_hex()[:5]))
+        acct = utils.create_service_account(name=name)
+        if utils.is_reachable(acct.config.api_host):
+            acct.create()
+            _list = acct.list()
+            for x in _list:
+                self.assertIsInstance(x, K8sServiceAccount)
 
     # --------------------------------------------------------------------------------- api - add API token
 

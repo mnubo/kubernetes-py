@@ -9,6 +9,7 @@
 import re
 import uuid
 
+import utils
 from BaseTest import BaseTest
 from kubernetes.K8sComponentStatus import K8sComponentStatus
 from kubernetes.K8sConfig import K8sConfig
@@ -16,10 +17,10 @@ from kubernetes.K8sExceptions import *
 from kubernetes.models.v1.ComponentCondition import ComponentCondition
 from kubernetes.models.v1.ComponentStatus import ComponentStatus
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
-from tests import utils
 
 
 class K8sComponentStatusTest(BaseTest):
+
     def setUp(self):
         pass
 
@@ -113,7 +114,9 @@ class K8sComponentStatusTest(BaseTest):
         components = utils.create_component_status(name=name)
         if utils.is_reachable(components.config.api_host):
             _list = components.list()
+            for x in _list:
+                self.assertIsInstance(x, K8sComponentStatus)
             etcd_pattern = re.compile("etcd-")
-            _filtered = filter(lambda x: etcd_pattern.match(x['metadata']['name']) is not None, _list)
+            _filtered = filter(lambda x: etcd_pattern.match(x.name) is not None, _list)
             self.assertIsInstance(_filtered, list)
             self.assertGreaterEqual(len(_filtered), 1)

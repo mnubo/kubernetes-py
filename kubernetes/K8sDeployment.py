@@ -59,6 +59,16 @@ class K8sDeployment(K8sObject):
             self._wait_for_desired_replicas()
         return self
 
+    def list(self):
+        deploys = super(K8sDeployment, self).list()
+        k8s_deploys = []
+        for x in deploys:
+            d = Deployment(x)
+            k8s = K8sDeployment(config=self.config, name=self.name)
+            k8s.model = d
+            k8s_deploys.append(k8s)
+        return k8s_deploys
+
     # -------------------------------------------------------------------------------------  wait
 
     def _wait_for_desired_replicas(self):

@@ -38,6 +38,16 @@ class K8sSecret(K8sObject):
         self.get()
         return self
 
+    def list(self):
+        secrets = super(K8sSecret, self).list()
+        k8s_secrets = []
+        for x in secrets:
+            y = Secret(x)
+            k8s = K8sSecret(config=self.config, name=self.name)
+            k8s.model = y
+            k8s_secrets.append(k8s)
+        return k8s_secrets
+
     # -------------------------------------------------------------------------------------  image pull secrets
 
     @staticmethod
@@ -45,7 +55,7 @@ class K8sSecret(K8sObject):
         s = Secret()
 
         if name is not None:
-            s.name = name
+            s.name = "{0}-docker-{1}".format(name, str(uuid.uuid4().get_hex()[:5]))
         elif name is None and prefix is not None:
             s.name = "{0}-docker-{1}".format(prefix, str(uuid.uuid4().get_hex()[:5]))
         else:
@@ -60,14 +70,11 @@ class K8sSecret(K8sObject):
     @staticmethod
     def list_image_pull_secrets(config=None):
         _list = K8sSecret(config=config, name="throwaway").list()
-        _secrets = []
+        secrets = []
         for x in _list:
-            s = Secret(x)
-            if s.type == 'kubernetes.io/.dockerconfigjson':
-                k8s = K8sSecret(config=config, name=s.name)
-                k8s.model = s
-                _secrets.append(k8s)
-        return _secrets
+            if x.type == Secret.K8s_TYPE_DOCKER_CONFIG:
+                secrets.append(x)
+        return secrets
 
     @staticmethod
     def image_pull_secret_with_name(config=None, name=None):
@@ -82,9 +89,9 @@ class K8sSecret(K8sObject):
     @staticmethod
     def create_service_account_api_token(config=None, name=None):
         s = Secret()
-        s.name = "{}-secret".format(name)
-        s.add_annotation('kubernetes.io/service-account.name', name)
-        s.type = 'kubernetes.io/service-account-token'
+        s.name = "{}-token-{}".format(name, str(uuid.uuid4().get_hex()[:5]))
+        s.add_annotation(Secret.K8s_ANNOTATION_SERVICE_ACCOUNT_NAME, name)
+        s.type = Secret.K8s_TYPE_SERVICE_ACCOUNT
         k8s = K8sSecret(config=config, name=s.name)
         k8s.model = s
         k8s.create()
@@ -95,12 +102,9 @@ class K8sSecret(K8sObject):
         _list = K8sSecret(config=config, name="throwaway").list()
         _tokens = []
         for x in _list:
-            s = Secret(x)
-            if s.type == 'kubernetes.io/service-account-token':
-                if s.metadata.annotations['kubernetes.io/service-account.name'] == name:
-                    k8s = K8sSecret(config=config, name=s.name)
-                    k8s.model = s
-                    _tokens.append(k8s)
+            if x.type == Secret.K8s_TYPE_SERVICE_ACCOUNT:
+                if x.annotations[Secret.K8s_ANNOTATION_SERVICE_ACCOUNT_NAME] == name:
+                    _tokens.append(x)
         return _tokens
 
     # ------------------------------------------------------------------------------------- data

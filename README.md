@@ -8,17 +8,26 @@ Kubernetes API bindings in Python.
 Currently supported Kubernetes objects:
 
 * ~/.kube/config
+* ComponentStatus
 * Container
 * CronJob
+* DaemonSet
 * Deployment
 * Job
+* Namespace
+* Node
 * PersistentVolume
 * PersistentVolumeClaim
+* PetSet
 * Pod
 * ReplicationController
 * Secret
 * Service
+* ServiceAccount
+* StatefulSet
+* StorageClass
 * Volume
+* VolumeMount
 
 
 ## Usage

@@ -29,6 +29,16 @@ class K8sComponentStatus(K8sObject):
     def delete(self, orphan=False):
         return self
 
+    def list(self):
+        cs = super(K8sComponentStatus, self).list()
+        k8s_cs = []
+        for x in cs:
+            cs = ComponentStatus(x)
+            k8s = K8sComponentStatus(config=self.config, name=self.name)
+            k8s.model = cs
+            k8s_cs.append(k8s)
+        return k8s_cs
+
     # ------------------------------------------------------------------------------------- get
 
     def get(self):

@@ -131,13 +131,19 @@ class K8sDeploymentTests(BaseTest):
 
     # --------------------------------------------------------------------------------- api - list
 
-    def test_list_nonexistent(self):
+    def test_list(self):
         name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=name)
+        cont_name = "redis"
+        cont_image = "redis:3.2.3"
+        cont = utils.create_container(name=cont_name, image=cont_image)
+        dep.add_container(container=cont)
+
         if utils.is_reachable(dep.config.api_host):
+            d = dep.create()
             objs = dep.list()
-            self.assertIsInstance(objs, list)
-            self.assertEqual(0, len(objs))
+            for x in objs:
+                self.assertIsInstance(x, K8sDeployment)
 
     def test_list_multiple(self):
         name = "yocontainer"
@@ -146,6 +152,7 @@ class K8sDeploymentTests(BaseTest):
         deployments = []
         count = 3
         objs = []
+
         if utils.is_reachable(config.api_host):
             for i in range(0, count):
                 name = "yodep-{0}".format(str(uuid.uuid4()))

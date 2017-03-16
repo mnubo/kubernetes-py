@@ -41,3 +41,13 @@ class K8sPetSet(K8sObject):
         super(K8sPetSet, self).update()
         self.get()
         return self
+
+    def list(self):
+        petsets = super(K8sPetSet, self).list()
+        k8s_petsets = []
+        for x in petsets:
+            y = PetSet(x)
+            k8s = K8sPetSet(config=self.config, name=self.name)
+            k8s.model = y
+            k8s_petsets.append(k8s)
+        return k8s_petsets

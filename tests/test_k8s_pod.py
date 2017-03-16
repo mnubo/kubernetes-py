@@ -16,6 +16,7 @@ from tests import utils
 
 
 class K8sPodTest(BaseTest):
+
     def setUp(self):
         pass
 
@@ -930,13 +931,16 @@ class K8sPodTest(BaseTest):
 
     # ------------------------------------------------------------------------------------- api - list
 
-    def test_list_nonexistent(self):
+    def test_list(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
+        container = utils.create_container(name=name)
+        pod.add_container(container)
         if utils.is_reachable(pod.config.api_host):
-            p = pod.list()
-            self.assertIsInstance(p, list)
-            self.assertEqual(0, len(p))
+            pod.create()
+            _list = pod.list()
+            for x in _list:
+                self.assertIsInstance(x, K8sPod)
 
     def test_list_multiple(self):
         name = "yocontainer"

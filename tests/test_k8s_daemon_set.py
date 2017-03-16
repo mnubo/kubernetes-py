@@ -13,6 +13,7 @@ from kubernetes.models.v1beta1.DaemonSet import DaemonSet
 
 
 class K8sDaemonSetTests(BaseTest):
+
     def setUp(self):
         utils.cleanup_ds()
         utils.cleanup_rs()
@@ -62,3 +63,16 @@ class K8sDaemonSetTests(BaseTest):
         if utils.is_reachable(k8s_ds.config.api_host):
             k8s_ds.create()
             self.assertIsInstance(k8s_ds, K8sDaemonSet)
+
+    # --------------------------------------------------------------------------------- api - list
+
+    def test_list(self):
+        ds = DaemonSet(utils.fluentd_daemonset())
+        k8s_ds = utils.create_daemonset(name=ds.name)
+        k8s_ds.model = ds
+
+        if utils.is_reachable(k8s_ds.config.api_host):
+            k8s_ds.create()
+            _list = k8s_ds.list()
+            for x in _list:
+                self.assertIsInstance(x, K8sDaemonSet)

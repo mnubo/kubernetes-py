@@ -32,6 +32,16 @@ class K8sDaemonSet(K8sObject):
         self.get()
         return self
 
+    def list(self):
+        daemons = super(K8sDaemonSet, self).list()
+        k8s_daemons = []
+        for x in daemons:
+            d = DaemonSet(x)
+            k8s = K8sDaemonSet(config=self.config, name=self.name)
+            k8s.model = d
+            k8s_daemons.append(k8s)
+        return k8s_daemons
+
     # -------------------------------------------------------------------------------------  get
 
     def get(self):

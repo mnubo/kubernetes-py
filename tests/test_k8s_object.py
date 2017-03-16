@@ -15,6 +15,7 @@ from tests import utils
 
 
 class K8sObjectTest(BaseTest):
+
     def setUp(self):
         utils.cleanup_objects()
 
