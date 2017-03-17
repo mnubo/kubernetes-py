@@ -9,6 +9,7 @@
 import base64
 import json
 
+from six import string_types
 from kubernetes.models.unversioned.BaseModel import BaseModel
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.utils import is_valid_string, is_valid_dict
@@ -126,13 +127,17 @@ class Secret(BaseModel):
         d = {}
         for k, v in self._data.items():
             d[k] = base64.b64decode(v)
+            if isinstance(d[k], bytes):
+                d[k] = d[k].decode()
+            elif is_valid_string(d[k]):
+                d[k] = d[k].decode()
         return d
 
     @data.setter
     def data(self, data=None):
         msg = 'Secret: data: [ {0} ] is invalid.'.format(data)
 
-        if isinstance(data, str):
+        if isinstance(data, string_types):
             try:
                 data = json.loads(data)
             except ValueError:
@@ -142,8 +147,13 @@ class Secret(BaseModel):
             raise SyntaxError(msg)
 
         for k, v in data.items():
-            if not is_valid_string(k) or not is_valid_string(v):
+            if not is_valid_string(k):
                 raise SyntaxError(msg)
+            if not isinstance(v, bytes):
+                try:
+                    v = bytearray(v, 'UTF-8')
+                except:
+                    raise SyntaxError('Could not convert [ {0} ] to bytes.'.format(v))
             self._data[k] = base64.b64encode(v)
 
     # ------------------------------------------------------------------------------------- stringData
@@ -211,12 +221,12 @@ class Secret(BaseModel):
 
         if is_valid_string(kubecfg_data):
             d = self.data
-            d['kubernetes.kubeconfig'] = kubecfg_data
+            d.update({'kubernetes.kubeconfig': kubecfg_data})
             self.data = d
 
         if is_valid_string(cacert):
             d = self.data
-            d['ca.crt'] = cacert
+            d.update({'ca.crt': cacert})
             self.data = d
 
         return self
@@ -228,7 +238,11 @@ class Secret(BaseModel):
         if self.data is not None:
             d = {}
             for k, v in self.data.items():
+                if is_valid_string(v):
+                    v = bytes(v, 'UTF-8')
                 d[k] = base64.b64encode(v)
+                if isinstance(d[k], bytes):
+                    d[k] = d[k].decode()
             data['data'] = d
         if self.string_data is not None:
             data['stringData'] = self.string_data

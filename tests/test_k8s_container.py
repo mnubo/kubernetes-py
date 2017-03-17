@@ -10,8 +10,8 @@ import json
 
 import yaml
 
-import utils
-from BaseTest import BaseTest
+from tests import utils
+from tests.BaseTest import BaseTest
 from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sVolumeMount import K8sVolumeMount
 from kubernetes.models.v1.Container import Container

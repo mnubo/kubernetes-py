@@ -6,9 +6,9 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from BaseTest import BaseTest
-from kubernetes import K8sConfig
 from tests import utils
+from tests.BaseTest import BaseTest
+from kubernetes import K8sConfig
 
 DEFAULT_API_HOST = "localhost:8888"
 DEFAULT_API_VERSION = "v1"

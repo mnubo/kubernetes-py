@@ -49,7 +49,7 @@ class K8sPod(K8sObject):
         ls = super(K8sPod, self).list()
         pods = map(lambda x: Pod(x), ls)
         if pattern is not None:
-            pods = filter(lambda x: pattern in x.name, pods)
+            pods = list(filter(lambda x: pattern in x.name, pods))
         k8s = []
         for x in pods:
             p = K8sPod(config=self.config, name=x.name)

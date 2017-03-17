@@ -91,7 +91,7 @@ class K8sNamespace(K8sObject):
     @staticmethod
     def get_by_name(config=None, name=None):
         namespaces = K8sNamespace(config=config, name=name).list()
-        filtered = filter(lambda x: x.name == name, namespaces)
+        filtered = list(filter(lambda x: x.name == name, namespaces))
         if filtered:
             return filtered[0]
         return None

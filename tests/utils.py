@@ -360,7 +360,7 @@ def cleanup_nodes():
     if is_reachable(ref.config.api_host):
         node_pattern = re.compile(r'yo-')
         _list = ref.list()
-        _filtered = filter(lambda x: node_pattern.match(x.name) is not None, _list)
+        _filtered = list(filter(lambda x: node_pattern.match(x.name) is not None, _list))
         while len(_filtered) > 1:
             for n in _filtered:
                 try:
@@ -368,7 +368,7 @@ def cleanup_nodes():
                 except NotFoundException:
                     continue
             _list = ref.list()
-            _filtered = filter(lambda x: node_pattern.match(x.name) is not None, _list)
+            _filtered = list(filter(lambda x: node_pattern.match(x.name) is not None, _list))
 
 
 def cleanup_pods():

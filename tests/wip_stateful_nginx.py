@@ -6,8 +6,8 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import utils
-from BaseTest import BaseTest
+from tests import utils
+from tests.BaseTest import BaseTest
 from kubernetes.K8sService import K8sService
 from kubernetes.K8sStatefulSet import K8sStatefulSet
 from kubernetes.models.v1.Service import Service

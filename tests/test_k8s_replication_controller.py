@@ -6,7 +6,6 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import unittest
 import uuid
 
 from kubernetes import K8sReplicationController, K8sConfig, K8sPod, K8sContainer
@@ -17,7 +16,7 @@ from kubernetes.models.v1.ReplicationController import ReplicationController
 from kubernetes.models.v1.ReplicationControllerSpec import ReplicationControllerSpec
 from kubernetes.models.v1.ReplicationControllerStatus import ReplicationControllerStatus
 from tests import utils
-from BaseTest import BaseTest
+from tests.BaseTest import BaseTest
 
 
 class K8sReplicationControllerTest(BaseTest):

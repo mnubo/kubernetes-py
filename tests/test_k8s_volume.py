@@ -8,7 +8,8 @@
 
 import uuid
 
-from BaseTest import BaseTest
+from tests import utils
+from tests.BaseTest import BaseTest
 from kubernetes.K8sExceptions import TimedOutException
 from kubernetes.K8sPod import K8sPod
 from kubernetes.K8sReplicationController import K8sReplicationController
@@ -21,7 +22,6 @@ from kubernetes.models.v1.GitRepoVolumeSource import GitRepoVolumeSource
 from kubernetes.models.v1.HostPathVolumeSource import HostPathVolumeSource
 from kubernetes.models.v1.NFSVolumeSource import NFSVolumeSource
 from kubernetes.models.v1.SecretVolumeSource import SecretVolumeSource
-from tests import utils
 
 
 class K8sVolumeTest(BaseTest):
@@ -723,7 +723,7 @@ class K8sVolumeTest(BaseTest):
         rc = utils.create_rc(name="admintool")
 
         for vol in volumes:
-            keys = filter(lambda x: x != 'name', vol.keys())
+            keys = list(filter(lambda x: x != 'name', vol.keys()))
             v = K8sVolume(
                 name=vol['name'],
                 type=keys[0],

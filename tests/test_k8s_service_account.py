@@ -8,8 +8,8 @@
 
 import uuid
 
-import utils
-from BaseTest import BaseTest
+from tests import utils
+from tests.BaseTest import BaseTest
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sSecret import K8sSecret
 from kubernetes.K8sServiceAccount import K8sServiceAccount
@@ -71,7 +71,7 @@ class K8sServiceAccountTests(BaseTest):
     # --------------------------------------------------------------------------------- api - create
 
     def test_create(self):
-        name = "mnubo.com-sa-{0}".format(str(uuid.uuid4().get_hex()[:5]))
+        name = "mnubo.com-sa-{0}".format(str(uuid.uuid4().hex[:5]))
         acct = utils.create_service_account(name=name)
         if utils.is_reachable(acct.config.api_host):
             acct.create()
@@ -81,7 +81,7 @@ class K8sServiceAccountTests(BaseTest):
     # --------------------------------------------------------------------------------- api - list
 
     def test_list(self):
-        name = "mnubo.com-sa-{0}".format(str(uuid.uuid4().get_hex()[:5]))
+        name = "mnubo.com-sa-{0}".format(str(uuid.uuid4().hex[:5]))
         acct = utils.create_service_account(name=name)
         if utils.is_reachable(acct.config.api_host):
             acct.create()
@@ -92,7 +92,7 @@ class K8sServiceAccountTests(BaseTest):
     # --------------------------------------------------------------------------------- api - add API token
 
     def test_add_api_token(self):
-        name = "mnubo.com-sa-{0}".format(str(uuid.uuid4().get_hex()[:5]))
+        name = "mnubo.com-sa-{0}".format(str(uuid.uuid4().hex[:5]))
         acct = utils.create_service_account(name=name)
         if utils.is_reachable(acct.config.api_host):
             acct.create()
@@ -103,7 +103,7 @@ class K8sServiceAccountTests(BaseTest):
     # --------------------------------------------------------------------------------- api - add image pull secret
 
     def test_add_image_pull_secret(self):
-        name = "mnubo.com-sa-{0}".format(str(uuid.uuid4().get_hex()[:5]))
+        name = "mnubo.com-sa-{0}".format(str(uuid.uuid4().hex[:5]))
         acct = utils.create_service_account(name=name)
         data = {"auths": {"repo:port": {"auth": "authstring", "email": "you@company.com"}}}
         if utils.is_reachable(acct.config.api_host):

@@ -6,4 +6,4 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from ListMeta import ListMeta
+from kubernetes.models.unversioned.ListMeta import ListMeta

@@ -5,16 +5,13 @@
 # This file is subject to the terms and conditions defined in
 # file 'LICENSE.md', which is part of this source code package.
 #
-
 import base64
 import json
 import os
 import tempfile
-import urllib
-
 import requests
-
 from kubernetes.utils.ConvertData import convert
+from six.moves.urllib.parse import urlencode
 
 
 class HttpRequest:
@@ -43,7 +40,7 @@ class HttpRequest:
             http_headers['Authorization'] = 'Bearer {token}'.format(token=self.token)
 
         if self.data is not None and self.http_method in ['GET']:
-            url = "{0}?{1}".format(self.url, urllib.urlencode(self.data))
+            url = "{0}?{1}".format(self.url, urlencode(self.data))
             self.url = url
 
         self.url = self.http_host + self.url
@@ -80,7 +77,7 @@ class HttpRequest:
 
         state['status'] = response.status_code
         state['reason'] = response.reason
-        resp_data = response.text.decode('utf-8')
+        resp_data = response.content.decode()
 
         if len(resp_data) > 0:
             try:

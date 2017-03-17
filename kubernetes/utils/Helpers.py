@@ -9,6 +9,7 @@
 import copy
 import importlib
 import socket
+from six import string_types
 
 from dateutil.parser import parse
 
@@ -18,7 +19,7 @@ from kubernetes.K8sExceptions import NotFoundException
 def is_valid_string(target=None):
     if target is None:
         return False
-    if not isinstance(target, str):
+    if not isinstance(target, string_types):
         return False
     return True
 

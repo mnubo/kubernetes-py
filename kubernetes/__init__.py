@@ -6,27 +6,27 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from K8sComponentStatus import K8sComponentStatus
-from K8sConfig import K8sConfig
-from K8sContainer import K8sContainer
-from K8sCronJob import K8sCronJob
-from K8sDaemonSet import K8sDaemonSet
-from K8sDeployment import K8sDeployment
-from K8sExceptions import *
-from K8sJob import K8sJob
-from K8sNamespace import K8sNamespace
-from K8sNode import K8sNode
-from K8sObject import K8sObject
-from K8sPersistentVolume import K8sPersistentVolume
-from K8sPersistentVolumeClaim import K8sPersistentVolumeClaim
-from K8sPetSet import K8sPetSet
-from K8sPod import K8sPod
-# from K8sReplicaSet import K8sReplicaSet  # should not be used directly
-from K8sReplicationController import K8sReplicationController
-from K8sSecret import K8sSecret
-from K8sService import K8sService
-from K8sServiceAccount import K8sServiceAccount
-from K8sStatefulSet import K8sStatefulSet
-from K8sStorageClass import K8sStorageClass
-from K8sVolume import K8sVolume
-from K8sVolumeMount import K8sVolumeMount
+from kubernetes.K8sComponentStatus import K8sComponentStatus
+from kubernetes.K8sConfig import K8sConfig
+from kubernetes.K8sContainer import K8sContainer
+from kubernetes.K8sCronJob import K8sCronJob
+from kubernetes.K8sDaemonSet import K8sDaemonSet
+from kubernetes.K8sDeployment import K8sDeployment
+from kubernetes.K8sExceptions import *
+from kubernetes.K8sJob import K8sJob
+from kubernetes.K8sNamespace import K8sNamespace
+from kubernetes.K8sNode import K8sNode
+from kubernetes.K8sObject import K8sObject
+from kubernetes.K8sPersistentVolume import K8sPersistentVolume
+from kubernetes.K8sPersistentVolumeClaim import K8sPersistentVolumeClaim
+from kubernetes.K8sPetSet import K8sPetSet
+from kubernetes.K8sPod import K8sPod
+# from kubernetes.K8sReplicaSet import K8sReplicaSet  # should not be used directly
+from kubernetes.K8sReplicationController import K8sReplicationController
+from kubernetes.K8sSecret import K8sSecret
+from kubernetes.K8sService import K8sService
+from kubernetes.K8sServiceAccount import K8sServiceAccount
+from kubernetes.K8sStatefulSet import K8sStatefulSet
+from kubernetes.K8sStorageClass import K8sStorageClass
+from kubernetes.K8sVolume import K8sVolume
+from kubernetes.K8sVolumeMount import K8sVolumeMount

@@ -117,7 +117,7 @@ class K8sNode(K8sObject):
     @staticmethod
     def get_by_name(config=None, name=None):
         nodes = K8sNode(config=config, name=name).list()
-        filtered = filter(lambda x: x.name == name, nodes)
+        filtered = list(filter(lambda x: x.name == name, nodes))
         if filtered:
             return filtered[0]
         return None

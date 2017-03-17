@@ -8,13 +8,13 @@
 
 import uuid
 
-from BaseTest import BaseTest
+from tests import utils
+from tests.BaseTest import BaseTest
 from kubernetes.K8sJob import K8sJob
 from kubernetes.models.v1.Job import Job
 from kubernetes.models.v1.JobSpec import JobSpec
 from kubernetes.models.v1.JobStatus import JobStatus
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
-from tests import utils
 
 
 class K8sJobTests(BaseTest):

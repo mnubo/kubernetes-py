@@ -58,7 +58,7 @@ class K8sJob(K8sObject):
         ls = super(K8sJob, self).list()
         jobs = map(lambda x: Job(x), ls)
         if pattern is not None:
-            jobs = filter(lambda x: pattern in x.name, jobs)
+            jobs = list(filter(lambda x: pattern in x.name, jobs))
         k8s = []
         for x in jobs:
             j = K8sJob(config=self.config, name=x.name)
