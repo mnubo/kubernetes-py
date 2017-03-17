@@ -129,6 +129,8 @@ class Secret(BaseModel):
             d[k] = base64.b64decode(v)
             if isinstance(d[k], bytes):
                 d[k] = d[k].decode()
+            elif is_valid_string(d[k]):
+                d[k] = d[k].decode()
         return d
 
     @data.setter
@@ -149,9 +151,9 @@ class Secret(BaseModel):
                 raise SyntaxError(msg)
             if not isinstance(v, bytes):
                 try:
-                    v = bytes(v, encoding='UTF-8')
+                    v = bytearray(v, 'UTF-8')
                 except:
-                    raise SyntaxError(msg)
+                    raise SyntaxError('Could not convert [ {0} ] to bytes.'.format(v))
             self._data[k] = base64.b64encode(v)
 
     # ------------------------------------------------------------------------------------- stringData
