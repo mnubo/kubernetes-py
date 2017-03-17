@@ -10,7 +10,7 @@ import uuid
 
 from tests import utils
 from tests.BaseTest import BaseTest
-from kubernetes import K8sDeployment, K8sConfig
+from kubernetes import K8sDeployment, K8sConfig, K8sContainer
 from kubernetes.K8sExceptions import *
 
 
@@ -358,3 +358,31 @@ class K8sDeploymentTests(BaseTest):
             self.assertEqual(5, dep.desired_replicas)
             self.assertEqual(5, dep.updated_replicas)
             self.assertEqual(5, dep.available_replicas)
+
+    def test_update_container_image_keep_env_vars(self):
+        name = "yodep-{0}".format(str(uuid.uuid4()))
+        dep = utils.create_deployment(name=name)
+        cont_name = "nginx"
+        cont_image = "nginx:1.7.9"
+        new_image = "nginx:1.10.3"
+        env_var_name = "YoVariable"
+        cont = utils.create_container(name=cont_name, image=cont_image)
+        cont.add_env(name=env_var_name, value=name)
+        dep.add_container(container=cont)
+        dep.desired_replicas = 1
+        if utils.is_reachable(dep.config.api_host):
+            dep.create()
+            with self.assertRaises(AlreadyExistsException):
+                dep.create()
+            # Change the container image
+            dep.container_image = (cont_name, new_image)
+            # Update the deployment
+            dep.update()
+            # Refresh whatever we have.
+            dep.get()
+            for c in dep.containers:
+                self.assertIsInstance(c, K8sContainer)
+                if c.name == cont_name:
+                    self.assertEqual(c.image, new_image)
+                    self.assertEqual(c.env[0].name, env_var_name)
+                    self.assertEqual(c.env[0].value, name)
