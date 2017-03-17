@@ -38,6 +38,7 @@ setup(
         'kubernetes.utils'
     ],
     install_requires=[
+        'six>=1.10.0',
         'PyYAML==3.11',
         'requests>=2.10.0',
         'uuid==1.30',

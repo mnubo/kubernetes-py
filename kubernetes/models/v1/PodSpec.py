@@ -110,7 +110,7 @@ class PodSpec(object):
             combined = secrets
         else:
             combined = s + secrets
-        filtered = filter(lambda x: isinstance(x, dict), combined)
+        filtered = list(filter(lambda x: isinstance(x, dict), combined))
         self.image_pull_secrets = filtered
         return self
 

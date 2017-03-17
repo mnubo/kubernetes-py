@@ -157,7 +157,7 @@ class K8sNodeTest(BaseTest):
                 n.get()
 
     def test_get(self):
-        name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
+        name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         n = utils.create_node(name=name)
         if utils.is_reachable(n.config.api_host):
             n.create()
@@ -168,19 +168,19 @@ class K8sNodeTest(BaseTest):
     # --------------------------------------------------------------------------------- api - list
 
     def test_list_without_create(self):
-        name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
+        name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         nodes = utils.create_node(name=name)
         if utils.is_reachable(nodes.config.api_host):
             _list = nodes.list()
             for x in _list:
                 self.assertIsInstance(x, K8sNode)
             node_pattern = re.compile("yo\-")
-            _filtered = filter(lambda x: node_pattern.match(x.name) is not None, _list)
+            _filtered = list(filter(lambda x: node_pattern.match(x.name) is not None, _list))
             self.assertIsInstance(_filtered, list)
             self.assertEqual(0, len(_filtered))
 
     def test_list(self):
-        name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
+        name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         node = utils.create_node(name=name)
 
         if utils.is_reachable(node.config.api_host):
@@ -188,26 +188,26 @@ class K8sNodeTest(BaseTest):
             _pre_list = node.list()
             for x in _pre_list:
                 self.assertIsInstance(x, K8sNode)
-            _filtered = filter(lambda x: node_pattern.match(x.name) is not None, _pre_list)
+            _filtered = list(filter(lambda x: node_pattern.match(x.name) is not None, _pre_list))
             pre_create_length = len(_filtered)
 
             node.create()
             _post_list = node.list()
             for x in _post_list:
                 self.assertIsInstance(x, K8sNode)
-            _filtered = filter(lambda x: node_pattern.match(x.name) is not None, _post_list)
+            _filtered = list(filter(lambda x: node_pattern.match(x.name) is not None, _post_list))
             post_create_length = len(_filtered)
             self.assertIsInstance(_filtered, list)
             self.assertEqual(1+pre_create_length, post_create_length)
 
-            from_query = filter(lambda x: x.name == name, _filtered)
+            from_query = list(filter(lambda x: x.name == name, _filtered))
             self.assertIsInstance(from_query, list)
             self.assertEqual(len(from_query), 1)
 
     # --------------------------------------------------------------------------------- api - create
 
     def test_create(self):
-        name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
+        name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         node = utils.create_node(name=name)
         if utils.is_reachable(node.config.api_host):
             node.create()
@@ -215,7 +215,7 @@ class K8sNodeTest(BaseTest):
             self.assertEqual(node, from_get)
 
     def test_create_already_exists(self):
-        name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
+        name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         node = utils.create_node(name=name)
         if utils.is_reachable(node.config.api_host):
             node.create()
@@ -225,7 +225,7 @@ class K8sNodeTest(BaseTest):
     # --------------------------------------------------------------------------------- api - update
 
     def test_update_nonexistent(self):
-        name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
+        name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         node = utils.create_node(name=name)
         if utils.is_reachable(node.config.api_host):
             with self.assertRaises(NotFoundException):
@@ -234,14 +234,14 @@ class K8sNodeTest(BaseTest):
     # --------------------------------------------------------------------------------- api - delete
 
     def test_delete_nonexistent(self):
-        name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
+        name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         node = utils.create_node(name=name)
         if utils.is_reachable(node.config.api_host):
             with self.assertRaises(NotFoundException):
                 node.delete()
 
     def test_delete(self):
-        name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
+        name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         node = utils.create_node(name=name)
         if utils.is_reachable(node.config.api_host):
             node.create()

@@ -55,7 +55,7 @@ class PersistentVolumeClaimStatus(object):
     def access_modes(self, modes=None):
         if not is_valid_list(modes, str):
             raise SyntaxError('PersistentVolumeClaimStatus: access_modes: [ {} ] is invalid.'.format(modes))
-        filtered = filter(lambda x: x in PersistentVolumeSpec.VALID_ACCESS_MODES, modes)
+        filtered = list(filter(lambda x: x in PersistentVolumeSpec.VALID_ACCESS_MODES, modes))
         self._access_modes = filtered
 
     # ------------------------------------------------------------------------------------- capacity

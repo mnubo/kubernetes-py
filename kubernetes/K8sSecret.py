@@ -55,11 +55,11 @@ class K8sSecret(K8sObject):
         s = Secret()
 
         if name is not None:
-            s.name = "{0}-docker-{1}".format(name, str(uuid.uuid4().get_hex()[:5]))
+            s.name = "{0}-docker-{1}".format(name, str(uuid.uuid4().hex[:5]))
         elif name is None and prefix is not None:
-            s.name = "{0}-docker-{1}".format(prefix, str(uuid.uuid4().get_hex()[:5]))
+            s.name = "{0}-docker-{1}".format(prefix, str(uuid.uuid4().hex[:5]))
         else:
-            s.name = "docker-{0}".format(str(uuid.uuid4().get_hex()[:5]))
+            s.name = "docker-{0}".format(str(uuid.uuid4().hex[:5]))
 
         s.dockerconfigjson = data
         k8s = K8sSecret(config=config, name=s.name)
@@ -79,7 +79,7 @@ class K8sSecret(K8sObject):
     @staticmethod
     def image_pull_secret_with_name(config=None, name=None):
         _secrets = K8sSecret.list_image_pull_secrets(config=config)
-        _list = filter(lambda x: x.name == name, _secrets)
+        _list = list(filter(lambda x: x.name == name, _secrets))
         if len(_list):
             return _list[0]
         return None
@@ -89,7 +89,7 @@ class K8sSecret(K8sObject):
     @staticmethod
     def create_service_account_api_token(config=None, name=None):
         s = Secret()
-        s.name = "{}-token-{}".format(name, str(uuid.uuid4().get_hex()[:5]))
+        s.name = "{}-token-{}".format(name, str(uuid.uuid4().hex[:5]))
         s.add_annotation(Secret.K8s_ANNOTATION_SERVICE_ACCOUNT_NAME, name)
         s.type = Secret.K8s_TYPE_SERVICE_ACCOUNT
         k8s = K8sSecret(config=config, name=s.name)

@@ -232,7 +232,7 @@ class K8sDeployment(K8sObject):
         if len(self.containers) == 1:
             return self.containers[0].image
         else:
-            filtered = filter(lambda x: x.name == name, self.containers)
+            filtered = list(filter(lambda x: x.name == name, self.containers))
             if filtered:
                 return filtered[0].image
             return None
@@ -242,9 +242,9 @@ class K8sDeployment(K8sObject):
         if not isinstance(tup, tuple):
             raise SyntaxError('K8sDeployment.container_image() must be a tuple of the form (name, image)')
         name, image = tup
-        found = filter(lambda x: x.name == name, self.containers)
+        found = list(filter(lambda x: x.name == name, self.containers))
         if found:
-            new = filter(lambda x: x.name != name, self.containers)
+            new = list(filter(lambda x: x.name != name, self.containers))
             found[0].image = image
             new.append(found[0])
             self.containers = new

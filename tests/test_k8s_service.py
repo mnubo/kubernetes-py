@@ -244,7 +244,7 @@ class K8sServiceTest(BaseTest):
                 svc.get()
 
     def test_get(self):
-        name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
+        name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
         if utils.is_reachable(svc.config.api_host):
@@ -608,7 +608,7 @@ class K8sServiceTest(BaseTest):
     # --------------------------------------------------------------------------------- api - get by name
 
     def test_get_by_name_nonexistent(self):
-        name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
+        name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
         if utils.is_reachable(svc.config.api_host):
@@ -617,7 +617,7 @@ class K8sServiceTest(BaseTest):
             self.assertEqual(0, len(_list))
 
     def test_get_by_name(self):
-        name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
+        name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
         if utils.is_reachable(svc.config.api_host):
@@ -632,14 +632,14 @@ class K8sServiceTest(BaseTest):
     # --------------------------------------------------------------------------------- api - list
 
     def test_list_without_create(self):
-        name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
+        name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
         if utils.is_reachable(svc.config.api_host):
             _list = svc.list()
 
     def test_list(self):
-        name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
+        name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
         if utils.is_reachable(svc.config.api_host):
@@ -655,7 +655,7 @@ class K8sServiceTest(BaseTest):
     # --------------------------------------------------------------------------------- api - create
 
     def test_create(self):
-        name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
+        name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
         if utils.is_reachable(svc.config.api_host):
@@ -664,7 +664,7 @@ class K8sServiceTest(BaseTest):
             self.assertEqual(svc, from_get)
 
     def test_create_already_exists(self):
-        name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
+        name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
         if utils.is_reachable(svc.config.api_host):
@@ -675,7 +675,7 @@ class K8sServiceTest(BaseTest):
     # --------------------------------------------------------------------------------- api - update
 
     def test_update_nonexistent(self):
-        name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
+        name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
         if utils.is_reachable(svc.config.api_host):
@@ -683,7 +683,7 @@ class K8sServiceTest(BaseTest):
                 svc.update()
 
     def test_update_nothing_changed(self):
-        name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
+        name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
         if utils.is_reachable(svc.config.api_host):
@@ -692,7 +692,7 @@ class K8sServiceTest(BaseTest):
             self.assertEqual(from_create, from_update)
 
     def test_update_set_cluster_ip_fails(self):
-        name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
+        name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
         if utils.is_reachable(svc.config.api_host):
@@ -702,7 +702,7 @@ class K8sServiceTest(BaseTest):
                 svc.update()
 
     def test_update_set_external_ips(self):
-        name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
+        name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
         ip = '192.168.123.123'
@@ -761,7 +761,7 @@ class K8sServiceTest(BaseTest):
     # --------------------------------------------------------------------------------- api - delete
 
     def test_delete_nonexistent(self):
-        name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
+        name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
         if utils.is_reachable(svc.config.api_host):
@@ -769,7 +769,7 @@ class K8sServiceTest(BaseTest):
                 svc.delete()
 
     def test_delete(self):
-        name = "yo-{0}".format(str(uuid.uuid4().get_hex()[:16]))
+        name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
         if utils.is_reachable(svc.config.api_host):

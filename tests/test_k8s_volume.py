@@ -723,7 +723,7 @@ class K8sVolumeTest(BaseTest):
         rc = utils.create_rc(name="admintool")
 
         for vol in volumes:
-            keys = filter(lambda x: x != 'name', vol.keys())
+            keys = list(filter(lambda x: x != 'name', vol.keys()))
             v = K8sVolume(
                 name=vol['name'],
                 type=keys[0],

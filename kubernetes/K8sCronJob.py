@@ -60,7 +60,7 @@ class K8sCronJob(K8sObject):
         containers = self.model.spec.job_template.spec.template.spec.containers
         if containers is None:
             containers = []
-        filtered = filter(lambda x: x.name != container.name, containers)
+        filtered = list(filter(lambda x: x.name != container.name, containers))
         filtered.append(container.model)
         self.model.spec.job_template.spec.template.spec.containers = filtered
         return self
@@ -172,9 +172,9 @@ class K8sCronJob(K8sObject):
         if not isinstance(tup, tuple):
             raise SyntaxError('K8sCronJob.container_image() must be a tuple of the form (name, image)')
         name, image = tup
-        found = filter(lambda x: x.name == name, self.containers)
+        found = list(filter(lambda x: x.name == name, self.containers))
         if found:
-            new = filter(lambda x: x.name != name, self.containers)
+            new = list(filter(lambda x: x.name != name, self.containers))
             found[0].image = image
             new.append(found[0])
             self.containers = new
