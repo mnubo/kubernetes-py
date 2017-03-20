@@ -38,15 +38,17 @@ class K8sSecret(K8sObject):
         self.get()
         return self
 
-    def list(self):
-        secrets = super(K8sSecret, self).list()
-        k8s_secrets = []
+    def list(self, pattern=None):
+        ls = super(K8sSecret, self).list()
+        secrets = list(map(lambda x: Secret(x), ls))
+        if pattern is not None:
+            secrets = list(filter(lambda x: pattern in x.name, secrets))
+        k8s = []
         for x in secrets:
-            y = Secret(x)
-            k8s = K8sSecret(config=self.config, name=self.name)
-            k8s.model = y
-            k8s_secrets.append(k8s)
-        return k8s_secrets
+            j = K8sSecret(config=self.config, name=x.name)
+            j.model = x
+            k8s.append(j)
+        return k8s
 
     # -------------------------------------------------------------------------------------  image pull secrets
 

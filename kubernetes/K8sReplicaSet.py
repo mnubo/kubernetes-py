@@ -29,12 +29,14 @@ class K8sReplicaSet(K8sObject):
         self.model = ReplicaSet(self.get_model())
         return self
 
-    def list(self):
-        rs = super(K8sReplicaSet, self).list()
-        k8s_rs = []
-        for x in rs:
-            y = ReplicaSet(x)
-            k8s = K8sReplicaSet(config=self.config, name=self.name)
-            k8s.model = y
-            k8s_rs.append(k8s)
-        return k8s_rs
+    def list(self, pattern=None):
+        ls = super(K8sReplicaSet, self).list()
+        rsets = list(map(lambda x: ReplicaSet(x), ls))
+        if pattern is not None:
+            rsets = list(filter(lambda x: pattern in x.name, rsets))
+        k8s = []
+        for x in rsets:
+            j = K8sReplicaSet(config=self.config, name=x.name)
+            j.model = x
+            k8s.append(j)
+        return k8s

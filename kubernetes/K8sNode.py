@@ -30,15 +30,17 @@ class K8sNode(K8sObject):
         self.get()
         return self
 
-    def list(self):
-        nodes = super(K8sNode, self).list()
-        k8s_nodes = []
+    def list(self, pattern=None):
+        ls = super(K8sNode, self).list()
+        nodes = list(map(lambda x: Node(x), ls))
+        if pattern is not None:
+            nodes = list(filter(lambda x: pattern in x.name, nodes))
+        k8s = []
         for x in nodes:
-            y = Node(x)
-            k8s = K8sNode(config=self.config, name=self.name)
-            k8s.model = y
-            k8s_nodes.append(k8s)
-        return k8s_nodes
+            j = K8sNode(config=self.config, name=x.name)
+            j.model = x
+            k8s.append(j)
+        return k8s
 
     # ------------------------------------------------------------------------------------- get
 
