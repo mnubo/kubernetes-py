@@ -6,11 +6,12 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+from kubernetes.models.unversioned.BaseModel import BaseModel
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.utils import is_valid_string, is_valid_dict
 
 
-class StorageClass(object):
+class StorageClass(BaseModel):
     """
     https://github.com/kubernetes/kubernetes/tree/master/examples/persistent-volume-provisioning/
     https://kubernetes.io/docs/user-guide/persistent-volumes/#storageclasses

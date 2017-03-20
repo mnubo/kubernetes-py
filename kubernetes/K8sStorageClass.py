@@ -36,12 +36,14 @@ class K8sStorageClass(K8sObject):
         self.get()
         return self
 
-    def list(self):
-        sclass = super(K8sStorageClass, self).list()
-        k8s_sclass = []
-        for x in sclass:
-            y = StorageClass(x)
-            k8s = K8sStorageClass(config=self.config, name=self.name)
-            k8s.model = y
-            k8s_sclass.append(k8s)
-        return k8s_sclass
+    def list(self, pattern=None):
+        ls = super(K8sStorageClass, self).list()
+        sclasses = list(map(lambda x: StorageClass(x), ls))
+        if pattern is not None:
+            sclasses = list(filter(lambda x: pattern in x.name, sclasses))
+        k8s = []
+        for x in sclasses:
+            j = K8sStorageClass(config=self.config, name=x.name)
+            j.model = x
+            k8s.append(j)
+        return k8s
