@@ -443,3 +443,16 @@ class K8sSecretTest(BaseTest):
                 config=sa.config,
                 name=sa.name)
             self.assertEqual(2, len(secrets))
+
+    # --------------------------------------------------------------------------------- issues
+
+    def test_issue_64(self):
+        name = "yosecret-{0}".format(str(uuid.uuid4()))
+        secret_data = {"test": "test"}
+        secret = utils.create_secret(name=name)
+        secret.data = secret_data
+        if utils.is_reachable(secret.config.api_host):
+            secret.create()
+            secret.get()
+            self.assertIsInstance(secret, K8sSecret)
+            self.assertEqual(secret.data, secret_data)
