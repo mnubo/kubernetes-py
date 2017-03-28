@@ -59,15 +59,17 @@ class K8sDeployment(K8sObject):
             self._wait_for_desired_replicas()
         return self
 
-    def list(self):
-        deploys = super(K8sDeployment, self).list()
-        k8s_deploys = []
+    def list(self, pattern=None):
+        ls = super(K8sDeployment, self).list()
+        deploys = list(map(lambda x: Deployment(x), ls))
+        if pattern is not None:
+            deploys = list(filter(lambda x: pattern in x.name, deploys))
+        k8s = []
         for x in deploys:
-            d = Deployment(x)
-            k8s = K8sDeployment(config=self.config, name=self.name)
-            k8s.model = d
-            k8s_deploys.append(k8s)
-        return k8s_deploys
+            j = K8sDeployment(config=self.config, name=x.name)
+            j.model = x
+            k8s.append(j)
+        return k8s
 
     # -------------------------------------------------------------------------------------  wait
 

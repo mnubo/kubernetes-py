@@ -60,15 +60,17 @@ class K8sReplicationController(K8sObject):
         self._wait_for_desired_replicas()
         return self
 
-    def list(self):
-        rcs = super(K8sReplicationController, self).list()
-        k8s_rcs = []
+    def list(self, pattern=None):
+        ls = super(K8sReplicationController, self).list()
+        rcs = list(map(lambda x: ReplicationController(x), ls))
+        if pattern is not None:
+            rcs = list(filter(lambda x: pattern in x.name, rcs))
+        k8s = []
         for x in rcs:
-            y = ReplicationController(x)
-            k8s = K8sReplicationController(config=self.config, name=self.name)
-            k8s.model = y
-            k8s_rcs.append(k8s)
-        return k8s_rcs
+            j = K8sReplicationController(config=self.config, name=x.name)
+            j.model = x
+            k8s.append(j)
+        return k8s
 
     # -------------------------------------------------------------------------------------  add
 

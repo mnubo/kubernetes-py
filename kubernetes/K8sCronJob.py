@@ -35,15 +35,17 @@ class K8sCronJob(K8sObject):
         self.get()
         return self
 
-    def list(self):
-        cronjobs = super(K8sCronJob, self).list()
-        k8s_cronjobs = []
-        for x in cronjobs:
-            cj = CronJob(x)
-            k8s = K8sCronJob(config=self.config, name=self.name)
-            k8s.model = cj
-            k8s_cronjobs.append(k8s)
-        return k8s_cronjobs
+    def list(self, pattern=None):
+        ls = super(K8sCronJob, self).list()
+        jobs = list(map(lambda x: CronJob(x), ls))
+        if pattern is not None:
+            jobs = list(filter(lambda x: pattern in x.name, jobs))
+        k8s = []
+        for x in jobs:
+            j = K8sCronJob(config=self.config, name=x.name)
+            j.model = x
+            k8s.append(j)
+        return k8s
 
     # -------------------------------------------------------------------------------------  get
 

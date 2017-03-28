@@ -3,6 +3,7 @@
 
 # virtualenv
 .env
+.env3
 .venv
 
 # minikube

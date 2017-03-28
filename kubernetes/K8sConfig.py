@@ -74,32 +74,35 @@ class K8sConfig(object):
             self.users = dotconf['users']
             self.version = dotconf['apiVersion']
 
-            for cluster in self.clusters:
-                if cluster['name'] == self.current_context_dict['cluster']:
-                    if 'server' in cluster['cluster']:
-                        self.api_host = cluster['cluster']['server']
-                    if 'certificate-authority' in cluster['cluster']:
-                        self.ca_cert = cluster['cluster']['certificate-authority']
-                    if 'certificate-authority-data' in cluster['cluster']:
-                        self.ca_cert_data = cluster['cluster']['certificate-authority-data']
+            if self.clusters:
+                for cluster in self.clusters:
+                    if cluster['name'] == self.current_context_dict['cluster']:
+                        if 'server' in cluster['cluster']:
+                            self.api_host = cluster['cluster']['server']
+                        if 'certificate-authority' in cluster['cluster']:
+                            self.ca_cert = cluster['cluster']['certificate-authority']
+                        if 'certificate-authority-data' in cluster['cluster']:
+                            self.ca_cert_data = cluster['cluster']['certificate-authority-data']
 
-            for user in self.users:
-                if user['name'] == self.current_context_dict['user']:
-                    if 'username' in user['user'] and 'password' in user['user']:
-                        self.auth = (user['user']['username'], user['user']['password'])
-                    if 'token' in user['user']:
-                        self.token = user['user']['token']
-                    if 'client-certificate' in user['user'] and 'client-key' in user['user']:
-                        self.client_certificate = user['user']['client-certificate']
-                        self.client_key = user['user']['client-key']
-                        self.cert = (self.client_certificate, self.client_key)
+            if self.users:
+                for user in self.users:
+                    if user['name'] == self.current_context_dict['user']:
+                        if 'username' in user['user'] and 'password' in user['user']:
+                            self.auth = (user['user']['username'], user['user']['password'])
+                        if 'token' in user['user']:
+                            self.token = user['user']['token']
+                        if 'client-certificate' in user['user'] and 'client-key' in user['user']:
+                            self.client_certificate = user['user']['client-certificate']
+                            self.client_key = user['user']['client-key']
+                            self.cert = (self.client_certificate, self.client_key)
 
-            for context in self.contexts:
-                if context['name'] == self.current_context:
-                    if 'namespace' in context['context']:
-                        self.namespace = context['context']['namespace']
-                    else:
-                        self.namespace = namespace
+            if self.contexts:
+                for context in self.contexts:
+                    if context['name'] == self.current_context:
+                        if 'namespace' in context['context']:
+                            self.namespace = context['context']['namespace']
+                        else:
+                            self.namespace = namespace
 
         # we're using user-supplied config; run some sanity checks.
         if dotconf is None:
