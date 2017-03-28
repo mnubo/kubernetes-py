@@ -239,7 +239,7 @@ class Secret(BaseModel):
             d = {}
             for k, v in self.data.items():
                 if is_valid_string(v):
-                    v = bytes(v, 'UTF-8')
+                    v = bytearray(source=v, encoding='UTF-8')
                 d[k] = base64.b64encode(v)
                 if isinstance(d[k], bytes):
                     d[k] = d[k].decode()
