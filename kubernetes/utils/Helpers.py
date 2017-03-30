@@ -10,6 +10,7 @@ import copy
 import importlib
 import socket
 from six import string_types
+import requests
 
 from dateutil.parser import parse
 
@@ -70,9 +71,11 @@ def is_reachable(ip=None):
     if not is_valid_string(ip):
         return False
     try:
-        socket.inet_aton(ip)
-        return True
-    except socket.error:
+        r = requests.get(ip)
+        if r.status_code == 200:
+            return True
+        return False
+    except Exception as err:
         return False
 
 
@@ -106,10 +109,3 @@ def str_to_class(obj_type=None):
         return _class
 
     raise NotFoundException("Could not import obj_type: [ {} ]".format(obj_type))
-
-
-def server_version():
-    from kubernetes.K8sObject import K8sObject
-    obj = K8sObject(obj_type='Pod', name='obj')
-    v = obj.server_version()
-    return v

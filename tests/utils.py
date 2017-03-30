@@ -8,7 +8,7 @@
 
 import os
 import re
-import socket
+import requests
 
 from kubernetes.K8sComponentStatus import K8sComponentStatus
 from kubernetes.K8sConfig import K8sConfig
@@ -42,24 +42,12 @@ kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(
 # --------------------------------------------------------------------------------- reachability
 
 
-def is_reachable(api_host):
-    port = None
+def is_reachable(ip=None):
     try:
-        scheme, host, port = api_host.replace("//", "").split(':')
-    except ValueError:  # no port specified
-        scheme, host = api_host.replace("//", "").split(":")
-    try:
-        if port is not None:
-            s = socket.create_connection((host, port), timeout=0.5)
-        else:
-            if scheme == 'http':
-                port = 80
-            elif scheme == 'https':
-                port = 443
-            s = socket.create_connection((host, port), timeout=0.5)
-        if s is not None:
-            s.close()
-        return True
+        r = requests.get(ip)
+        if r.status_code == 200:
+            return True
+        return False
     except Exception as err:
         return False
 
