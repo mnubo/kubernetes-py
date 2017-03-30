@@ -21,7 +21,7 @@ class K8sPetSet(K8sObject):
 
     def __init__(self, config=None, name=None):
 
-        if is_reachable(config.api_host):
+        if config and is_reachable(config.api_host):
             temp = K8sObject(config=config, obj_type='Pod', name='temp')
             v = temp.server_version()
             if int(v['major']) <= 1 and int(v['minor']) < 4:
