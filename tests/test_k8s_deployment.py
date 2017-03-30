@@ -340,7 +340,7 @@ class K8sDeploymentTests(BaseTest):
             self.assertIsInstance(result[0], K8sDeployment)
             self.assertEqual(dep, result[0])
 
-    # -------------------------------------------------------------------------------------  get scale
+    # ------------------------------------------------------------------------------------- scale
 
     def test_scale(self):
         cont_name = "yocontainer"
@@ -386,3 +386,24 @@ class K8sDeploymentTests(BaseTest):
                     self.assertEqual(c.image, new_image)
                     self.assertEqual(c.env[0].name, env_var_name)
                     self.assertEqual(c.env[0].value, name)
+
+    # ------------------------------------------------------------------------------------- inmarsat case
+
+    def test_inmarsat(self):
+
+        cfg_default = K8sConfig(kubeconfig=None, api_host="127.0.0.1:8001")
+
+        container = K8sContainer(name='nginx', image='nginx:latest')
+        container.add_port(
+            container_port=80,
+            host_port=80,
+            name='nginx'
+        )
+
+        deployment = K8sDeployment(
+            config=cfg_default,
+            name='nginx',
+            replicas=3
+        )
+        deployment.add_container(container)
+        deployment.create()
