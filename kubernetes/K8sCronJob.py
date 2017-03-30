@@ -10,16 +10,24 @@ from kubernetes.K8sObject import K8sObject
 from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sVolume import K8sVolume
 from kubernetes.models.v2alpha1.CronJob import CronJob
-from kubernetes.utils import is_valid_list
+from kubernetes.utils import is_valid_list, is_reachable
 
 
 class K8sCronJob(K8sObject):
 
     def __init__(self, config=None, name=None):
 
+        temp = K8sObject(config=config, obj_type='Pod', name='temp')
+        _type = 'CronJob'
+
+        if is_reachable(config.api_host):
+            v = temp.server_version()
+            if int(v['major']) == 1 and int(v['minor']) == 4:
+                _type = 'ScheduledJob'
+
         super(K8sCronJob, self).__init__(
             config=config,
-            obj_type='CronJob',
+            obj_type=_type,
             name=name
         )
 

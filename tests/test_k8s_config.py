@@ -8,7 +8,7 @@
 
 from tests import utils
 from tests.BaseTest import BaseTest
-from kubernetes import K8sConfig
+from kubernetes import K8sConfig, K8sCronJob
 
 DEFAULT_API_HOST = "localhost:8888"
 DEFAULT_API_VERSION = "v1"
@@ -18,10 +18,10 @@ DEFAULT_NAMESPACE = "default"
 class K8sConfigTest(BaseTest):
 
     def setUp(self):
-        pass
+        utils.cleanup_cronjobs()
 
     def tearDown(self):
-        pass
+        utils.cleanup_cronjobs()
 
     # ------------------------------------------------------------------------------------- init without kubeconfig
 
@@ -197,3 +197,15 @@ class K8sConfigTest(BaseTest):
             version=v
         )
         self.assertEqual(v, config.version)
+
+    # ------------------------------------------------------------------------------------- server version
+
+    def test_server_version_no_kubeconfig(self):
+        api_host = "127.0.0.1:8001"
+        cfg = K8sConfig(kubeconfig=None, api_host=api_host)
+        if utils.is_reachable(cfg.api_host):
+            container = utils.create_container(name="nginx", image="nginx:latest")
+            cj = utils.create_cronjob(config=cfg, name="test")
+            cj.add_container(container)
+            cj.create()
+            self.assertIsInstance(cj, K8sCronJob)
