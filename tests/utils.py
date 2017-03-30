@@ -35,7 +35,6 @@ from kubernetes.K8sStatefulSet import K8sStatefulSet
 from kubernetes.K8sStorageClass import K8sStorageClass
 from kubernetes.K8sVolume import K8sVolume
 from kubernetes.K8sVolumeMount import K8sVolumeMount
-from kubernetes.utils import server_version
 
 kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
 
@@ -70,7 +69,9 @@ def assert_server_version(api_host=None, major=None, minor=None, type='exact'):
         if not api_host:
             return False
         if is_reachable(api_host):
-            v = server_version()
+            cfg = K8sConfig(api_host=api_host)
+            obj = K8sObject(config=cfg, obj_type='Pod', name='temp')
+            v = obj.server_version()
             if type == 'exact':
                 if int(v['major']) != major or int(v['minor']) != minor:
                     msg = 'Desired: [ {}.{} ]. Observed: [ {}.{} ].'.format(major, minor, v['major'], v['minor'])

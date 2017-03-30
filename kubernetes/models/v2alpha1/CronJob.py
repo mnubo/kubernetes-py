@@ -6,12 +6,10 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import os
 from kubernetes.models.unversioned.BaseModel import BaseModel
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.models.v2alpha1.CronJobSpec import CronJobSpec
 from kubernetes.models.v2alpha1.CronJobStatus import CronJobStatus
-from kubernetes.utils import server_version
 
 
 class CronJob(BaseModel):
@@ -22,15 +20,7 @@ class CronJob(BaseModel):
     def __init__(self, model=None):
         super(CronJob, self).__init__()
 
-        if bool(os.environ.get('TRAVIS_SKIP_SERVER_VERSION', 0)):
-            self.kind = 'ScheduledJob'
-        else:
-            v = server_version()
-            if int(v['major']) == 1 and int(v['minor']) == 4:
-                self.kind = 'ScheduledJob'
-            if int(v['major']) == 1 and int(v['minor']) >= 5:
-                self.kind = 'CronJob'
-
+        self.kind = "CronJob"
         self.api_version = "batch/v2alpha1"
         self.spec = CronJobSpec()
         self.status = CronJobStatus()

@@ -53,7 +53,8 @@ class BaseUrls(object):
 
         # batch
         self.urls['Job'] = '/apis/batch/{0}/namespaces/{1}/jobs'.format(batch, namespace)
-        self.urls['CronJob'] = '/apis/batch/{0}/namespaces/{1}/scheduledjobs'.format(cron, namespace)
+        self.urls['ScheduledJob'] = '/apis/batch/{0}/namespaces/{1}/scheduledjobs'.format(cron, namespace)
+        self.urls['CronJob'] = '/apis/batch/{0}/namespaces/{1}/cronjobs'.format(cron, namespace)
 
         # extensions
         self.urls['DaemonSet'] = '/apis/extensions/{0}/namespaces/{1}/daemonsets'.format(extensions, namespace)

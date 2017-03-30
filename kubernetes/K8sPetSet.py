@@ -20,6 +20,12 @@ class K8sPetSet(K8sObject):
 
     def __init__(self, config=None, name=None):
 
+        v = super(K8sPetSet, self).server_version()
+        if int(v['major']) <= 1 and int(v['minor']) < 4:
+            raise NotImplementedError('PetSets exist only on Kubernetes == 1.4.x.')
+        if int(v['major']) >= 1 and int(v['minor']) >= 5:
+            raise NotImplementedError('PetSets were refactored into StatefulSets on Kubernetes >= 1.5.x.')
+
         super(K8sPetSet, self).__init__(
             config=config,
             name=name,

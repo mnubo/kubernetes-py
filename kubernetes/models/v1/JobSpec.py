@@ -15,6 +15,8 @@ class JobSpec(object):
     http://kubernetes.io/docs/api-reference/batch/v1/definitions/#_v1_jobspec
     """
 
+    VALID_RESTART_POLICIES = ['OnFailure', 'Never']
+
     def __init__(self, model=None):
         super(JobSpec, self).__init__()
 
@@ -25,7 +27,9 @@ class JobSpec(object):
         self._manual_selector = None
         self._template = PodTemplateSpec()
 
-        self.template.spec.VALID_RESTART_POLICIES = ['OnFailure', 'Never']
+        self.template.spec.VALID_RESTART_POLICIES = JobSpec.VALID_RESTART_POLICIES
+        if self.template.spec.restart_policy not in JobSpec.VALID_RESTART_POLICIES:
+            self.template.spec.restart_policy = 'OnFailure'
 
         if model is not None:
             self._build_with_model(model)

@@ -17,9 +17,15 @@ class K8sCronJob(K8sObject):
 
     def __init__(self, config=None, name=None):
 
+        temp = K8sObject(config=config, obj_type='Pod', name='temp')
+        v = temp.server_version()
+        _type = 'CronJob'
+        if int(v['major']) == 1 and int(v['minor']) == 4:
+            _type = 'ScheduledJob'
+
         super(K8sCronJob, self).__init__(
             config=config,
-            obj_type='CronJob',
+            obj_type=_type,
             name=name
         )
 
