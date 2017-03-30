@@ -37,7 +37,7 @@ class K8sCronJobTests(BaseTest):
         except IOError:
             pass
         except Exception as err:
-            self.fail("Unhandled exception: [ {0} ]".format(err.__class__.__name__))
+            self.fail("Unhandled exception: [ {0} ]".format(err))
 
     def test_init_with_invalid_config(self):
         config = object()
