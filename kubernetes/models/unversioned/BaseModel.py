@@ -12,7 +12,7 @@ from kubernetes.utils import is_valid_string
 
 class BaseModel(object):
 
-    def __init__(self):
+    def __init__(self, model=None):
         super(BaseModel, self).__init__()
 
         self._api_version = None
@@ -21,7 +21,10 @@ class BaseModel(object):
         self._spec = None
         self._status = None
 
-    def build_with_model(self, model=None):
+        if model is not None:
+            self._build_with_model(model)
+
+    def _build_with_model(self, model=None):
         if 'apiVersion' in model:
             self.api_version = model['apiVersion']
         if 'kind' in model:
