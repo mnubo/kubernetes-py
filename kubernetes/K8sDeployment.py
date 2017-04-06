@@ -24,7 +24,11 @@ class K8sDeployment(K8sObject):
 
     def __init__(self, config=None, name=None, image=None, replicas=0):
 
-        super(K8sDeployment, self).__init__(config=config, obj_type='Deployment', name=name)
+        super(K8sDeployment, self).__init__(
+            config=config,
+            obj_type='Deployment',
+            name=name
+        )
 
         self.desired_replicas = replicas
 
