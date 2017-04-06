@@ -71,11 +71,9 @@ def is_reachable(ip=None):
     if not is_valid_string(ip):
         return False
     try:
-        r = requests.get(ip)
-        if r.status_code == 200:
-            return True
-        return False
-    except Exception as err:
+        socket.inet_aton(ip)
+        return True
+    except socket.error:
         return False
 
 
