@@ -6,7 +6,7 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.unversioned import BaseModel
+from kubernetes.models.unversioned.BaseModel import BaseModel
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
 from kubernetes.models.v1beta1.HorizontalPodAutoscalerSpec import HorizontalPodAutoscalerSpec
 from kubernetes.models.v1beta1.HorizontalPodAutoscalerStatus import HorizontalPodAutoscalerStatus
@@ -17,13 +17,13 @@ class HorizontalPodAutoscaler(BaseModel):
     https://kubernetes.io/docs/api-reference/extensions/v1beta1/definitions/#_v1beta1_horizontalpodautoscaler
     """
 
-    def __init__(self, model):
+    def __init__(self, model=None):
         super(HorizontalPodAutoscaler, self).__init__()
 
-        self._kind = 'HorizontalPodAutoscaler'
-        self._api_version = 'extensions/v1beta1'
-        self._spec = HorizontalPodAutoscalerSpec()
-        self._status = HorizontalPodAutoscalerStatus()
+        self.kind = 'HorizontalPodAutoscaler'
+        self.api_version = 'extensions/v1beta1'
+        self.spec = HorizontalPodAutoscalerSpec()
+        self.status = HorizontalPodAutoscalerStatus()
 
         if model is not None:
             self._build_with_model(model)
