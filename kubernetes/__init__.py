@@ -13,6 +13,7 @@ from kubernetes.K8sCronJob import K8sCronJob
 from kubernetes.K8sDaemonSet import K8sDaemonSet
 from kubernetes.K8sDeployment import K8sDeployment
 from kubernetes.K8sExceptions import *
+from kubernetes.K8sHorizontalPodAutoscaler import K8sHorizontalPodAutoscaler
 from kubernetes.K8sJob import K8sJob
 from kubernetes.K8sNamespace import K8sNamespace
 from kubernetes.K8sNode import K8sNode
