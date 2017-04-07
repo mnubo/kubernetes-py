@@ -20,7 +20,7 @@ class K8sCronJob(K8sObject):
         temp = K8sObject(config=config, obj_type='Pod', name='temp')
         _type = 'CronJob'
 
-        if config and is_reachable(config.api_host):
+        if config and is_reachable(config):
             v = temp.server_version()
             if int(v['major']) == 1 and int(v['minor']) == 4:
                 _type = 'ScheduledJob'

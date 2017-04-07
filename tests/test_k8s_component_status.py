@@ -95,14 +95,14 @@ class K8sComponentStatusTest(BaseTest):
     def test_get_nonexistent(self):
         name = "yo-component"
         c = utils.create_component_status(name=name)
-        if utils.is_reachable(c.config.api_host):
+        if utils.is_reachable(c.config):
             with self.assertRaises(NotFoundException):
                 c.get()
 
     def test_get(self):
         name = "scheduler"
         c = utils.create_component_status(name=name)
-        if utils.is_reachable(c.config.api_host):
+        if utils.is_reachable(c.config):
             from_get = c.get()
             self.assertIsInstance(from_get, K8sComponentStatus)
             self.assertEqual(c, from_get)
@@ -112,7 +112,7 @@ class K8sComponentStatusTest(BaseTest):
     def test_list(self):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         components = utils.create_component_status(name=name)
-        if utils.is_reachable(components.config.api_host):
+        if utils.is_reachable(components.config):
             _list = components.list()
             for x in _list:
                 self.assertIsInstance(x, K8sComponentStatus)

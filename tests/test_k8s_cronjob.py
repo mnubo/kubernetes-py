@@ -83,7 +83,7 @@ class K8sCronJobTests(BaseTest):
         job = CronJob(utils.scheduledjob())
         k8s_cronjob = utils.create_cronjob(name=name)
         k8s_cronjob.model = job
-        if utils.is_reachable(k8s_cronjob.config.api_host):
+        if utils.is_reachable(k8s_cronjob.config):
             k8s_cronjob.create()
             self.assertIsInstance(k8s_cronjob, K8sCronJob)
 
@@ -95,7 +95,7 @@ class K8sCronJobTests(BaseTest):
         k8s_cronjob.model = job
         k8s_cronjob.concurrency_policy = "Allow"
 
-        if utils.is_reachable(k8s_cronjob.config.api_host):
+        if utils.is_reachable(k8s_cronjob.config):
             k8s_cronjob.create()
             self.assertIsInstance(k8s_cronjob, K8sCronJob)
             self.assertEqual('Allow', k8s_cronjob.concurrency_policy)
@@ -109,7 +109,7 @@ class K8sCronJobTests(BaseTest):
         k8s_cronjob.concurrency_policy = "Forbid"
         k8s_cronjob.starting_deadline_seconds = 10
 
-        if utils.is_reachable(k8s_cronjob.config.api_host):
+        if utils.is_reachable(k8s_cronjob.config):
             k8s_cronjob.create()
             self.assertIsInstance(k8s_cronjob, K8sCronJob)
             self.assertEqual('Forbid', k8s_cronjob.concurrency_policy)
@@ -126,7 +126,7 @@ class K8sCronJobTests(BaseTest):
         k8s_cronjob.concurrency_policy = "Forbid"
         k8s_cronjob.starting_deadline_seconds = 10
 
-        if utils.is_reachable(k8s_cronjob.config.api_host):
+        if utils.is_reachable(k8s_cronjob.config):
             k8s_cronjob.create()
             crons = k8s_cronjob.list()
             for c in crons:

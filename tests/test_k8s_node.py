@@ -152,14 +152,14 @@ class K8sNodeTest(BaseTest):
     def test_get_nonexistent(self):
         name = "yo-node"
         n = utils.create_node(name=name)
-        if utils.is_reachable(n.config.api_host):
+        if utils.is_reachable(n.config):
             with self.assertRaises(NotFoundException):
                 n.get()
 
     def test_get(self):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         n = utils.create_node(name=name)
-        if utils.is_reachable(n.config.api_host):
+        if utils.is_reachable(n.config):
             n.create()
             from_get = n.get()
             self.assertIsInstance(from_get, K8sNode)
@@ -170,7 +170,7 @@ class K8sNodeTest(BaseTest):
     def test_list_without_create(self):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         nodes = utils.create_node(name=name)
-        if utils.is_reachable(nodes.config.api_host):
+        if utils.is_reachable(nodes.config):
             _list = nodes.list()
             for x in _list:
                 self.assertIsInstance(x, K8sNode)
@@ -183,7 +183,7 @@ class K8sNodeTest(BaseTest):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         node = utils.create_node(name=name)
 
-        if utils.is_reachable(node.config.api_host):
+        if utils.is_reachable(node.config):
             node_pattern = re.compile(r'yo-')
             _pre_list = node.list()
             for x in _pre_list:
@@ -209,7 +209,7 @@ class K8sNodeTest(BaseTest):
     def test_create(self):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         node = utils.create_node(name=name)
-        if utils.is_reachable(node.config.api_host):
+        if utils.is_reachable(node.config):
             node.create()
             from_get = node.get()
             self.assertEqual(node, from_get)
@@ -217,7 +217,7 @@ class K8sNodeTest(BaseTest):
     def test_create_already_exists(self):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         node = utils.create_node(name=name)
-        if utils.is_reachable(node.config.api_host):
+        if utils.is_reachable(node.config):
             node.create()
             with self.assertRaises(AlreadyExistsException):
                 node.create()
@@ -227,7 +227,7 @@ class K8sNodeTest(BaseTest):
     def test_update_nonexistent(self):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         node = utils.create_node(name=name)
-        if utils.is_reachable(node.config.api_host):
+        if utils.is_reachable(node.config):
             with self.assertRaises(NotFoundException):
                 node.update()
 
@@ -236,14 +236,14 @@ class K8sNodeTest(BaseTest):
     def test_delete_nonexistent(self):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         node = utils.create_node(name=name)
-        if utils.is_reachable(node.config.api_host):
+        if utils.is_reachable(node.config):
             with self.assertRaises(NotFoundException):
                 node.delete()
 
     def test_delete(self):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         node = utils.create_node(name=name)
-        if utils.is_reachable(node.config.api_host):
+        if utils.is_reachable(node.config):
             node.create()
             from_get = K8sNode.get_by_name(node.config, node.name)
             self.assertIsInstance(from_get, K8sNode)

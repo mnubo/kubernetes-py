@@ -450,7 +450,7 @@ class K8sVolumeTest(BaseTest):
         pod.add_volume(volume)
         pod.add_container(container)
 
-        if utils.is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config):
             pod.create()
             volnames = [x.name for x in pod.volumes]
             self.assertIn(vol_name, volnames)
@@ -478,7 +478,7 @@ class K8sVolumeTest(BaseTest):
         pod.add_volume(volume)
         pod.add_container(container)
 
-        if utils.is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config):
             pod.create()
             volnames = [x.name for x in pod.volumes]
             self.assertIn(vol_name, volnames)
@@ -511,7 +511,7 @@ class K8sVolumeTest(BaseTest):
         pod.add_volume(volume)
         pod.add_container(container)
 
-        if utils.is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config):
             secret.create()
             pod.create()
             volnames = [x.name for x in pod.volumes]
@@ -540,7 +540,7 @@ class K8sVolumeTest(BaseTest):
         pod.add_volume(volume)
         pod.add_container(container)
 
-        if utils.is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config):
             try:
                 pod.create()
                 volnames = [x.name for x in pod.volumes]
@@ -571,7 +571,7 @@ class K8sVolumeTest(BaseTest):
         pod.add_volume(volume)
         pod.add_container(container)
 
-        if utils.is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config):
             try:
                 pod.create()
                 volnames = [x.name for x in pod.volumes]
@@ -604,7 +604,7 @@ class K8sVolumeTest(BaseTest):
         pod.add_volume(volume)
         pod.add_container(container)
 
-        if utils.is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config):
             try:
                 pod.create()
                 volnames = [x.name for x in pod.volumes]
@@ -637,7 +637,7 @@ class K8sVolumeTest(BaseTest):
         pod.add_volume(volume)
         pod.add_container(container)
 
-        if utils.is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config):
             try:
                 pod.create()
                 volnames = [x.name for x in pod.volumes]
@@ -673,7 +673,7 @@ class K8sVolumeTest(BaseTest):
         rc.add_container(container_redis)
         rc.desired_replicas = 1
 
-        if utils.is_reachable(rc.config.api_host):
+        if utils.is_reachable(rc.config):
             rc.create()
             volnames = [x.name for x in rc.volumes]
             self.assertIn(vol_name, volnames)
@@ -708,7 +708,7 @@ class K8sVolumeTest(BaseTest):
         rc.add_container(container_redis)
         rc.desired_replicas = 1
 
-        if utils.is_reachable(rc.config.api_host):
+        if utils.is_reachable(rc.config):
             rc.create()
             volnames = [x.name for x in rc.volumes]
             self.assertIn(vol_name, volnames)
@@ -773,7 +773,7 @@ class K8sVolumeTest(BaseTest):
         rc.add_container(container_redis)
         rc.desired_replicas = 1
 
-        if utils.is_reachable(rc.config.api_host):
+        if utils.is_reachable(rc.config):
             secret.create()
             rc.create()
             volnames = [x.name for x in rc.volumes]
@@ -816,7 +816,7 @@ class K8sVolumeTest(BaseTest):
         rc.add_container(container_redis)
         rc.desired_replicas = 3
 
-        if utils.is_reachable(rc.config.api_host):
+        if utils.is_reachable(rc.config):
             try:
                 rc.create()
                 volnames = [x.name for x in rc.volumes]
@@ -861,7 +861,7 @@ class K8sVolumeTest(BaseTest):
         rc.add_container(container_redis)
         rc.desired_replicas = 3
 
-        if utils.is_reachable(rc.config.api_host):
+        if utils.is_reachable(rc.config):
             try:
                 rc.create()
                 volnames = [x.name for x in rc.volumes]
@@ -901,7 +901,7 @@ class K8sVolumeTest(BaseTest):
         rc.add_container(container_redis)
         rc.desired_replicas = 3
 
-        if utils.is_reachable(rc.config.api_host):
+        if utils.is_reachable(rc.config):
             try:
                 rc.create()
                 volnames = [x.name for x in rc.volumes]
@@ -941,7 +941,7 @@ class K8sVolumeTest(BaseTest):
         rc.add_container(container_redis)
         rc.desired_replicas = 3
 
-        if utils.is_reachable(rc.config.api_host):
+        if utils.is_reachable(rc.config):
             try:
                 rc.create()
                 volnames = [x.name for x in rc.volumes]

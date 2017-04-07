@@ -239,7 +239,7 @@ class K8sServiceTest(BaseTest):
     def test_get_nonexistent(self):
         name = "yoservice"
         svc = utils.create_service(name=name)
-        if utils.is_reachable(svc.config.api_host):
+        if utils.is_reachable(svc.config):
             with self.assertRaises(NotFoundException):
                 svc.get()
 
@@ -247,7 +247,7 @@ class K8sServiceTest(BaseTest):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
-        if utils.is_reachable(svc.config.api_host):
+        if utils.is_reachable(svc.config):
             svc.create()
             from_get = svc.get()
             self.assertIsInstance(from_get, K8sService)
@@ -424,7 +424,7 @@ class K8sServiceTest(BaseTest):
         name = "yoservice"
         svc = utils.create_service(name=name)
         svc.add_port('http', 80, 80, 'TCP')
-        if utils.is_reachable(svc.config.api_host):
+        if utils.is_reachable(svc.config):
             svc.create()
             ip = "192.168.00000.1234345"
             svc.cluster_ip = ip
@@ -611,7 +611,7 @@ class K8sServiceTest(BaseTest):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
-        if utils.is_reachable(svc.config.api_host):
+        if utils.is_reachable(svc.config):
             _list = K8sService.get_by_name(config=svc.config, name=name)
             self.assertIsInstance(_list, list)
             self.assertEqual(0, len(_list))
@@ -620,7 +620,7 @@ class K8sServiceTest(BaseTest):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
-        if utils.is_reachable(svc.config.api_host):
+        if utils.is_reachable(svc.config):
             svc.create()
             _list = K8sService.get_by_name(config=svc.config, name=name)
             self.assertIsInstance(_list, list)
@@ -635,14 +635,14 @@ class K8sServiceTest(BaseTest):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
-        if utils.is_reachable(svc.config.api_host):
+        if utils.is_reachable(svc.config):
             _list = svc.list()
 
     def test_list(self):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
-        if utils.is_reachable(svc.config.api_host):
+        if utils.is_reachable(svc.config):
             svc.create()
             _list = svc.list()
             for x in _list:
@@ -658,7 +658,7 @@ class K8sServiceTest(BaseTest):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
-        if utils.is_reachable(svc.config.api_host):
+        if utils.is_reachable(svc.config):
             svc.create()
             from_get = svc.get()
             self.assertEqual(svc, from_get)
@@ -667,7 +667,7 @@ class K8sServiceTest(BaseTest):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
-        if utils.is_reachable(svc.config.api_host):
+        if utils.is_reachable(svc.config):
             svc.create()
             with self.assertRaises(UnprocessableEntityException):
                 svc.create()
@@ -678,7 +678,7 @@ class K8sServiceTest(BaseTest):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
-        if utils.is_reachable(svc.config.api_host):
+        if utils.is_reachable(svc.config):
             with self.assertRaises(NotFoundException):
                 svc.update()
 
@@ -686,7 +686,7 @@ class K8sServiceTest(BaseTest):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
-        if utils.is_reachable(svc.config.api_host):
+        if utils.is_reachable(svc.config):
             from_create = svc.create()
             from_update = svc.update()
             self.assertEqual(from_create, from_update)
@@ -695,7 +695,7 @@ class K8sServiceTest(BaseTest):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
-        if utils.is_reachable(svc.config.api_host):
+        if utils.is_reachable(svc.config):
             svc.create()
             svc.cluster_ip = "192.168.123.123"
             with self.assertRaises(UnprocessableEntityException):
@@ -706,7 +706,7 @@ class K8sServiceTest(BaseTest):
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
         ip = '192.168.123.123'
-        if utils.is_reachable(svc.config.api_host):
+        if utils.is_reachable(svc.config):
             svc.create()
             svc.external_ips = [ip]
             svc.update()
@@ -764,7 +764,7 @@ class K8sServiceTest(BaseTest):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
-        if utils.is_reachable(svc.config.api_host):
+        if utils.is_reachable(svc.config):
             with self.assertRaises(NotFoundException):
                 svc.delete()
 
@@ -772,7 +772,7 @@ class K8sServiceTest(BaseTest):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
-        if utils.is_reachable(svc.config.api_host):
+        if utils.is_reachable(svc.config):
             svc.create()
             from_get = K8sService.get_by_name(svc.config, svc.name)
             self.assertIsInstance(from_get, list)
@@ -801,7 +801,7 @@ class K8sServiceTest(BaseTest):
             'kubernetes.io/cluster-service': 'true'
         }
 
-        if utils.is_reachable(service.config.api_host):
+        if utils.is_reachable(service.config):
             with self.assertRaises(AlreadyExistsException):
                 service.create()
             service.get()

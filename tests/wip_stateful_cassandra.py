@@ -45,7 +45,7 @@ class StatefulSetCassandraTests(BaseTest):
         k8s_ds = utils.create_daemonset(name="cassandra")
         k8s_ds.model = ds
 
-        if utils.is_reachable(k8s_rc.config.api_host):
+        if utils.is_reachable(k8s_rc.config):
             k8s_service.create()
             k8s_rc.create()
             self.assertIsInstance(k8s_service, K8sService)

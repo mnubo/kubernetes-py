@@ -34,7 +34,7 @@ class StatefulSetNginxTests(BaseTest):
         k8s_sset = K8sStatefulSet(name='sset')
         k8s_svc.model = svc
         k8s_sset.model = sset
-        if utils.is_reachable(k8s_svc.config.api_host):
+        if utils.is_reachable(k8s_svc.config):
             k8s_svc.create()
             k8s_sset.create()
 

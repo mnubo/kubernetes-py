@@ -8,8 +8,9 @@
 
 import os
 import re
-import requests
+import socket
 
+from kubernetes.utils import HttpRequest
 from kubernetes.K8sComponentStatus import K8sComponentStatus
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sContainer import K8sContainer
@@ -18,6 +19,7 @@ from kubernetes.K8sDaemonSet import K8sDaemonSet
 from kubernetes.K8sDeployment import K8sDeployment
 from kubernetes.K8sExceptions import NotFoundException
 from kubernetes.K8sExceptions import VersionMismatchException
+from kubernetes.K8sHorizontalPodAutoscaler import K8sHorizontalPodAutoscaler
 from kubernetes.K8sJob import K8sJob
 from kubernetes.K8sNamespace import K8sNamespace
 from kubernetes.K8sNode import K8sNode
@@ -36,20 +38,34 @@ from kubernetes.K8sStorageClass import K8sStorageClass
 from kubernetes.K8sVolume import K8sVolume
 from kubernetes.K8sVolumeMount import K8sVolumeMount
 
+
 kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
 
 
 # --------------------------------------------------------------------------------- reachability
 
 
-def is_reachable(ip=None):
+def is_reachable(cfg=None):
     try:
-        r = requests.get(ip)
-        if r.status_code == 200:
-            return True
-        return False
+        socket.inet_aton(cfg.api_host)
+        return True
+
     except Exception as err:
-        return False
+        try:
+            req = HttpRequest(
+                host=cfg.api_host,
+                method='GET',
+                auth=cfg.auth,
+                cert=cfg.cert,
+                ca_cert=cfg.ca_cert,
+                ca_cert_data=cfg.ca_cert_data,
+                token=cfg.token
+            )
+            r = req.send()
+            return r['success']
+
+        except Exception as err:
+            return False
 
 
 def assert_server_version(api_host=None, major=None, minor=None, type='exact'):
@@ -313,11 +329,21 @@ def create_storage_class(config=None, name=None):
     return obj
 
 
+def create_hpa(config=None, name=None):
+    if config is None:
+        config = create_config()
+    obj = K8sHorizontalPodAutoscaler(
+        config=config,
+        name=name
+    )
+    return obj
+
+
 # --------------------------------------------------------------------------------- delete
 
 def cleanup_objects():
     config = K8sConfig(kubeconfig=kubeconfig_fallback)
-    if is_reachable(config.api_host):
+    if is_reachable(config):
         cleanup_rc()
         cleanup_deployments()
         cleanup_rs()
@@ -332,7 +358,7 @@ def cleanup_objects():
 
 def cleanup_namespaces():
     ref = create_namespace(name="throwaway")
-    if is_reachable(ref.config.api_host):
+    if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 2:
             for ns in _list:
@@ -346,7 +372,7 @@ def cleanup_namespaces():
 
 def cleanup_nodes():
     ref = create_node(name="throwaway")
-    if is_reachable(ref.config.api_host):
+    if is_reachable(ref.config):
         node_pattern = re.compile(r'yo-')
         _list = ref.list()
         _filtered = list(filter(lambda x: node_pattern.match(x.name) is not None, _list))
@@ -362,7 +388,7 @@ def cleanup_nodes():
 
 def cleanup_pods():
     ref = create_pod(name="throwaway")
-    if is_reachable(ref.config.api_host):
+    if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 0:
             for p in _list:
@@ -375,7 +401,7 @@ def cleanup_pods():
 
 def cleanup_rc():
     ref = create_rc(name="throwaway")
-    if is_reachable(ref.config.api_host):
+    if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 0:
             for rc in _list:
@@ -388,7 +414,7 @@ def cleanup_rc():
 
 def cleanup_secrets():
     ref = create_secret(name="throwaway")
-    if is_reachable(ref.config.api_host):
+    if is_reachable(ref.config):
         try:
             _list = ref.list()
             while len(_list) > 0:
@@ -409,7 +435,7 @@ def cleanup_secrets():
 
 def cleanup_services():
     ref = create_service(name="throwaway")
-    if is_reachable(ref.config.api_host):
+    if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 1:
             for svc in _list:
@@ -423,7 +449,7 @@ def cleanup_services():
 
 def cleanup_rs():
     ref = create_rs(name="throwaway")
-    if is_reachable(ref.config.api_host):
+    if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 0:
             for rs in _list:
@@ -436,12 +462,12 @@ def cleanup_rs():
 
 def cleanup_deployments():
     ref = create_deployment(name="throwaway")
-    if is_reachable(ref.config.api_host):
+    if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 0:
             for d in _list:
                 try:
-                    d.delete()
+                    d.delete(orphan=False)
                 except NotFoundException:
                     continue
             _list = ref.list()
@@ -449,7 +475,7 @@ def cleanup_deployments():
 
 def cleanup_pv():
     ref = create_pv(name="throwaway", type="hostPath")
-    if is_reachable(ref.config.api_host):
+    if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 0:
             for v in _list:
@@ -462,7 +488,7 @@ def cleanup_pv():
 
 def cleanup_pvc():
     ref = create_pvc(name="throwaway")
-    if is_reachable(ref.config.api_host):
+    if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 0:
             for c in _list:
@@ -475,7 +501,7 @@ def cleanup_pvc():
 
 def cleanup_jobs():
     ref = create_job(name="throwaway")
-    if is_reachable(ref.config.api_host):
+    if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 0:
             for j in _list:
@@ -488,7 +514,7 @@ def cleanup_jobs():
 
 def cleanup_cronjobs():
     ref = create_cronjob(name="throwaway")
-    if is_reachable(ref.config.api_host):
+    if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 0:
             for job in _list:
@@ -501,7 +527,7 @@ def cleanup_cronjobs():
 
 def cleanup_ds():
     ref = create_daemonset(name="throwaway")
-    if is_reachable(ref.config.api_host):
+    if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 0:
             for d in _list:
@@ -514,7 +540,7 @@ def cleanup_ds():
 
 def cleanup_petsets():
     ref = create_petset(name="throwaway")
-    if is_reachable(ref.config.api_host):
+    if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 0:
             for p in _list:
@@ -528,7 +554,7 @@ def cleanup_petsets():
 
 def cleanup_stateful_sets():
     ref = create_stateful_set(name="throwaway")
-    if is_reachable(ref.config.api_host):
+    if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 0:
             for p in _list:
@@ -542,7 +568,7 @@ def cleanup_stateful_sets():
 
 def cleanup_service_accounts():
     ref = create_service_account(name="throwaway")
-    if is_reachable(ref.config.api_host):
+    if is_reachable(ref.config):
         _list = ref.list()
         try:
             while len(_list) > 0:
@@ -562,7 +588,20 @@ def cleanup_service_accounts():
 
 def cleanup_storage_class():
     ref = create_storage_class(name="throwaway")
-    if is_reachable(ref.config.api_host):
+    if is_reachable(ref.config):
+        _list = ref.list()
+        while len(_list) > 0:
+            for p in _list:
+                try:
+                    p.delete()
+                except NotFoundException:
+                    continue
+            _list = ref.list()
+
+
+def cleanup_hpas():
+    ref = create_hpa(name="throwaway")
+    if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 0:
             for p in _list:
@@ -1396,3 +1435,116 @@ def component_status_scheduler():
             }
         ]
     }
+
+
+# --------------------------------------------------------------------------------- horizontal pod autoscaler
+
+
+def hpa_example_service():
+    return {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+            "name": "php-apache",
+            "namespace": "default",
+        },
+        "spec": {
+            "clusterIP": "10.3.255.25",
+            "ports": [
+                {
+                    "port": 80,
+                    "protocol": "TCP",
+                    "targetPort": 80
+                }
+            ],
+            "selector": {
+                "run": "php-apache"
+            },
+            "sessionAffinity": "None",
+            "type": "ClusterIP"
+        },
+        "status": {
+            "loadBalancer": {}
+        }
+    }
+
+
+def hpa_example_deployment():
+    return {
+        "apiVersion": "extensions/v1beta1",
+        "kind": "Deployment",
+        "metadata": {
+            "annotations": {
+                "deployment.kubernetes.io/revision": "1"
+            },
+            "labels": {
+                "run": "php-apache"
+            },
+            "name": "php-apache",
+            "namespace": "default",
+        },
+        "spec": {
+            "replicas": 1,
+            "selector": {
+                "matchLabels": {
+                    "run": "php-apache"
+                }
+            },
+            "strategy": {
+                "rollingUpdate": {
+                    "maxSurge": 1,
+                    "maxUnavailable": 1
+                },
+                "type": "RollingUpdate"
+            },
+            "template": {
+                "metadata": {
+                    "labels": {
+                        "run": "php-apache"
+                    }
+                },
+                "spec": {
+                    "containers": [{
+                        "image": "gcr.io/google_containers/hpa-example",
+                        "imagePullPolicy": "Always",
+                        "name": "php-apache",
+                        "ports": [{
+                            "containerPort": 80,
+                            "protocol": "TCP"
+                        }],
+                        "resources": {
+                            "requests": {
+                                "cpu": "200m"
+                            },
+                        },
+                    }],
+                    "dnsPolicy": "ClusterFirst",
+                    "restartPolicy": "Always",
+                    "securityContext": {},
+                    "terminationGracePeriodSeconds": 30
+                }
+            }
+        },
+    }
+
+
+def hpa_example_autoscaler():
+    return {
+        "apiVersion": "autoscaling/v1",
+        "kind": "HorizontalPodAutoscaler",
+        "metadata": {
+            "name": "php-apache",
+            "namespace": "default",
+        },
+        "spec": {
+            "maxReplicas": 10,
+            "minReplicas": 1,
+            "scaleTargetRef": {
+                "apiVersion": "extensions/v1beta1",
+                "kind": "Deployment",
+                "name": "php-apache"
+            },
+            "targetCPUUtilizationPercentage": 50
+        },
+    }
+

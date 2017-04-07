@@ -152,14 +152,14 @@ class K8sNamespaceTest(BaseTest):
     def test_get_nonexistent(self):
         name = "yonamespace"
         ns = utils.create_namespace(name=name)
-        if utils.is_reachable(ns.config.api_host):
+        if utils.is_reachable(ns.config):
             with self.assertRaises(NotFoundException):
                 ns.get()
 
     def test_get(self):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         ns = utils.create_namespace(name=name)
-        if utils.is_reachable(ns.config.api_host):
+        if utils.is_reachable(ns.config):
             ns.create()
             from_get = ns.get()
             self.assertIsInstance(from_get, K8sNamespace)
@@ -317,7 +317,7 @@ class K8sNamespaceTest(BaseTest):
     # def test_get_by_name_nonexistent(self):
     #     name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
     #     ns = utils.create_namespace(name=name)
-    #     if utils.is_reachable(ns.config.api_host):
+    #     if utils.is_reachable(ns.config):
     #         _list = K8sNamespace.get_by_name(config=ns.config, name=name)
     #         self.assertIsInstance(_list, list)
     #         self.assertEqual(0, len(_list))
@@ -325,7 +325,7 @@ class K8sNamespaceTest(BaseTest):
     # def test_get_by_name(self):
     #     name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
     #     ns = utils.create_namespace(name=name)
-    #     if utils.is_reachable(ns.config.api_host):
+    #     if utils.is_reachable(ns.config):
     #         ns.create()
     #         _list = K8sNamespace.get_by_name(config=ns.config, name=name)
     #         self.assertIsInstance(_list, list)
@@ -339,7 +339,7 @@ class K8sNamespaceTest(BaseTest):
     def test_list_without_create(self):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         ns = utils.create_namespace(name=name)
-        if utils.is_reachable(ns.config.api_host):
+        if utils.is_reachable(ns.config):
             _list = ns.list()
             for x in _list:
                 self.assertIsInstance(x, K8sNamespace)
@@ -349,7 +349,7 @@ class K8sNamespaceTest(BaseTest):
     def test_list(self):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         ns = utils.create_namespace(name=name)
-        if utils.is_reachable(ns.config.api_host):
+        if utils.is_reachable(ns.config):
             ns.create()
             _list = ns.list()
             for x in _list:
@@ -364,7 +364,7 @@ class K8sNamespaceTest(BaseTest):
     def test_create(self):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         ns = utils.create_namespace(name=name)
-        if utils.is_reachable(ns.config.api_host):
+        if utils.is_reachable(ns.config):
             ns.create()
             from_get = ns.get()
             self.assertEqual(ns, from_get)
@@ -372,7 +372,7 @@ class K8sNamespaceTest(BaseTest):
     def test_create_already_exists(self):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         ns = utils.create_namespace(name=name)
-        if utils.is_reachable(ns.config.api_host):
+        if utils.is_reachable(ns.config):
             ns.create()
             with self.assertRaises(AlreadyExistsException):
                 ns.create()
@@ -382,7 +382,7 @@ class K8sNamespaceTest(BaseTest):
     def test_update_nonexistent(self):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         ns = utils.create_namespace(name=name)
-        if utils.is_reachable(ns.config.api_host):
+        if utils.is_reachable(ns.config):
             with self.assertRaises(NotFoundException):
                 ns.update()
 
@@ -391,14 +391,14 @@ class K8sNamespaceTest(BaseTest):
     def test_delete_nonexistent(self):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         ns = utils.create_namespace(name=name)
-        if utils.is_reachable(ns.config.api_host):
+        if utils.is_reachable(ns.config):
             with self.assertRaises(NotFoundException):
                 ns.delete()
 
     def test_delete(self):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         ns = utils.create_namespace(name=name)
-        if utils.is_reachable(ns.config.api_host):
+        if utils.is_reachable(ns.config):
             ns.create()
             from_get = K8sNamespace.get_by_name(ns.config, ns.name)
             self.assertIsInstance(from_get, K8sNamespace)

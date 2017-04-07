@@ -10,7 +10,7 @@ import copy
 import importlib
 import socket
 from six import string_types
-import requests
+from kubernetes.utils.HttpRequest import HttpRequest
 
 from dateutil.parser import parse
 
@@ -67,14 +67,27 @@ def is_valid_date_time(target=None):
     return rc
 
 
-def is_reachable(ip=None):
-    if not is_valid_string(ip):
-        return False
+def is_reachable(cfg=None):
     try:
-        socket.inet_aton(ip)
+        socket.inet_aton(cfg.api_host)
         return True
-    except socket.error:
-        return False
+
+    except Exception as err:
+        try:
+            req = HttpRequest(
+                host=cfg.api_host,
+                method='GET',
+                auth=cfg.auth,
+                cert=cfg.cert,
+                ca_cert=cfg.ca_cert,
+                ca_cert_data=cfg.ca_cert_data,
+                token=cfg.token
+            )
+            r = req.send()
+            return r['success']
+
+        except Exception as err:
+            return False
 
 
 def filter_model(model=None):
