@@ -8,13 +8,17 @@
 
 import copy
 import importlib
+import re
 import socket
-from six import string_types
-from kubernetes.utils.HttpRequest import HttpRequest
 
 from dateutil.parser import parse
+from six import string_types
 
 from kubernetes.K8sExceptions import NotFoundException
+from kubernetes.utils.HttpRequest import HttpRequest
+
+RE_VALID_IP = re.compile(
+    r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')
 
 
 def is_valid_string(target=None):
@@ -65,6 +69,13 @@ def is_valid_date_time(target=None):
             rc = False
             pass
     return rc
+
+
+def is_valid_ip(ip=None):
+    match = re.match(RE_VALID_IP, ip)
+    if match is not None:
+        return True
+    return False
 
 
 def is_reachable(cfg=None):

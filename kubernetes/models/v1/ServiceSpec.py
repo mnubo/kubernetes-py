@@ -7,7 +7,7 @@
 #
 
 from kubernetes.models.v1.ServicePort import ServicePort
-from kubernetes.utils import is_valid_list, is_valid_string, is_valid_dict, is_reachable
+from kubernetes.utils import *
 
 
 class ServiceSpec(object):
@@ -82,7 +82,7 @@ class ServiceSpec(object):
         if not is_valid_list(ips, str):
             raise SyntaxError(msg)
         for ip in ips:
-            if not is_reachable(ip):
+            if not is_valid_ip(ip):
                 raise SyntaxError(msg)
         self._external_ips = ips
 
@@ -106,7 +106,7 @@ class ServiceSpec(object):
 
     @load_balancer_ip.setter
     def load_balancer_ip(self, ip=None):
-        if not is_valid_string(ip) or not is_reachable(ip):
+        if not is_valid_string(ip) or not is_valid_ip(ip):
             raise SyntaxError('ServiceSpec: load_balancer_ip: [ {0} ] is invalid.'.format(ip))
         self._load_balancer_ip = ip
 
