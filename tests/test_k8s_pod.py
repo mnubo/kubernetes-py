@@ -237,7 +237,7 @@ class K8sPodTest(BaseTest):
     #     obj = utils.create_pod(name=name)
     #     config = utils.create_config()
     #     vol = K8sVolume(config=config, name=name, mount_path="/var/test", type='hostPath')
-    #     if utils.is_reachable(config.api_host):
+    #     if utils.is_reachable(config):
     #         with self.assertRaises(UnprocessableEntityException):
     #             obj.add_volume(vol)
     #             obj.create()
@@ -364,7 +364,7 @@ class K8sPodTest(BaseTest):
     def test_get_nonexistent(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-        if utils.is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config):
             with self.assertRaises(NotFoundException):
                 pod.get()
 
@@ -374,7 +374,7 @@ class K8sPodTest(BaseTest):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
         pod.add_container(container)
-        if utils.is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config):
             from_create = pod.create()
             from_get = pod.get()
             self.assertIsInstance(from_create, K8sPod)
@@ -577,7 +577,7 @@ class K8sPodTest(BaseTest):
     def test_get_pod_status_nonexistent(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-        if utils.is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config):
             with self.assertRaises(NotFoundException):
                 pod.status
 
@@ -587,7 +587,7 @@ class K8sPodTest(BaseTest):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
         pod.add_container(container)
-        if utils.is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config):
             p = pod.create()
             result = p.status
             self.assertIsInstance(result, PodStatus)
@@ -599,7 +599,7 @@ class K8sPodTest(BaseTest):
     def test_is_ready_nonexistent(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-        if utils.is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config):
             with self.assertRaises(NotFoundException):
                 pod.is_ready()
                 self.fail("Should not fail.")
@@ -610,7 +610,7 @@ class K8sPodTest(BaseTest):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
         pod.add_container(container)
-        if utils.is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config):
             p = pod.create()
             self.assertTrue(p.is_ready())
 
@@ -839,7 +839,7 @@ class K8sPodTest(BaseTest):
     def test_get_by_name_nonexistent(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
-        if utils.is_reachable(config.api_host):
+        if utils.is_reachable(config):
             pods = K8sPod.get_by_name(config=config, name=name)
             self.assertIsInstance(pods, list)
             self.assertEqual(0, len(pods))
@@ -850,7 +850,7 @@ class K8sPodTest(BaseTest):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
         pod.add_container(container)
-        if utils.is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config):
             pod.create()
             pods = K8sPod.get_by_name(config=pod.config, name=name)
             self.assertIsInstance(pods, list)
@@ -872,7 +872,7 @@ class K8sPodTest(BaseTest):
     def test_get_by_labels_nonexistent(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
-        if utils.is_reachable(config.api_host):
+        if utils.is_reachable(config):
             pods = K8sPod.get_by_labels(config=config, labels={'name': name})
             self.assertIsInstance(pods, list)
             self.assertEqual(0, len(pods))
@@ -883,7 +883,7 @@ class K8sPodTest(BaseTest):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
         pod.add_container(container)
-        if utils.is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config):
             pod.create()
             pods = K8sPod.get_by_labels(config=pod.config, labels={'name': name})
             self.assertIsInstance(pods, list)
@@ -895,7 +895,7 @@ class K8sPodTest(BaseTest):
     def test_create_without_containers(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-        if utils.is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config):
             with self.assertRaises(UnprocessableEntityException):
                 pod.create()
 
@@ -905,7 +905,7 @@ class K8sPodTest(BaseTest):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
         pod.add_container(c)
-        if utils.is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config):
             with self.assertRaises(AlreadyExistsException):
                 result = pod.create()
                 self.assertIsInstance(result, K8sPod)
@@ -916,7 +916,7 @@ class K8sPodTest(BaseTest):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         pods = []
         count = 3
-        if utils.is_reachable(config.api_host):
+        if utils.is_reachable(config):
             name = "yocontainer"
             container = utils.create_container(name=name)
             for i in range(0, count):
@@ -936,7 +936,7 @@ class K8sPodTest(BaseTest):
         pod = utils.create_pod(name=name)
         container = utils.create_container(name=name)
         pod.add_container(container)
-        if utils.is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config):
             pod.create()
             _list = pod.list()
             for x in _list:
@@ -948,7 +948,7 @@ class K8sPodTest(BaseTest):
         config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
         pods = []
         count = 3
-        if utils.is_reachable(config.api_host):
+        if utils.is_reachable(config):
             for i in range(0, count):
                 name = "yopod-{0}".format(str(uuid.uuid4()))
                 pod = utils.create_pod(config, name)
@@ -964,7 +964,7 @@ class K8sPodTest(BaseTest):
     def test_update_nonexistent(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-        if utils.is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config):
             with self.assertRaises(NotFoundException):
                 pod.update()
 
@@ -975,7 +975,7 @@ class K8sPodTest(BaseTest):
         name2 = "yopod2"
         pod = utils.create_pod(name=name1)
         pod.add_container(container)
-        if utils.is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config):
             pod.create()
             result = K8sPod.get_by_name(config=pod.config, name=name1)
             self.assertIsInstance(result, list)
@@ -992,7 +992,7 @@ class K8sPodTest(BaseTest):
         nspace = "yonamespace"
         pod1 = utils.create_pod(name=name)
         pod1.add_container(container)
-        if utils.is_reachable(pod1.config.api_host):
+        if utils.is_reachable(pod1.config):
             pod1.create()
             result = K8sPod.get_by_name(config=pod1.config, name=name)
             self.assertIsInstance(result, list)
@@ -1011,7 +1011,7 @@ class K8sPodTest(BaseTest):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
         pod.add_container(container)
-        if utils.is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config):
             pod.create()
             labels = pod.labels
             labels['yomama'] = 'sofat'
@@ -1030,7 +1030,7 @@ class K8sPodTest(BaseTest):
         pod_name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=pod_name)
         pod.add_container(container)
-        if utils.is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config):
             pod.create()
             container = utils.create_container(name=cont_names[1])
             pod.add_container(container)
@@ -1050,7 +1050,7 @@ class K8sPodTest(BaseTest):
     def test_delete_nonexistent(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
-        if utils.is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config):
             with self.assertRaises(NotFoundException):
                 pod.delete()
 
@@ -1060,7 +1060,7 @@ class K8sPodTest(BaseTest):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = utils.create_pod(name=name)
         pod.add_container(container)
-        if utils.is_reachable(pod.config.api_host):
+        if utils.is_reachable(pod.config):
             pod.create()
             utils.cleanup_pods()
             result = pod.list()

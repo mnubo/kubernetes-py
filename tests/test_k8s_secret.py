@@ -142,7 +142,7 @@ class K8sSecretTest(BaseTest):
     def test_get_doesnt_exist(self):
         name = "yosecret"
         secret = utils.create_secret(name=name)
-        if utils.is_reachable(secret.config.api_host):
+        if utils.is_reachable(secret.config):
             try:
                 secret.get()
                 self.fail("Should not fail.")
@@ -152,7 +152,7 @@ class K8sSecretTest(BaseTest):
     def test_get(self):
         name = "yosecret-{0}".format(str(uuid.uuid4()))
         secret = utils.create_secret(name=name)
-        if utils.is_reachable(secret.config.api_host):
+        if utils.is_reachable(secret.config):
             from_create = secret.create()
             self.assertIsInstance(from_create, K8sSecret)
             self.assertEqual(from_create.name, name)
@@ -303,7 +303,7 @@ class K8sSecretTest(BaseTest):
     def test_create(self):
         name = "yosecret-{0}".format(str(uuid.uuid4()))
         secret = utils.create_secret(name=name)
-        if utils.is_reachable(secret.config.api_host):
+        if utils.is_reachable(secret.config):
             secret.create()
             _list = secret.list()
             self.assertEqual(2, len(_list))  # service-account-token + 1
@@ -311,7 +311,7 @@ class K8sSecretTest(BaseTest):
     def test_create_already_exists(self):
         name = "yosecret-{0}".format(str(uuid.uuid4()))
         secret = utils.create_secret(name=name)
-        if utils.is_reachable(secret.config.api_host):
+        if utils.is_reachable(secret.config):
             secret.create()
             try:
                 secret.create()
@@ -324,7 +324,7 @@ class K8sSecretTest(BaseTest):
     def test_list_without_create(self):
         name = "yosecret-{0}".format(str(uuid.uuid4()))
         secret = utils.create_secret(name=name)
-        if utils.is_reachable(secret.config.api_host):
+        if utils.is_reachable(secret.config):
             _list = secret.list()
             self.assertGreaterEqual(1, len(_list))  # service-account-token on GCE
             for x in _list:
@@ -333,7 +333,7 @@ class K8sSecretTest(BaseTest):
     def test_list(self):
         count = 10
         config = utils.create_config()
-        if utils.is_reachable(config.api_host):
+        if utils.is_reachable(config):
             for i in range(0, count):
                 name = "yosecret-{0}".format(str(uuid.uuid4()))
                 secret = utils.create_secret(name=name)
@@ -349,7 +349,7 @@ class K8sSecretTest(BaseTest):
     def test_update_nonexistent(self):
         name = "yosecret-{0}".format(str(uuid.uuid4()))
         secret = utils.create_secret(name=name)
-        if utils.is_reachable(secret.config.api_host):
+        if utils.is_reachable(secret.config):
             try:
                 secret.update()
                 self.fail("Should not fail.")
@@ -361,7 +361,7 @@ class K8sSecretTest(BaseTest):
         secret = utils.create_secret(name=name)
         k = "yokey"
         v = "yovalue"
-        if utils.is_reachable(secret.config.api_host):
+        if utils.is_reachable(secret.config):
             secret.create()
             secret.data = {k: v}
             secret.update()
@@ -375,7 +375,7 @@ class K8sSecretTest(BaseTest):
     def test_delete_nonexistent(self):
         name = "yosecret-{0}".format(str(uuid.uuid4()))
         secret = utils.create_secret(name=name)
-        if utils.is_reachable(secret.config.api_host):
+        if utils.is_reachable(secret.config):
             try:
                 secret.delete()
                 self.fail("Should not fail.")
@@ -385,7 +385,7 @@ class K8sSecretTest(BaseTest):
     def test_delete(self):
         name = "yosecret-{0}".format(str(uuid.uuid4()))
         secret = utils.create_secret(name=name)
-        if utils.is_reachable(secret.config.api_host):
+        if utils.is_reachable(secret.config):
             _list = secret.list()
             count_before_create = len(_list)
             secret.create()
@@ -407,7 +407,7 @@ class K8sSecretTest(BaseTest):
         self.assertEqual('kubernetes.io/.dockerconfigjson', secret.type)
         self.assertIn('.dockerconfigjson', secret.data)
         self.assertEqual(data, secret.dockerconfigjson)
-        if utils.is_reachable(secret.config.api_host):
+        if utils.is_reachable(secret.config):
             s = secret.create()
             self.assertIsInstance(s, K8sSecret)
 
@@ -421,7 +421,7 @@ class K8sSecretTest(BaseTest):
         self.assertEqual('kubernetes.io/.dockerconfigjson', secret.type)
         self.assertIn('.dockerconfigjson', secret.data)
         self.assertEqual(data, secret.dockerconfigjson)
-        if utils.is_reachable(secret.config.api_host):
+        if utils.is_reachable(secret.config):
             try:
                 secret.delete()
             except NotFoundException:
@@ -433,7 +433,7 @@ class K8sSecretTest(BaseTest):
 
     def test_create_service_account_api_token(self):
         sa = utils.create_service_account(name='build-robot')
-        if utils.is_reachable(sa.config.api_host):
+        if utils.is_reachable(sa.config):
             sa.create()
             secret = K8sSecret.create_service_account_api_token(
                 config=sa.config,
@@ -451,7 +451,7 @@ class K8sSecretTest(BaseTest):
         secret_data = {"test": "test"}
         secret = utils.create_secret(name=name)
         secret.data = secret_data
-        if utils.is_reachable(secret.config.api_host):
+        if utils.is_reachable(secret.config):
             secret.create()
             secret.get()
             self.assertIsInstance(secret, K8sSecret)

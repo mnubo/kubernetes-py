@@ -37,7 +37,7 @@ class K8sStorageClassTests(BaseTest):
         k8s_sc = utils.create_storage_class(name='sc')
         k8s_sc.model = sc
 
-        if utils.is_reachable(k8s_sc.config.api_host):
+        if utils.is_reachable(k8s_sc.config):
             k8s_sc.create()
             from_get = k8s_sc.get()
             self.assertIsInstance(from_get, K8sStorageClass)

@@ -103,7 +103,7 @@ class K8sPersistentVolumeClaimTest(BaseTest):
     def test_api_create_timeout(self):
         name = "yopvc-{}".format(str(uuid.uuid4()))
         claim = utils.create_pvc(name=name)
-        if utils.is_reachable(claim.config.api_host):
+        if utils.is_reachable(claim.config):
             with self.assertRaises(TimedOutException):
                 claim.create()
 
@@ -132,7 +132,7 @@ class K8sPersistentVolumeClaimTest(BaseTest):
         pod.add_volume(vol)
         pod.add_container(container)
 
-        if utils.is_reachable(pvc.config.api_host):
+        if utils.is_reachable(pvc.config):
             try:
                 pv.create()
                 pvc.create()
@@ -167,7 +167,7 @@ class K8sPersistentVolumeClaimTest(BaseTest):
         pod.add_volume(vol)
         pod.add_container(container)
 
-        if utils.is_reachable(pvc.config.api_host):
+        if utils.is_reachable(pvc.config):
             try:
                 pv.create()
                 pvc.create()
@@ -202,7 +202,7 @@ class K8sPersistentVolumeClaimTest(BaseTest):
         pod.add_volume(vol)
         pod.add_container(container)
 
-        if utils.is_reachable(pvc.config.api_host):
+        if utils.is_reachable(pvc.config):
             try:
                 pv.create()
                 pvc.create()

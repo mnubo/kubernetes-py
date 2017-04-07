@@ -15,16 +15,19 @@ class BaseUrls(object):
 
     default_api_version = 'v1'
     default_apps_version = 'v1alpha1'
+    default_autoscaling_version = 'v1'
     default_batch_version = 'v1'
     default_extensions_version = 'v1beta1'
     default_cron_version = 'v2alpha1'
 
-    def __init__(self, namespace='default', api=None, apps=None, extensions=None, batch=None, cron=None):
+    def __init__(self, namespace='default', api=None, apps=None, autoscaling=None, extensions=None, batch=None, cron=None):
 
         if api is None:
             api = self.default_api_version
         if apps is None:
             apps = self.default_apps_version
+        if autoscaling is None:
+            autoscaling = self.default_autoscaling_version
         if batch is None:
             batch = self.default_batch_version
         if extensions is None:
@@ -46,6 +49,9 @@ class BaseUrls(object):
         self.urls['ServiceAccount'] = '/api/{0}/namespaces/{1}/serviceaccounts'.format(api, namespace)
         self.urls['Secret'] = '/api/{0}/namespaces/{1}/secrets'.format(api, namespace)
         self.urls['StorageClass'] = '/apis/storage.k8s.io/v1beta1/storageclasses'
+
+        # autoscaling
+        self.urls['HorizontalPodAutoscaler'] = '/apis/autoscaling/{0}/namespaces/{1}/horizontalpodautoscalers'.format(autoscaling, namespace)
 
         # apps
         self.urls['PetSet'] = '/apis/apps/v1alpha1/namespaces/{}/petsets'.format(namespace)

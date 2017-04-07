@@ -23,7 +23,7 @@ class K8sReplicaSetTests(BaseTest):
     def test_delete_nonexistent(self):
         name = "yorc-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=name)
-        if utils.is_reachable(dep.config.api_host):
+        if utils.is_reachable(dep.config):
             try:
                 dep.delete()
                 self.fail("Should not fail.")
@@ -34,7 +34,7 @@ class K8sReplicaSetTests(BaseTest):
         name = "yoname"
         rs = utils.create_rs(name=name)
         config = utils.create_config()
-        if utils.is_reachable(config.api_host):
+        if utils.is_reachable(config):
             utils.cleanup_rs()
             result = rs.list()
             self.assertIsInstance(result, list)

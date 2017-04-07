@@ -51,7 +51,7 @@ class K8sUpgradeTest(BaseTest):
         rc.add_container(container)
 
         # create the API resources
-        if utils.is_reachable(rc.config.api_host):
+        if utils.is_reachable(rc.config):
             svc.create()
             rc.create()
             pass

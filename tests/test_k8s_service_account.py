@@ -73,7 +73,7 @@ class K8sServiceAccountTests(BaseTest):
     def test_create(self):
         name = "mnubo.com-sa-{0}".format(str(uuid.uuid4().hex[:5]))
         acct = utils.create_service_account(name=name)
-        if utils.is_reachable(acct.config.api_host):
+        if utils.is_reachable(acct.config):
             acct.create()
             from_get = acct.get()
             self.assertEqual(acct, from_get)
@@ -83,7 +83,7 @@ class K8sServiceAccountTests(BaseTest):
     def test_list(self):
         name = "mnubo.com-sa-{0}".format(str(uuid.uuid4().hex[:5]))
         acct = utils.create_service_account(name=name)
-        if utils.is_reachable(acct.config.api_host):
+        if utils.is_reachable(acct.config):
             acct.create()
             _list = acct.list()
             for x in _list:
@@ -94,7 +94,7 @@ class K8sServiceAccountTests(BaseTest):
     def test_add_api_token(self):
         name = "mnubo.com-sa-{0}".format(str(uuid.uuid4().hex[:5]))
         acct = utils.create_service_account(name=name)
-        if utils.is_reachable(acct.config.api_host):
+        if utils.is_reachable(acct.config):
             acct.create()
             acct.add_api_token()
             secrets = K8sSecret.api_tokens_for_service_account(config=acct.config, name=acct.name)
@@ -106,7 +106,7 @@ class K8sServiceAccountTests(BaseTest):
         name = "mnubo.com-sa-{0}".format(str(uuid.uuid4().hex[:5]))
         acct = utils.create_service_account(name=name)
         data = {"auths": {"repo:port": {"auth": "authstring", "email": "you@company.com"}}}
-        if utils.is_reachable(acct.config.api_host):
+        if utils.is_reachable(acct.config):
             acct.create()
             secret = K8sSecret.create_image_pull_secret(config=acct.config, name=acct.name, data=data)
             acct.add_image_pull_secret(secret)

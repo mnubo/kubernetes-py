@@ -60,7 +60,7 @@ class K8sDeploymentTests(BaseTest):
     def test_create_no_args(self):
         name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=name)
-        if utils.is_reachable(dep.config.api_host):
+        if utils.is_reachable(dep.config):
             with self.assertRaises(UnprocessableEntityException):
                 dep.create()
 
@@ -71,7 +71,7 @@ class K8sDeploymentTests(BaseTest):
         cont_image = "redis:3.2.3"
         cont = utils.create_container(name=cont_name, image=cont_image)
         dep.add_container(container=cont)
-        if utils.is_reachable(dep.config.api_host):
+        if utils.is_reachable(dep.config):
             d = dep.create()
             self.assertIsNotNone(d)
             self.assertIsInstance(d, K8sDeployment)
@@ -90,7 +90,7 @@ class K8sDeploymentTests(BaseTest):
         cont = utils.create_container(name=cont_name, image=cont_image)
         dep.add_container(container=cont)
         dep.desired_replicas = 1
-        if utils.is_reachable(dep.config.api_host):
+        if utils.is_reachable(dep.config):
             d = dep.create()
             self.assertIsNotNone(d)
             self.assertIsInstance(d, K8sDeployment)
@@ -107,7 +107,7 @@ class K8sDeploymentTests(BaseTest):
         cont = utils.create_container(name=cont_name, image=cont_image)
         dep.add_container(container=cont)
         dep.desired_replicas = 3
-        if utils.is_reachable(dep.config.api_host):
+        if utils.is_reachable(dep.config):
             d = dep.create()
             self.assertIsNotNone(d)
             self.assertIsInstance(d, K8sDeployment)
@@ -124,7 +124,7 @@ class K8sDeploymentTests(BaseTest):
         cont = utils.create_container(name=cont_name, image=cont_image)
         dep.add_container(container=cont)
         dep.desired_replicas = 1
-        if utils.is_reachable(dep.config.api_host):
+        if utils.is_reachable(dep.config):
             dep.create()
             with self.assertRaises(AlreadyExistsException):
                 dep.create()
@@ -139,7 +139,7 @@ class K8sDeploymentTests(BaseTest):
         cont = utils.create_container(name=cont_name, image=cont_image)
         dep.add_container(container=cont)
 
-        if utils.is_reachable(dep.config.api_host):
+        if utils.is_reachable(dep.config):
             d = dep.create()
             objs = dep.list()
             for x in objs:
@@ -153,7 +153,7 @@ class K8sDeploymentTests(BaseTest):
         count = 3
         objs = []
 
-        if utils.is_reachable(config.api_host):
+        if utils.is_reachable(config):
             for i in range(0, count):
                 name = "yodep-{0}".format(str(uuid.uuid4()))
                 dep = utils.create_deployment(config, name)
@@ -171,7 +171,7 @@ class K8sDeploymentTests(BaseTest):
     def test_update_nonexistent(self):
         name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=name)
-        if utils.is_reachable(dep.config.api_host):
+        if utils.is_reachable(dep.config):
             with self.assertRaises(NotFoundException):
                 dep.update()
 
@@ -182,7 +182,7 @@ class K8sDeploymentTests(BaseTest):
         name2 = "yodep2"
         dep = utils.create_deployment(name=name1)
         dep.add_container(container)
-        if utils.is_reachable(dep.config.api_host):
+        if utils.is_reachable(dep.config):
             dep.create()
             dep.name = name2
             with self.assertRaises(NotFoundException):
@@ -195,7 +195,7 @@ class K8sDeploymentTests(BaseTest):
         nspace = "yonamespace"
         dep = utils.create_deployment(name=name)
         dep.add_container(container)
-        if utils.is_reachable(dep.config.api_host):
+        if utils.is_reachable(dep.config):
             dep.create()
             dep.namespace = nspace
             with self.assertRaises(BadRequestException):
@@ -210,7 +210,7 @@ class K8sDeploymentTests(BaseTest):
         dep = utils.create_deployment(name=dep_name)
         dep.add_container(container)
         dep.desired_replicas = 3
-        if utils.is_reachable(dep.config.api_host):
+        if utils.is_reachable(dep.config):
             dep.create()
             self.assertEqual(image1, dep.containers[0].image)
             dep.container_image = (name, image2)
@@ -227,7 +227,7 @@ class K8sDeploymentTests(BaseTest):
         dep = utils.create_deployment(name=dep_name)
         dep.add_container(container)
         dep.desired_replicas = 3
-        if utils.is_reachable(dep.config.api_host):
+        if utils.is_reachable(dep.config):
             dep.create()
             labels = dep.labels
             labels['newkey'] = 'newvalue'
@@ -243,7 +243,7 @@ class K8sDeploymentTests(BaseTest):
         dep = utils.create_deployment(name=dep_name)
         dep.add_container(container)
         dep.desired_replicas = 3
-        if utils.is_reachable(dep.config.api_host):
+        if utils.is_reachable(dep.config):
             dep.create()
             labels = dep.pod_labels
             labels['newkey'] = 'newvalue'
@@ -262,7 +262,7 @@ class K8sDeploymentTests(BaseTest):
         dep = utils.create_deployment(name=dep_name)
         dep.add_container(container)
         dep.desired_replicas = 3
-        if utils.is_reachable(dep.config.api_host):
+        if utils.is_reachable(dep.config):
             dep.create()
             self.assertEqual(image1, dep.containers[0].image)
             dep.container_image = (name, image2)
@@ -284,7 +284,7 @@ class K8sDeploymentTests(BaseTest):
     def test_delete_nonexistent(self):
         name = "yorc-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=name)
-        if utils.is_reachable(dep.config.api_host):
+        if utils.is_reachable(dep.config):
             with self.assertRaises(NotFoundException):
                 dep.delete()
 
@@ -294,7 +294,7 @@ class K8sDeploymentTests(BaseTest):
         name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=name)
         dep.add_container(container)
-        if utils.is_reachable(dep.config.api_host):
+        if utils.is_reachable(dep.config):
             dep.create()
             utils.cleanup_deployments()
             result = dep.list()
@@ -321,7 +321,7 @@ class K8sDeploymentTests(BaseTest):
     def test_get_by_name_nonexistent(self):
         name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=name)
-        if utils.is_reachable(dep.config.api_host):
+        if utils.is_reachable(dep.config):
             result = K8sDeployment.get_by_name(config=dep.config, name=name)
             self.assertIsInstance(result, list)
             self.assertEqual(0, len(result))
@@ -332,7 +332,7 @@ class K8sDeploymentTests(BaseTest):
         name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=name)
         dep.add_container(container)
-        if utils.is_reachable(dep.config.api_host):
+        if utils.is_reachable(dep.config):
             dep.create()
             result = K8sDeployment.get_by_name(config=dep.config, name=name)
             self.assertIsInstance(result, list)
@@ -349,7 +349,7 @@ class K8sDeploymentTests(BaseTest):
         dep = utils.create_deployment(name=name)
         dep.add_container(container)
         dep.desired_replicas = 3
-        if utils.is_reachable(dep.config.api_host):
+        if utils.is_reachable(dep.config):
             dep.create()
             self.assertEqual(3, dep.desired_replicas)
             self.assertEqual(3, dep.updated_replicas)
@@ -370,7 +370,7 @@ class K8sDeploymentTests(BaseTest):
         cont.add_env(name=env_var_name, value=name)
         dep.add_container(container=cont)
         dep.desired_replicas = 1
-        if utils.is_reachable(dep.config.api_host):
+        if utils.is_reachable(dep.config):
             dep.create()
             with self.assertRaises(AlreadyExistsException):
                 dep.create()
@@ -386,24 +386,3 @@ class K8sDeploymentTests(BaseTest):
                     self.assertEqual(c.image, new_image)
                     self.assertEqual(c.env[0].name, env_var_name)
                     self.assertEqual(c.env[0].value, name)
-
-    # ------------------------------------------------------------------------------------- inmarsat case
-
-    def test_inmarsat(self):
-
-        cfg_default = K8sConfig(kubeconfig=None, api_host="127.0.0.1:8001")
-
-        container = K8sContainer(name='nginx', image='nginx:latest')
-        container.add_port(
-            container_port=80,
-            host_port=80,
-            name='nginx'
-        )
-
-        deployment = K8sDeployment(
-            config=cfg_default,
-            name='nginx',
-            replicas=3
-        )
-        deployment.add_container(container)
-        deployment.create()

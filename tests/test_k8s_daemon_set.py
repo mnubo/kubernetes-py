@@ -60,7 +60,7 @@ class K8sDaemonSetTests(BaseTest):
         ds = DaemonSet(utils.fluentd_daemonset())
         k8s_ds = utils.create_daemonset(name=ds.name)
         k8s_ds.model = ds
-        if utils.is_reachable(k8s_ds.config.api_host):
+        if utils.is_reachable(k8s_ds.config):
             k8s_ds.create()
             self.assertIsInstance(k8s_ds, K8sDaemonSet)
 
@@ -71,7 +71,7 @@ class K8sDaemonSetTests(BaseTest):
         k8s_ds = utils.create_daemonset(name=ds.name)
         k8s_ds.model = ds
 
-        if utils.is_reachable(k8s_ds.config.api_host):
+        if utils.is_reachable(k8s_ds.config):
             k8s_ds.create()
             _list = k8s_ds.list()
             for x in _list:

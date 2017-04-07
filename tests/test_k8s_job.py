@@ -196,7 +196,7 @@ class K8sJobTests(BaseTest):
         job = Job(utils.job())
         k8s_job = utils.create_job(name=name)
         k8s_job.model = job
-        if utils.is_reachable(k8s_job.config.api_host):
+        if utils.is_reachable(k8s_job.config):
             k8s_job.create()
             self.assertIsInstance(k8s_job, K8sJob)
 
@@ -207,7 +207,7 @@ class K8sJobTests(BaseTest):
         job = Job(utils.job())
         k8s_job = utils.create_job(name=name)
         k8s_job.model = job
-        if utils.is_reachable(k8s_job.config.api_host):
+        if utils.is_reachable(k8s_job.config):
             k8s_job.create()
             _list = k8s_job.list()
             for x in _list:
@@ -221,7 +221,7 @@ class K8sJobTests(BaseTest):
         k8s_job = utils.create_job(name=name)
         k8s_job.model = job
         k8s_job.completions = 30
-        if utils.is_reachable(k8s_job.config.api_host):
+        if utils.is_reachable(k8s_job.config):
             k8s_job.create()
             k8s_job.parallelism = 10
             k8s_job.update()
