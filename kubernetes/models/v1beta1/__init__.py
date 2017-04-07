@@ -15,9 +15,6 @@ from kubernetes.models.v1beta1.DeploymentRollback import DeploymentRollback
 from kubernetes.models.v1beta1.DeploymentSpec import DeploymentSpec
 from kubernetes.models.v1beta1.DeploymentStatus import DeploymentStatus
 from kubernetes.models.v1beta1.DeploymentStrategy import DeploymentStrategy
-from kubernetes.models.v1beta1.HorizontalPodAutoscaler import HorizontalPodAutoscaler
-from kubernetes.models.v1beta1.HorizontalPodAutoscalerSpec import HorizontalPodAutoscalerSpec
-from kubernetes.models.v1beta1.HorizontalPodAutoscalerStatus import HorizontalPodAutoscalerStatus
 from kubernetes.models.v1beta1.LabelSelector import LabelSelector
 from kubernetes.models.v1beta1.LabelSelectorRequirement import LabelSelectorRequirement
 from kubernetes.models.v1beta1.ReplicaSet import ReplicaSet

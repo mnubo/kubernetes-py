@@ -6,10 +6,11 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+from kubernetes.models.v1.HorizontalPodAutoscalerStatus import HorizontalPodAutoscalerStatus
+
 from kubernetes.models.unversioned.BaseModel import BaseModel
+from kubernetes.models.v1.HorizontalPodAutoscalerSpec import HorizontalPodAutoscalerSpec
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
-from kubernetes.models.v1beta1.HorizontalPodAutoscalerSpec import HorizontalPodAutoscalerSpec
-from kubernetes.models.v1beta1.HorizontalPodAutoscalerStatus import HorizontalPodAutoscalerStatus
 
 
 class HorizontalPodAutoscaler(BaseModel):
@@ -21,7 +22,7 @@ class HorizontalPodAutoscaler(BaseModel):
         super(HorizontalPodAutoscaler, self).__init__()
 
         self.kind = 'HorizontalPodAutoscaler'
-        self.api_version = 'extensions/v1beta1'
+        self.api_version = 'autoscaling/v1'
         self.spec = HorizontalPodAutoscalerSpec()
         self.status = HorizontalPodAutoscalerStatus()
 

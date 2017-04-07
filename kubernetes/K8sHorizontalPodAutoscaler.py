@@ -7,7 +7,11 @@
 #
 
 from kubernetes.K8sObject import K8sObject
-from kubernetes.models.v1beta1.HorizontalPodAutoscaler import HorizontalPodAutoscaler
+from kubernetes.K8sDeployment import K8sDeployment
+from kubernetes.K8sReplicationController import K8sReplicationController
+from kubernetes.K8sExceptions import NotFoundException
+from kubernetes.models.v1.HorizontalPodAutoscaler import HorizontalPodAutoscaler
+import subprocess
 
 
 class K8sHorizontalPodAutoscaler(K8sObject):
@@ -49,3 +53,33 @@ class K8sHorizontalPodAutoscaler(K8sObject):
     def get(self):
         self.model = HorizontalPodAutoscaler(self.get_model())
         return self
+
+    # ------------------------------------------------------------------------------------- cpu_percent
+
+    @property
+    def cpu_percent(self):
+        return self.model.spec.cpu_utilization
+
+    @cpu_percent.setter
+    def cpu_percent(self, pct=None):
+        self.model.spec.cpu_utilization = pct
+
+    # ------------------------------------------------------------------------------------- min replicas
+
+    @property
+    def min_replicas(self):
+        return self.model.spec.min_replicas
+
+    @min_replicas.setter
+    def min_replicas(self, min=None):
+        self.model.spec.min_replicas = min
+
+    # ------------------------------------------------------------------------------------- max replicas
+
+    @property
+    def max_replicas(self):
+        return self.model.spec.max_replicas
+
+    @max_replicas.setter
+    def max_replicas(self, max=None):
+        self.model.spec.max_replicas = max

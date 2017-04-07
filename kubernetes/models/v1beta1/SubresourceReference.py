@@ -82,3 +82,17 @@ class SubresourceReference(object):
         if not is_valid_string(s):
             raise SyntaxError('SubresourceReference: subresource: [ {} ] is invalid.'.format(s))
         self._subresource = s
+
+    # ------------------------------------------------------------------------------------- serialize
+
+    def serialize(self):
+        data = {}
+        if self.kind is not None:
+            data['kind'] = self.kind
+        if self.name is not None:
+            data['name'] = self.name
+        if self.api_version is not None:
+            data['apiVersion'] = self.api_version
+        if self.subresource is not None:
+            data['subresource'] = self.subresource
+        return data

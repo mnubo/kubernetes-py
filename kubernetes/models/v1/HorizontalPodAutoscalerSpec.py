@@ -18,35 +18,35 @@ class HorizontalPodAutoscalerSpec(object):
     def __init__(self, model=None):
         super(HorizontalPodAutoscalerSpec, self).__init__()
 
-        self._scale_ref = None
+        self._scale_target_ref = None
         self._min_replicas = 1
         self._max_replicas = 1  # cannot be smaller than min_replicas
-        self._cpu_utilization = None
+        self._cpu_utilization = 70
 
         if model is not None:
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'scaleRef' in model:
-            self.scale_ref = SubresourceReference(model['scaleRef'])
+        if 'scaleTargetRef' in model:
+            self.scale_target_ref = SubresourceReference(model['scaleTargetRef'])
         if 'minReplicas' in model:
             self.min_replicas = model['minReplicas']
         if 'maxReplicas' in model:
             self.max_replicas = model['maxReplicas']
-        if 'cpuUtilization' in model:
-            self.cpu_utilization = CPUTargetUtilization(model['cpuUtilization'])
+        if 'targetCPUUtilizationPercentage' in model:
+            self.cpu_utilization = model['targetCPUUtilizationPercentage']
 
     # ------------------------------------------------------------------------------------- scaleRef
 
     @property
-    def scale_ref(self):
-        return self._scale_ref
+    def scale_target_ref(self):
+        return self._scale_target_ref
 
-    @scale_ref.setter
-    def scale_ref(self, ref=None):
+    @scale_target_ref.setter
+    def scale_target_ref(self, ref=None):
         if not isinstance(ref, SubresourceReference):
-            raise SyntaxError('HorizontalPodAutoscaler: scale_ref: [ {} ] is invalid.'.format(ref))
-        self._scale_ref = ref
+            raise SyntaxError('HorizontalPodAutoscaler: scale_target_ref: [ {} ] is invalid.'.format(ref))
+        self._scale_target_ref = ref
 
     # ------------------------------------------------------------------------------------- minReplicas
         
@@ -80,7 +80,7 @@ class HorizontalPodAutoscalerSpec(object):
 
     @cpu_utilization.setter
     def cpu_utilization(self, u=None):
-        if not isinstance(u, CPUTargetUtilization):
+        if not isinstance(u, int):
             raise SyntaxError('HorizontalPodAutoscaler: cpu_utilization: [ {} ] is invalid.'.format(u))
         self._cpu_utilization = u
 
@@ -88,12 +88,12 @@ class HorizontalPodAutoscalerSpec(object):
 
     def serialize(self):
         data = {}
-        if self.scale_ref is not None:
-            data['scaleRef'] = self.scale_ref.serialize()
+        if self.scale_target_ref is not None:
+            data['scaleTargetRef'] = self.scale_target_ref.serialize()
         if self.min_replicas is not None:
             data['minReplicas'] = self.min_replicas
         if self.max_replicas is not None:
             data['maxReplicas'] = self.max_replicas
         if self.cpu_utilization is not None:
-            data['cpuUtilization'] = self.cpu_utilization.serialize()
+            data['targetCPUUtilizationPercentage'] = self.cpu_utilization
         return data

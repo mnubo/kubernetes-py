@@ -22,6 +22,7 @@ VALID_K8s_OBJS = [
     'CronJob',  # server version >= 1.5
     'DaemonSet',
     'Deployment',
+    'HorizontalPodAutoscaler',
     'Job',
     'Namespace',
     'Node',
