@@ -47,28 +47,28 @@ class K8sJobTests(BaseTest):
 
     # ------------------------------------------------------------------------------------- walkthrough
 
-    def test_walkthrough(self):
+    def test_hpa_walkthrough(self):
         """
         https://kubernetes.io/docs/user-guide/horizontal-pod-autoscaling/walkthrough/
         https://github.com/kubernetes/community/blob/master/contributors/design-proposals/horizontal-pod-autoscaler.md
         """
 
-        # //--- Step One: Run & expose php-apache server
-
         k8s_dep = utils.create_deployment(name="php-apache")
         k8s_dep.model = Deployment(utils.hpa_example_deployment())
-        k8s_dep.create()
 
         k8s_svc = utils.create_service(name="php-apache")
         k8s_svc.model = Service(utils.hpa_example_service())
-        k8s_svc.create()
-
-        # // --- Step Two: Create Horizontal Pod Autoscaler
 
         k8s_hpa = utils.create_hpa(name="php-apache")
         k8s_hpa.model = HorizontalPodAutoscaler(utils.hpa_example_autoscaler())
-        k8s_hpa.create()
-        
+
+        if utils.is_reachable(k8s_hpa.config):
+            # //--- Step One: Run & expose php-apache server
+            k8s_dep.create()
+            k8s_svc.create()
+            # // --- Step Two: Create Horizontal Pod Autoscaler
+            k8s_hpa.create()
+
         # // --- Step Three: Increase Load
         # $ kubectl run -i --tty load-generator --image=busybox /bin/sh
         # $ while true; do wget -q -O- http://php-apache.default.svc.cluster.local; done
