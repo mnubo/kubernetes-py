@@ -98,7 +98,7 @@ This module assumes the default container runtime.
     
     cj = K8sCronJob(
         config=cfg_cert,
-        name='my_cronjob',
+        name='my-cronjob',
     )
     cj.schedule = '*/1 * * * *'
     cj.concurrency_policy = 'Forbid'
@@ -109,7 +109,7 @@ This module assumes the default container runtime.
 
     from kubernetes import K8sCronJob
     
-    cj = K8sCronJob(config=cfg_cert, name='my_cronjob').get()
+    cj = K8sCronJob(config=cfg_cert, name='my-cronjob').get()
     cj.suspend = True
     cj.update()
     
@@ -117,7 +117,7 @@ This module assumes the default container runtime.
 
     from kubernetes import K8sCronJob
     
-    cj = K8sCronJob(config=cfg_cert, name='my_cronjob').get()
+    cj = K8sCronJob(config=cfg_cert, name='my-cronjob').get()
     cj.delete()
 
 
@@ -129,7 +129,7 @@ This module assumes the default container runtime.
     
     deployment = K8sDeployment(
         config=cfg_cert, 
-        name='my_deployment',
+        name='my-deployment',
         replicas=3
     )
     deployment.add_container(container)
@@ -139,7 +139,7 @@ This module assumes the default container runtime.
 
     from kubernetes import K8sDeployment
     
-    deployment = K8sDeployment(config=cfg_cert, name='my_deployment')
+    deployment = K8sDeployment(config=cfg_cert, name='my-deployment')
     deployment.get()
 
 
@@ -147,7 +147,7 @@ This module assumes the default container runtime.
 
     from kubernetes import K8sDeployment
     
-    deployment = K8sDeployment(config=cfg_cert, name='my_deployment')
+    deployment = K8sDeployment(config=cfg_cert, name='my-deployment')
     deployment.list()
 
 
@@ -155,7 +155,7 @@ This module assumes the default container runtime.
 
     from kubernetes import K8sDeployment, K8sContainer
     
-    deployment = K8sDeployment(config=cfg_cert, name='my_deployment')
+    deployment = K8sDeployment(config=cfg_cert, name='my-deployment')
     container = K8sContainer(name='nginx', image='nginx:1.7.9')
     deployment.add_container(container)
     deployment.create()
@@ -167,7 +167,7 @@ This module assumes the default container runtime.
 
     from kubernetes import K8sDeployment, K8sContainer
     
-    deployment = K8sDeployment(config=cfg_cert, name='my_deployment')
+    deployment = K8sDeployment(config=cfg_cert, name='my-deployment')
     container = K8sContainer(name='nginx', image='nginx:1.7.9')
     deployment.add_container(container)
     deployment.set_replicas(3)
@@ -179,7 +179,7 @@ This module assumes the default container runtime.
 
     from kubernetes import K8sDeployment
     
-    deployment = K8sDeployment(config=cfg_cert, name='my_deployment')
+    deployment = K8sDeployment(config=cfg_cert, name='my-deployment')
     deployment.delete()    
 
 
@@ -189,7 +189,7 @@ This module assumes the default container runtime.
 
     from kubernetes import K8sJob
     
-    job = K8sJob(config=cfg_cert, name='my_job')
+    job = K8sJob(config=cfg_cert, name='my-job')
     job.parallelism = 10
     job.completions = 20
     job.create()
@@ -198,7 +198,7 @@ This module assumes the default container runtime.
 
     from kubernetes import K8sJob
     
-    job = K8sJob(config=cfg_cert, name='my_job').get()
+    job = K8sJob(config=cfg_cert, name='my-job').get()
     job.parallelism = 5
     job.update()
     
@@ -206,7 +206,7 @@ This module assumes the default container runtime.
 
     from kubernetes import K8sJob
     
-    job = K8sJob(config=cfg_cert, name='my_job').get()
+    job = K8sJob(config=cfg_cert, name='my-job').get()
     job.delete()
     
 
@@ -218,7 +218,7 @@ This module assumes the default container runtime.
     
     pv_aws = K8sPersistentVolume(
         config=cfg_cert, 
-        name="my_aws_ebs", 
+        name="my-aws_ebs", 
         type="awsElasticBlockStore"
     )
     pv_aws.fs_type = "xfs"
@@ -239,7 +239,7 @@ Pod creation will timeout waiting for readiness if not on AWS; unschedulable.
     
     pv_gce = K8sPersistentVolume(
         config=cfg_cert, 
-        name="my_gce_pd", 
+        name="my-gce_pd", 
         type="gcePersistentDisk"
     )
     pv_gce.fs_type = "ext4"
@@ -259,7 +259,7 @@ Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
     
     pv = K8sPersistentVolume(
         config=cfg_cert,
-        name="my_pv",
+        name="my-pv",
         type="nfs"
     )
     pv.nfs_server = "nfs.mycompany.com"
@@ -282,13 +282,13 @@ Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
     
     pvc = K8sPersistentVolumeClaim(
         config=cfg_cert,
-        name="my_pvc",
+        name="my-pvc",
     )
     pvc.create()
     
     vol = K8sVolume(
         config=cfg_cert,
-        name="my_volume",
+        name="my-volume",
         type="persistentVolumeClaim"
     )
     vol.claim_name = pvc.name
@@ -302,7 +302,7 @@ Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
     
     pod = K8sPod(
         config=cfg_cert,
-        name="my_pod"
+        name="my-pod"
     )
     pod.add_volume(vol)
     pod.add_container(container)
@@ -413,7 +413,7 @@ Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
                     "email": "you@company.com"
                 }}}  
     
-    secret = K8sSecret(config=cfg_cert, name='my_registry')
+    secret = K8sSecret(config=cfg_cert, name='my-registry')
     secret.dockerconfigjson = data
     secret.create()
         
@@ -421,14 +421,14 @@ Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
 
     from kubernetes import K8sSecret
 
-    secret = K8sSecret(config=cfg_cert, name='my_registry')
+    secret = K8sSecret(config=cfg_cert, name='my-registry')
     secret.get()
 
 ##### Deleting a secret:
 
     from kubernetes import K8sSecret
     
-    secret = K8sSecret(config=cfg_cert, name='my_registry')
+    secret = K8sSecret(config=cfg_cert, name='my-registry')
     secret.delete()
     
 ### Volume
