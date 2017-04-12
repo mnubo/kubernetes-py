@@ -16,6 +16,7 @@ from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sVolumeMount import K8sVolumeMount
 from kubernetes.models.v1.Container import Container
 from kubernetes.models.v1.Probe import Probe
+from kubernetes.models.v1.Capabilities import Capabilities
 
 
 class K8sContainerTest(BaseTest):
@@ -101,6 +102,42 @@ class K8sContainerTest(BaseTest):
         c.add_volume_mount(mount)
         self.assertEqual(1, len(c.volume_mounts))
         self.assertIn(mount.model, c.volume_mounts)
+
+    # ------------------------------------------------------------------------------------- add capabilities
+
+    def test_add_capabilities_invalid_args(self):
+        name = "yomama"
+        image = "redis"
+        with self.assertRaises(SyntaxError):
+            c = K8sContainer(name=name, image=image)
+            c.add_capabilities('NET_RAW')
+
+    def test_add_capabilities(self):
+        name = "yomama"
+        image = "redis"
+        c = K8sContainer(name=name, image=image)
+        c.add_capabilities(['NET_RAW'])
+        self.assertIsInstance(c.capabilities, Capabilities)
+        self.assertIsInstance(c.capabilities.add, list)
+        self.assertEqual(c.capabilities.add, ['NET_RAW'])
+
+    # ------------------------------------------------------------------------------------- drop capabilities
+
+    def test_drop_capabilities_invalid_args(self):
+        name = "yomama"
+        image = "redis"
+        with self.assertRaises(SyntaxError):
+            c = K8sContainer(name=name, image=image)
+            c.drop_capabilities('NET_RAW')
+
+    def test_drop_capabilities(self):
+        name = "yomama"
+        image = "redis"
+        c = K8sContainer(name=name, image=image)
+        c.drop_capabilities(['NET_RAW'])
+        self.assertIsInstance(c.capabilities, Capabilities)
+        self.assertIsInstance(c.capabilities.drop, list)
+        self.assertEqual(c.capabilities.drop, ['NET_RAW'])
 
     # ------------------------------------------------------------------------------------- add liveness probe
 

@@ -80,7 +80,12 @@ def is_valid_ip(ip=None):
 
 def is_reachable(cfg=None):
     try:
-        socket.inet_aton(cfg.api_host)
+        trimmed = re.sub(r'https?://', '', cfg.api_host)
+        host, port = trimmed.split(':')
+        sock = socket.socket()
+        sock.settimeout(timeout=0.5)
+        address = (host, int(port)) if port is not None else (host, 80)
+        sock.connect(address)
         return True
 
     except Exception as err:

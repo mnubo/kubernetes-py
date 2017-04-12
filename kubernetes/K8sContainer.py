@@ -13,9 +13,10 @@ import yaml
 from kubernetes.K8sVolumeMount import K8sVolumeMount
 from kubernetes.models.v1.Container import Container
 from kubernetes.models.v1.ContainerPort import ContainerPort
+from kubernetes.models.v1.EnvVar import EnvVar
 from kubernetes.models.v1.Probe import Probe
 from kubernetes.models.v1.ResourceRequirements import ResourceRequirements
-from kubernetes.models.v1.EnvVar import EnvVar
+from kubernetes.models.v1.Capabilities import Capabilities
 
 
 class K8sContainer(object):
@@ -25,6 +26,7 @@ class K8sContainer(object):
 
     def __init__(self, name=None, image=None):
         super(K8sContainer, self).__init__()
+
         self.model = Container()
         self.name = name
         self.image = image
@@ -93,6 +95,14 @@ class K8sContainer(object):
             raise SyntaxError('K8sContainer: could not add readiness_probe: [ {} ]'.format(kwargs))
         probe = Probe(kwargs)
         self.readiness_probe = probe
+
+    def add_capabilities(self, c=None):
+        cap = Capabilities({'add': c})
+        self.capabilities = cap
+
+    def drop_capabilities(self, c=None):
+        cap = Capabilities({'drop': c})
+        self.capabilities = cap
 
     # -------------------------------------------------------------------------------------  args
 
@@ -197,6 +207,26 @@ class K8sContainer(object):
     @volume_mounts.setter
     def volume_mounts(self, mounts=None):
         self.model.volume_mounts = mounts
+
+    # -------------------------------------------------------------------------------------  capabilities
+
+    @property
+    def capabilities(self):
+        return self.model.security_context.capabilities
+
+    @capabilities.setter
+    def capabilities(self, c=None):
+        self.model.security_context.capabilities = c
+
+    # -------------------------------------------------------------------------------------  seLinuxOptions
+
+    @property
+    def se_linux_options(self):
+        return self.model.security_context.se_linux_options
+
+    @se_linux_options.setter
+    def se_linux_options(self, o=None):
+        self.model.security_context.se_linux_options = o
 
     # ------------------------------------------------------------------------------------- serialize
 
