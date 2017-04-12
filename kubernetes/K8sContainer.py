@@ -16,7 +16,7 @@ from kubernetes.models.v1.ContainerPort import ContainerPort
 from kubernetes.models.v1.EnvVar import EnvVar
 from kubernetes.models.v1.Probe import Probe
 from kubernetes.models.v1.ResourceRequirements import ResourceRequirements
-from kubernetes.models.v1.SecurityContext import SecurityContext
+from kubernetes.models.v1.Capabilities import Capabilities
 
 
 class K8sContainer(object):
@@ -26,6 +26,7 @@ class K8sContainer(object):
 
     def __init__(self, name=None, image=None):
         super(K8sContainer, self).__init__()
+
         self.model = Container()
         self.name = name
         self.image = image
@@ -95,25 +96,13 @@ class K8sContainer(object):
         probe = Probe(kwargs)
         self.readiness_probe = probe
 
-    def add_capabilities(self, caps):
-        if not isinstance(caps, list):
-            raise SyntaxError('K8sContainer: could not add capabilities: [ {} ]'.format(caps))
-        context = self.model.security_context or SecurityContext()
-        if context.capabilities is None:
-            context.capabilities = dict(add=list())
-        context.capabilities['add'].extend(caps)
-        self.model.security_context = context
+    def add_capabilities(self, c=None):
+        cap = Capabilities({'add': c})
+        self.capabilities = cap
 
-    # ------------------------------------------------------------------------------------- drop
-
-    def drop_capabilities(self, caps):
-        if not isinstance(caps, list):
-            raise SyntaxError('K8sContainer: could not drop capabilities: [ {} ]'.format(caps))
-        context = self.model.security_context or SecurityContext()
-        if context.capabilities is None:
-            context.capabilities = dict(drop=list())
-        context.capabilities['drop'].extend(caps)
-        self.model.security_context = context
+    def drop_capabilities(self, c=None):
+        cap = Capabilities({'drop': c})
+        self.capabilities = cap
 
     # -------------------------------------------------------------------------------------  args
 
@@ -218,6 +207,26 @@ class K8sContainer(object):
     @volume_mounts.setter
     def volume_mounts(self, mounts=None):
         self.model.volume_mounts = mounts
+
+    # -------------------------------------------------------------------------------------  capabilities
+
+    @property
+    def capabilities(self):
+        return self.model.security_context.capabilities
+
+    @capabilities.setter
+    def capabilities(self, c=None):
+        self.model.security_context.capabilities = c
+
+    # -------------------------------------------------------------------------------------  seLinuxOptions
+
+    @property
+    def se_linux_options(self):
+        return self.model.security_context.se_linux_options
+
+    @se_linux_options.setter
+    def se_linux_options(self, o=None):
+        self.model.security_context.se_linux_options = o
 
     # ------------------------------------------------------------------------------------- serialize
 

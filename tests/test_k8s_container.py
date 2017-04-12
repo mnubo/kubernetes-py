@@ -16,6 +16,7 @@ from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sVolumeMount import K8sVolumeMount
 from kubernetes.models.v1.Container import Container
 from kubernetes.models.v1.Probe import Probe
+from kubernetes.models.v1.Capabilities import Capabilities
 
 
 class K8sContainerTest(BaseTest):
@@ -116,11 +117,9 @@ class K8sContainerTest(BaseTest):
         image = "redis"
         c = K8sContainer(name=name, image=image)
         c.add_capabilities(['NET_RAW'])
-        data = c.serialize()
-        self.assertIsInstance(data['securityContext']['capabilities'], dict)
-        self.assertIsInstance(data['securityContext']['capabilities']['add'], list)
-        self.assertEqual(data['securityContext']['capabilities']['add'], ['NET_RAW'])
-
+        self.assertIsInstance(c.capabilities, Capabilities)
+        self.assertIsInstance(c.capabilities.add, list)
+        self.assertEqual(c.capabilities.add, ['NET_RAW'])
 
     # ------------------------------------------------------------------------------------- drop capabilities
 
@@ -136,10 +135,9 @@ class K8sContainerTest(BaseTest):
         image = "redis"
         c = K8sContainer(name=name, image=image)
         c.drop_capabilities(['NET_RAW'])
-        data = c.serialize()
-        self.assertIsInstance(data['securityContext']['capabilities'], dict)
-        self.assertIsInstance(data['securityContext']['capabilities']['drop'], list)
-        self.assertEqual(data['securityContext']['capabilities']['drop'], ['NET_RAW'])
+        self.assertIsInstance(c.capabilities, Capabilities)
+        self.assertIsInstance(c.capabilities.drop, list)
+        self.assertEqual(c.capabilities.drop, ['NET_RAW'])
 
     # ------------------------------------------------------------------------------------- add liveness probe
 

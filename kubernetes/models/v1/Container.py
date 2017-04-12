@@ -35,7 +35,7 @@ class Container(object):
         self._ports = None
         self._readiness_probe = None
         self._resources = ResourceRequirements()
-        self._security_context = None
+        self._security_context = SecurityContext()
         self._volume_mounts = []
         self._working_dir = None
 
