@@ -22,9 +22,9 @@ class BaseModel(object):
         self._status = None
 
         if model is not None:
-            self._build_with_model(model)
+            self.build_with_model(model)
 
-    def _build_with_model(self, model=None):
+    def build_with_model(self, model=None):
         if 'apiVersion' in model:
             self.api_version = model['apiVersion']
         if 'kind' in model:
