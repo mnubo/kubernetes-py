@@ -25,6 +25,7 @@ class SecurityContext(object):
         self.run_as_user = None
         self.run_as_non_root = False
         self.read_only_root_file_system = False
+        self.capabilities = None
 
         if model is not None:
             m = filter_model(model)
@@ -35,7 +36,7 @@ class SecurityContext(object):
 
     # ------------------------------------------------------------------------------------- serialize
 
-    def json(self):
+    def serialize(self):
         data = {}
         if self.privileged is not None:
             data['privileged'] = self.privileged
@@ -45,4 +46,6 @@ class SecurityContext(object):
             data['runAsNonRoot'] = self.run_as_non_root
         if self.read_only_root_file_system is not None:
             data['readOnlyRootFilesystem'] = self.read_only_root_file_system
+        if self.capabilities is not None:
+            data['capabilities'] = self.capabilities
         return data

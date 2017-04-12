@@ -13,9 +13,10 @@ import yaml
 from kubernetes.K8sVolumeMount import K8sVolumeMount
 from kubernetes.models.v1.Container import Container
 from kubernetes.models.v1.ContainerPort import ContainerPort
+from kubernetes.models.v1.EnvVar import EnvVar
 from kubernetes.models.v1.Probe import Probe
 from kubernetes.models.v1.ResourceRequirements import ResourceRequirements
-from kubernetes.models.v1.EnvVar import EnvVar
+from kubernetes.models.v1.SecurityContext import SecurityContext
 
 
 class K8sContainer(object):
@@ -93,6 +94,26 @@ class K8sContainer(object):
             raise SyntaxError('K8sContainer: could not add readiness_probe: [ {} ]'.format(kwargs))
         probe = Probe(kwargs)
         self.readiness_probe = probe
+
+    def add_capabilities(self, caps):
+        if not isinstance(caps, list):
+            raise SyntaxError('K8sContainer: could not add capabilities: [ {} ]'.format(caps))
+        context = self.model.security_context or SecurityContext()
+        if context.capabilities is None:
+            context.capabilities = dict(add=list())
+        context.capabilities['add'].extend(caps)
+        self.model.security_context = context
+
+    # ------------------------------------------------------------------------------------- drop
+
+    def drop_capabilities(self, caps):
+        if not isinstance(caps, list):
+            raise SyntaxError('K8sContainer: could not drop capabilities: [ {} ]'.format(caps))
+        context = self.model.security_context or SecurityContext()
+        if context.capabilities is None:
+            context.capabilities = dict(drop=list())
+        context.capabilities['drop'].extend(caps)
+        self.model.security_context = context
 
     # -------------------------------------------------------------------------------------  args
 

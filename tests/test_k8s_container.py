@@ -101,6 +101,45 @@ class K8sContainerTest(BaseTest):
         self.assertEqual(1, len(c.volume_mounts))
         self.assertIn(mount.model, c.volume_mounts)
 
+    # ------------------------------------------------------------------------------------- add capabilities
+
+    def test_add_capabilities_invalid_args(self):
+        name = "yomama"
+        image = "redis"
+        with self.assertRaises(SyntaxError):
+            c = K8sContainer(name=name, image=image)
+            c.add_capabilities('NET_RAW')
+
+    def test_add_capabilities(self):
+        name = "yomama"
+        image = "redis"
+        c = K8sContainer(name=name, image=image)
+        c.add_capabilities(['NET_RAW'])
+        data = c.serialize()
+        self.assertIsInstance(data['securityContext']['capabilities'], dict)
+        self.assertIsInstance(data['securityContext']['capabilities']['add'], list)
+        self.assertEqual(data['securityContext']['capabilities']['add'], ['NET_RAW'])
+
+
+    # ------------------------------------------------------------------------------------- drop capabilities
+
+    def test_drop_capabilities_invalid_args(self):
+        name = "yomama"
+        image = "redis"
+        with self.assertRaises(SyntaxError):
+            c = K8sContainer(name=name, image=image)
+            c.drop_capabilities('NET_RAW')
+
+    def test_drop_capabilities(self):
+        name = "yomama"
+        image = "redis"
+        c = K8sContainer(name=name, image=image)
+        c.drop_capabilities(['NET_RAW'])
+        data = c.serialize()
+        self.assertIsInstance(data['securityContext']['capabilities'], dict)
+        self.assertIsInstance(data['securityContext']['capabilities']['drop'], list)
+        self.assertEqual(data['securityContext']['capabilities']['drop'], ['NET_RAW'])
+
     # ------------------------------------------------------------------------------------- add liveness probe
 
     def test_add_liveness_probe(self):
