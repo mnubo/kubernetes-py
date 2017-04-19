@@ -155,6 +155,16 @@ class K8sObject(object):
         self.model.metadata.name = name
         self.model.metadata.labels['name'] = name
 
+    # ------------------------------------------------------------------------------------- name
+
+    @property
+    def status(self):
+        return self.model.status
+
+    @status.setter
+    def status(self, status=None):
+        raise NotImplementedError()
+
     # ------------------------------------------------------------------------------------- serialize
 
     def serialize(self):
