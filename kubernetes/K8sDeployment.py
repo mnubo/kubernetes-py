@@ -14,6 +14,7 @@ from kubernetes.K8sExceptions import BadRequestException
 from kubernetes.K8sExceptions import TimedOutException, NotFoundException
 from kubernetes.K8sObject import K8sObject
 from kubernetes.K8sVolume import K8sVolume
+from kubernetes.K8sReplicaSet import K8sReplicaSet
 from kubernetes.models.v1beta1.Deployment import Deployment
 from kubernetes.models.v1beta1.DeploymentRollback import DeploymentRollback
 from kubernetes.models.v1beta1.LabelSelector import LabelSelector
@@ -75,6 +76,16 @@ class K8sDeployment(K8sObject):
             j.model = x
             k8s.append(j)
         return k8s
+
+    def delete(self, orphan=True):
+        super(K8sDeployment, self).delete(orphan)
+        if not orphan:  # no orphans ~ cascade true
+            rsets = K8sReplicaSet(
+                config=self.config,
+                name="throwaway"
+            ).list(pattern=self.name)
+            [rset.delete() for rset in rsets]
+
 
     # -------------------------------------------------------------------------------------  wait
 

@@ -10,7 +10,11 @@ import uuid
 
 from tests import utils
 from tests.BaseTest import BaseTest
-from kubernetes import K8sDeployment, K8sConfig, K8sContainer
+from kubernetes.K8sDeployment import K8sDeployment
+from kubernetes.K8sConfig import K8sConfig
+from kubernetes.K8sContainer import K8sContainer
+from kubernetes.K8sPod import K8sPod
+from kubernetes.K8sReplicaSet import K8sReplicaSet
 from kubernetes.K8sExceptions import *
 
 
@@ -288,18 +292,47 @@ class K8sDeploymentTests(BaseTest):
             with self.assertRaises(NotFoundException):
                 dep.delete()
 
-    def test_delete(self):
+    def test_delete_no_cascade(self):
         name = "yocontainer"
         container = utils.create_container(name=name)
         name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=name)
         dep.add_container(container)
+        dep.desired_replicas = 3
         if utils.is_reachable(dep.config):
             dep.create()
-            utils.cleanup_deployments()
+            dep.delete(orphan=True)
             result = dep.list()
             self.assertIsInstance(result, list)
             self.assertEqual(0, len(result))
+            repsets = K8sReplicaSet(config=dep.config, name="throwaway").list()
+            self.assertEqual(1, len(repsets))
+            pods = K8sPod(config=dep.config, name="throwaway").list()
+            self.assertEqual(3, len(pods))
+            
+    def test_delete_cascade(self):
+        c_redis = utils.create_container(name="redis", image="redis")
+        c_nginx = utils.create_container(name="nginx", image="nginx")
+        name = "yodep-{0}".format(str(uuid.uuid4()))
+        dep = utils.create_deployment(name=name)
+        dep.add_container(c_redis)
+        dep.desired_replicas = 3
+        if utils.is_reachable(dep.config):
+            dep.create()
+            dep.add_container(c_nginx)
+            dep.update()
+            repsets = K8sReplicaSet(config=dep.config, name="throwaway").list()
+            self.assertEqual(2, len(repsets))
+            pods = K8sPod(config=dep.config, name="throwaway").list()
+            self.assertEqual(3, len(pods))
+            dep.delete(orphan=False)
+            result = dep.list()
+            self.assertIsInstance(result, list)
+            self.assertEqual(0, len(result))
+            repsets = K8sReplicaSet(config=dep.config, name="throwaway").list()
+            self.assertEqual(0, len(repsets))
+            pods = K8sPod(config=dep.config, name="throwaway").list()
+            self.assertEqual(0, len(pods))
 
     # -------------------------------------------------------------------------------------  get by name
 
