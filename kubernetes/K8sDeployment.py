@@ -220,6 +220,18 @@ class K8sDeployment(K8sObject):
     def unavailable_replicas(self, reps=None):
         self.model.status.unavailable_replicas = reps
 
+    # -------------------------------------------------------------------------------------  revision
+
+    @property
+    def revision(self):
+        if 'deployment.kubernetes.io/revision' in self.annotations:
+            return int(self.annotations['deployment.kubernetes.io/revision'])
+        return None
+
+    @revision.setter
+    def revision(self, r=None):
+        raise NotImplementedError("K8sDeployment: revision is read-only.")
+
     # -------------------------------------------------------------------------------------  selector
 
     @property

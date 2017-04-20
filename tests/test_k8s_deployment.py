@@ -419,3 +419,32 @@ class K8sDeploymentTests(BaseTest):
                     self.assertEqual(c.image, new_image)
                     self.assertEqual(c.env[0].name, env_var_name)
                     self.assertEqual(c.env[0].value, name)
+
+    # ---------------------------------------------------------------------------------- revision
+
+    def test_revision(self):
+        c_redis = utils.create_container(name="redis", image="redis")
+        c_nginx_1 = utils.create_container(name="nginx", image="nginx")
+        c_nginx_2 = utils.create_container(name="postgres", image="postgres:alpine")
+
+        name = "yodep-{0}".format(str(uuid.uuid4()))
+        dep = utils.create_deployment(name=name)
+        dep.add_container(c_redis)
+        dep.desired_replicas = 3
+
+        if utils.is_reachable(dep.config):
+            dep.create()
+            self.assertEqual(1, dep.revision)
+            dep.add_container(c_nginx_1)
+            dep.update()
+            self.assertEqual(2, dep.revision)
+            dep.add_container(c_nginx_2)
+            dep.update()
+            self.assertEqual(3, dep.revision)
+            dep.rollback(revision=1)
+            self.assertEqual(4, dep.revision)
+            dep.add_container(c_nginx_1)
+            dep.update()
+            self.assertEqual(5, dep.revision)
+            dep.rollback(revision=4)
+            self.assertEqual(6, dep.revision)
