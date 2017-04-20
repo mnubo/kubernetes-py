@@ -29,7 +29,7 @@ class K8sReplicaSet(K8sObject):
         self.model = ReplicaSet(self.get_model())
         return self
 
-    def list(self, pattern=None):
+    def list(self, pattern=None, reverse=True):
         ls = super(K8sReplicaSet, self).list()
         rsets = list(map(lambda x: ReplicaSet(x), ls))
         if pattern is not None:
@@ -39,6 +39,7 @@ class K8sReplicaSet(K8sObject):
             j = K8sReplicaSet(config=self.config, name=x.name)
             j.model = x
             k8s.append(j)
+        k8s.sort(key=lambda x: x.creation_timestamp, reverse=reverse)
         return k8s
 
     # -------------------------------------------------------------------------------------  revision

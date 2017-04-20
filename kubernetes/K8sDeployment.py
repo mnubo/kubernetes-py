@@ -362,3 +362,11 @@ class K8sDeployment(K8sObject):
         self.desired_replicas = replicas
         self.update()
         return self
+
+    # -------------------------------------------------------------------------------------  purge replica sets
+
+    def purge_replica_sets(self, keep=3):
+        rsets = K8sReplicaSet(config=self.config, name="yo").list(pattern=self.name, reverse=True)
+        to_purge = rsets[keep:]
+        for rset in to_purge:
+            rset.delete(cascade=True)
