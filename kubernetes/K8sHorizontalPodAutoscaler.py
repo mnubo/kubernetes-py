@@ -7,15 +7,10 @@
 #
 
 from kubernetes.K8sObject import K8sObject
-from kubernetes.K8sDeployment import K8sDeployment
-from kubernetes.K8sReplicationController import K8sReplicationController
-from kubernetes.K8sExceptions import NotFoundException
 from kubernetes.models.v1.HorizontalPodAutoscaler import HorizontalPodAutoscaler
-import subprocess
 
 
 class K8sHorizontalPodAutoscaler(K8sObject):
-
     def __init__(self, config=None, name=None):
 
         super(K8sHorizontalPodAutoscaler, self).__init__(

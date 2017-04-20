@@ -29,7 +29,7 @@ class K8sReplicaSet(K8sObject):
         self.model = ReplicaSet(self.get_model())
         return self
 
-    def list(self, pattern=None):
+    def list(self, pattern=None, reverse=True):
         ls = super(K8sReplicaSet, self).list()
         rsets = list(map(lambda x: ReplicaSet(x), ls))
         if pattern is not None:
@@ -39,4 +39,31 @@ class K8sReplicaSet(K8sObject):
             j = K8sReplicaSet(config=self.config, name=x.name)
             j.model = x
             k8s.append(j)
+        k8s.sort(key=lambda x: x.creation_timestamp, reverse=reverse)
         return k8s
+
+    # -------------------------------------------------------------------------------------  revision
+
+    @property
+    def revision(self):
+        if 'deployment.kubernetes.io/revision' in self.model.metadata.annotations:
+            return self.model.metadata.annotations['deployment.kubernetes.io/revision']
+        return None
+
+    @revision.setter
+    def revision(self, r=None):
+        raise NotImplementedError('K8sReplicaSet: revision is read-only.')
+
+    # -------------------------------------------------------------------------------------  revision history
+
+    @property
+    def revision_history(self):
+        if 'deployment.kubernetes.io/revision-history' in self.model.metadata.annotations:
+            comma_string = self.model.metadata.annotations['deployment.kubernetes.io/revision-history']
+            version_array = comma_string.split(",")
+            return map(lambda x: int(x), version_array)
+        return None
+
+    @revision_history.setter
+    def revision_history(self, r=None):
+        raise NotImplementedError('K8sReplicaSet: revision_history is read-only.')

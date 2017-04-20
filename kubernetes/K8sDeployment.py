@@ -13,6 +13,8 @@ from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sExceptions import BadRequestException
 from kubernetes.K8sExceptions import TimedOutException, NotFoundException
 from kubernetes.K8sObject import K8sObject
+from kubernetes.K8sVolume import K8sVolume
+from kubernetes.K8sReplicaSet import K8sReplicaSet
 from kubernetes.models.v1beta1.Deployment import Deployment
 from kubernetes.models.v1beta1.DeploymentRollback import DeploymentRollback
 from kubernetes.models.v1beta1.LabelSelector import LabelSelector
@@ -75,6 +77,15 @@ class K8sDeployment(K8sObject):
             k8s.append(j)
         return k8s
 
+    def delete(self, cascade=False):
+        super(K8sDeployment, self).delete(cascade)
+        if cascade:
+            rsets = K8sReplicaSet(
+                config=self.config,
+                name="throwaway"
+            ).list(pattern=self.name)
+            [rset.delete() for rset in rsets]
+
     # -------------------------------------------------------------------------------------  wait
 
     def _wait_for_desired_replicas(self):
@@ -112,6 +123,15 @@ class K8sDeployment(K8sObject):
 
     def add_image_pull_secrets(self, secret=None):
         self.model.spec.template.spec.add_image_pull_secrets(secret)
+        return self
+
+    def add_volume(self, volume=None):
+        if not isinstance(volume, K8sVolume):
+            raise SyntaxError('K8sDeployment.add_volume() volume: [ {0} ] is invalid.'.format(volume))
+        volumes = self.model.spec.template.spec.volumes
+        if volume.model not in volumes:
+            volumes.append(volume.model)
+        self.model.spec.template.spec.volumes = volumes
         return self
 
     # -------------------------------------------------------------------------------------  get
@@ -199,6 +219,18 @@ class K8sDeployment(K8sObject):
     @unavailable_replicas.setter
     def unavailable_replicas(self, reps=None):
         self.model.status.unavailable_replicas = reps
+
+    # -------------------------------------------------------------------------------------  revision
+
+    @property
+    def revision(self):
+        if 'deployment.kubernetes.io/revision' in self.annotations:
+            return int(self.annotations['deployment.kubernetes.io/revision'])
+        return None
+
+    @revision.setter
+    def revision(self, r=None):
+        raise NotImplementedError("K8sDeployment: revision is read-only.")
 
     # -------------------------------------------------------------------------------------  selector
 
@@ -330,3 +362,11 @@ class K8sDeployment(K8sObject):
         self.desired_replicas = replicas
         self.update()
         return self
+
+    # -------------------------------------------------------------------------------------  purge replica sets
+
+    def purge_replica_sets(self, keep=3):
+        rsets = K8sReplicaSet(config=self.config, name="yo").list(pattern=self.name, reverse=True)
+        to_purge = rsets[keep:]
+        for rset in to_purge:
+            rset.delete(cascade=True)

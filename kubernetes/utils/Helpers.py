@@ -81,10 +81,14 @@ def is_valid_ip(ip=None):
 def is_reachable(cfg=None):
     try:
         trimmed = re.sub(r'https?://', '', cfg.api_host)
-        host, port = trimmed.split(':')
         sock = socket.socket()
-        sock.settimeout(timeout=0.5)
-        address = (host, int(port)) if port is not None else (host, 80)
+        sock.settimeout(0.5)
+        if ":" in trimmed:
+            host, port = trimmed.split(':')
+            address = (host, int(port)) if port is not None else (host, 80)
+        else:
+            host = trimmed
+            address = (host, 80)
         sock.connect(address)
         return True
 

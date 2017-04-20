@@ -8,6 +8,7 @@
 
 import json
 import time
+from dateutil import parser
 
 import yaml
 
@@ -133,6 +134,19 @@ class K8sObject(object):
     @annotations.setter
     def annotations(self, anns=None):
         self.model.metadata.annotations = anns
+
+    # -------------------------------------------------------------------------------------  creationTimestamp
+
+    @property
+    def creation_timestamp(self):
+        datestring = self.model.metadata.creation_timestamp
+        dt = parser.parse(datestring)
+        epoch = int(time.mktime(dt.timetuple()))
+        return epoch
+
+    @creation_timestamp.setter
+    def creation_timestamp(self, t=None):
+        raise NotImplementedError('K8sObject: creation_timestamp is read-only.')
 
     # ------------------------------------------------------------------------------------- labels
 
@@ -306,14 +320,14 @@ class K8sObject(object):
 
         return self
 
-    def delete(self, orphan=False):
+    def delete(self, cascade=False):
         if self.name is None:
             raise SyntaxError('K8sObject: name: [ {0} ] must be set to DELETE the object.'.format(self.name))
 
         url = '{base}/{name}'.format(base=self.base_url, name=self.name)
 
         delete_opts = DeleteOptions()
-        delete_opts.orphan_dependents = orphan
+        delete_opts.orphan_dependents = not cascade
 
         state = self.request(method='DELETE', url=url, data=delete_opts.serialize())
 

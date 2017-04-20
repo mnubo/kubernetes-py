@@ -26,7 +26,8 @@ class K8sComponentStatus(K8sObject):
     def update(self):
         return self
 
-    def delete(self, orphan=False):
+    def delete(self, cascade=False):
+        super(K8sComponentStatus, self).delete(cascade)
         return self
 
     def list(self, pattern=None):

@@ -7,6 +7,7 @@
 #
 
 import uuid
+import time
 
 from tests import utils
 from tests.BaseTest import BaseTest
@@ -131,3 +132,23 @@ class K8sCronJobTests(BaseTest):
             crons = k8s_cronjob.list()
             for c in crons:
                 self.assertIsInstance(c, K8sCronJob)
+
+    # --------------------------------------------------------------------------------- api - last scheduled time
+
+    def test_last_schedule_time(self):
+        name = "job-{}".format(uuid.uuid4())
+        job = CronJob(utils.scheduledjob_90())
+
+        k8s_cronjob = utils.create_cronjob(name=name)
+        k8s_cronjob.model = job
+        k8s_cronjob.concurrency_policy = "Forbid"
+        k8s_cronjob.starting_deadline_seconds = 10
+
+        if utils.is_reachable(k8s_cronjob.config):
+            k8s_cronjob.create()
+            while not k8s_cronjob.last_schedule_time:
+                k8s_cronjob.get()
+                time.sleep(2)
+            lst = k8s_cronjob.last_schedule_time
+            self.assertIsNotNone(lst)
+            self.assertIsInstance(lst, str)

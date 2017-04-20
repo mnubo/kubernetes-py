@@ -48,10 +48,14 @@ kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(
 def is_reachable(cfg=None):
     try:
         trimmed = re.sub(r'https?://', '', cfg.api_host)
-        host, port = trimmed.split(':')
         sock = socket.socket()
-        sock.settimeout(timeout=0.5)
-        address = (host, int(port)) if port is not None else (host, 80)
+        sock.settimeout(0.5)
+        if ":" in trimmed:
+            host, port = trimmed.split(':')
+            address = (host, int(port)) if port is not None else (host, 80)
+        else:
+            host = trimmed
+            address = (host, 80)
         sock.connect(address)
         return True
 
@@ -369,7 +373,7 @@ def cleanup_namespaces():
             for ns in _list:
                 try:
                     if ns.name not in ['kube-system', 'default']:
-                        ns.delete()
+                        ns.delete(cascade=True)
                 except NotFoundException:
                     continue
             _list = ref.list()
@@ -384,7 +388,7 @@ def cleanup_nodes():
         while len(_filtered) > 1:
             for n in _filtered:
                 try:
-                    n.delete()
+                    n.delete(cascade=True)
                 except NotFoundException:
                     continue
             _list = ref.list()
@@ -398,7 +402,7 @@ def cleanup_pods():
         while len(_list) > 0:
             for p in _list:
                 try:
-                    p.delete()
+                    p.delete(cascade=True)
                 except NotFoundException:
                     continue
             _list = ref.list()
@@ -411,7 +415,7 @@ def cleanup_rc():
         while len(_list) > 0:
             for rc in _list:
                 try:
-                    rc.delete()
+                    rc.delete(cascade=True)
                 except NotFoundException:
                     continue
             _list = ref.list()
@@ -426,9 +430,9 @@ def cleanup_secrets():
                 for s in _list:
                     try:
                         if s.type != 'kubernetes.io/service-account-token':
-                            s.delete()
+                            s.delete(cascade=True)
                         if s.type == 'kubernetes.io/service-account-token' and not re.search(r'default', s.name):
-                            s.delete()
+                            s.delete(cascade=True)
                         if len(_list) == 1 and re.search(r'default', s.name):
                             raise StopIteration
                     except NotFoundException:
@@ -446,7 +450,7 @@ def cleanup_services():
             for svc in _list:
                 try:
                     if not _is_api_server(svc):
-                        svc.delete()
+                        svc.delete(cascade=True)
                 except NotFoundException:
                     continue
             _list = ref.list()
@@ -459,7 +463,7 @@ def cleanup_rs():
         while len(_list) > 0:
             for rs in _list:
                 try:
-                    rs.delete()
+                    rs.delete(cascade=True)
                 except NotFoundException:
                     continue
             _list = ref.list()
@@ -472,7 +476,7 @@ def cleanup_deployments():
         while len(_list) > 0:
             for d in _list:
                 try:
-                    d.delete(orphan=False)
+                    d.delete(cascade=False)
                 except NotFoundException:
                     continue
             _list = ref.list()
@@ -485,7 +489,7 @@ def cleanup_pv():
         while len(_list) > 0:
             for v in _list:
                 try:
-                    v.delete()
+                    v.delete(cascade=True)
                 except NotFoundException:
                     continue
             _list = ref.list()
@@ -498,7 +502,7 @@ def cleanup_pvc():
         while len(_list) > 0:
             for c in _list:
                 try:
-                    c.delete()
+                    c.delete(cascade=True)
                 except NotFoundException:
                     continue
             _list = ref.list()
@@ -511,7 +515,7 @@ def cleanup_jobs():
         while len(_list) > 0:
             for j in _list:
                 try:
-                    j.delete()
+                    j.delete(cascade=True)
                 except NotFoundException:
                     continue
             _list = ref.list()
@@ -524,7 +528,7 @@ def cleanup_cronjobs():
         while len(_list) > 0:
             for job in _list:
                 try:
-                    job.delete()
+                    job.delete(cascade=True)
                 except NotFoundException:
                     continue
             _list = ref.list()
@@ -537,7 +541,7 @@ def cleanup_ds():
         while len(_list) > 0:
             for d in _list:
                 try:
-                    d.delete()
+                    d.delete(cascade=True)
                 except NotFoundException:
                     continue
             _list = ref.list()
@@ -551,7 +555,7 @@ def cleanup_petsets():
             for p in _list:
                 try:
                     petset = K8sPetSet(config=ref.config, name=p['metadata']['name']).get()
-                    petset.delete()
+                    petset.delete(cascade=True)
                 except NotFoundException:
                     continue
             _list = ref.list()
@@ -565,7 +569,7 @@ def cleanup_stateful_sets():
             for p in _list:
                 try:
                     sset = K8sStatefulSet(config=ref.config, name=p['metadata']['name']).get()
-                    sset.delete()
+                    sset.delete(cascade=True)
                 except NotFoundException:
                     continue
             _list = ref.list()
@@ -581,7 +585,7 @@ def cleanup_service_accounts():
                     try:
                         name = p.name
                         if name != 'default':
-                            p.delete()
+                            p.delete(cascade=True)
                         if len(_list) == 1 and name == 'default':
                             raise StopIteration
                     except NotFoundException:
@@ -598,7 +602,7 @@ def cleanup_storage_class():
         while len(_list) > 0:
             for p in _list:
                 try:
-                    p.delete()
+                    p.delete(cascade=True)
                 except NotFoundException:
                     continue
             _list = ref.list()
@@ -611,7 +615,7 @@ def cleanup_hpas():
         while len(_list) > 0:
             for p in _list:
                 try:
-                    p.delete()
+                    p.delete(cascade=True)
                 except NotFoundException:
                     continue
             _list = ref.list()

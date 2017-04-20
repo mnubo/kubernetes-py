@@ -198,3 +198,13 @@ class K8sCronJob(K8sObject):
     @restart_policy.setter
     def restart_policy(self, p=None):
         self.model.spec.job_template.spec.template.spec.restart_policy = p
+
+    # -------------------------------------------------------------------------------------  lastScheduleTime
+
+    @property
+    def last_schedule_time(self):
+        return self.model.status.last_schedule_time
+
+    @last_schedule_time.setter
+    def last_schedule_time(self, t=None):
+        raise NotImplementedError('K8sCronJob: last_schedule_time: this property is read-only.')

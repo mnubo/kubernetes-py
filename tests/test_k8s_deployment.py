@@ -10,7 +10,11 @@ import uuid
 
 from tests import utils
 from tests.BaseTest import BaseTest
-from kubernetes import K8sDeployment, K8sConfig, K8sContainer
+from kubernetes.K8sDeployment import K8sDeployment
+from kubernetes.K8sConfig import K8sConfig
+from kubernetes.K8sContainer import K8sContainer
+from kubernetes.K8sPod import K8sPod
+from kubernetes.K8sReplicaSet import K8sReplicaSet
 from kubernetes.K8sExceptions import *
 
 
@@ -288,18 +292,47 @@ class K8sDeploymentTests(BaseTest):
             with self.assertRaises(NotFoundException):
                 dep.delete()
 
-    def test_delete(self):
+    def test_delete_no_cascade(self):
         name = "yocontainer"
         container = utils.create_container(name=name)
         name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=name)
         dep.add_container(container)
+        dep.desired_replicas = 3
         if utils.is_reachable(dep.config):
             dep.create()
-            utils.cleanup_deployments()
+            dep.delete(cascade=False)
             result = dep.list()
             self.assertIsInstance(result, list)
             self.assertEqual(0, len(result))
+            repsets = K8sReplicaSet(config=dep.config, name="throwaway").list()
+            self.assertEqual(1, len(repsets))
+            pods = K8sPod(config=dep.config, name="throwaway").list()
+            self.assertEqual(3, len(pods))
+            
+    def test_delete_cascade(self):
+        c_redis = utils.create_container(name="redis", image="redis")
+        c_nginx = utils.create_container(name="nginx", image="nginx")
+        name = "yodep-{0}".format(str(uuid.uuid4()))
+        dep = utils.create_deployment(name=name)
+        dep.add_container(c_redis)
+        dep.desired_replicas = 3
+        if utils.is_reachable(dep.config):
+            dep.create()
+            dep.add_container(c_nginx)
+            dep.update()
+            repsets = K8sReplicaSet(config=dep.config, name="throwaway").list()
+            self.assertEqual(2, len(repsets))
+            pods = K8sPod(config=dep.config, name="throwaway").list()
+            self.assertEqual(3, len(pods))
+            dep.delete(cascade=True)
+            result = dep.list()
+            self.assertIsInstance(result, list)
+            self.assertEqual(0, len(result))
+            repsets = K8sReplicaSet(config=dep.config, name="throwaway").list()
+            self.assertEqual(0, len(repsets))
+            pods = K8sPod(config=dep.config, name="throwaway").list()
+            self.assertEqual(0, len(pods))
 
     # -------------------------------------------------------------------------------------  get by name
 
@@ -386,3 +419,86 @@ class K8sDeploymentTests(BaseTest):
                     self.assertEqual(c.image, new_image)
                     self.assertEqual(c.env[0].name, env_var_name)
                     self.assertEqual(c.env[0].value, name)
+
+    # ---------------------------------------------------------------------------------- revision
+
+    def test_revision(self):
+        c_redis = utils.create_container(name="redis", image="redis")
+        c_nginx_1 = utils.create_container(name="nginx", image="nginx")
+        c_nginx_2 = utils.create_container(name="postgres", image="postgres:alpine")
+
+        name = "yodep-{0}".format(str(uuid.uuid4()))
+        dep = utils.create_deployment(name=name)
+        dep.add_container(c_redis)
+        dep.desired_replicas = 3
+
+        if utils.is_reachable(dep.config):
+            dep.create()
+            self.assertEqual(1, dep.revision)
+            dep.add_container(c_nginx_1)
+            dep.update()
+            self.assertEqual(2, dep.revision)
+            dep.add_container(c_nginx_2)
+            dep.update()
+            self.assertEqual(3, dep.revision)
+            dep.rollback(revision=1)
+            self.assertEqual(4, dep.revision)
+            dep.add_container(c_nginx_1)
+            dep.update()
+            self.assertEqual(5, dep.revision)
+            dep.rollback(revision=4)
+            self.assertEqual(6, dep.revision)
+
+    # ---------------------------------------------------------------------------------- replicaset creationTimestamp
+
+    def test_replicaset_creation_timestamp(self):
+        c_redis = utils.create_container(name="redis", image="redis")
+        c_nginx_1 = utils.create_container(name="nginx", image="nginx")
+        c_nginx_2 = utils.create_container(name="postgres", image="postgres:alpine")
+
+        name = "yodep-{0}".format(str(uuid.uuid4()))
+        dep = utils.create_deployment(name=name)
+        dep.add_container(c_redis)
+        dep.desired_replicas = 3
+
+        if utils.is_reachable(dep.config):
+            dep.create()
+            self.assertEqual(1, dep.revision)
+            dep.add_container(c_nginx_1)
+            dep.update()
+            self.assertEqual(2, dep.revision)
+            dep.add_container(c_nginx_2)
+            dep.update()
+            self.assertEqual(3, dep.revision)
+
+            rsets = K8sReplicaSet(config=dep.config, name="yo").list()
+            for i in range(0, len(rsets)-1):
+                self.assertGreater(rsets[i].creation_timestamp, rsets[i+1].creation_timestamp)
+
+    # ---------------------------------------------------------------------------------- replicaset purge
+
+    def test_purge_replica_set(self):
+        c_redis = utils.create_container(name="redis", image="redis")
+        c_nginx_1 = utils.create_container(name="nginx", image="nginx")
+        c_nginx_2 = utils.create_container(name="postgres", image="postgres:alpine")
+        c_nginx_3 = utils.create_container(name="memcached", image="memcached:alpine")
+
+        name = "yodep-{0}".format(str(uuid.uuid4()))
+        dep = utils.create_deployment(name=name)
+        dep.add_container(c_redis)
+        dep.desired_replicas = 3
+
+        if utils.is_reachable(dep.config):
+            dep.create()
+            dep.add_container(c_nginx_1)
+            dep.update()
+            dep.add_container(c_nginx_2)
+            dep.update()
+
+            rsets = K8sReplicaSet(config=dep.config, name="yo").list()
+            self.assertEqual(3, len(rsets))
+
+            dep.purge_replica_sets(keep=2)
+
+            rsets = K8sReplicaSet(config=dep.config, name="yo").list()
+            self.assertEqual(2, len(rsets))
