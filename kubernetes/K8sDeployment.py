@@ -77,15 +77,14 @@ class K8sDeployment(K8sObject):
             k8s.append(j)
         return k8s
 
-    def delete(self, orphan=True):
-        super(K8sDeployment, self).delete(orphan)
-        if not orphan:  # no orphans ~ cascade true
+    def delete(self, cascade=False):
+        super(K8sDeployment, self).delete(cascade)
+        if cascade:
             rsets = K8sReplicaSet(
                 config=self.config,
                 name="throwaway"
             ).list(pattern=self.name)
             [rset.delete() for rset in rsets]
-
 
     # -------------------------------------------------------------------------------------  wait
 

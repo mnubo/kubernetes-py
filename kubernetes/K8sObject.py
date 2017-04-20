@@ -306,14 +306,14 @@ class K8sObject(object):
 
         return self
 
-    def delete(self, orphan=False):
+    def delete(self, cascade=False):
         if self.name is None:
             raise SyntaxError('K8sObject: name: [ {0} ] must be set to DELETE the object.'.format(self.name))
 
         url = '{base}/{name}'.format(base=self.base_url, name=self.name)
 
         delete_opts = DeleteOptions()
-        delete_opts.orphan_dependents = orphan
+        delete_opts.orphan_dependents = not cascade
 
         state = self.request(method='DELETE', url=url, data=delete_opts.serialize())
 

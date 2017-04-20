@@ -301,7 +301,7 @@ class K8sDeploymentTests(BaseTest):
         dep.desired_replicas = 3
         if utils.is_reachable(dep.config):
             dep.create()
-            dep.delete(orphan=True)
+            dep.delete(cascade=False)
             result = dep.list()
             self.assertIsInstance(result, list)
             self.assertEqual(0, len(result))
@@ -325,7 +325,7 @@ class K8sDeploymentTests(BaseTest):
             self.assertEqual(2, len(repsets))
             pods = K8sPod(config=dep.config, name="throwaway").list()
             self.assertEqual(3, len(pods))
-            dep.delete(orphan=False)
+            dep.delete(cascade=True)
             result = dep.list()
             self.assertIsInstance(result, list)
             self.assertEqual(0, len(result))

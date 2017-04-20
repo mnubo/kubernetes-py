@@ -584,7 +584,7 @@ class K8sReplicationController(K8sObject):
             foo_old.selector = copy.deepcopy(foo.selector)
             foo_old.pod_labels = copy.deepcopy(foo.pod_labels)
 
-            foo.delete(orphan=True)
+            foo.delete(cascade=False)
             foo_old.create()
 
             if image and len(foo_old.containers) > 1 and not container_name:
