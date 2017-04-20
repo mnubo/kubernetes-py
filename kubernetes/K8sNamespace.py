@@ -6,15 +6,11 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import json
-import yaml
-
 from kubernetes.K8sObject import K8sObject
 from kubernetes.models.v1.Namespace import Namespace
 
 
 class K8sNamespace(K8sObject):
-
     def __init__(self, config=None, name=None):
         super(K8sNamespace, self).__init__(
             config=config,
