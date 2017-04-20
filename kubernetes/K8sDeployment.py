@@ -13,6 +13,7 @@ from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sExceptions import BadRequestException
 from kubernetes.K8sExceptions import TimedOutException, NotFoundException
 from kubernetes.K8sObject import K8sObject
+from kubernetes.K8sVolume import K8sVolume
 from kubernetes.models.v1beta1.Deployment import Deployment
 from kubernetes.models.v1beta1.DeploymentRollback import DeploymentRollback
 from kubernetes.models.v1beta1.LabelSelector import LabelSelector
@@ -112,6 +113,15 @@ class K8sDeployment(K8sObject):
 
     def add_image_pull_secrets(self, secret=None):
         self.model.spec.template.spec.add_image_pull_secrets(secret)
+        return self
+
+    def add_volume(self, volume=None):
+        if not isinstance(volume, K8sVolume):
+            raise SyntaxError('K8sDeployment.add_volume() volume: [ {0} ] is invalid.'.format(volume))
+        volumes = self.model.spec.template.spec.volumes
+        if volume.model not in volumes:
+            volumes.append(volume.model)
+        self.model.spec.template.spec.volumes = volumes
         return self
 
     # -------------------------------------------------------------------------------------  get
