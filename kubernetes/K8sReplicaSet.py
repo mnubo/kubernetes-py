@@ -40,3 +40,29 @@ class K8sReplicaSet(K8sObject):
             j.model = x
             k8s.append(j)
         return k8s
+
+    # -------------------------------------------------------------------------------------  revision
+
+    @property
+    def revision(self):
+        if 'deployment.kubernetes.io/revision' in self.model.metadata.annotations:
+            return self.model.metadata.annotations['deployment.kubernetes.io/revision']
+        return None
+
+    @revision.setter
+    def revision(self, r=None):
+        raise NotImplementedError('K8sReplicaSet: revision is read-only.')
+
+    # -------------------------------------------------------------------------------------  revision history
+
+    @property
+    def revision_history(self):
+        if 'deployment.kubernetes.io/revision-history' in self.model.metadata.annotations:
+            comma_string = self.model.metadata.annotations['deployment.kubernetes.io/revision-history']
+            version_array = comma_string.split(",")
+            return map(lambda x: int(x), version_array)
+        return None
+
+    @revision_history.setter
+    def revision_history(self, r=None):
+        raise NotImplementedError('K8sReplicaSet: revision_history is read-only.')
