@@ -349,7 +349,7 @@ class K8sDeployment(K8sObject):
             rollback.rollback_to.revision = rev
 
         if annotations is not None:
-            rollback.updated_annotations.update(annotations)
+            rollback.updated_annotations = annotations
 
         url = '{base}/{name}/rollback'.format(base=self.base_url, name=self.name)
         state = self.request(
