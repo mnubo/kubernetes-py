@@ -89,7 +89,17 @@ class K8sHorizontalPodAutoscaler(K8sObject):
 
     @scale_ref.setter
     def scale_ref(self, ref=None):
-        if not is_valid_dict(ref, ['apiVersion', 'kind', 'name']):
-            raise SyntaxError('K8sHorizontalPodAutoscaler: scale_ref: [ {} ] is invalid.')
+        if not isinstance(ref, tuple):
+            raise SyntaxError('K8sHorizontalPodAutoscaler: scale_ref must be a tuple of the form (kind, name).')
+
+        kind, name = ref
+        if kind not in ['ReplicationController', 'Deployment']:
+            raise SyntaxError('K8sHorizontalPodAutoscaler: scale_ref.kind: [ {} ] is invalid.'.format(kind))
+
+        ref = {
+            'apiVersion': 'v1' if kind == 'ReplicationController' else 'extensions/v1beta1',
+            'kind': kind,
+            'name': name
+        }
         sub = SubresourceReference(ref)
         self.model.spec.scale_target_ref = sub

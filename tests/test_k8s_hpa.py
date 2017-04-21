@@ -45,6 +45,35 @@ class K8sJobTests(BaseTest):
         except Exception as err:
             self.fail("Unhandled exception: [ {0} ]".format(err.__class__.__name__))
 
+    # ------------------------------------------------------------------------------------- update
+
+    def test_hpa_update(self):
+        c_nginx = utils.create_container(name="yo", image="nginx:latest")
+
+        deploy = utils.create_deployment(name="yo")
+        deploy.add_container(c_nginx)
+        deploy.desired_replicas = 3
+
+        hpa = utils.create_hpa(name="yo")
+        hpa.min_replicas = 1
+        hpa.max_replicas = 10
+        hpa.cpu_percent = 50
+        hpa.scale_ref = ("Deployment", "yo")
+
+        if utils.is_reachable(hpa.config):
+            deploy.create()
+            hpa.create()
+            hpa.get()
+            self.assertEqual(50, hpa.cpu_percent)
+            hpa.cpu_percent = 70
+            hpa.min_replicas = 3
+            hpa.max_replicas = 5
+            hpa.update()
+            hpa.get()
+            self.assertEqual(70, hpa.cpu_percent)
+            self.assertEqual(3, hpa.min_replicas)
+            self.assertEqual(5, hpa.max_replicas)
+
     # ------------------------------------------------------------------------------------- walkthrough
 
     def test_hpa_walkthrough(self):
