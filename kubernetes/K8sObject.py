@@ -342,7 +342,6 @@ class K8sObject(object):
 
         return self
 
-
     def delete(self, cascade=False):
         if self.name is None:
             raise SyntaxError('K8sObject: name: [ {0} ] must be set to DELETE the object.'.format(self.name))
