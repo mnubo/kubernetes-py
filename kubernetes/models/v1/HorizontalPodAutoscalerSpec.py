@@ -6,7 +6,6 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1beta1.CPUTargetUtilization import CPUTargetUtilization
 from kubernetes.models.v1beta1.SubresourceReference import SubresourceReference
 
 
@@ -18,7 +17,7 @@ class HorizontalPodAutoscalerSpec(object):
     def __init__(self, model=None):
         super(HorizontalPodAutoscalerSpec, self).__init__()
 
-        self._scale_target_ref = None
+        self._scale_target_ref = SubresourceReference()
         self._min_replicas = 1
         self._max_replicas = 1  # cannot be smaller than min_replicas
         self._cpu_utilization = 70
