@@ -23,9 +23,15 @@ class K8sNodeTest(BaseTest):
 
     def setUp(self):
         utils.cleanup_nodes()
+        utils.cleanup_deployments()
+        utils.cleanup_rs()
+        utils.cleanup_pods()
 
     def tearDown(self):
         utils.cleanup_nodes()
+        utils.cleanup_deployments()
+        utils.cleanup_rs()
+        utils.cleanup_pods()
 
     # --------------------------------------------------------------------------------- init
 
@@ -251,3 +257,48 @@ class K8sNodeTest(BaseTest):
             node.delete()
             from_get = K8sNode.get_by_name(node.config, node.name)
             self.assertIsNone(from_get)
+
+    # --------------------------------------------------------------------------------- api - nodeSelector
+
+    def test_node_selectors(self):
+        node = utils.create_node(name="yo")
+
+        c_nginx = utils.create_container("yo-nginx", "nginx:latest")
+        c_pg = utils.create_container("yo-pg", "postgres:alpine")
+        c_redis = utils.create_container("yo-redis", "redis:latest")
+
+        d_nginx = utils.create_deployment(name="yo-nginx")
+        d_nginx.desired_replicas = 1
+        d_nginx.add_container(c_nginx)
+
+        d_pg = utils.create_deployment(name="yo-pg")
+        d_pg.desired_replicas = 1
+        d_pg.add_container(c_pg)
+
+        d_redis = utils.create_deployment(name="yo-redis")
+        d_redis.desired_replicas = 1
+        d_redis.add_container(c_redis)
+
+        if utils.is_reachable(node.config):
+            nodes = node.list()
+
+            for i in range(len(nodes)):
+                node = nodes[i]
+                labels = node.labels
+                labels.update({'mnubo.com/selector': str(i)})
+                node.labels = labels
+                node.update()
+
+            d_nginx.node_selector = {"mnubo.com/selector": "0"}
+            d_pg.node_selector = {"mnubo.com/selector": "1"}
+            d_redis.node_selector = {"mnubo.com/selector": "2"}
+            
+            d_nginx.create()
+            d_pg.create()
+            d_redis.create()
+
+            self.assertEqual(d_nginx.node_selector, {"mnubo.com/selector": "0"})
+            self.assertEqual(d_pg.node_selector, {"mnubo.com/selector": "1"})
+            self.assertEqual(d_redis.node_selector, {"mnubo.com/selector": "2"})
+
+            pass  # set breakpoint; play around with killing pods
