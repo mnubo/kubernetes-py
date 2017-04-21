@@ -33,7 +33,7 @@ class HttpRequest:
         http_headers = dict()
         http_headers['Accept'] = 'application/json'
 
-        if self.http_method in ['PUT', 'POST']:
+        if self.http_method in ['PUT', 'POST', 'PATCH']:
             http_headers['Content-type'] = 'application/json'
 
         if self.token is not None:
