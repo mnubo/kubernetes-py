@@ -291,6 +291,14 @@ class K8sDeployment(K8sObject):
 
     @staticmethod
     def get_by_name(config=None, name=None):
+        """
+        Fetches a K8sDeployment by name.
+        
+        :param config: A K8sConfig object.
+        :param name: The name we want.
+        :return: A list of K8sDeployment objects.
+        """
+
         if name is None:
             raise SyntaxError('Deployment: name: [ {0} ] cannot be None.'.format(name))
         if not isinstance(name, str):
@@ -324,7 +332,8 @@ class K8sDeployment(K8sObject):
         preceding the current version.
 
         :param revision: The revision to rollback to.
-        :return:
+        :param annotations: Annotations we'd like to update.
+        :return: self
         """
 
         rollback = DeploymentRollback()
@@ -340,10 +349,13 @@ class K8sDeployment(K8sObject):
             rollback.rollback_to.revision = rev
 
         if annotations is not None:
-            rollback.updated_annotations = annotations
+            rollback.updated_annotations.update(annotations)
 
         url = '{base}/{name}/rollback'.format(base=self.base_url, name=self.name)
-        state = self.request(method='POST', url=url, data=rollback.serialize())
+        state = self.request(
+            method='POST',
+            url=url,
+            data=rollback.serialize())
 
         self.get()
         self._wait_for_desired_replicas()
@@ -359,6 +371,13 @@ class K8sDeployment(K8sObject):
     # -------------------------------------------------------------------------------------  scale
 
     def scale(self, replicas=None):
+        """
+        Scales up or down.
+        
+        :param replicas: The number of desired replicas.
+        :return: self
+        """
+
         self.desired_replicas = replicas
         self.update()
         return self
@@ -366,7 +385,18 @@ class K8sDeployment(K8sObject):
     # -------------------------------------------------------------------------------------  purge replica sets
 
     def purge_replica_sets(self, keep=3):
-        rsets = K8sReplicaSet(config=self.config, name="yo").list(pattern=self.name, reverse=True)
+        """
+        Builds a list of ReplicaSets, sorted from newest to oldest.
+        Slices the array, keeping the most X most recent ReplicaSets.
+        
+        :param keep: The number of ReplicaSets to keep.
+        :return: None.
+        """
+
+        rsets = K8sReplicaSet(
+            config=self.config,
+            name="yo").list(pattern=self.name, reverse=True)
+
         to_purge = rsets[keep:]
         for rset in to_purge:
             rset.delete(cascade=True)
