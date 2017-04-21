@@ -7,6 +7,7 @@
 #
 
 from kubernetes.K8sObject import K8sObject
+from kubernetes.K8sPod import K8sPod
 from kubernetes.models.v1beta1.ReplicaSet import ReplicaSet
 
 
@@ -23,7 +24,7 @@ class K8sReplicaSet(K8sObject):
             name=name
         )
 
-    # -------------------------------------------------------------------------------------  fetch
+    # -------------------------------------------------------------------------------------  override
 
     def get(self):
         self.model = ReplicaSet(self.get_model())
@@ -41,6 +42,14 @@ class K8sReplicaSet(K8sObject):
             k8s.append(j)
         k8s.sort(key=lambda x: x.creation_timestamp, reverse=reverse)
         return k8s
+
+    def delete(self, cascade=False):
+        super(K8sReplicaSet, self).delete(cascade)
+        if cascade:
+            pods = K8sPod(config=self.config, name="yo").list(pattern=self.name)
+            for pod in pods:
+                pod.delete(cascade)
+        return self
 
     # -------------------------------------------------------------------------------------  revision
 

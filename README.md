@@ -5,6 +5,9 @@
 
 Kubernetes API bindings in Python.
 
+Run on our own Kubernetes clusters at 1.4.7
+Unit tests run on Google GKE clusters at 1.5.6
+
 Currently supported Kubernetes objects:
 
 * ~/.kube/config
@@ -13,6 +16,7 @@ Currently supported Kubernetes objects:
 * CronJob
 * DaemonSet
 * Deployment
+* HorizontalPodAutoscalers
 * Job
 * Namespace
 * Node
@@ -20,6 +24,7 @@ Currently supported Kubernetes objects:
 * PersistentVolumeClaim
 * PetSet
 * Pod
+* ReplicaSet
 * ReplicationController
 * Secret
 * Service
@@ -225,7 +230,7 @@ This module assumes the default container runtime.
     pv_aws.volume_id = "vol-0a89cd040d534a371"
     pv_aws.create()
 
-As [specified](http://kubernetes.io/docs/user-guide/volumes/#awselasticblockstore):
+As [specified](https://kubernetes.io/docs/concepts/storage/volumes/#awselasticblockstore):
 - the nodes on which pods are running must be AWS EC2 instances
 - those instances need to be in the same region and availability-zone as the EBS volume
 - EBS only supports a single EC2 instance mounting a volume
@@ -246,7 +251,7 @@ Pod creation will timeout waiting for readiness if not on AWS; unschedulable.
     pv_gce.pd_name = "han-shot-first"
     pv_gce.create()
 
-As [specified](http://kubernetes.io/docs/user-guide/volumes/#gcepersistentdisk):
+As [specified](https://kubernetes.io/docs/concepts/storage/volumes/#gcepersistentdisk):
 - the nodes on which pods are running must be GCE VMs
 - those VMs need to be in the same GCE project and zone as the PD
 
@@ -440,7 +445,7 @@ Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
     volume = K8sVolume(
         config=cfg_cert,
         name='aws-volume',
-        type='awdElasticBlockStore',
+        type='awsElasticBlockStore',
         mount_path='/path/inside/container'
     )
     volume.set_volume_id('vol-123456')  # this volume must already exist
@@ -452,19 +457,17 @@ Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
 
 ## Unit tests
 
-Development of features and unit tests was done against both a full Kubernetes cluster, as well as using 
-the [minikube](https://github.com/kubernetes/minikube) tool. You will find a `./bin/minukube.sh` script in the 
-source tree which fetches the application binary.
-
 The unit tests that require making remote API calls check if there is a reachable API server; if no such endpoint
-is found, the test is skipped. It is recommended to begin testing things out against `minikube`. However, be aware
+is found, the test is skipped. 
+
+It is recommended to begin testing things out against `minikube`. However, be aware
 that minikube does not support the entire feature set of a full Kubernetes install.
 
 ```
 $ nosetests --with-coverage --cover-package=kubernetes
 ```
 
-Please note that when using minikube, and Kuebrnetes in general, the default hosts are as below:
+Please note that when using minikube, and Kubernetes in general, the default hosts are as below:
 
 * `kubernetes`
 * `kubernetes.default`

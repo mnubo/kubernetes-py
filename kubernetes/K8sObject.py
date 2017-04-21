@@ -320,6 +320,28 @@ class K8sObject(object):
 
         return self
 
+    def patch(self):
+        if self.name is None:
+            raise SyntaxError('K8sObject: name: [ {0} ] must be set to PATCH the object.'.format(self.name))
+
+        self.model.metadata.strip(self.model.kind)  # strip server-generated metadata before posting updates
+
+        url = '{base}/{name}'.format(base=self.base_url, name=self.name)
+        post_data = self.serialize()
+        state = self.request(method='PATCH', url=url, data=post_data)
+
+        if not state.get('success'):
+            status = state.get('status', '')
+            reason = state.get('data', dict()).get('message', None)
+            message = 'K8sObject: PATCH failed: HTTP {0} : {1}'.format(status, reason)
+            if int(status) == 404:
+                raise NotFoundException(message)
+            if int(status) == 422:
+                raise UnprocessableEntityException(message)
+            raise BadRequestException(message)
+
+        return self
+
     def delete(self, cascade=False):
         if self.name is None:
             raise SyntaxError('K8sObject: name: [ {0} ] must be set to DELETE the object.'.format(self.name))

@@ -74,6 +74,7 @@ def is_reachable(cfg=None):
             return r['success']
 
         except Exception as err:
+            print(err)
             return False
 
 
@@ -366,7 +367,7 @@ def cleanup_objects():
 
 
 def cleanup_namespaces():
-    ref = create_namespace(name="throwaway")
+    ref = create_namespace(name="yo")
     if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 2:
@@ -380,7 +381,7 @@ def cleanup_namespaces():
 
 
 def cleanup_nodes():
-    ref = create_node(name="throwaway")
+    ref = create_node(name="yo")
     if is_reachable(ref.config):
         node_pattern = re.compile(r'yo-')
         _list = ref.list()
@@ -396,7 +397,7 @@ def cleanup_nodes():
 
 
 def cleanup_pods():
-    ref = create_pod(name="throwaway")
+    ref = create_pod(name="yo")
     if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 0:
@@ -409,7 +410,7 @@ def cleanup_pods():
 
 
 def cleanup_rc():
-    ref = create_rc(name="throwaway")
+    ref = create_rc(name="yo")
     if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 0:
@@ -422,7 +423,7 @@ def cleanup_rc():
 
 
 def cleanup_secrets():
-    ref = create_secret(name="throwaway")
+    ref = create_secret(name="yo")
     if is_reachable(ref.config):
         try:
             _list = ref.list()
@@ -443,7 +444,7 @@ def cleanup_secrets():
 
 
 def cleanup_services():
-    ref = create_service(name="throwaway")
+    ref = create_service(name="yo")
     if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 1:
@@ -457,7 +458,7 @@ def cleanup_services():
 
 
 def cleanup_rs():
-    ref = create_rs(name="throwaway")
+    ref = create_rs(name="yo")
     if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 0:
@@ -470,7 +471,7 @@ def cleanup_rs():
 
 
 def cleanup_deployments():
-    ref = create_deployment(name="throwaway")
+    ref = create_deployment(name="yo")
     if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 0:
@@ -483,7 +484,7 @@ def cleanup_deployments():
 
 
 def cleanup_pv():
-    ref = create_pv(name="throwaway", type="hostPath")
+    ref = create_pv(name="yo", type="hostPath")
     if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 0:
@@ -496,7 +497,7 @@ def cleanup_pv():
 
 
 def cleanup_pvc():
-    ref = create_pvc(name="throwaway")
+    ref = create_pvc(name="yo")
     if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 0:
@@ -509,7 +510,7 @@ def cleanup_pvc():
 
 
 def cleanup_jobs():
-    ref = create_job(name="throwaway")
+    ref = create_job(name="yo")
     if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 0:
@@ -522,7 +523,7 @@ def cleanup_jobs():
 
 
 def cleanup_cronjobs():
-    ref = create_cronjob(name="throwaway")
+    ref = create_cronjob(name="yo")
     if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 0:
@@ -535,7 +536,7 @@ def cleanup_cronjobs():
 
 
 def cleanup_ds():
-    ref = create_daemonset(name="throwaway")
+    ref = create_daemonset(name="yo")
     if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 0:
@@ -548,7 +549,7 @@ def cleanup_ds():
 
 
 def cleanup_petsets():
-    ref = create_petset(name="throwaway")
+    ref = create_petset(name="yo")
     if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 0:
@@ -562,7 +563,7 @@ def cleanup_petsets():
 
 
 def cleanup_stateful_sets():
-    ref = create_stateful_set(name="throwaway")
+    ref = create_stateful_set(name="yo")
     if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 0:
@@ -576,7 +577,7 @@ def cleanup_stateful_sets():
 
 
 def cleanup_service_accounts():
-    ref = create_service_account(name="throwaway")
+    ref = create_service_account(name="yo")
     if is_reachable(ref.config):
         _list = ref.list()
         try:
@@ -596,7 +597,7 @@ def cleanup_service_accounts():
 
 
 def cleanup_storage_class():
-    ref = create_storage_class(name="throwaway")
+    ref = create_storage_class(name="yo")
     if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 0:
@@ -609,7 +610,7 @@ def cleanup_storage_class():
 
 
 def cleanup_hpas():
-    ref = create_hpa(name="throwaway")
+    ref = create_hpa(name="yo")
     if is_reachable(ref.config):
         _list = ref.list()
         while len(_list) > 0:

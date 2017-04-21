@@ -305,9 +305,9 @@ class K8sDeploymentTests(BaseTest):
             result = dep.list()
             self.assertIsInstance(result, list)
             self.assertEqual(0, len(result))
-            repsets = K8sReplicaSet(config=dep.config, name="throwaway").list()
+            repsets = K8sReplicaSet(config=dep.config, name="yo").list()
             self.assertEqual(1, len(repsets))
-            pods = K8sPod(config=dep.config, name="throwaway").list()
+            pods = K8sPod(config=dep.config, name="yo").list()
             self.assertEqual(3, len(pods))
             
     def test_delete_cascade(self):
@@ -321,17 +321,17 @@ class K8sDeploymentTests(BaseTest):
             dep.create()
             dep.add_container(c_nginx)
             dep.update()
-            repsets = K8sReplicaSet(config=dep.config, name="throwaway").list()
+            repsets = K8sReplicaSet(config=dep.config, name="yo").list()
             self.assertEqual(2, len(repsets))
-            pods = K8sPod(config=dep.config, name="throwaway").list()
+            pods = K8sPod(config=dep.config, name="yo").list()
             self.assertEqual(3, len(pods))
             dep.delete(cascade=True)
             result = dep.list()
             self.assertIsInstance(result, list)
             self.assertEqual(0, len(result))
-            repsets = K8sReplicaSet(config=dep.config, name="throwaway").list()
+            repsets = K8sReplicaSet(config=dep.config, name="yo").list()
             self.assertEqual(0, len(repsets))
-            pods = K8sPod(config=dep.config, name="throwaway").list()
+            pods = K8sPod(config=dep.config, name="yo").list()
             self.assertEqual(0, len(pods))
 
     # -------------------------------------------------------------------------------------  get by name
@@ -411,7 +411,7 @@ class K8sDeploymentTests(BaseTest):
             dep.container_image = (cont_name, new_image)
             # Update the deployment
             dep.update()
-            # Refresh whatever we have.
+            # Refresh
             dep.get()
             for c in dep.containers:
                 self.assertIsInstance(c, K8sContainer)
@@ -479,9 +479,9 @@ class K8sDeploymentTests(BaseTest):
 
     def test_purge_replica_set(self):
         c_redis = utils.create_container(name="redis", image="redis")
-        c_nginx_1 = utils.create_container(name="nginx", image="nginx")
-        c_nginx_2 = utils.create_container(name="postgres", image="postgres:alpine")
-        c_nginx_3 = utils.create_container(name="memcached", image="memcached:alpine")
+        c_nginx = utils.create_container(name="nginx", image="nginx")
+        c_postgres = utils.create_container(name="postgres", image="postgres:alpine")
+        # c_memcached = utils.create_container(name="memcached", image="memcached:alpine")
 
         name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = utils.create_deployment(name=name)
@@ -490,9 +490,9 @@ class K8sDeploymentTests(BaseTest):
 
         if utils.is_reachable(dep.config):
             dep.create()
-            dep.add_container(c_nginx_1)
+            dep.add_container(c_nginx)
             dep.update()
-            dep.add_container(c_nginx_2)
+            dep.add_container(c_postgres)
             dep.update()
 
             rsets = K8sReplicaSet(config=dep.config, name="yo").list()

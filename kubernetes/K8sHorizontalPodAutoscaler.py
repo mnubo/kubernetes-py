@@ -7,7 +7,9 @@
 #
 
 from kubernetes.K8sObject import K8sObject
+from kubernetes.utils import is_valid_dict
 from kubernetes.models.v1.HorizontalPodAutoscaler import HorizontalPodAutoscaler
+from kubernetes.models.v1beta1.SubresourceReference import SubresourceReference
 
 
 class K8sHorizontalPodAutoscaler(K8sObject):
@@ -78,3 +80,26 @@ class K8sHorizontalPodAutoscaler(K8sObject):
     @max_replicas.setter
     def max_replicas(self, max=None):
         self.model.spec.max_replicas = max
+        
+    # ------------------------------------------------------------------------------------- scaleRef
+
+    @property
+    def scale_ref(self):
+        return self.model.spec.scale_target_ref
+
+    @scale_ref.setter
+    def scale_ref(self, ref=None):
+        if not isinstance(ref, tuple):
+            raise SyntaxError('K8sHorizontalPodAutoscaler: scale_ref must be a tuple of the form (kind, name).')
+
+        kind, name = ref
+        if kind not in ['ReplicationController', 'Deployment']:
+            raise SyntaxError('K8sHorizontalPodAutoscaler: scale_ref.kind: [ {} ] is invalid.'.format(kind))
+
+        ref = {
+            'apiVersion': 'v1' if kind == 'ReplicationController' else 'extensions/v1beta1',
+            'kind': kind,
+            'name': name
+        }
+        sub = SubresourceReference(ref)
+        self.model.spec.scale_target_ref = sub

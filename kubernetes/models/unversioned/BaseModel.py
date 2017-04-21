@@ -114,7 +114,7 @@ class BaseModel(object):
         data = {}
         if self.api_version is not None:
             data['apiVersion'] = self.api_version
-        if self.kind  is not None:
+        if self.kind is not None:
             data['kind'] = self.kind
         if self.metadata is not None:
             data['metadata'] = self.metadata.serialize()
