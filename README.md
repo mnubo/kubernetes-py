@@ -445,7 +445,7 @@ Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
     volume = K8sVolume(
         config=cfg_cert,
         name='aws-volume',
-        type='awdElasticBlockStore',
+        type='awsElasticBlockStore',
         mount_path='/path/inside/container'
     )
     volume.set_volume_id('vol-123456')  # this volume must already exist
@@ -457,19 +457,17 @@ Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
 
 ## Unit tests
 
-Development of features and unit tests was done against both a full Kubernetes cluster, as well as using 
-the [minikube](https://github.com/kubernetes/minikube) tool. You will find a `./bin/minukube.sh` script in the 
-source tree which fetches the application binary.
-
 The unit tests that require making remote API calls check if there is a reachable API server; if no such endpoint
-is found, the test is skipped. It is recommended to begin testing things out against `minikube`. However, be aware
+is found, the test is skipped. 
+
+It is recommended to begin testing things out against `minikube`. However, be aware
 that minikube does not support the entire feature set of a full Kubernetes install.
 
 ```
 $ nosetests --with-coverage --cover-package=kubernetes
 ```
 
-Please note that when using minikube, and Kuebrnetes in general, the default hosts are as below:
+Please note that when using minikube, and Kubernetes in general, the default hosts are as below:
 
 * `kubernetes`
 * `kubernetes.default`
