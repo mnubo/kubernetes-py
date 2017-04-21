@@ -243,6 +243,16 @@ class K8sDeployment(K8sObject):
     def selector(self, sel=None):
         self.model.spec.selector = sel
 
+    # -------------------------------------------------------------------------------------  nodeSelector
+
+    @property
+    def node_selector(self):
+        return self.model.spec.template.spec.node_selector
+
+    @node_selector.setter
+    def node_selector(self, sel=None):
+        self.model.spec.template.spec.node_selector = sel
+
     # -------------------------------------------------------------------------------------  containers
 
     @property
