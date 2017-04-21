@@ -7,7 +7,9 @@
 #
 
 from kubernetes.K8sObject import K8sObject
+from kubernetes.utils import is_valid_dict
 from kubernetes.models.v1.HorizontalPodAutoscaler import HorizontalPodAutoscaler
+from kubernetes.models.v1beta1.SubresourceReference import SubresourceReference
 
 
 class K8sHorizontalPodAutoscaler(K8sObject):
@@ -78,3 +80,16 @@ class K8sHorizontalPodAutoscaler(K8sObject):
     @max_replicas.setter
     def max_replicas(self, max=None):
         self.model.spec.max_replicas = max
+        
+    # ------------------------------------------------------------------------------------- scaleRef
+
+    @property
+    def scale_ref(self):
+        return self.model.spec.scale_target_ref
+
+    @scale_ref.setter
+    def scale_ref(self, ref=None):
+        if not is_valid_dict(ref, ['apiVersion', 'kind', 'name']):
+            raise SyntaxError('K8sHorizontalPodAutoscaler: scale_ref: [ {} ] is invalid.')
+        sub = SubresourceReference(ref)
+        self.model.spec.scale_target_ref = sub
