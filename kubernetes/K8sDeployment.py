@@ -18,6 +18,7 @@ from kubernetes.K8sReplicaSet import K8sReplicaSet
 from kubernetes.models.v1beta1.Deployment import Deployment
 from kubernetes.models.v1beta1.DeploymentRollback import DeploymentRollback
 from kubernetes.models.v1beta1.LabelSelector import LabelSelector
+from kubernetes.utils import is_valid_list
 
 
 class K8sDeployment(K8sObject):
@@ -286,6 +287,17 @@ class K8sDeployment(K8sObject):
             found[0].image = image
             new.append(found[0])
             self.containers = new
+
+    # -------------------------------------------------------------------------------------  volumes
+
+    @property
+    def volumes(self):
+        return self.model.spec.template.spec.volumes
+
+    @volumes.setter
+    def volumes(self, v=None):
+        if not is_valid_list(v, K8sVolume):
+            self.model.spec.template.spec.volumes = v
 
     # -------------------------------------------------------------------------------------  get by name
 
