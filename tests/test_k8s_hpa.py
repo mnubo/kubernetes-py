@@ -72,5 +72,6 @@ class K8sJobTests(BaseTest):
         # // --- Step Three: Increase Load
         # $ kubectl run -i --tty load-generator --image=busybox /bin/sh
         # $ while true; do wget -q -O- http://php-apache.default.svc.cluster.local; done
+        # watch 'kubectl config current-context; echo; kubectl get deployments; echo; kubectl get replicasets; echo; kubectl get pods; echo; kubectl top nodes; echo; kubectl top pods'
 
         time.sleep(10)  # wait for 10 secs; set a breakpoint if you need.
