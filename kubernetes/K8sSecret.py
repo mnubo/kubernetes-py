@@ -71,7 +71,7 @@ class K8sSecret(K8sObject):
 
     @staticmethod
     def list_image_pull_secrets(config=None):
-        _list = K8sSecret(config=config, name="throwaway").list()
+        _list = K8sSecret(config=config, name="yo").list()
         secrets = []
         for x in _list:
             if x.type == Secret.K8s_TYPE_DOCKER_CONFIG:
@@ -101,7 +101,7 @@ class K8sSecret(K8sObject):
 
     @staticmethod
     def api_tokens_for_service_account(config=None, name=None):
-        _list = K8sSecret(config=config, name="throwaway").list()
+        _list = K8sSecret(config=config, name="yo").list()
         _tokens = []
         for x in _list:
             if x.type == Secret.K8s_TYPE_SERVICE_ACCOUNT:
