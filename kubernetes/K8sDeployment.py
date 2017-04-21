@@ -390,12 +390,13 @@ class K8sDeployment(K8sObject):
         Slices the array, keeping the most X most recent ReplicaSets.
         
         :param keep: The number of ReplicaSets to keep.
-        :return: None.
+        :return: None
         """
 
         rsets = K8sReplicaSet(
             config=self.config,
-            name="yo").list(pattern=self.name, reverse=True)
+            name="yo"
+        ).list(pattern=self.name, reverse=True)
 
         to_purge = rsets[keep:]
         for rset in to_purge:
