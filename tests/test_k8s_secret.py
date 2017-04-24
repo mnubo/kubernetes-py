@@ -9,7 +9,7 @@
 import json
 import uuid
 
-from tests import utils
+from tests import _utils
 from tests.BaseTest import BaseTest
 from kubernetes import K8sSecret, K8sConfig
 from kubernetes.K8sExceptions import *
@@ -19,12 +19,12 @@ from kubernetes.models.v1 import Secret
 class K8sSecretTest(BaseTest):
 
     def setUp(self):
-        utils.cleanup_service_accounts()
-        utils.cleanup_secrets()
+        _utils.cleanup_service_accounts()
+        _utils.cleanup_secrets()
 
     def tearDown(self):
-        utils.cleanup_service_accounts()
-        utils.cleanup_secrets()
+        _utils.cleanup_service_accounts()
+        _utils.cleanup_secrets()
 
     # --------------------------------------------------------------------------------- init
 
@@ -47,11 +47,11 @@ class K8sSecretTest(BaseTest):
     def test_init_with_invalid_name(self):
         name = object()
         with self.assertRaises(SyntaxError):
-            utils.create_secret(name=name)
+            _utils.create_secret(name=name)
 
     def test_init_with_name(self):
         name = "yoname"
-        secret = utils.create_secret(name=name)
+        secret = _utils.create_secret(name=name)
         self.assertIsNotNone(secret)
         self.assertIsInstance(secret, K8sSecret)
         self.assertEqual(secret.name, name)
@@ -61,8 +61,8 @@ class K8sSecretTest(BaseTest):
     def test_init_with_name_and_config(self):
         name = "yoname"
         nspace = "yomama"
-        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback, namespace=nspace)
-        secret = utils.create_secret(config=config, name=name)
+        config = K8sConfig(kubeconfig=_utils.kubeconfig_fallback, namespace=nspace)
+        secret = _utils.create_secret(config=config, name=name)
         self.assertIsNotNone(secret)
         self.assertIsInstance(secret, K8sSecret)
         self.assertEqual(secret.name, name)
@@ -73,7 +73,7 @@ class K8sSecretTest(BaseTest):
 
     def test_struct_k8s_secret(self):
         name = "yoname"
-        secret = utils.create_secret(name=name)
+        secret = _utils.create_secret(name=name)
         self.assertIsNotNone(secret)
         self.assertIsInstance(secret.base_url, str)
         self.assertIsInstance(secret.config, K8sConfig)
@@ -83,7 +83,7 @@ class K8sSecretTest(BaseTest):
 
     def test_struct(self):
         name = "yoname"
-        secret = utils.create_secret(name=name)
+        secret = _utils.create_secret(name=name)
         model = secret.model
         self.assertIsInstance(model, Secret)
 
@@ -91,13 +91,13 @@ class K8sSecretTest(BaseTest):
 
     def test_add_annotation_none_args(self):
         name = "yosecret"
-        secret = utils.create_secret(name=name)
+        secret = _utils.create_secret(name=name)
         with self.assertRaises(SyntaxError):
             secret.add_annotation()
 
     def test_add_annotation_invalid_args(self):
         name = "yosecret"
-        secret = utils.create_secret(name=name)
+        secret = _utils.create_secret(name=name)
         k = object()
         v = object()
         with self.assertRaises(SyntaxError):
@@ -105,7 +105,7 @@ class K8sSecretTest(BaseTest):
 
     def test_add_annotation(self):
         name = "yosecret"
-        secret = utils.create_secret(name=name)
+        secret = _utils.create_secret(name=name)
         k = "yokey"
         v = "yovalue"
         secret.add_annotation(k, v)
@@ -116,13 +116,13 @@ class K8sSecretTest(BaseTest):
 
     def test_add_label_none_args(self):
         name = "yosecret"
-        secret = utils.create_secret(name=name)
+        secret = _utils.create_secret(name=name)
         with self.assertRaises(SyntaxError):
             secret.add_label()
 
     def test_add_label_invalid_args(self):
         name = "yosecret"
-        secret = utils.create_secret(name=name)
+        secret = _utils.create_secret(name=name)
         k = object()
         v = object()
         with self.assertRaises(SyntaxError):
@@ -130,7 +130,7 @@ class K8sSecretTest(BaseTest):
 
     def test_add_label(self):
         name = "yosecret"
-        secret = utils.create_secret(name=name)
+        secret = _utils.create_secret(name=name)
         k = "yokey"
         v = "yovalue"
         secret.add_label(k, v)
@@ -141,8 +141,8 @@ class K8sSecretTest(BaseTest):
 
     def test_get_doesnt_exist(self):
         name = "yosecret"
-        secret = utils.create_secret(name=name)
-        if utils.is_reachable(secret.config):
+        secret = _utils.create_secret(name=name)
+        if _utils.is_reachable(secret.config):
             try:
                 secret.get()
                 self.fail("Should not fail.")
@@ -151,8 +151,8 @@ class K8sSecretTest(BaseTest):
 
     def test_get(self):
         name = "yosecret-{0}".format(str(uuid.uuid4()))
-        secret = utils.create_secret(name=name)
-        if utils.is_reachable(secret.config):
+        secret = _utils.create_secret(name=name)
+        if _utils.is_reachable(secret.config):
             from_create = secret.create()
             self.assertIsInstance(from_create, K8sSecret)
             self.assertEqual(from_create.name, name)
@@ -165,13 +165,13 @@ class K8sSecretTest(BaseTest):
 
     def test_set_data_none_args(self):
         name = "yosecret"
-        secret = utils.create_secret(name=name)
+        secret = _utils.create_secret(name=name)
         with self.assertRaises(SyntaxError):
             secret.data = None
 
     def test_set_data_invalid_key(self):
         name = "yosecret"
-        secret = utils.create_secret(name=name)
+        secret = _utils.create_secret(name=name)
         k = object()
         v = {'key1': 'value1', 'key2': 'value2'}
         with self.assertRaises(SyntaxError):
@@ -179,7 +179,7 @@ class K8sSecretTest(BaseTest):
 
     def test_set_data_invalid_value(self):
         name = "yosecret"
-        secret = utils.create_secret(name=name)
+        secret = _utils.create_secret(name=name)
         k = "yokey"
         v = {'key1': 'value1', 'key2': 'value2'}
         with self.assertRaises(SyntaxError):
@@ -187,7 +187,7 @@ class K8sSecretTest(BaseTest):
 
     def test_set_data(self):
         name = "yosecret"
-        secret = utils.create_secret(name=name)
+        secret = _utils.create_secret(name=name)
         k = "yokey"
         v = {'key1': 'value1', 'key2': 'value2'}
         secret.data = {k: json.dumps(v)}
@@ -198,20 +198,20 @@ class K8sSecretTest(BaseTest):
 
     def test_set_type_none_arg(self):
         name = "yosecret"
-        secret = utils.create_secret(name=name)
+        secret = _utils.create_secret(name=name)
         with self.assertRaises(SyntaxError):
             secret.type = None
 
     def test_set_type_invalid_arg(self):
         name = "yosecret"
-        secret = utils.create_secret(name=name)
+        secret = _utils.create_secret(name=name)
         secret_type = object()
         with self.assertRaises(SyntaxError):
             secret.type = secret_type
 
     def test_set_type(self):
         name = "yosecret"
-        secret = utils.create_secret(name=name)
+        secret = _utils.create_secret(name=name)
         t = "yosecrettype"
         secret.type = t
         self.assertEqual(t, secret.type)
@@ -220,13 +220,13 @@ class K8sSecretTest(BaseTest):
 
     def test_set_dockercfg_json_secret_none_arg(self):
         name = "yosecret"
-        secret = utils.create_secret(name=name)
+        secret = _utils.create_secret(name=name)
         with self.assertRaises(SyntaxError):
             secret.dockerconfigjson = None
 
     def test_set_dockercfg_json_secret_invalid_arg(self):
         name = "yosecret"
-        secret = utils.create_secret(name=name)
+        secret = _utils.create_secret(name=name)
         data = object()
         with self.assertRaises(SyntaxError):
             secret.dockerconfigjson = data
@@ -235,7 +235,7 @@ class K8sSecretTest(BaseTest):
 
     def test_set_service_account_token_none_args(self):
         name = "yosecret"
-        secret = utils.create_secret(name=name)
+        secret = _utils.create_secret(name=name)
         try:
             secret.set_service_account_token()
         except Exception as err:
@@ -249,7 +249,7 @@ class K8sSecretTest(BaseTest):
         kubecfg_data = object()
         cacert = object()
 
-        secret = utils.create_secret(name=name)
+        secret = _utils.create_secret(name=name)
         try:
             secret.set_service_account_token(
                 account_name=account_name,
@@ -269,7 +269,7 @@ class K8sSecretTest(BaseTest):
         kubecfg_data = "yokubecfgdata"
         cacert = "yocacert"
 
-        secret = utils.create_secret(name=name)
+        secret = _utils.create_secret(name=name)
         secret.set_service_account_token(
             account_name=account_name,
             account_uid=account_uid,
@@ -302,16 +302,16 @@ class K8sSecretTest(BaseTest):
 
     def test_create(self):
         name = "yosecret-{0}".format(str(uuid.uuid4()))
-        secret = utils.create_secret(name=name)
-        if utils.is_reachable(secret.config):
+        secret = _utils.create_secret(name=name)
+        if _utils.is_reachable(secret.config):
             secret.create()
             _list = secret.list()
             self.assertEqual(2, len(_list))  # service-account-token + 1
 
     def test_create_already_exists(self):
         name = "yosecret-{0}".format(str(uuid.uuid4()))
-        secret = utils.create_secret(name=name)
-        if utils.is_reachable(secret.config):
+        secret = _utils.create_secret(name=name)
+        if _utils.is_reachable(secret.config):
             secret.create()
             try:
                 secret.create()
@@ -323,8 +323,8 @@ class K8sSecretTest(BaseTest):
 
     def test_list_without_create(self):
         name = "yosecret-{0}".format(str(uuid.uuid4()))
-        secret = utils.create_secret(name=name)
-        if utils.is_reachable(secret.config):
+        secret = _utils.create_secret(name=name)
+        if _utils.is_reachable(secret.config):
             _list = secret.list()
             self.assertGreaterEqual(1, len(_list))  # service-account-token on GCE
             for x in _list:
@@ -332,13 +332,13 @@ class K8sSecretTest(BaseTest):
 
     def test_list(self):
         count = 10
-        config = utils.create_config()
-        if utils.is_reachable(config):
+        config = _utils.create_config()
+        if _utils.is_reachable(config):
             for i in range(0, count):
                 name = "yosecret-{0}".format(str(uuid.uuid4()))
-                secret = utils.create_secret(name=name)
+                secret = _utils.create_secret(name=name)
                 secret.create()
-            secret = utils.create_secret(name="yosecret")
+            secret = _utils.create_secret(name="yosecret")
             _list = secret.list()
             for x in _list:
                 self.assertIsInstance(x, K8sSecret)
@@ -348,8 +348,8 @@ class K8sSecretTest(BaseTest):
 
     def test_update_nonexistent(self):
         name = "yosecret-{0}".format(str(uuid.uuid4()))
-        secret = utils.create_secret(name=name)
-        if utils.is_reachable(secret.config):
+        secret = _utils.create_secret(name=name)
+        if _utils.is_reachable(secret.config):
             try:
                 secret.update()
                 self.fail("Should not fail.")
@@ -358,10 +358,10 @@ class K8sSecretTest(BaseTest):
 
     def test_update_data(self):
         name = "yosecret-{0}".format(str(uuid.uuid4()))
-        secret = utils.create_secret(name=name)
+        secret = _utils.create_secret(name=name)
         k = "yokey"
         v = "yovalue"
-        if utils.is_reachable(secret.config):
+        if _utils.is_reachable(secret.config):
             secret.create()
             secret.data = {k: v}
             secret.update()
@@ -374,8 +374,8 @@ class K8sSecretTest(BaseTest):
 
     def test_delete_nonexistent(self):
         name = "yosecret-{0}".format(str(uuid.uuid4()))
-        secret = utils.create_secret(name=name)
-        if utils.is_reachable(secret.config):
+        secret = _utils.create_secret(name=name)
+        if _utils.is_reachable(secret.config):
             try:
                 secret.delete()
                 self.fail("Should not fail.")
@@ -384,8 +384,8 @@ class K8sSecretTest(BaseTest):
 
     def test_delete(self):
         name = "yosecret-{0}".format(str(uuid.uuid4()))
-        secret = utils.create_secret(name=name)
-        if utils.is_reachable(secret.config):
+        secret = _utils.create_secret(name=name)
+        if _utils.is_reachable(secret.config):
             _list = secret.list()
             count_before_create = len(_list)
             secret.create()
@@ -401,27 +401,27 @@ class K8sSecretTest(BaseTest):
 
     def test_set_default_dockerconfigjson(self):
         name = "docker-registry"
-        secret = utils.create_secret(name=name)
+        secret = _utils.create_secret(name=name)
         data = {"auths": {"repo:port": {"auth": "authstring", "email": "you@company.com"}}}
         secret.dockerconfigjson = data
         self.assertEqual('kubernetes.io/.dockerconfigjson', secret.type)
         self.assertIn('.dockerconfigjson', secret.data)
         self.assertEqual(data, secret.dockerconfigjson)
-        if utils.is_reachable(secret.config):
+        if _utils.is_reachable(secret.config):
             s = secret.create()
             self.assertIsInstance(s, K8sSecret)
 
     def test_set_system_dockerconfigjson(self):
         name = "docker-registry"
-        config = utils.create_config()
+        config = _utils.create_config()
         config.namespace = 'kube-system'
-        secret = utils.create_secret(config=config, name=name)
+        secret = _utils.create_secret(config=config, name=name)
         data = {"auths": {"repo:port": {"auth": "authstring", "email": "you@company.com"}}}
         secret.dockerconfigjson = data
         self.assertEqual('kubernetes.io/.dockerconfigjson', secret.type)
         self.assertIn('.dockerconfigjson', secret.data)
         self.assertEqual(data, secret.dockerconfigjson)
-        if utils.is_reachable(secret.config):
+        if _utils.is_reachable(secret.config):
             try:
                 secret.delete()
             except NotFoundException:
@@ -432,8 +432,8 @@ class K8sSecretTest(BaseTest):
     # --------------------------------------------------------------------------------- api - create API token
 
     def test_create_service_account_api_token(self):
-        sa = utils.create_service_account(name='build-robot')
-        if utils.is_reachable(sa.config):
+        sa = _utils.create_service_account(name='build-robot')
+        if _utils.is_reachable(sa.config):
             sa.create()
             secret = K8sSecret.create_service_account_api_token(
                 config=sa.config,
@@ -449,9 +449,9 @@ class K8sSecretTest(BaseTest):
     def test_issue_64(self):
         name = "yosecret-{0}".format(str(uuid.uuid4()))
         secret_data = {"test": "test"}
-        secret = utils.create_secret(name=name)
+        secret = _utils.create_secret(name=name)
         secret.data = secret_data
-        if utils.is_reachable(secret.config):
+        if _utils.is_reachable(secret.config):
             secret.create()
             secret.get()
             self.assertIsInstance(secret, K8sSecret)

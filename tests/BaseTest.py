@@ -11,6 +11,7 @@ import unittest
 
 
 class BaseTest(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls):
         # Logging

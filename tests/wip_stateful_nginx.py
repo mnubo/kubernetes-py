@@ -6,7 +6,7 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from tests import utils
+from tests import _utils
 from tests.BaseTest import BaseTest
 from kubernetes.K8sService import K8sService
 from kubernetes.K8sStatefulSet import K8sStatefulSet
@@ -20,12 +20,12 @@ class StatefulSetNginxTests(BaseTest):
     """
 
     def setUp(self):
-        utils.cleanup_stateful_sets()
-        utils.cleanup_services()
+        _utils.cleanup_stateful_sets()
+        _utils.cleanup_services()
 
     def tearDown(self):
-        utils.cleanup_stateful_sets()
-        utils.cleanup_services()
+        _utils.cleanup_stateful_sets()
+        _utils.cleanup_services()
 
     def test_stateful_nginx(self):
         svc = Service(headless_service())
@@ -34,7 +34,7 @@ class StatefulSetNginxTests(BaseTest):
         k8s_sset = K8sStatefulSet(name='sset')
         k8s_svc.model = svc
         k8s_sset.model = sset
-        if utils.is_reachable(k8s_svc.config):
+        if _utils.is_reachable(k8s_svc.config):
             k8s_svc.create()
             k8s_sset.create()
 

@@ -141,8 +141,7 @@ class K8sObject(object):
     def creation_timestamp(self):
         datestring = self.model.metadata.creation_timestamp
         dt = parser.parse(datestring)
-        epoch = int(time.mktime(dt.timetuple()))
-        return epoch
+        return dt
 
     @creation_timestamp.setter
     def creation_timestamp(self, t=None):

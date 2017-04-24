@@ -12,25 +12,25 @@ from kubernetes.K8sHorizontalPodAutoscaler import K8sHorizontalPodAutoscaler
 from kubernetes.models.v1.HorizontalPodAutoscaler import HorizontalPodAutoscaler
 from kubernetes.models.v1.Service import Service
 from kubernetes.models.v1beta1.Deployment import Deployment
-from tests import utils
+from tests import _constants
+from tests import _utils
 from tests.BaseTest import BaseTest
 
 
 class K8sJobTests(BaseTest):
-
     def setUp(self):
-        utils.cleanup_hpas()
-        utils.cleanup_services()
-        utils.cleanup_deployments()
-        utils.cleanup_rs()
-        utils.cleanup_pods()
+        _utils.cleanup_hpas()
+        _utils.cleanup_services()
+        _utils.cleanup_deployments()
+        _utils.cleanup_rs()
+        _utils.cleanup_pods()
 
     def tearDown(self):
-        utils.cleanup_hpas()
-        utils.cleanup_services()
-        utils.cleanup_deployments()
-        utils.cleanup_rs()
-        utils.cleanup_pods()
+        _utils.cleanup_hpas()
+        _utils.cleanup_services()
+        _utils.cleanup_deployments()
+        _utils.cleanup_rs()
+        _utils.cleanup_pods()
 
     # ------------------------------------------------------------------------------------- init
 
@@ -48,19 +48,19 @@ class K8sJobTests(BaseTest):
     # ------------------------------------------------------------------------------------- update
 
     def test_hpa_update(self):
-        c_nginx = utils.create_container(name="yo", image="nginx:latest")
+        c_nginx = _utils.create_container(name="yo", image="nginx:latest")
 
-        deploy = utils.create_deployment(name="yo")
+        deploy = _utils.create_deployment(name="yo")
         deploy.add_container(c_nginx)
         deploy.desired_replicas = 3
 
-        hpa = utils.create_hpa(name="yo")
+        hpa = _utils.create_hpa(name="yo")
         hpa.min_replicas = 1
         hpa.max_replicas = 10
         hpa.cpu_percent = 50
         hpa.scale_ref = ("Deployment", "yo")
 
-        if utils.is_reachable(hpa.config):
+        if _utils.is_reachable(hpa.config):
             deploy.create()
             hpa.create()
             hpa.get()
@@ -82,16 +82,16 @@ class K8sJobTests(BaseTest):
         https://github.com/kubernetes/community/blob/master/contributors/design-proposals/horizontal-pod-autoscaler.md
         """
 
-        k8s_dep = utils.create_deployment(name="php-apache")
-        k8s_dep.model = Deployment(utils.hpa_example_deployment())
+        k8s_dep = _utils.create_deployment(name="php-apache")
+        k8s_dep.model = Deployment(_constants.hpa_example_deployment())
 
-        k8s_svc = utils.create_service(name="php-apache")
-        k8s_svc.model = Service(utils.hpa_example_service())
+        k8s_svc = _utils.create_service(name="php-apache")
+        k8s_svc.model = Service(_constants.hpa_example_service())
 
-        k8s_hpa = utils.create_hpa(name="php-apache")
-        k8s_hpa.model = HorizontalPodAutoscaler(utils.hpa_example_autoscaler())
+        k8s_hpa = _utils.create_hpa(name="php-apache")
+        k8s_hpa.model = HorizontalPodAutoscaler(_constants.hpa_example_autoscaler())
 
-        if utils.is_reachable(k8s_hpa.config):
+        if _utils.is_reachable(k8s_hpa.config):
             # //--- Step One: Run & expose php-apache server
             k8s_dep.create()
             k8s_svc.create()

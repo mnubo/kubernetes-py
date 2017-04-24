@@ -9,18 +9,18 @@
 import re
 import uuid
 
-from tests import utils
-from tests.BaseTest import BaseTest
 from kubernetes.K8sComponentStatus import K8sComponentStatus
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sExceptions import *
 from kubernetes.models.v1.ComponentCondition import ComponentCondition
 from kubernetes.models.v1.ComponentStatus import ComponentStatus
 from kubernetes.models.v1.ObjectMeta import ObjectMeta
+from tests import _constants
+from tests import _utils
+from tests.BaseTest import BaseTest
 
 
 class K8sComponentStatusTest(BaseTest):
-
     def setUp(self):
         pass
 
@@ -48,11 +48,11 @@ class K8sComponentStatusTest(BaseTest):
     def test_init_with_invalid_name(self):
         name = object()
         with self.assertRaises(SyntaxError):
-            utils.create_component_status(name=name)
+            _utils.create_component_status(name=name)
 
     def test_init_with_name(self):
         name = "yo-name"
-        c = utils.create_component_status(name=name)
+        c = _utils.create_component_status(name=name)
         self.assertIsNotNone(c)
         self.assertIsInstance(c, K8sComponentStatus)
         self.assertEqual('ComponentStatus', c.obj_type)
@@ -61,9 +61,9 @@ class K8sComponentStatusTest(BaseTest):
 
     def test_init_with_name_and_config(self):
         nspace = "default"
-        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback, namespace=nspace)
+        config = K8sConfig(kubeconfig=_utils.kubeconfig_fallback, namespace=nspace)
         name = "yo-name"
-        c = utils.create_component_status(config=config, name=name)
+        c = _utils.create_component_status(config=config, name=name)
         self.assertIsNotNone(c)
         self.assertIsInstance(c, K8sComponentStatus)
         self.assertEqual(c.name, name)
@@ -74,7 +74,7 @@ class K8sComponentStatusTest(BaseTest):
 
     def test_struct_k8s_component_status(self):
         name = "yo-name"
-        c = utils.create_component_status(name=name)
+        c = _utils.create_component_status(name=name)
         self.assertIsInstance(c, K8sComponentStatus)
         self.assertIsInstance(c.base_url, str)
         self.assertIsInstance(c.config, K8sConfig)
@@ -83,7 +83,7 @@ class K8sComponentStatusTest(BaseTest):
         self.assertIsInstance(c.obj_type, str)
 
     def test_struct_component_status(self):
-        c = ComponentStatus(model=utils.component_status_scheduler())
+        c = ComponentStatus(model=_constants.component_status_scheduler())
         self.assertIsInstance(c, ComponentStatus)
         self.assertIsInstance(c.metadata, ObjectMeta)
         self.assertIsInstance(c.conditions, list)
@@ -94,15 +94,15 @@ class K8sComponentStatusTest(BaseTest):
 
     def test_get_nonexistent(self):
         name = "yo-component"
-        c = utils.create_component_status(name=name)
-        if utils.is_reachable(c.config):
+        c = _utils.create_component_status(name=name)
+        if _utils.is_reachable(c.config):
             with self.assertRaises(NotFoundException):
                 c.get()
 
     def test_get(self):
         name = "scheduler"
-        c = utils.create_component_status(name=name)
-        if utils.is_reachable(c.config):
+        c = _utils.create_component_status(name=name)
+        if _utils.is_reachable(c.config):
             from_get = c.get()
             self.assertIsInstance(from_get, K8sComponentStatus)
             self.assertEqual(c, from_get)
@@ -111,8 +111,8 @@ class K8sComponentStatusTest(BaseTest):
 
     def test_list(self):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
-        components = utils.create_component_status(name=name)
-        if utils.is_reachable(components.config):
+        components = _utils.create_component_status(name=name)
+        if _utils.is_reachable(components.config):
             _list = components.list()
             for x in _list:
                 self.assertIsInstance(x, K8sComponentStatus)
