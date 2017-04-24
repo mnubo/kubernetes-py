@@ -220,14 +220,14 @@ class K8sReplicationController(K8sObject):
     def namespace(self, nspace=None):
         self.model.metadata.namespace = nspace
 
-    # -------------------------------------------------------------------------------------  node selector
+    # -------------------------------------------------------------------------------------  nodeSelector
 
     @property
-    def pod_node_selector(self):
+    def node_selector(self):
         return self.model.spec.template.spec.node_selector
 
-    @pod_node_selector.setter
-    def pod_node_selector(self, sel=None):
+    @node_selector.setter
+    def node_selector(self, sel=None):
         self.model.spec.template.spec.node_selector = sel
 
     # -------------------------------------------------------------------------------------  pod annotations

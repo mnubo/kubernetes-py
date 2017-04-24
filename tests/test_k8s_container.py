@@ -10,17 +10,17 @@ import json
 
 import yaml
 
-from tests import utils
-from tests.BaseTest import BaseTest
 from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sVolumeMount import K8sVolumeMount
+from kubernetes.models.v1.Capabilities import Capabilities
 from kubernetes.models.v1.Container import Container
 from kubernetes.models.v1.Probe import Probe
-from kubernetes.models.v1.Capabilities import Capabilities
+from tests import _constants
+from tests import _utils
+from tests.BaseTest import BaseTest
 
 
 class K8sContainerTest(BaseTest):
-
     def setUp(self):
         pass
 
@@ -183,10 +183,10 @@ class K8sContainerTest(BaseTest):
     # ------------------------------------------------------------------------------------- add env
 
     def test_add_env(self):
-        cont = Container(utils.myweb_container())
-        k8s_container = utils.create_container(name=cont.name)
+        cont = Container(_constants.myweb_container())
+        k8s_container = _utils.create_container(name=cont.name)
         k8s_container.model = cont
-        envs = utils.myweb_envs()
+        envs = _constants.myweb_envs()
         for k, v in envs.items():
             k8s_container.add_env(k, v)
         self.assertEqual(4, len(k8s_container.env))

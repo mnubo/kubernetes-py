@@ -6,7 +6,7 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from tests import utils
+from tests import _utils
 from tests.BaseTest import BaseTest
 from kubernetes.K8sStorageClass import K8sStorageClass
 from kubernetes.models.v1beta1.StorageClass import StorageClass
@@ -15,10 +15,10 @@ from kubernetes.models.v1beta1.StorageClass import StorageClass
 class K8sStorageClassTests(BaseTest):
 
     def setUp(self):
-        utils.cleanup_storage_class()
+        _utils.cleanup_storage_class()
 
     def tearDown(self):
-        utils.cleanup_storage_class()
+        _utils.cleanup_storage_class()
 
     def test_gce_pd(self):
         json = {
@@ -34,10 +34,10 @@ class K8sStorageClassTests(BaseTest):
         }
 
         sc = StorageClass(json)
-        k8s_sc = utils.create_storage_class(name='sc')
+        k8s_sc = _utils.create_storage_class(name='sc')
         k8s_sc.model = sc
 
-        if utils.is_reachable(k8s_sc.config):
+        if _utils.is_reachable(k8s_sc.config):
             k8s_sc.create()
             from_get = k8s_sc.get()
             self.assertIsInstance(from_get, K8sStorageClass)

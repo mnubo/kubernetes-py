@@ -79,13 +79,14 @@ class K8sDeployment(K8sObject):
         return k8s
 
     def delete(self, cascade=False):
+        super(K8sDeployment, self).delete(cascade)
         if cascade:
             rsets = K8sReplicaSet(
                 config=self.config,
                 name="yo"
             ).list(pattern=self.name)
-            [rset.delete() for rset in rsets]
-        super(K8sDeployment, self).delete(cascade)
+            [rset.delete(cascade=cascade) for rset in rsets]
+        return self
 
     # -------------------------------------------------------------------------------------  wait
 
@@ -242,6 +243,16 @@ class K8sDeployment(K8sObject):
     @selector.setter
     def selector(self, sel=None):
         self.model.spec.selector = sel
+
+    # -------------------------------------------------------------------------------------  nodeSelector
+
+    @property
+    def node_selector(self):
+        return self.model.spec.template.spec.node_selector
+
+    @node_selector.setter
+    def node_selector(self, sel=None):
+        self.model.spec.template.spec.node_selector = sel
 
     # -------------------------------------------------------------------------------------  containers
 

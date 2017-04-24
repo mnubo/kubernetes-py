@@ -8,7 +8,7 @@
 
 import uuid
 
-from tests import utils
+from tests import _utils
 from tests.BaseTest import BaseTest
 from kubernetes.K8sConfig import K8sConfig
 from kubernetes.K8sSecret import K8sSecret
@@ -18,12 +18,12 @@ from kubernetes.K8sServiceAccount import K8sServiceAccount
 class K8sServiceAccountTests(BaseTest):
 
     def setUp(self):
-        utils.cleanup_service_accounts()
-        utils.cleanup_secrets()
+        _utils.cleanup_service_accounts()
+        _utils.cleanup_secrets()
 
     def tearDown(self):
-        utils.cleanup_service_accounts()
-        utils.cleanup_secrets()
+        _utils.cleanup_service_accounts()
+        _utils.cleanup_secrets()
 
     # --------------------------------------------------------------------------------- init
 
@@ -46,11 +46,11 @@ class K8sServiceAccountTests(BaseTest):
     def test_init_with_invalid_name(self):
         name = object()
         with self.assertRaises(SyntaxError):
-            utils.create_service_account(name=name)
+            _utils.create_service_account(name=name)
 
     def test_init_with_name(self):
         name = "yoname"
-        secret = utils.create_service_account(name=name)
+        secret = _utils.create_service_account(name=name)
         self.assertIsNotNone(secret)
         self.assertIsInstance(secret, K8sServiceAccount)
         self.assertEqual(secret.name, name)
@@ -60,8 +60,8 @@ class K8sServiceAccountTests(BaseTest):
     def test_init_with_name_and_config(self):
         name = "yoname"
         nspace = "yomama"
-        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback, namespace=nspace)
-        secret = utils.create_service_account(config=config, name=name)
+        config = K8sConfig(kubeconfig=_utils.kubeconfig_fallback, namespace=nspace)
+        secret = _utils.create_service_account(config=config, name=name)
         self.assertIsNotNone(secret)
         self.assertIsInstance(secret, K8sServiceAccount)
         self.assertEqual(secret.name, name)
@@ -72,8 +72,8 @@ class K8sServiceAccountTests(BaseTest):
 
     def test_create(self):
         name = "mnubo.com-sa-{0}".format(str(uuid.uuid4().hex[:5]))
-        acct = utils.create_service_account(name=name)
-        if utils.is_reachable(acct.config):
+        acct = _utils.create_service_account(name=name)
+        if _utils.is_reachable(acct.config):
             acct.create()
             from_get = acct.get()
             self.assertEqual(acct, from_get)
@@ -82,8 +82,8 @@ class K8sServiceAccountTests(BaseTest):
 
     def test_list(self):
         name = "mnubo.com-sa-{0}".format(str(uuid.uuid4().hex[:5]))
-        acct = utils.create_service_account(name=name)
-        if utils.is_reachable(acct.config):
+        acct = _utils.create_service_account(name=name)
+        if _utils.is_reachable(acct.config):
             acct.create()
             _list = acct.list()
             for x in _list:
@@ -93,8 +93,8 @@ class K8sServiceAccountTests(BaseTest):
 
     def test_add_api_token(self):
         name = "mnubo.com-sa-{0}".format(str(uuid.uuid4().hex[:5]))
-        acct = utils.create_service_account(name=name)
-        if utils.is_reachable(acct.config):
+        acct = _utils.create_service_account(name=name)
+        if _utils.is_reachable(acct.config):
             acct.create()
             acct.add_api_token()
             secrets = K8sSecret.api_tokens_for_service_account(config=acct.config, name=acct.name)
@@ -104,9 +104,9 @@ class K8sServiceAccountTests(BaseTest):
 
     def test_add_image_pull_secret(self):
         name = "mnubo.com-sa-{0}".format(str(uuid.uuid4().hex[:5]))
-        acct = utils.create_service_account(name=name)
+        acct = _utils.create_service_account(name=name)
         data = {"auths": {"repo:port": {"auth": "authstring", "email": "you@company.com"}}}
-        if utils.is_reachable(acct.config):
+        if _utils.is_reachable(acct.config):
             acct.create()
             secret = K8sSecret.create_image_pull_secret(config=acct.config, name=acct.name, data=data)
             acct.add_image_pull_secret(secret)

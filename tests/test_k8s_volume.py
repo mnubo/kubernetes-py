@@ -8,7 +8,7 @@
 
 import uuid
 
-from tests import utils
+from tests import _utils
 from tests.BaseTest import BaseTest
 from kubernetes.K8sExceptions import TimedOutException
 from kubernetes.K8sPod import K8sPod
@@ -29,14 +29,14 @@ class K8sVolumeTest(BaseTest):
     def setUp(self):
         K8sPod.POD_READY_TIMEOUT_SECONDS = 20
         K8sReplicationController.SCALE_WAIT_TIMEOUT_SECONDS = 20
-        utils.cleanup_rc()
-        utils.cleanup_pods()
-        utils.cleanup_secrets()
+        _utils.cleanup_rc()
+        _utils.cleanup_pods()
+        _utils.cleanup_secrets()
 
     def tearDown(self):
-        utils.cleanup_rc()
-        utils.cleanup_pods()
-        utils.cleanup_secrets()
+        _utils.cleanup_rc()
+        _utils.cleanup_pods()
+        _utils.cleanup_secrets()
 
     # --------------------------------------------------------------------------------- init
 
@@ -434,11 +434,11 @@ class K8sVolumeTest(BaseTest):
     def test_pod_emptydir(self):
         container_name = "nginx"
         container_image = "nginx:1.7.9"
-        container = utils.create_container(name=container_name, image=container_image)
+        container = _utils.create_container(name=container_name, image=container_image)
 
         vol_name = "emptydir"
         vol_type = "emptyDir"
-        volume = utils.create_volume(name=vol_name, type=vol_type)
+        volume = _utils.create_volume(name=vol_name, type=vol_type)
 
         mount_name = vol_name
         mount_path = '/test-emptydir'
@@ -446,11 +446,11 @@ class K8sVolumeTest(BaseTest):
         container.add_volume_mount(mount)
 
         pod_name = "nginx"
-        pod = utils.create_pod(name=pod_name)
+        pod = _utils.create_pod(name=pod_name)
         pod.add_volume(volume)
         pod.add_container(container)
 
-        if utils.is_reachable(pod.config):
+        if _utils.is_reachable(pod.config):
             pod.create()
             volnames = [x.name for x in pod.volumes]
             self.assertIn(vol_name, volnames)
@@ -460,12 +460,12 @@ class K8sVolumeTest(BaseTest):
     def test_pod_hostpath(self):
         container_name = "nginx"
         container_image = "nginx:1.7.9"
-        container = utils.create_container(name=container_name, image=container_image)
+        container = _utils.create_container(name=container_name, image=container_image)
 
         vol_name = "hostpath"
         vol_type = "hostPath"
         host_path = "/var/lib/docker"
-        volume = utils.create_volume(name=vol_name, type=vol_type)
+        volume = _utils.create_volume(name=vol_name, type=vol_type)
         volume.path = host_path
 
         mount_name = vol_name
@@ -474,11 +474,11 @@ class K8sVolumeTest(BaseTest):
         container.add_volume_mount(mount)
 
         pod_name = "nginx"
-        pod = utils.create_pod(name=pod_name)
+        pod = _utils.create_pod(name=pod_name)
         pod.add_volume(volume)
         pod.add_container(container)
 
-        if utils.is_reachable(pod.config):
+        if _utils.is_reachable(pod.config):
             pod.create()
             volnames = [x.name for x in pod.volumes]
             self.assertIn(vol_name, volnames)
@@ -488,17 +488,17 @@ class K8sVolumeTest(BaseTest):
     def test_pod_secret(self):
         container_name = "nginx"
         container_image = "nginx:1.7.9"
-        container = utils.create_container(name=container_name, image=container_image)
+        container = _utils.create_container(name=container_name, image=container_image)
 
         secret_name = "yosecret"
-        secret = utils.create_secret(name=secret_name)
+        secret = _utils.create_secret(name=secret_name)
         k = ".secret-file"
         v = "dmFsdWUtMg0KDQo="
         secret.data = {k: v}
 
         vol_name = "secret"
         vol_type = "secret"
-        volume = utils.create_volume(name=vol_name, type=vol_type)
+        volume = _utils.create_volume(name=vol_name, type=vol_type)
         volume.secret_name = secret_name
 
         mount_name = vol_name
@@ -507,11 +507,11 @@ class K8sVolumeTest(BaseTest):
         container.add_volume_mount(mount)
 
         pod_name = "nginx"
-        pod = utils.create_pod(name=pod_name)
+        pod = _utils.create_pod(name=pod_name)
         pod.add_volume(volume)
         pod.add_container(container)
 
-        if utils.is_reachable(pod.config):
+        if _utils.is_reachable(pod.config):
             secret.create()
             pod.create()
             volnames = [x.name for x in pod.volumes]
@@ -522,12 +522,12 @@ class K8sVolumeTest(BaseTest):
     def test_pod_aws_ebs(self):
         container_name = "nginx"
         container_image = "nginx:1.7.9"
-        container = utils.create_container(name=container_name, image=container_image)
+        container = _utils.create_container(name=container_name, image=container_image)
 
         volume_id = "vol-0e3056a2"
         vol_name = "ebs"
         vol_type = "awsElasticBlockStore"
-        volume = utils.create_volume(name=vol_name, type=vol_type)
+        volume = _utils.create_volume(name=vol_name, type=vol_type)
         volume.volume_id = volume_id
 
         mount_name = vol_name
@@ -536,11 +536,11 @@ class K8sVolumeTest(BaseTest):
         container.add_volume_mount(mount)
 
         pod_name = "nginx-{0}".format(str(uuid.uuid4()))
-        pod = utils.create_pod(name=pod_name)
+        pod = _utils.create_pod(name=pod_name)
         pod.add_volume(volume)
         pod.add_container(container)
 
-        if utils.is_reachable(pod.config):
+        if _utils.is_reachable(pod.config):
             try:
                 pod.create()
                 volnames = [x.name for x in pod.volumes]
@@ -553,12 +553,12 @@ class K8sVolumeTest(BaseTest):
     def test_pod_gce_pd(self):
         container_name = "nginx"
         container_image = "nginx:1.7.9"
-        container = utils.create_container(name=container_name, image=container_image)
+        container = _utils.create_container(name=container_name, image=container_image)
 
         pd_name = "kubernetes-py-test-pd"
         vol_name = "persistent"
         vol_type = "gcePersistentDisk"
-        volume = utils.create_volume(name=vol_name, type=vol_type)
+        volume = _utils.create_volume(name=vol_name, type=vol_type)
         volume.pd_name = pd_name
 
         mount_name = vol_name
@@ -567,11 +567,11 @@ class K8sVolumeTest(BaseTest):
         container.add_volume_mount(mount)
 
         pod_name = "nginx-{0}".format(str(uuid.uuid4()))
-        pod = utils.create_pod(name=pod_name)
+        pod = _utils.create_pod(name=pod_name)
         pod.add_volume(volume)
         pod.add_container(container)
 
-        if utils.is_reachable(pod.config):
+        if _utils.is_reachable(pod.config):
             try:
                 pod.create()
                 volnames = [x.name for x in pod.volumes]
@@ -584,13 +584,13 @@ class K8sVolumeTest(BaseTest):
     def test_pod_nfs(self):
         container_name = "nginx"
         container_image = "nginx:1.7.9"
-        container = utils.create_container(name=container_name, image=container_image)
+        container = _utils.create_container(name=container_name, image=container_image)
 
         vol_name = "nfs"
         vol_type = "nfs"
         server = "howard.mtl.mnubo.com"
         nfs_path = "/fs1/test-nfs"
-        volume = utils.create_volume(name=vol_name, type=vol_type)
+        volume = _utils.create_volume(name=vol_name, type=vol_type)
         volume.nfs_server = server
         volume.nfs_path = nfs_path
 
@@ -600,11 +600,11 @@ class K8sVolumeTest(BaseTest):
         container.add_volume_mount(mount)
 
         pod_name = "nginx-{0}".format(str(uuid.uuid4()))
-        pod = utils.create_pod(name=pod_name)
+        pod = _utils.create_pod(name=pod_name)
         pod.add_volume(volume)
         pod.add_container(container)
 
-        if utils.is_reachable(pod.config):
+        if _utils.is_reachable(pod.config):
             try:
                 pod.create()
                 volnames = [x.name for x in pod.volumes]
@@ -617,13 +617,13 @@ class K8sVolumeTest(BaseTest):
     def test_pod_git_repo(self):
         container_name = "nginx"
         container_image = "nginx:1.7.9"
-        container = utils.create_container(name=container_name, image=container_image)
+        container = _utils.create_container(name=container_name, image=container_image)
 
         vol_name = "git-repo"
         vol_type = "gitRepo"
         repo = "https://user:pass@somewhere/repo.git"
         revision = "e42d3dca1541ba085f34ce282feda1109a707c7b"
-        volume = utils.create_volume(name=vol_name, type=vol_type)
+        volume = _utils.create_volume(name=vol_name, type=vol_type)
         volume.git_repository = repo
         volume.git_revision = revision
 
@@ -633,11 +633,11 @@ class K8sVolumeTest(BaseTest):
         container.add_volume_mount(mount)
 
         pod_name = "nginx-{0}".format(str(uuid.uuid4()))
-        pod = utils.create_pod(name=pod_name)
+        pod = _utils.create_pod(name=pod_name)
         pod.add_volume(volume)
         pod.add_container(container)
 
-        if utils.is_reachable(pod.config):
+        if _utils.is_reachable(pod.config):
             try:
                 pod.create()
                 volnames = [x.name for x in pod.volumes]
@@ -650,15 +650,15 @@ class K8sVolumeTest(BaseTest):
     def test_rc_emptydir(self):
         container_name = "nginx"
         container_image = "nginx:1.7.9"
-        container_nginx = utils.create_container(name=container_name, image=container_image)
+        container_nginx = _utils.create_container(name=container_name, image=container_image)
 
         container_name = "redis"
         container_image = "redis:3.0.7"
-        container_redis = utils.create_container(name=container_name, image=container_image)
+        container_redis = _utils.create_container(name=container_name, image=container_image)
 
         vol_name = "emptydir"
         vol_type = "emptyDir"
-        volume = utils.create_volume(name=vol_name, type=vol_type)
+        volume = _utils.create_volume(name=vol_name, type=vol_type)
 
         mount_name = vol_name
         mount_path = '/test-emptydir'
@@ -667,13 +667,13 @@ class K8sVolumeTest(BaseTest):
         container_redis.add_volume_mount(mount)
 
         rc_name = "app"
-        rc = utils.create_rc(name=rc_name)
+        rc = _utils.create_rc(name=rc_name)
         rc.add_volume(volume)
         rc.add_container(container_nginx)
         rc.add_container(container_redis)
         rc.desired_replicas = 1
 
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             rc.create()
             volnames = [x.name for x in rc.volumes]
             self.assertIn(vol_name, volnames)
@@ -683,16 +683,16 @@ class K8sVolumeTest(BaseTest):
     def test_rc_hostpath(self):
         container_name = "nginx"
         container_image = "nginx:1.7.9"
-        container_nginx = utils.create_container(name=container_name, image=container_image)
+        container_nginx = _utils.create_container(name=container_name, image=container_image)
 
         container_name = "redis"
         container_image = "redis:3.0.7"
-        container_redis = utils.create_container(name=container_name, image=container_image)
+        container_redis = _utils.create_container(name=container_name, image=container_image)
 
         vol_name = "hostpath"
         vol_type = "hostPath"
         hostpath = "/var/lib/docker"
-        volume = utils.create_volume(name=vol_name, type=vol_type)
+        volume = _utils.create_volume(name=vol_name, type=vol_type)
         volume.path = hostpath
 
         mount_name = vol_name
@@ -702,13 +702,13 @@ class K8sVolumeTest(BaseTest):
         container_redis.add_volume_mount(mount)
 
         rc_name = "app"
-        rc = utils.create_rc(name=rc_name)
+        rc = _utils.create_rc(name=rc_name)
         rc.add_volume(volume)
         rc.add_container(container_nginx)
         rc.add_container(container_redis)
         rc.desired_replicas = 1
 
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             rc.create()
             volnames = [x.name for x in rc.volumes]
             self.assertIn(vol_name, volnames)
@@ -720,7 +720,7 @@ class K8sVolumeTest(BaseTest):
             {'hostPath': {'path': '/var/run/docker.sock'}, 'name': 'dockersock'},
             {'hostPath': {'path': '/root/.docker'}, 'name': 'dockerconfig'}
         ]
-        rc = utils.create_rc(name="admintool")
+        rc = _utils.create_rc(name="admintool")
 
         for vol in volumes:
             keys = list(filter(lambda x: x != 'name', vol.keys()))
@@ -743,21 +743,21 @@ class K8sVolumeTest(BaseTest):
     def test_rc_secret(self):
         container_name = "nginx"
         container_image = "nginx:1.7.9"
-        container_nginx = utils.create_container(name=container_name, image=container_image)
+        container_nginx = _utils.create_container(name=container_name, image=container_image)
 
         container_name = "redis"
         container_image = "redis:3.0.7"
-        container_redis = utils.create_container(name=container_name, image=container_image)
+        container_redis = _utils.create_container(name=container_name, image=container_image)
 
         secret_name = "yosecret"
-        secret = utils.create_secret(name=secret_name)
+        secret = _utils.create_secret(name=secret_name)
         k = ".secret-file"
         v = "dmFsdWUtMg0KDQo="
         secret.data = {k: v}
 
         vol_name = "secret"
         vol_type = "secret"
-        volume = utils.create_volume(name=vol_name, type=vol_type)
+        volume = _utils.create_volume(name=vol_name, type=vol_type)
         volume.secret_name = secret_name
 
         mount_name = vol_name
@@ -767,13 +767,13 @@ class K8sVolumeTest(BaseTest):
         container_redis.add_volume_mount(mount)
 
         rc_name = "app"
-        rc = utils.create_rc(name=rc_name)
+        rc = _utils.create_rc(name=rc_name)
         rc.add_volume(volume)
         rc.add_container(container_nginx)
         rc.add_container(container_redis)
         rc.desired_replicas = 1
 
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             secret.create()
             rc.create()
             volnames = [x.name for x in rc.volumes]
@@ -791,16 +791,16 @@ class K8sVolumeTest(BaseTest):
 
         container_name = "nginx"
         container_image = "nginx:1.7.9"
-        container_nginx = utils.create_container(name=container_name, image=container_image)
+        container_nginx = _utils.create_container(name=container_name, image=container_image)
 
         container_name = "redis"
         container_image = "redis:3.0.7"
-        container_redis = utils.create_container(name=container_name, image=container_image)
+        container_redis = _utils.create_container(name=container_name, image=container_image)
 
         volume_id = "vol-0e3056a2"
         vol_name = "ebs"
         vol_type = "awsElasticBlockStore"
-        volume = utils.create_volume(name=vol_name, type=vol_type)
+        volume = _utils.create_volume(name=vol_name, type=vol_type)
         volume.volume_id = volume_id
 
         mount_name = vol_name
@@ -810,13 +810,13 @@ class K8sVolumeTest(BaseTest):
         container_redis.add_volume_mount(mount)
 
         rc_name = "nginx-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=rc_name)
+        rc = _utils.create_rc(name=rc_name)
         rc.add_volume(volume)
         rc.add_container(container_nginx)
         rc.add_container(container_redis)
         rc.desired_replicas = 3
 
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             try:
                 rc.create()
                 volnames = [x.name for x in rc.volumes]
@@ -835,16 +835,16 @@ class K8sVolumeTest(BaseTest):
 
         container_name = "nginx"
         container_image = "nginx:1.7.9"
-        container_nginx = utils.create_container(name=container_name, image=container_image)
+        container_nginx = _utils.create_container(name=container_name, image=container_image)
 
         container_name = "redis"
         container_image = "redis:3.0.7"
-        container_redis = utils.create_container(name=container_name, image=container_image)
+        container_redis = _utils.create_container(name=container_name, image=container_image)
 
         pd_name = "mnubo-disk1"
         vol_name = "persistent"
         vol_type = "gcePersistentDisk"
-        volume = utils.create_volume(name=vol_name, type=vol_type)
+        volume = _utils.create_volume(name=vol_name, type=vol_type)
         volume.pd_name = pd_name
         volume.read_only = True  # HTTP 422: GCE PD can only be mounted on multiple machines if it is read-only
 
@@ -855,13 +855,13 @@ class K8sVolumeTest(BaseTest):
         container_redis.add_volume_mount(mount)
 
         rc_name = "nginx-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=rc_name)
+        rc = _utils.create_rc(name=rc_name)
         rc.add_volume(volume)
         rc.add_container(container_nginx)
         rc.add_container(container_redis)
         rc.desired_replicas = 3
 
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             try:
                 rc.create()
                 volnames = [x.name for x in rc.volumes]
@@ -874,17 +874,17 @@ class K8sVolumeTest(BaseTest):
     def test_rc_nfs(self):
         container_name = "nginx"
         container_image = "nginx:1.7.9"
-        container_nginx = utils.create_container(name=container_name, image=container_image)
+        container_nginx = _utils.create_container(name=container_name, image=container_image)
 
         container_name = "redis"
         container_image = "redis:3.0.7"
-        container_redis = utils.create_container(name=container_name, image=container_image)
+        container_redis = _utils.create_container(name=container_name, image=container_image)
 
         vol_name = "nfs"
         vol_type = "nfs"
         server = "howard.mtl.mnubo.com"
         path = "/fs1/test-nfs"
-        volume = utils.create_volume(name=vol_name, type=vol_type)
+        volume = _utils.create_volume(name=vol_name, type=vol_type)
         volume.nfs_server = server
         volume.nfs_path = path
 
@@ -895,13 +895,13 @@ class K8sVolumeTest(BaseTest):
         container_redis.add_volume_mount(mount)
 
         rc_name = "nginx-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=rc_name)
+        rc = _utils.create_rc(name=rc_name)
         rc.add_volume(volume)
         rc.add_container(container_nginx)
         rc.add_container(container_redis)
         rc.desired_replicas = 3
 
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             try:
                 rc.create()
                 volnames = [x.name for x in rc.volumes]
@@ -914,17 +914,17 @@ class K8sVolumeTest(BaseTest):
     def test_rc_git_repo(self):
         container_name = "nginx"
         container_image = "nginx:1.7.9"
-        container_nginx = utils.create_container(name=container_name, image=container_image)
+        container_nginx = _utils.create_container(name=container_name, image=container_image)
 
         container_name = "redis"
         container_image = "redis:3.0.7"
-        container_redis = utils.create_container(name=container_name, image=container_image)
+        container_redis = _utils.create_container(name=container_name, image=container_image)
 
         vol_name = "git-repo"
         vol_type = "gitRepo"
         repo = "https://user:pass@somewhere/repo.git"
         revision = "e42d3dca1541ba085f34ce282feda1109a707c7b"
-        volume = utils.create_volume(name=vol_name, type=vol_type)
+        volume = _utils.create_volume(name=vol_name, type=vol_type)
         volume.git_repository = repo
         volume.git_revision = revision
 
@@ -935,13 +935,13 @@ class K8sVolumeTest(BaseTest):
         container_redis.add_volume_mount(mount)
 
         rc_name = "nginx-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=rc_name)
+        rc = _utils.create_rc(name=rc_name)
         rc.add_volume(volume)
         rc.add_container(container_nginx)
         rc.add_container(container_redis)
         rc.desired_replicas = 3
 
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             try:
                 rc.create()
                 volnames = [x.name for x in rc.volumes]

@@ -8,7 +8,7 @@
 
 import uuid
 
-from tests import utils
+from tests import _utils
 from tests.BaseTest import BaseTest
 from kubernetes.K8sExceptions import TimedOutException
 from kubernetes.K8sPersistentVolume import K8sPersistentVolume
@@ -21,31 +21,31 @@ class K8sPersistentVolumeClaimTest(BaseTest):
 
     def setUp(self):
         K8sPod.POD_READY_TIMEOUT_SECONDS = 20
-        utils.cleanup_pods()
-        utils.cleanup_pvc()
-        utils.cleanup_pv()
+        _utils.cleanup_pods()
+        _utils.cleanup_pvc()
+        _utils.cleanup_pv()
 
     def tearDown(self):
-        utils.cleanup_pods()
-        utils.cleanup_pvc()
-        utils.cleanup_pv()
+        _utils.cleanup_pods()
+        _utils.cleanup_pvc()
+        _utils.cleanup_pv()
 
     # --------------------------------------------------------------------------------- init
 
     def test_init_no_args(self):
-        config = utils.create_config()
+        config = _utils.create_config()
         with self.assertRaises(SyntaxError):
             K8sPersistentVolumeClaim(config=config)
 
     def test_init_invalid_name(self):
         name = object()
-        config = utils.create_config()
+        config = _utils.create_config()
         with self.assertRaises(SyntaxError):
             K8sPersistentVolumeClaim(config=config, name=name)
 
     def test_init(self):
         name = "yopvc123"
-        claim = utils.create_pvc(name=name)
+        claim = _utils.create_pvc(name=name)
         self.assertIsInstance(claim, K8sPersistentVolumeClaim)
         self.assertEqual(claim.name, name)
 
@@ -53,13 +53,13 @@ class K8sPersistentVolumeClaimTest(BaseTest):
 
     def test_access_modes_none(self):
         name = "yopvc-{}".format(str(uuid.uuid4()))
-        claim = utils.create_pvc(name=name)
+        claim = _utils.create_pvc(name=name)
         with self.assertRaises(SyntaxError):
             claim.access_modes = None
 
     def test_access_modes_invalid(self):
         name = "yopvc-{}".format(str(uuid.uuid4()))
-        claim = utils.create_pvc(name=name)
+        claim = _utils.create_pvc(name=name)
         with self.assertRaises(SyntaxError):
             claim.access_modes = object()
         modes = ['yomama']
@@ -68,7 +68,7 @@ class K8sPersistentVolumeClaimTest(BaseTest):
 
     def test_access_modes(self):
         name = "yopvc-{}".format(str(uuid.uuid4()))
-        claim = utils.create_pvc(name=name)
+        claim = _utils.create_pvc(name=name)
         modes = ['ReadWriteMany']
         claim.access_modes = modes
         self.assertEqual(modes, claim.access_modes)
@@ -77,13 +77,13 @@ class K8sPersistentVolumeClaimTest(BaseTest):
 
     def test_resources_none(self):
         name = "yopvc-{}".format(str(uuid.uuid4()))
-        claim = utils.create_pvc(name=name)
+        claim = _utils.create_pvc(name=name)
         with self.assertRaises(SyntaxError):
             claim.resources = None
 
     def test_resources_invalid(self):
         name = "yopvc-{}".format(str(uuid.uuid4()))
-        claim = utils.create_pvc(name=name)
+        claim = _utils.create_pvc(name=name)
         with self.assertRaises(SyntaxError):
             claim.resources = object()
         resources = {'cpu': '', 'memory': ''}
@@ -92,7 +92,7 @@ class K8sPersistentVolumeClaimTest(BaseTest):
 
     def test_resources(self):
         name = "yopvc-{}".format(str(uuid.uuid4()))
-        claim = utils.create_pvc(name=name)
+        claim = _utils.create_pvc(name=name)
         resources = {'requests': {'storage': '100Gi'}}
         claim.resources = resources
         self.assertIsInstance(claim.resources, ResourceRequirements)
@@ -102,8 +102,8 @@ class K8sPersistentVolumeClaimTest(BaseTest):
 
     def test_api_create_timeout(self):
         name = "yopvc-{}".format(str(uuid.uuid4()))
-        claim = utils.create_pvc(name=name)
-        if utils.is_reachable(claim.config):
+        claim = _utils.create_pvc(name=name)
+        if _utils.is_reachable(claim.config):
             with self.assertRaises(TimedOutException):
                 claim.create()
 
@@ -115,24 +115,24 @@ class K8sPersistentVolumeClaimTest(BaseTest):
         contname = "yocontainer"
 
         pvtype = "awsElasticBlockStore"
-        pv = utils.create_pv(name=pvname, type=pvtype)
+        pv = _utils.create_pv(name=pvname, type=pvtype)
         pv.volume_id = "vol-0e3056a2"
         pv.fs_type = "xfs"
 
-        pvc = utils.create_pvc(name=pvcname)
+        pvc = _utils.create_pvc(name=pvcname)
 
-        vol = utils.create_volume(name=volname, type='persistentVolumeClaim')
+        vol = _utils.create_volume(name=volname, type='persistentVolumeClaim')
         vol.claim_name = pvcname
 
-        container = utils.create_container(name=contname, image="nginx:latest")
-        volmount = utils.create_volume_mount(name=volname, mount_path='/test-persistent')
+        container = _utils.create_container(name=contname, image="nginx:latest")
+        volmount = _utils.create_volume_mount(name=volname, mount_path='/test-persistent')
         container.add_volume_mount(volmount)
 
-        pod = utils.create_pod(name=podname)
+        pod = _utils.create_pod(name=podname)
         pod.add_volume(vol)
         pod.add_container(container)
 
-        if utils.is_reachable(pvc.config):
+        if _utils.is_reachable(pvc.config):
             try:
                 pv.create()
                 pvc.create()
@@ -150,24 +150,24 @@ class K8sPersistentVolumeClaimTest(BaseTest):
         contname = "yocontainer"
 
         pvtype = "gcePersistentDisk"
-        pv = utils.create_pv(name=pvname, type=pvtype)
+        pv = _utils.create_pv(name=pvname, type=pvtype)
         pv.pd_name = "mnubo-disk1"
         pv.fs_type = "xfs"
 
-        pvc = utils.create_pvc(name=pvcname)
+        pvc = _utils.create_pvc(name=pvcname)
 
-        vol = utils.create_volume(name=volname, type='persistentVolumeClaim')
+        vol = _utils.create_volume(name=volname, type='persistentVolumeClaim')
         vol.claim_name = pvcname
 
-        container = utils.create_container(name=contname, image="nginx:latest")
-        volmount = utils.create_volume_mount(name=volname, mount_path='/test-persistent')
+        container = _utils.create_container(name=contname, image="nginx:latest")
+        volmount = _utils.create_volume_mount(name=volname, mount_path='/test-persistent')
         container.add_volume_mount(volmount)
 
-        pod = utils.create_pod(name=podname)
+        pod = _utils.create_pod(name=podname)
         pod.add_volume(vol)
         pod.add_container(container)
 
-        if utils.is_reachable(pvc.config):
+        if _utils.is_reachable(pvc.config):
             try:
                 pv.create()
                 pvc.create()
@@ -185,24 +185,24 @@ class K8sPersistentVolumeClaimTest(BaseTest):
         contname = "yocontainer"
 
         pvtype = "nfs"
-        pv = utils.create_pv(name=pvname, type=pvtype)
+        pv = _utils.create_pv(name=pvname, type=pvtype)
         pv.nfs_server = "nfs.company.com"
         pv.nfs_path = "/fs1/test-nfs"
 
-        pvc = utils.create_pvc(name=pvcname)
+        pvc = _utils.create_pvc(name=pvcname)
 
-        vol = utils.create_volume(name=volname, type='persistentVolumeClaim')
+        vol = _utils.create_volume(name=volname, type='persistentVolumeClaim')
         vol.claim_name = pvcname
 
-        container = utils.create_container(name=contname, image="nginx:latest")
-        volmount = utils.create_volume_mount(name=volname, mount_path='/test-persistent')
+        container = _utils.create_container(name=contname, image="nginx:latest")
+        volmount = _utils.create_volume_mount(name=volname, mount_path='/test-persistent')
         container.add_volume_mount(volmount)
 
-        pod = utils.create_pod(name=podname)
+        pod = _utils.create_pod(name=podname)
         pod.add_volume(vol)
         pod.add_container(container)
 
-        if utils.is_reachable(pvc.config):
+        if _utils.is_reachable(pvc.config):
             try:
                 pv.create()
                 pvc.create()

@@ -6,7 +6,7 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from tests import utils
+from tests import _utils
 from tests.BaseTest import BaseTest
 from kubernetes.K8sReplicationController import K8sReplicationController
 from kubernetes.K8sService import K8sService
@@ -23,29 +23,29 @@ class StatefulSetCassandraTests(BaseTest):
     """
 
     def setUp(self):
-        utils.cleanup_services()
-        utils.cleanup_rc()
-        utils.cleanup_pods()
+        _utils.cleanup_services()
+        _utils.cleanup_rc()
+        _utils.cleanup_pods()
 
     def tearDown(self):
-        utils.cleanup_services()
-        utils.cleanup_rc()
-        utils.cleanup_pods()
+        _utils.cleanup_services()
+        _utils.cleanup_rc()
+        _utils.cleanup_pods()
 
     def test_cassandra_setup(self):
-        svc = Service(utils.cassandra_service())
-        k8s_service = utils.create_service(name="cassandra")
+        svc = Service(_utils.cassandra_service())
+        k8s_service = _utils.create_service(name="cassandra")
         k8s_service.model = svc
 
-        rc = ReplicationController(utils.cassandra_rc())
-        k8s_rc = utils.create_rc(name="cassandra")
+        rc = ReplicationController(_utils.cassandra_rc())
+        k8s_rc = _utils.create_rc(name="cassandra")
         k8s_rc.model = rc
 
-        ds = DaemonSet(utils.cassandra_daemonset())
-        k8s_ds = utils.create_daemonset(name="cassandra")
+        ds = DaemonSet(_utils.cassandra_daemonset())
+        k8s_ds = _utils.create_daemonset(name="cassandra")
         k8s_ds.model = ds
 
-        if utils.is_reachable(k8s_rc.config):
+        if _utils.is_reachable(k8s_rc.config):
             k8s_service.create()
             k8s_rc.create()
             self.assertIsInstance(k8s_service, K8sService)

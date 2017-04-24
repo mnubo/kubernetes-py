@@ -6,26 +6,26 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-import uuid
 import time
+import uuid
 
-from tests import utils
-from tests.BaseTest import BaseTest
 from kubernetes.K8sCronJob import K8sCronJob
 from kubernetes.models.v2alpha1.CronJob import CronJob
+from tests import _constants
+from tests import _utils
+from tests.BaseTest import BaseTest
 
 
 class K8sCronJobTests(BaseTest):
-
     def setUp(self):
-        utils.cleanup_cronjobs()
-        utils.cleanup_jobs()
-        utils.cleanup_pods()
+        _utils.cleanup_cronjobs()
+        _utils.cleanup_jobs()
+        _utils.cleanup_pods()
 
     def tearDown(self):
-        utils.cleanup_cronjobs()
-        utils.cleanup_jobs()
-        utils.cleanup_pods()
+        _utils.cleanup_cronjobs()
+        _utils.cleanup_jobs()
+        _utils.cleanup_pods()
 
     # --------------------------------------------------------------------------------- init
 
@@ -48,11 +48,11 @@ class K8sCronJobTests(BaseTest):
     def test_init_with_invalid_name(self):
         name = object()
         with self.assertRaises(SyntaxError):
-            utils.create_cronjob(name=name)
+            _utils.create_cronjob(name=name)
 
     def test_init_with_name(self):
         name = "yomama"
-        rc = utils.create_cronjob(name=name)
+        rc = _utils.create_cronjob(name=name)
         self.assertIsNotNone(rc)
         self.assertIsInstance(rc, K8sCronJob)
         self.assertEqual(rc.name, name)
@@ -63,16 +63,16 @@ class K8sCronJobTests(BaseTest):
         c_name = "redis"
         c_image = "redis:latest"
         c_image_2 = "redis:3.2.3"
-        container = utils.create_container(name=c_name, image=c_image)
+        container = _utils.create_container(name=c_name, image=c_image)
         name = "job-{}".format(uuid.uuid4())
 
-        cj = utils.create_cronjob(name=name)
+        cj = _utils.create_cronjob(name=name)
         cj.add_container(container)
         self.assertEqual(1, len(cj.containers))
         self.assertIn(c_name, cj.container_image)
         self.assertEqual(c_image, cj.container_image[c_name])
 
-        container = utils.create_container(name=c_name, image=c_image_2)
+        container = _utils.create_container(name=c_name, image=c_image_2)
         cj.add_container(container)
         self.assertEqual(1, len(cj.containers))
         self.assertEqual(c_image_2, cj.container_image[c_name])
@@ -81,36 +81,36 @@ class K8sCronJobTests(BaseTest):
 
     def test_api_create(self):
         name = "job-{}".format(uuid.uuid4())
-        job = CronJob(utils.scheduledjob())
-        k8s_cronjob = utils.create_cronjob(name=name)
+        job = CronJob(_constants.scheduledjob())
+        k8s_cronjob = _utils.create_cronjob(name=name)
         k8s_cronjob.model = job
-        if utils.is_reachable(k8s_cronjob.config):
+        if _utils.is_reachable(k8s_cronjob.config):
             k8s_cronjob.create()
             self.assertIsInstance(k8s_cronjob, K8sCronJob)
 
     def test_api_create_long_running_with_concurrency(self):
         name = "job-{}".format(uuid.uuid4())
-        job = CronJob(utils.scheduledjob_90())
+        job = CronJob(_constants.scheduledjob_90())
 
-        k8s_cronjob = utils.create_cronjob(name=name)
+        k8s_cronjob = _utils.create_cronjob(name=name)
         k8s_cronjob.model = job
         k8s_cronjob.concurrency_policy = "Allow"
 
-        if utils.is_reachable(k8s_cronjob.config):
+        if _utils.is_reachable(k8s_cronjob.config):
             k8s_cronjob.create()
             self.assertIsInstance(k8s_cronjob, K8sCronJob)
             self.assertEqual('Allow', k8s_cronjob.concurrency_policy)
 
     def test_api_create_long_running_no_concurrency(self):
         name = "job-{}".format(uuid.uuid4())
-        job = CronJob(utils.scheduledjob_90())
+        job = CronJob(_constants.scheduledjob_90())
 
-        k8s_cronjob = utils.create_cronjob(name=name)
+        k8s_cronjob = _utils.create_cronjob(name=name)
         k8s_cronjob.model = job
         k8s_cronjob.concurrency_policy = "Forbid"
         k8s_cronjob.starting_deadline_seconds = 10
 
-        if utils.is_reachable(k8s_cronjob.config):
+        if _utils.is_reachable(k8s_cronjob.config):
             k8s_cronjob.create()
             self.assertIsInstance(k8s_cronjob, K8sCronJob)
             self.assertEqual('Forbid', k8s_cronjob.concurrency_policy)
@@ -120,14 +120,14 @@ class K8sCronJobTests(BaseTest):
 
     def test_list(self):
         name = "job-{}".format(uuid.uuid4())
-        job = CronJob(utils.scheduledjob_90())
+        job = CronJob(_constants.scheduledjob_90())
 
-        k8s_cronjob = utils.create_cronjob(name=name)
+        k8s_cronjob = _utils.create_cronjob(name=name)
         k8s_cronjob.model = job
         k8s_cronjob.concurrency_policy = "Forbid"
         k8s_cronjob.starting_deadline_seconds = 10
 
-        if utils.is_reachable(k8s_cronjob.config):
+        if _utils.is_reachable(k8s_cronjob.config):
             k8s_cronjob.create()
             crons = k8s_cronjob.list()
             for c in crons:
@@ -137,14 +137,14 @@ class K8sCronJobTests(BaseTest):
 
     def test_last_schedule_time(self):
         name = "job-{}".format(uuid.uuid4())
-        job = CronJob(utils.scheduledjob_90())
+        job = CronJob(_constants.scheduledjob_90())
 
-        k8s_cronjob = utils.create_cronjob(name=name)
+        k8s_cronjob = _utils.create_cronjob(name=name)
         k8s_cronjob.model = job
         k8s_cronjob.concurrency_policy = "Forbid"
         k8s_cronjob.starting_deadline_seconds = 10
 
-        if utils.is_reachable(k8s_cronjob.config):
+        if _utils.is_reachable(k8s_cronjob.config):
             k8s_cronjob.create()
             while not k8s_cronjob.last_schedule_time:
                 k8s_cronjob.get()

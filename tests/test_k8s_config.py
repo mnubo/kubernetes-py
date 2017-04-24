@@ -6,9 +6,9 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from tests import utils
-from tests.BaseTest import BaseTest
 from kubernetes import K8sConfig, K8sCronJob
+from tests import _utils
+from tests.BaseTest import BaseTest
 
 DEFAULT_API_HOST = "localhost:8888"
 DEFAULT_API_VERSION = "v1"
@@ -16,12 +16,11 @@ DEFAULT_NAMESPACE = "default"
 
 
 class K8sConfigTest(BaseTest):
-
     def setUp(self):
-        utils.cleanup_cronjobs()
+        _utils.cleanup_cronjobs()
 
     def tearDown(self):
-        utils.cleanup_cronjobs()
+        _utils.cleanup_cronjobs()
 
     # ------------------------------------------------------------------------------------- init without kubeconfig
 
@@ -41,7 +40,7 @@ class K8sConfigTest(BaseTest):
     # ------------------------------------------------------------------------------------- init with kubeconfig
 
     def test_init_with_test_kubeconfig(self):
-        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        config = K8sConfig(kubeconfig=_utils.kubeconfig_fallback)
         self.assertIsNotNone(config)
         self.assertIsInstance(config, K8sConfig)
         if config.api_host is not None:
@@ -203,9 +202,9 @@ class K8sConfigTest(BaseTest):
     def test_server_version_no_kubeconfig(self):
         api_host = "127.0.0.1:8001"
         cfg = K8sConfig(kubeconfig=None, api_host=api_host)
-        if utils.is_reachable(cfg.api_host):
-            container = utils.create_container(name="nginx", image="nginx:latest")
-            cj = utils.create_cronjob(config=cfg, name="test")
+        if _utils.is_reachable(cfg.api_host):
+            container = _utils.create_container(name="nginx", image="nginx:latest")
+            cj = _utils.create_cronjob(config=cfg, name="test")
             cj.add_container(container)
             cj.create()
             self.assertIsInstance(cj, K8sCronJob)

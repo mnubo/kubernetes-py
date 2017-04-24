@@ -15,7 +15,8 @@ from kubernetes.models.v1.Probe import Probe
 from kubernetes.models.v1.ReplicationController import ReplicationController
 from kubernetes.models.v1.ReplicationControllerSpec import ReplicationControllerSpec
 from kubernetes.models.v1.ReplicationControllerStatus import ReplicationControllerStatus
-from tests import utils
+from tests import _utils
+from tests import _constants
 from tests.BaseTest import BaseTest
 
 
@@ -23,12 +24,12 @@ class K8sReplicationControllerTest(BaseTest):
 
     def setUp(self):
         K8sReplicationController.SCALE_WAIT_TIMEOUT_SECONDS = 30
-        utils.cleanup_rc()
-        utils.cleanup_pods()
+        _utils.cleanup_rc()
+        _utils.cleanup_pods()
 
     def tearDown(self):
-        utils.cleanup_rc()
-        utils.cleanup_pods()
+        _utils.cleanup_rc()
+        _utils.cleanup_pods()
 
     # --------------------------------------------------------------------------------- init
 
@@ -51,11 +52,11 @@ class K8sReplicationControllerTest(BaseTest):
     def test_init_with_invalid_name(self):
         name = object()
         with self.assertRaises(SyntaxError):
-            utils.create_rc(name=name)
+            _utils.create_rc(name=name)
 
     def test_init_with_name(self):
         name = "yomama"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         self.assertIsNotNone(rc)
         self.assertIsInstance(rc, K8sReplicationController)
         self.assertEqual(rc.name, name)
@@ -63,8 +64,8 @@ class K8sReplicationControllerTest(BaseTest):
     def test_init_with_config_and_pull_secrets(self):
         ps = [{'name': 'yomama'}]
         name = "sofat"
-        config = K8sConfig(pull_secret=ps, kubeconfig=utils.kubeconfig_fallback)
-        rc = utils.create_rc(config=config, name=name)
+        config = K8sConfig(pull_secret=ps, kubeconfig=_utils.kubeconfig_fallback)
+        rc = _utils.create_rc(config=config, name=name)
         self.assertIsNotNone(rc.config)
         self.assertEqual(ps, rc.config.pull_secret)
 
@@ -72,7 +73,7 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_struct_k8s_rc(self):
         name = "yomama"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         self.assertIsNotNone(rc)
         self.assertIsInstance(rc, K8sReplicationController)
         self.assertIsNotNone(rc.model)
@@ -80,7 +81,7 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_struct_rc(self):
         name = "yomama"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         self.assertIsInstance(rc.model, ReplicationController)
         self.assertIsInstance(rc.model.metadata, ObjectMeta)
         self.assertIsInstance(rc.model.spec, ReplicationControllerSpec)
@@ -90,13 +91,13 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_add_annotation_none_args(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         with self.assertRaises(SyntaxError):
             rc.add_annotation()
 
     def test_add_annotation_invalid_args(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         k = object()
         v = object()
         with self.assertRaises(SyntaxError):
@@ -104,7 +105,7 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_add_annotation(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         k = "yokey"
         v = "yovalue"
         rc.add_annotation(k, v)
@@ -115,14 +116,14 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_rc_add_container_invalid(self):
         name = "yorc"
-        obj = utils.create_rc(name=name)
+        obj = _utils.create_rc(name=name)
         c = object()
         with self.assertRaises(SyntaxError):
             obj.add_container(c)
 
     def test_rc_add_container(self):
         name = "yoname"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         self.assertEqual(0, len(rc.containers))
         name = "redis"
         image = "redis:latest"
@@ -135,13 +136,13 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_add_label_none_args(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         with self.assertRaises(SyntaxError):
             rc.add_label()
 
     def test_add_label_invalid_args(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         k = object()
         v = object()
         with self.assertRaises(SyntaxError):
@@ -149,7 +150,7 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_add_label(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         k = "yokey"
         v = "yovalue"
         rc.add_label(k, v)
@@ -160,13 +161,13 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_add_pod_annotation_none_args(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         with self.assertRaises(SyntaxError):
             rc.add_pod_annotation()
 
     def test_add_pod_annotation_invalid_args(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         k = object()
         v = object()
         with self.assertRaises(SyntaxError):
@@ -174,7 +175,7 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_add_pod_annotation(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         k = "yokey"
         v = "yovalue"
         rc.add_pod_annotation(k, v)
@@ -185,13 +186,13 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_add_pod_label_none_args(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         with self.assertRaises(SyntaxError):
             rc.add_pod_label()
 
     def test_add_pod_label_invalid_args(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         k = object()
         v = object()
         with self.assertRaises(SyntaxError):
@@ -199,7 +200,7 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_add_pod_label(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         k = "yokey"
         v = "yovalue"
         rc.add_pod_label(k, v)
@@ -210,28 +211,28 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_rc_add_image_pull_secrets_none_arg(self):
         name = "yorc"
-        obj = utils.create_rc(name=name)
+        obj = _utils.create_rc(name=name)
         secretname = None
         with self.assertRaises(SyntaxError):
             obj.add_image_pull_secrets(secretname)
 
     def test_rc_add_image_pull_secrets_invalid_arg(self):
         name = "yorc"
-        obj = utils.create_rc(name=name)
+        obj = _utils.create_rc(name=name)
         secrets = 666
         with self.assertRaises(SyntaxError):
             obj.add_image_pull_secrets(secrets)
 
     def test_rc_add_image_pull_secrets(self):
-        config = utils.create_config()
+        config = _utils.create_config()
         config.pull_secret = [{'name': 'secretname'}]
         name = "yorc"
-        rc = utils.create_rc(config=config, name=name)
+        rc = _utils.create_rc(config=config, name=name)
         self.assertEqual(1, len(rc.image_pull_secrets))
         self.assertEqual(config.pull_secret, rc.image_pull_secrets)
-        container = utils.create_container(name="nginx", image="nginx:latest")
+        container = _utils.create_container(name="nginx", image="nginx:latest")
         rc.add_container(container)
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             rc.create()
             self.assertIsInstance(rc, K8sReplicationController)
             self.assertEqual(config.pull_secret, rc.image_pull_secrets)
@@ -240,7 +241,7 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_del_annotation_doesnt_exist(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         k = "yokey"
         self.assertNotIn(k, rc.annotations)
         rc.del_annotation(k)
@@ -248,7 +249,7 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_del_annotation(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         k = "yokey"
         v = "yovalue"
         rc.add_annotation(k, v)
@@ -260,7 +261,7 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_del_label_doesnt_exist(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         k = "yokey"
         self.assertNotIn(k, rc.labels)
         rc.del_label(k)
@@ -268,7 +269,7 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_del_label(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         k = "yokey"
         v = "yovalue"
         rc.add_label(k, v)
@@ -280,7 +281,7 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_del_pod_annotation_doesnt_exist(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         k = "yokey"
         self.assertNotIn(k, rc.pod_annotations)
         rc.del_pod_annotation(k)
@@ -288,7 +289,7 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_del_pod_annotation(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         k = "yokey"
         v = "yovalue"
         rc.add_pod_annotation(k, v)
@@ -300,14 +301,14 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_del_pod_label_doesnt_exist(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         k = "yokey"
         self.assertNotIn(k, rc.pod_labels)
         rc.del_pod_label(k)
 
     def test_del_pod_label(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         k = "yokey"
         v = "yovalue"
         rc.add_pod_label(k, v)
@@ -319,7 +320,7 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_rc_del_pod_node_name(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         nodename = "yonodename"
         rc.pod_node_name = nodename
         self.assertEqual(nodename, rc.pod_node_name)
@@ -331,8 +332,8 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_get_nonexistent(self):
         name = "yorc-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=name)
-        if utils.is_reachable(rc.config):
+        rc = _utils.create_rc(name=name)
+        if _utils.is_reachable(rc.config):
             try:
                 rc.get()
                 self.fail("Should not fail.")
@@ -341,11 +342,11 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_get(self):
         name = "yocontainer"
-        container = utils.create_container(name=name)
+        container = _utils.create_container(name=name)
         name = "yorc-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         rc.add_container(container)
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             from_create = rc.create()
             from_get = rc.get()
             self.assertIsInstance(from_create, K8sReplicationController)
@@ -356,14 +357,14 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_get_annotation_doesnt_exist(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         k = "yokey"
         ann = rc.get_annotation(k)
         self.assertIsNone(ann)
 
     def test_get_annotation(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         k = "yokey"
         v_in = "yovalue"
         rc.add_annotation(k, v_in)
@@ -374,12 +375,12 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_get_annotations_none(self):
         name = "yorc-{}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         self.assertEqual({}, rc.annotations)
 
     def test_get_annotations(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         count = 4
         for i in range(0, count):
             k = "yokey_{0}".format(i)
@@ -396,14 +397,14 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_get_label_doesnt_exist(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         k = "yokey"
         label = rc.get_label(k)
         self.assertIsNone(label)
 
     def test_get_label(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         k = "yokey"
         v_in = "yovalue"
         rc.add_label(k, v_in)
@@ -414,14 +415,14 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_get_labels_none(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         self.assertIsNotNone(rc.labels)  # 'name' is already a label
         self.assertIn('name', rc.labels)
         self.assertEqual(name, rc.labels['name'])
 
     def test_get_labels(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         count = 4
         for i in range(0, count):
             k = "yokey_{0}".format(i)
@@ -438,14 +439,14 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_get_pod_annotation_doesnt_exist(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         k = "yokey"
         self.assertNotIn(k, rc.pod_annotations)
         self.assertIsNone(rc.get_pod_annotation(k))
 
     def test_get_pod_annotation(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         k = "yokey"
         v = "yovalue"
         self.assertNotIn(k, rc.pod_annotations)
@@ -457,12 +458,12 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_get_pod_annotations_none(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         self.assertEqual({}, rc.pod_annotations)
 
     def test_get_pod_annotations(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         count = 4
         for i in range(0, count):
             k = "yokey_{0}".format(i)
@@ -479,7 +480,7 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_get_pod_label_doesnt_exist(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         k = "yokey"
         self.assertNotIn(k, rc.pod_labels)
         label = rc.get_pod_label(k)
@@ -487,7 +488,7 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_get_pod_label(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         k = "yokey"
         v = "yovalue"
         rc.add_pod_label(k, v)
@@ -498,7 +499,7 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_get_pod_labels_none(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         self.assertIsNotNone(rc.pod_labels)  # 'name' and 'rc_version' are already labels
         self.assertIn('name', rc.pod_labels)
         self.assertIn('rc_version', rc.pod_labels)
@@ -506,7 +507,7 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_get_pod_labels(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         count = 4
         for i in range(0, count):
             k = "yokey_{0}".format(i)
@@ -523,53 +524,53 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_rc_get_pod_node_name_none(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         self.assertIsNone(rc.pod_node_name)
 
     def test_rc_get_pod_node_name(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         nodename = "yonodename"
         rc.pod_node_name = nodename
         self.assertEqual(nodename, rc.pod_node_name)
 
     # --------------------------------------------------------------------------------- get pod node selector
 
-    def test_rc_get_pod_node_selector_none(self):
+    def test_rc_get_node_selector_none(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
-        self.assertEqual({}, rc.pod_node_selector)
+        rc = _utils.create_rc(name=name)
+        self.assertEqual({}, rc.node_selector)
 
     def test_rc_get_pod_node_selector(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         s = {"disktype": "ssd"}
-        rc.pod_node_selector = s
-        self.assertEqual(s, rc.pod_node_selector)
+        rc.node_selector = s
+        self.assertEqual(s, rc.node_selector)
 
     # --------------------------------------------------------------------------------- get replicas
 
     def test_get_replicas_none(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         self.assertEqual(0, rc.desired_replicas)
 
     def test_get_replicas(self):
         name = "yorc"
         count = 10
-        rc = utils.create_rc(name=name, replicas=count)
+        rc = _utils.create_rc(name=name, replicas=count)
         self.assertEqual(count, rc.desired_replicas)
 
     # --------------------------------------------------------------------------------- get dns policy
 
     def test_get_dns_policy_default(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         self.assertEqual('Default', rc.dns_policy)
 
     def test_get_dns_policy(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         rc.dns_policy = 'ClusterFirst'
         self.assertEqual('ClusterFirst', rc.dns_policy)
 
@@ -577,13 +578,13 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_rc_get_pod_restart_policy_none(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         rp = rc.restart_policy
         self.assertEqual('Always', rp)  # set to 'Always' by default
 
     def test_rc_get_pod_restart_policy(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         p = 'OnFailure'
         rc.restart_policy = p
         self.assertEqual(p, rc.restart_policy)
@@ -592,7 +593,7 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_get_selector(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         self.assertIsNotNone(rc.selector)
         self.assertIsInstance(rc.selector, dict)
         self.assertEqual(2, len(rc.selector))
@@ -604,12 +605,12 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_rc_get_service_account_none(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         self.assertIsNone(rc.service_account_name)
 
     def test_rc_get_service_account(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         acct = "yoservice"
         rc.service_account_name = acct
         self.assertEqual(acct, rc.service_account_name)
@@ -618,21 +619,21 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_rc_set_active_deadline_none_arg(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         d = None
         with self.assertRaises(SyntaxError):
             rc.active_deadline = d
 
     def test_rc_set_active_deadline_invalid_arg(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         d = "yodeadline"
         with self.assertRaises(SyntaxError):
             rc.active_deadline = d
 
     def test_rc_set_active_deadline(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         d = 600
         rc.active_deadline = d
         self.assertEqual(d, rc.active_deadline)
@@ -641,20 +642,20 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_set_annotations_none_arg(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         with self.assertRaises(SyntaxError):
             rc.annotations = None
 
     def test_set_annotations_invalid_arg(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         anns = object()
         with self.assertRaises(SyntaxError):
             rc.annotations = anns
 
     def test_set_annotations(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         anns_in = {'k1': 'v1', 'k2': 'v2'}
         rc.annotations = anns_in
         anns_out = rc.annotations
@@ -664,20 +665,20 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_set_labels_none_arg(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         with self.assertRaises(SyntaxError):
             rc.labels = None
 
     def test_set_labels_invalid_arg(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         labels = object()
         with self.assertRaises(SyntaxError):
             rc.labels = labels
 
     def test_set_labels(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         labels = {'k1': 'v1', 'k2': 'v2'}
         rc.labels = labels
         self.assertEqual(labels, rc.labels)
@@ -686,20 +687,20 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_set_namespace_none_arg(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         with self.assertRaises(SyntaxError):
             rc.namespace = None
 
     def test_set_namespace_invalid_arg(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         nspace = object()
         with self.assertRaises(SyntaxError):
             rc.namespace = nspace
 
     def test_set_namespace(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         nspace = "yonamespace"
         rc.namespace = nspace
         self.assertEqual(nspace, rc.namespace)
@@ -708,20 +709,20 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_set_pod_annotations_none_arg(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         with self.assertRaises(SyntaxError):
             rc.pod_annotations = None
 
     def test_set_pod_annotations_invalid_arg(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         anns = object()
         with self.assertRaises(SyntaxError):
             rc.pod_annotations = anns
 
     def test_set_pod_annotations(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         anns = {'k1': 'v1', 'k2': 'v2'}
         rc.pod_annotations = anns
         self.assertEqual(anns, rc.pod_annotations)
@@ -730,66 +731,66 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_rc_set_pod_node_name_none_arg(self):
         name = "yorc"
-        obj = utils.create_rc(name=name)
+        obj = _utils.create_rc(name=name)
         nodename = None
         with self.assertRaises(SyntaxError):
             obj.pod_node_name = nodename
 
     def test_rc_set_pod_node_name_invalid_arg(self):
         name = "yorc"
-        obj = utils.create_rc(name=name)
+        obj = _utils.create_rc(name=name)
         nodename = 666
         with self.assertRaises(SyntaxError):
             obj.pod_node_name = nodename
 
     def test_rc_set_pod_node_name(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         nodename = "yonodename"
         rc.pod_node_name = nodename
         self.assertEqual(rc.pod_node_name, nodename)
 
     # --------------------------------------------------------------------------------- set pod node selector
 
-    def test_rc_set_pod_node_selector_none_arg(self):
+    def test_rc_set_node_selector_none_arg(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         s = None
         with self.assertRaises(SyntaxError):
-            rc.pod_node_selector = s
+            rc.node_selector = s
 
-    def test_rc_set_pod_node_selector_invalid_arg(self):
+    def test_rc_set_node_selector_invalid_arg(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         s = "yoselector"
         with self.assertRaises(SyntaxError):
-            rc.pod_node_selector = s
+            rc.node_selector = s
 
-    def test_rc_set_pod_node_selector(self):
+    def test_rc_set_node_selector(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         s = {"disktype": "ssd"}
-        rc.pod_node_selector = s
-        self.assertEqual(s, rc.pod_node_selector)
+        rc.node_selector = s
+        self.assertEqual(s, rc.node_selector)
 
     # --------------------------------------------------------------------------------- set labels
 
     def test_set_pod_labels_none_arg(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         with self.assertRaises(SyntaxError):
             rc.pod_labels = None
 
     def test_set_pod_labels_invalid_arg(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         labels = object()
         with self.assertRaises(SyntaxError):
             rc.pod_labels = labels
 
     def test_set_pod_labels(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         labels = {'k1': 'v1', 'k2': 'v2'}
         rc.pod_labels = labels
         self.assertEqual(labels, rc.pod_labels)
@@ -798,27 +799,27 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_rc_set_pod_restart_policy_none_arg(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         with self.assertRaises(SyntaxError):
             rc.restart_policy = None
 
     def test_rc_set_pod_restart_policy_not_a_string(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         p = 666
         with self.assertRaises(SyntaxError):
             rc.restart_policy = p
 
     def test_rc_set_pod_restart_policy_invalid_arg(self):
         name = "yorc"
-        obj = utils.create_rc(name=name)
+        obj = _utils.create_rc(name=name)
         p = 'yopolicy'
         with self.assertRaises(SyntaxError):
             obj.restart_policy = p
 
     def test_rc_set_pod_restart_policy(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         p = 'Always'
         rc.restart_policy = p
         self.assertEqual(p, rc.restart_policy)
@@ -827,20 +828,20 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_rc_set_service_account_none_arg(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         with self.assertRaises(SyntaxError):
             rc.service_account_name = None
 
     def test_rc_set_service_account_invalid_arg(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         acct = 666
         with self.assertRaises(SyntaxError):
             rc.service_account_name = acct
 
     def test_rc_set_service_account(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         acct = "yoservice"
         rc.service_account_name = acct
         self.assertEqual(acct, rc.service_account_name)
@@ -849,20 +850,20 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_set_replicas_none_arg(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         with self.assertRaises(SyntaxError):
             rc.desired_replicas = None
 
     def test_set_replicas_invalid_arg(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         count = -99
         with self.assertRaises(SyntaxError):
             rc.desired_replicas = count
 
     def test_set_replicas(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         count = 10
         before = rc.desired_replicas
         self.assertNotEqual(before, count)
@@ -875,20 +876,20 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_set_selector_none_arg(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         with self.assertRaises(SyntaxError):
             rc.selector = None
 
     def test_set_selector_invalid_arg(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         sel = object()
         with self.assertRaises(SyntaxError):
             rc.selector = sel
 
     def test_set_selector(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         sel = {'k1': 'v1', 'k2': 'v2'}
         rc.selector = sel
         self.assertEqual(sel, rc.selector)
@@ -897,20 +898,20 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_rc_set_termination_grace_period_none_arg(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         with self.assertRaises(SyntaxError):
             rc.termination_grace_period = None
 
     def test_rc_set_termination_grace_period_invalid_arg(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         secs = -666
         with self.assertRaises(SyntaxError):
             rc.termination_grace_period = secs
 
     def test_rc_set_termination_grace_period(self):
         name = "yorc"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         secs = 1234
         rc.termination_grace_period = secs
         self.assertEqual(secs, rc.termination_grace_period)
@@ -919,11 +920,11 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_wait_for_replicas(self):
         cont_name = "yocontainer"
-        container = utils.create_container(name=cont_name)
+        container = _utils.create_container(name=cont_name)
         name = "yorc-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         rc.add_container(container)
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             rc.create()
             rc.desired_replicas = 2
             rc.update()
@@ -961,19 +962,19 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_get_by_name_nonexistent(self):
         name = "yorc-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=name)
-        if utils.is_reachable(rc.config):
+        rc = _utils.create_rc(name=name)
+        if _utils.is_reachable(rc.config):
             result = K8sReplicationController.get_by_name(config=rc.config, name=name)
             self.assertIsInstance(result, list)
             self.assertEqual(0, len(result))
 
     def test_get_by_name(self):
         cont_name = "yocontainer"
-        container = utils.create_container(name=cont_name)
+        container = _utils.create_container(name=cont_name)
         name = "yorc-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         rc.add_container(container)
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             rc.create()
             result = K8sReplicationController.get_by_name(config=rc.config, name=name)
             self.assertIsInstance(result, list)
@@ -984,7 +985,7 @@ class K8sReplicationControllerTest(BaseTest):
     # -------------------------------------------------------------------------------------  resize
 
     def test_scale_none_args(self):
-        config = utils.create_config()
+        config = _utils.create_config()
         with self.assertRaises(SyntaxError):
             K8sReplicationController.scale(config=config)
 
@@ -998,38 +999,38 @@ class K8sReplicationControllerTest(BaseTest):
     def test_scale_invalid_name(self):
         name = object()
         replicas = 1
-        config = utils.create_config()
-        if utils.is_reachable(config):
+        config = _utils.create_config()
+        if _utils.is_reachable(config):
             with self.assertRaises(SyntaxError):
                 K8sReplicationController.scale(config=config, name=name, replicas=replicas)
 
     def test_scale_invalid_replicas(self):
         name = "yoname"
         replicas = -99
-        container = utils.create_container(name=name)
-        rc = utils.create_rc(name=name)
+        container = _utils.create_container(name=name)
+        rc = _utils.create_rc(name=name)
         rc.add_container(container)
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             with self.assertRaises(SyntaxError):
                 rc.create()
                 K8sReplicationController.scale(config=rc.config, name=rc.name, replicas=replicas)
 
     def test_scale_nonexistent(self):
         name = "yorc-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         replicas = 3
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             with self.assertRaises(NotFoundException):
                 K8sReplicationController.scale(config=rc.config, name=name, replicas=replicas)
 
     def test_scale(self):
         cont_name = "yocontainer"
-        container = utils.create_container(name=cont_name)
+        container = _utils.create_container(name=cont_name)
         name = "yorc-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         rc.add_container(container)
         replicas = 3
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             rc.create()
             K8sReplicationController.scale(config=rc.config, name=name, replicas=replicas)
             result = rc.get()
@@ -1040,11 +1041,11 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_rolling_update_none_args(self):
         cont_name = "yocontainer"
-        container = utils.create_container(name=cont_name)
+        container = _utils.create_container(name=cont_name)
         name = "yorc-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         rc.add_container(container)
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             try:
                 K8sReplicationController.rolling_update()
             except Exception as err:
@@ -1054,11 +1055,11 @@ class K8sReplicationControllerTest(BaseTest):
         cont_name = "redis"
         image = "redis:3.2.0"
         new_image = "redis:3.2.3"
-        container = utils.create_container(name=cont_name, image=image)
+        container = _utils.create_container(name=cont_name, image=image)
         name = "yorc-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         rc.add_container(container)
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             try:
                 K8sReplicationController.rolling_update(config=rc.config, name=name, image=new_image)
             except Exception as err:
@@ -1068,11 +1069,11 @@ class K8sReplicationControllerTest(BaseTest):
         cont_name = "redis"
         image = "redis:3.2.0"
         new_image = "redis:3.2.3"
-        container = utils.create_container(name=cont_name, image=image)
+        container = _utils.create_container(name=cont_name, image=image)
         name = "yorc-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         rc.add_container(container)
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             rc.create()
             rollout = K8sReplicationController.rolling_update(config=rc.config, name=name, image=new_image)
             self.assertEqual(new_image, rollout.containers[0].image)
@@ -1083,13 +1084,13 @@ class K8sReplicationControllerTest(BaseTest):
         image_1 = "redis:3.2.0"
         image_2 = "nginx:1.10"
         new_image = "redis:3.2.3"
-        container_1 = utils.create_container(name=cont_name_1, image=image_1)
-        container_2 = utils.create_container(name=cont_name_2, image=image_2)
+        container_1 = _utils.create_container(name=cont_name_1, image=image_1)
+        container_2 = _utils.create_container(name=cont_name_2, image=image_2)
         name = "yorc-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         rc.add_container(container_1)
         rc.add_container(container_2)
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             rc.create()
             try:
                 K8sReplicationController.rolling_update(config=rc.config, name=name, image=new_image)
@@ -1102,13 +1103,13 @@ class K8sReplicationControllerTest(BaseTest):
         image_1 = "redis:3.2.0"
         image_2 = "nginx:1.10"
         new_image = "redis:3.2.3"
-        container_1 = utils.create_container(name=cont_name_1, image=image_1)
-        container_2 = utils.create_container(name=cont_name_2, image=image_2)
+        container_1 = _utils.create_container(name=cont_name_1, image=image_1)
+        container_2 = _utils.create_container(name=cont_name_2, image=image_2)
         name = "yorc-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         rc.add_container(container_1)
         rc.add_container(container_2)
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             rc.create()
             rollout = K8sReplicationController.rolling_update(
                 config=rc.config, name=name, image=new_image, container_name=cont_name_1)
@@ -1124,13 +1125,13 @@ class K8sReplicationControllerTest(BaseTest):
         image_2 = "nginx:1.10"
         new_image = "redis:3.2.3"
         count = 1
-        container_1 = utils.create_container(name=cont_name_1, image=image_1)
-        container_2 = utils.create_container(name=cont_name_2, image=image_2)
+        container_1 = _utils.create_container(name=cont_name_1, image=image_1)
+        container_2 = _utils.create_container(name=cont_name_2, image=image_2)
         name = "yorc-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         rc.add_container(container_1)
         rc.add_container(container_2)
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             rc.create()
             K8sReplicationController.scale(
                 config=rc.config,
@@ -1169,13 +1170,13 @@ class K8sReplicationControllerTest(BaseTest):
         image_2 = "nginx:1.10"
         new_image = "redis:3.2.3"
         count = 2
-        container_1 = utils.create_container(name=cont_name_1, image=image_1)
-        container_2 = utils.create_container(name=cont_name_2, image=image_2)
+        container_1 = _utils.create_container(name=cont_name_1, image=image_1)
+        container_2 = _utils.create_container(name=cont_name_2, image=image_2)
         name = "yorc-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         rc.add_container(container_1)
         rc.add_container(container_2)
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             rc.create()
             K8sReplicationController.scale(
                 config=rc.config,
@@ -1213,16 +1214,16 @@ class K8sReplicationControllerTest(BaseTest):
         image = "redis:3.2.0"
         new_image = "redis:3.2.3"
 
-        cont_1 = utils.create_container(name=cont_name, image=image)
+        cont_1 = _utils.create_container(name=cont_name, image=image)
         name = "yorc-{0}".format(str(uuid.uuid4()))
-        rc_1 = utils.create_rc(name=name)
+        rc_1 = _utils.create_rc(name=name)
         rc_1.add_container(cont_1)
 
-        cont_2 = utils.create_container(name=cont_name, image=new_image)
-        rc_2 = utils.create_rc(name=name)
+        cont_2 = _utils.create_container(name=cont_name, image=new_image)
+        rc_2 = _utils.create_rc(name=name)
         rc_2.add_container(cont_2)
 
-        if utils.is_reachable(rc_1.config):
+        if _utils.is_reachable(rc_1.config):
             rc_1.create()
             rollout = K8sReplicationController.rolling_update(config=rc_1.config, name=name, rc_new=rc_2)
             self.assertEqual(new_image, rollout.containers[0].image)
@@ -1234,21 +1235,21 @@ class K8sReplicationControllerTest(BaseTest):
         image_2 = "nginx:1.10"
         new_image = "redis:3.2.3"
 
-        container_1 = utils.create_container(name=cont_name_1, image=image_1)
-        container_2 = utils.create_container(name=cont_name_2, image=image_2)
-        container_3 = utils.create_container(name=cont_name_1, image=new_image)
+        container_1 = _utils.create_container(name=cont_name_1, image=image_1)
+        container_2 = _utils.create_container(name=cont_name_2, image=image_2)
+        container_3 = _utils.create_container(name=cont_name_1, image=new_image)
 
         name_1 = "yorc-{0}".format(str(uuid.uuid4()))
-        rc_1 = utils.create_rc(name=name_1)
+        rc_1 = _utils.create_rc(name=name_1)
         rc_1.add_container(container_1)
         rc_1.add_container(container_2)
 
         name_2 = "yorc-{0}".format(str(uuid.uuid4()))
-        rc_2 = utils.create_rc(name=name_2)
+        rc_2 = _utils.create_rc(name=name_2)
         rc_2.add_container(container_3)
         rc_2.add_container(container_2)
 
-        if utils.is_reachable(rc_1.config):
+        if _utils.is_reachable(rc_1.config):
             rc_1.create()
             rollout = K8sReplicationController.rolling_update(config=rc_1.config, name=name_1, rc_new=rc_2)
             self.assertEqual(new_image, rollout.containers[0].image)
@@ -1261,21 +1262,21 @@ class K8sReplicationControllerTest(BaseTest):
         new_image = "redis:3.2.3"
         count = 1
 
-        container_1 = utils.create_container(name=cont_name_1, image=image_1)
-        container_2 = utils.create_container(name=cont_name_2, image=image_2)
-        container_3 = utils.create_container(name=cont_name_1, image=new_image)
+        container_1 = _utils.create_container(name=cont_name_1, image=image_1)
+        container_2 = _utils.create_container(name=cont_name_2, image=image_2)
+        container_3 = _utils.create_container(name=cont_name_1, image=new_image)
 
         name_1 = "yorc-{0}".format(str(uuid.uuid4()))
-        rc_1 = utils.create_rc(name=name_1)
+        rc_1 = _utils.create_rc(name=name_1)
         rc_1.add_container(container_1)
         rc_1.add_container(container_2)
 
         name_2 = "yorc-{0}".format(str(uuid.uuid4()))
-        rc_2 = utils.create_rc(name=name_2)
+        rc_2 = _utils.create_rc(name=name_2)
         rc_2.add_container(container_3)
         rc_2.add_container(container_2)
 
-        if utils.is_reachable(rc_1.config):
+        if _utils.is_reachable(rc_1.config):
             rc_1.create()
             K8sReplicationController.scale(
                 config=rc_1.config,
@@ -1313,23 +1314,23 @@ class K8sReplicationControllerTest(BaseTest):
         new_image = "redis:3.2.3"
         count = 2
 
-        container_1 = utils.create_container(name=cont_name_1, image=image_1)
-        container_2 = utils.create_container(name=cont_name_2, image=image_2)
-        container_3 = utils.create_container(name=cont_name_1, image=new_image)
+        container_1 = _utils.create_container(name=cont_name_1, image=image_1)
+        container_2 = _utils.create_container(name=cont_name_2, image=image_2)
+        container_3 = _utils.create_container(name=cont_name_1, image=new_image)
 
         name_1 = "yorc-{0}".format(str(uuid.uuid4()))
-        rc_1 = utils.create_rc(name=name_1)
+        rc_1 = _utils.create_rc(name=name_1)
         rc_1.add_container(container_1)
         rc_1.add_container(container_2)
         rc_1.desired_replicas = count
 
         name_2 = "yorc-{0}".format(str(uuid.uuid4()))
-        rc_2 = utils.create_rc(name=name_2)
+        rc_2 = _utils.create_rc(name=name_2)
         rc_2.add_container(container_3)
         rc_2.add_container(container_2)
         rc_2.desired_replicas = count
 
-        if utils.is_reachable(rc_1.config):
+        if _utils.is_reachable(rc_1.config):
             rc_1.create()
             pods = K8sPod.get_by_labels(
                 config=rc_1.config,
@@ -1355,10 +1356,10 @@ class K8sReplicationControllerTest(BaseTest):
                     self.assertIn(c.image, [new_image, image_2])
 
     def test_update_from_full_model_with_liveness_probes(self):
-        data = utils.frontend()
+        data = _constants.frontend()
 
         rc = ReplicationController(data)
-        k8s_rc = utils.create_rc(name=rc.metadata.name)
+        k8s_rc = _utils.create_rc(name=rc.metadata.name)
         k8s_rc.model = rc
         self.assertEqual(1, len(k8s_rc.liveness_probes))
 
@@ -1366,7 +1367,7 @@ class K8sReplicationControllerTest(BaseTest):
         self.assertIsInstance(liveness, Probe)
         self.assertEqual(15, liveness.initial_delay_seconds)
 
-        if utils.is_reachable(k8s_rc.config):
+        if _utils.is_reachable(k8s_rc.config):
             k8s_rc.create()
             self.assertIsInstance(k8s_rc, K8sReplicationController)
 
@@ -1392,10 +1393,10 @@ class K8sReplicationControllerTest(BaseTest):
                 self.assertEqual(from_get.initial_delay_seconds, liveness.initial_delay_seconds)
 
     def test_update_from_full_model_with_readiness_probes(self):
-        data = utils.frontend()
+        data = _constants.frontend()
 
         rc = ReplicationController(data)
-        k8s_rc = utils.create_rc(name=rc.metadata.name)
+        k8s_rc = _utils.create_rc(name=rc.metadata.name)
         k8s_rc.model = rc
         self.assertEqual(1, len(k8s_rc.liveness_probes))
 
@@ -1403,7 +1404,7 @@ class K8sReplicationControllerTest(BaseTest):
         self.assertIsInstance(readiness, Probe)
         self.assertEqual("/", readiness.http_get_action.path)
 
-        if utils.is_reachable(k8s_rc.config):
+        if _utils.is_reachable(k8s_rc.config):
             k8s_rc.create()
             self.assertIsInstance(k8s_rc, K8sReplicationController)
 
@@ -1425,8 +1426,8 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_create_without_containers(self):
         name = "yorc-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=name)
-        if utils.is_reachable(rc.config):
+        rc = _utils.create_rc(name=name)
+        if _utils.is_reachable(rc.config):
             try:
                 rc.create()
                 self.fail("Should not fail.")
@@ -1435,23 +1436,23 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_create_with_container(self):
         name = "yocontainer"
-        container = utils.create_container(name=name)
+        container = _utils.create_container(name=name)
         name = "yorc-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         rc.add_container(container=container)
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             obj = rc.create()
             self.assertIsNotNone(obj)
             self.assertIsInstance(obj, K8sReplicationController)
 
     def test_create_already_exists(self):
         name = "yocontainer"
-        container = utils.create_container(name=name)
+        container = _utils.create_container(name=name)
         name = "yorc-{0}".format(str(uuid.uuid4()))
 
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         rc.add_container(container=container)
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             with self.assertRaises(AlreadyExistsException):
                 obj = rc.create()
                 self.assertIsNotNone(obj)
@@ -1459,25 +1460,25 @@ class K8sReplicationControllerTest(BaseTest):
                 rc.create()
 
     def test_create_from_full_model(self):
-        model = utils.admintool()
+        model = _constants.admintool()
         model = ReplicationController(model)
         self.assertIsInstance(model, ReplicationController)
 
-        rc = utils.create_rc(name=model.metadata.name)
+        rc = _utils.create_rc(name=model.metadata.name)
         rc.model = model
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             rc.create()
             self.assertIsInstance(rc, K8sReplicationController)
 
     # ------------------------------------------------------------------------------------- api - list
 
     def test_list(self):
-        model = utils.admintool()
+        model = _constants.admintool()
         model = ReplicationController(model)
         self.assertIsInstance(model, ReplicationController)
-        rc = utils.create_rc(name=model.metadata.name)
+        rc = _utils.create_rc(name=model.metadata.name)
         rc.model = model
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             rc.create()
             objs = rc.list()
             for x in objs:
@@ -1485,15 +1486,15 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_list_multiple(self):
         name = "yocontainer"
-        container = utils.create_container(name=name)
-        config = K8sConfig(kubeconfig=utils.kubeconfig_fallback)
+        container = _utils.create_container(name=name)
+        config = K8sConfig(kubeconfig=_utils.kubeconfig_fallback)
         rcs = []
         count = 3
         objs = []
-        if utils.is_reachable(config):
+        if _utils.is_reachable(config):
             for i in range(0, count):
                 name = "yorc-{0}".format(str(uuid.uuid4()))
-                rc = utils.create_rc(config, name, replicas=1)
+                rc = _utils.create_rc(config, name, replicas=1)
                 rc.add_container(container)
                 result = rc.create()
                 self.assertIsInstance(result, K8sReplicationController)
@@ -1507,19 +1508,19 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_update_nonexistent(self):
         name = "yorc-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=name)
-        if utils.is_reachable(rc.config):
+        rc = _utils.create_rc(name=name)
+        if _utils.is_reachable(rc.config):
             with self.assertRaises(NotFoundException):
                 rc.update()
 
     def test_update_name_fails(self):
         name = "yocontainer"
-        container = utils.create_container(name=name)
+        container = _utils.create_container(name=name)
         name1 = "yorc1"
         name2 = "yorc2"
-        rc = utils.create_rc(name=name1)
+        rc = _utils.create_rc(name=name1)
         rc.add_container(container)
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             rc.create()
             result = K8sReplicationController.get_by_name(config=rc.config, name=name1)
             self.assertIsInstance(result, list)
@@ -1531,12 +1532,12 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_update_namespace_fails(self):
         name = "yocontainer"
-        container = utils.create_container(name=name)
+        container = _utils.create_container(name=name)
         name = "yorc-{0}".format(str(uuid.uuid4()))
         nspace = "yonamespace"
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         rc.add_container(container)
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             rc.create()
             result = K8sReplicationController.get_by_name(config=rc.config, name=name)
             self.assertIsInstance(result, list)
@@ -1551,11 +1552,11 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_update_labels_succeeds(self):
         name = "yocontainer"
-        container = utils.create_container(name=name)
+        container = _utils.create_container(name=name)
         name = "yorc-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         rc.add_container(container)
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             rc.create()
             rc.labels['yomama'] = 'sofat'
             rc.update()
@@ -1567,13 +1568,13 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_update_add_container_succeeds(self):
         cont_names = ["yocontainer", "yocontainer2"]
-        container = utils.create_container(name=cont_names[0])
+        container = _utils.create_container(name=cont_names[0])
         rc_name = "yorc-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=rc_name)
+        rc = _utils.create_rc(name=rc_name)
         rc.add_container(container)
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             rc.create()
-            container = utils.create_container(name=cont_names[1])
+            container = _utils.create_container(name=cont_names[1])
             rc.add_container(container)
             result = rc.update()
             self.assertIsInstance(result, K8sReplicationController)
@@ -1585,12 +1586,12 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_update_with_add_container(self):
         rc_name = "nginx-{}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=rc_name)
-        container_1 = utils.create_container(name="nginx", image="nginx:1.8.1")
-        container_2 = utils.create_container(name="nginx", image="nginx:1.10.2")
+        rc = _utils.create_rc(name=rc_name)
+        container_1 = _utils.create_container(name="nginx", image="nginx:1.8.1")
+        container_2 = _utils.create_container(name="nginx", image="nginx:1.10.2")
         rc.add_container(container_1)
         rc.desired_replicas = 1
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             rc.create()
             self.assertIsInstance(rc, K8sReplicationController)
             rc.add_container(container_2)
@@ -1605,20 +1606,20 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_delete_nonexistent(self):
         name = "yorc-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=name)
-        if utils.is_reachable(rc.config):
+        rc = _utils.create_rc(name=name)
+        if _utils.is_reachable(rc.config):
             with self.assertRaises(NotFoundException):
                 rc.delete()
 
     def test_delete(self):
         name = "yocontainer"
-        container = utils.create_container(name=name)
+        container = _utils.create_container(name=name)
         name = "yopod-{0}".format(str(uuid.uuid4()))
-        rc = utils.create_rc(name=name)
+        rc = _utils.create_rc(name=name)
         rc.add_container(container)
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             rc.create()
-            utils.cleanup_rc()
+            _utils.cleanup_rc()
             result = rc.list()
             self.assertIsInstance(result, list)
             self.assertEqual(0, len(result))
@@ -1630,11 +1631,11 @@ class K8sReplicationControllerTest(BaseTest):
         image_1 = "redis:3.2.0"
         new_image = "redis:3.2.3"
         count = 2
-        container = utils.create_container(name=name, image=image_1)
-        rc = utils.create_rc(name=name)
+        container = _utils.create_container(name=name, image=image_1)
+        rc = _utils.create_rc(name=name)
         rc.add_container(container)
         rc.desired_replicas = count
-        if utils.is_reachable(rc.config):
+        if _utils.is_reachable(rc.config):
             rc.create()
             K8sReplicationController.rolling_update(config=rc.config, name=rc.name, image=new_image)
             rc.get()
@@ -1650,16 +1651,16 @@ class K8sReplicationControllerTest(BaseTest):
         image_2 = "nginx:1.10"
         count = 2
 
-        container_1 = utils.create_container(name=cont_name_1, image=image_1)
-        container_2 = utils.create_container(name=cont_name_2, image=image_2)
+        container_1 = _utils.create_container(name=cont_name_1, image=image_1)
+        container_2 = _utils.create_container(name=cont_name_2, image=image_2)
 
         name_1 = "yorc-{0}".format(str(uuid.uuid4()))
-        rc_1 = utils.create_rc(name=name_1)
+        rc_1 = _utils.create_rc(name=name_1)
         rc_1.add_container(container_1)
         rc_1.add_container(container_2)
         rc_1.desired_replicas = count
 
-        if utils.is_reachable(rc_1.config):
+        if _utils.is_reachable(rc_1.config):
             rc_1.create()
             rc_2 = rc_1.restart()
             self.assertIn(cont_name_1, rc_2.container_image)
@@ -1670,14 +1671,14 @@ class K8sReplicationControllerTest(BaseTest):
     # ------------------------------------------------------------------------------------- api - Probe periodSeconds
 
     def test_probe_period_seconds(self):
-        data = utils.frontend()
+        data = _constants.frontend()
         rc = ReplicationController(data)
-        k8s_rc = utils.create_rc(name=rc.metadata.name)
+        k8s_rc = _utils.create_rc(name=rc.metadata.name)
         k8s_rc.model = rc
         self.assertEqual(1, len(k8s_rc.liveness_probes))
         self.assertEqual(1, len(k8s_rc.readiness_probes))
 
-        if utils.is_reachable(k8s_rc.config):
+        if _utils.is_reachable(k8s_rc.config):
             k8s_rc.create()
             probe = k8s_rc.liveness_probes['frontend']
             probe.period_seconds = 60
@@ -1687,14 +1688,14 @@ class K8sReplicationControllerTest(BaseTest):
             self.assertEqual(60, rc.liveness_probes['frontend'].period_seconds)
 
     def test_probe_period_seconds_with_model(self):
-        data = utils.frontend()
+        data = _constants.frontend()
         rc = ReplicationController(data)
-        k8s_rc = utils.create_rc(name=rc.metadata.name)
+        k8s_rc = _utils.create_rc(name=rc.metadata.name)
         k8s_rc.model = rc
         self.assertEqual(1, len(k8s_rc.liveness_probes))
         self.assertEqual(1, len(k8s_rc.readiness_probes))
 
-        if utils.is_reachable(k8s_rc.config):
+        if _utils.is_reachable(k8s_rc.config):
             k8s_rc.create()
             liveness = k8s_rc.liveness_probes['frontend']
             liveness.period_seconds = 60

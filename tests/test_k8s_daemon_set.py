@@ -6,23 +6,23 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from tests import utils
-from tests.BaseTest import BaseTest
 from kubernetes.K8sDaemonSet import K8sDaemonSet
 from kubernetes.models.v1beta1.DaemonSet import DaemonSet
+from tests import _constants
+from tests import _utils
+from tests.BaseTest import BaseTest
 
 
 class K8sDaemonSetTests(BaseTest):
-
     def setUp(self):
-        utils.cleanup_ds()
-        utils.cleanup_rs()
-        utils.cleanup_pods()
+        _utils.cleanup_ds()
+        _utils.cleanup_rs()
+        _utils.cleanup_pods()
 
     def tearDown(self):
-        utils.cleanup_ds()
-        utils.cleanup_rs()
-        utils.cleanup_pods()
+        _utils.cleanup_ds()
+        _utils.cleanup_rs()
+        _utils.cleanup_pods()
 
     # --------------------------------------------------------------------------------- init
 
@@ -45,11 +45,11 @@ class K8sDaemonSetTests(BaseTest):
     def test_init_with_invalid_name(self):
         name = object()
         with self.assertRaises(SyntaxError):
-            utils.create_cronjob(name=name)
+            _utils.create_cronjob(name=name)
 
     def test_init_with_name(self):
         name = "yomama"
-        rc = utils.create_daemonset(name=name)
+        rc = _utils.create_daemonset(name=name)
         self.assertIsNotNone(rc)
         self.assertIsInstance(rc, K8sDaemonSet)
         self.assertEqual(rc.name, name)
@@ -57,21 +57,21 @@ class K8sDaemonSetTests(BaseTest):
     # --------------------------------------------------------------------------------- api - create
 
     def test_api_create(self):
-        ds = DaemonSet(utils.fluentd_daemonset())
-        k8s_ds = utils.create_daemonset(name=ds.name)
+        ds = DaemonSet(_constants.fluentd_daemonset())
+        k8s_ds = _utils.create_daemonset(name=ds.name)
         k8s_ds.model = ds
-        if utils.is_reachable(k8s_ds.config):
+        if _utils.is_reachable(k8s_ds.config):
             k8s_ds.create()
             self.assertIsInstance(k8s_ds, K8sDaemonSet)
 
     # --------------------------------------------------------------------------------- api - list
 
     def test_list(self):
-        ds = DaemonSet(utils.fluentd_daemonset())
-        k8s_ds = utils.create_daemonset(name=ds.name)
+        ds = DaemonSet(_constants.fluentd_daemonset())
+        k8s_ds = _utils.create_daemonset(name=ds.name)
         k8s_ds.model = ds
 
-        if utils.is_reachable(k8s_ds.config):
+        if _utils.is_reachable(k8s_ds.config):
             k8s_ds.create()
             _list = k8s_ds.list()
             for x in _list:

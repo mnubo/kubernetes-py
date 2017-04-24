@@ -8,7 +8,7 @@
 
 import uuid
 
-from tests import utils
+from tests import _utils
 from tests.BaseTest import BaseTest
 from kubernetes.K8sExceptions import *
 
@@ -18,12 +18,12 @@ class K8sReplicaSetTests(BaseTest):
         pass
 
     def tearDown(self):
-        utils.cleanup_objects()
+        _utils.cleanup_objects()
 
     def test_delete_nonexistent(self):
         name = "yorc-{0}".format(str(uuid.uuid4()))
-        dep = utils.create_deployment(name=name)
-        if utils.is_reachable(dep.config):
+        dep = _utils.create_deployment(name=name)
+        if _utils.is_reachable(dep.config):
             try:
                 dep.delete()
                 self.fail("Should not fail.")
@@ -32,10 +32,10 @@ class K8sReplicaSetTests(BaseTest):
 
     def test_delete(self):
         name = "yoname"
-        rs = utils.create_rs(name=name)
-        config = utils.create_config()
-        if utils.is_reachable(config):
-            utils.cleanup_rs()
+        rs = _utils.create_rs(name=name)
+        config = _utils.create_config()
+        if _utils.is_reachable(config):
+            _utils.cleanup_rs()
             result = rs.list()
             self.assertIsInstance(result, list)
             self.assertEqual(0, len(result))
