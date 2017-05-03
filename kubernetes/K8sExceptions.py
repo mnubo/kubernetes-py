@@ -45,3 +45,8 @@ class PodNotReadyException(Exception):
 class VersionMismatchException(Exception):
     def __init__(self, *args, **kwargs):
         super(VersionMismatchException, self).__init__(*args, **kwargs)
+
+
+class DrainNodeException(Exception):
+    def __init__(self, *args, **kwargs):
+        super(DrainNodeException, self).__init__(*args, **kwargs)

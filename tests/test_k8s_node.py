@@ -21,16 +21,18 @@ from tests.BaseTest import BaseTest
 
 class K8sNodeTest(BaseTest):
     def setUp(self):
-        _utils.cleanup_nodes()
-        _utils.cleanup_deployments()
-        _utils.cleanup_rs()
-        _utils.cleanup_pods()
+        #_utils.cleanup_nodes()
+        #_utils.cleanup_deployments()
+        #_utils.cleanup_rs()
+        #_utils.cleanup_pods()
+        pass
 
     def tearDown(self):
-        _utils.cleanup_nodes()
-        _utils.cleanup_deployments()
-        _utils.cleanup_rs()
-        _utils.cleanup_pods()
+        #_utils.cleanup_nodes()
+        #_utils.cleanup_deployments()
+        #_utils.cleanup_rs()
+        #_utils.cleanup_pods()
+        pass
 
     # --------------------------------------------------------------------------------- init
 
@@ -301,3 +303,28 @@ class K8sNodeTest(BaseTest):
             self.assertEqual(d_redis.node_selector, {"mnubo.com/selector": "2"})
 
             pass  # set breakpoint; play around with killing pods
+
+    # --------------------------------------------------------------------------------- api - drain
+
+    def test_drain_vanilla(self):
+        cfg = _utils.create_config()
+
+        if _utils.is_reachable(cfg):
+            nodes = K8sNode(config=cfg, name="yo").list()
+
+            for node in nodes:
+                with self.assertRaises(DrainNodeException):
+                        node.drain()
+                        self.assertEqual(True, node.unschedulable)
+
+    def test_drain_ignore_daemonsets(self):
+        cfg = _utils.create_config()
+
+        if _utils.is_reachable(cfg):
+            nodes = K8sNode(config=cfg, name="yo").list()
+
+            for node in nodes:
+                node.drain(ignore_daemonsets=True)
+                self.assertTrue(node.unschedulable)
+                node.uncordon()
+                self.assertFalse(node.unschedulable)
