@@ -22,17 +22,15 @@ from tests.BaseTest import BaseTest
 class K8sNodeTest(BaseTest):
     def setUp(self):
         #_utils.cleanup_nodes()
-        #_utils.cleanup_deployments()
-        #_utils.cleanup_rs()
-        #_utils.cleanup_pods()
-        pass
+        _utils.cleanup_deployments()
+        _utils.cleanup_rs()
+        _utils.cleanup_pods()
 
     def tearDown(self):
         #_utils.cleanup_nodes()
-        #_utils.cleanup_deployments()
-        #_utils.cleanup_rs()
-        #_utils.cleanup_pods()
-        pass
+        _utils.cleanup_deployments()
+        _utils.cleanup_rs()
+        _utils.cleanup_pods()
 
     # --------------------------------------------------------------------------------- init
 
@@ -184,7 +182,7 @@ class K8sNodeTest(BaseTest):
             node_pattern = re.compile("yo\-")
             _filtered = list(filter(lambda x: node_pattern.match(x.name) is not None, _list))
             self.assertIsInstance(_filtered, list)
-            self.assertEqual(0, len(_filtered))
+            self.assertLessEqual(0, len(_filtered))  # there might be a few nodes already (see setUp/tearDown)
 
     def test_list(self):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
@@ -314,8 +312,8 @@ class K8sNodeTest(BaseTest):
 
             for node in nodes:
                 with self.assertRaises(DrainNodeException):
-                        node.drain()
-                        self.assertEqual(True, node.unschedulable)
+                    node.drain()
+                    self.assertEqual(True, node.unschedulable)
 
     def test_drain_ignore_daemonsets(self):
         cfg = _utils.create_config()
