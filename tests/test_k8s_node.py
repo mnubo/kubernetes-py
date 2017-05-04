@@ -11,6 +11,7 @@ import uuid
 
 from kubernetes import K8sNode, K8sConfig
 from kubernetes.K8sExceptions import *
+from kubernetes.K8sPod import K8sPod
 from kubernetes.models.v1.Node import Node
 from kubernetes.models.v1.NodeSpec import NodeSpec
 from kubernetes.models.v1.NodeStatus import NodeStatus
@@ -21,13 +22,13 @@ from tests.BaseTest import BaseTest
 
 class K8sNodeTest(BaseTest):
     def setUp(self):
-        #_utils.cleanup_nodes()
+        # _utils.cleanup_nodes()
         _utils.cleanup_deployments()
         _utils.cleanup_rs()
         _utils.cleanup_pods()
 
     def tearDown(self):
-        #_utils.cleanup_nodes()
+        # _utils.cleanup_nodes()
         _utils.cleanup_deployments()
         _utils.cleanup_rs()
         _utils.cleanup_pods()
@@ -302,6 +303,20 @@ class K8sNodeTest(BaseTest):
 
             pass  # set breakpoint; play around with killing pods
 
+    # --------------------------------------------------------------------------------- api - pods
+
+    def test_pods(self):
+        cfg = _utils.create_config()
+
+        if _utils.is_reachable(cfg):
+            nodes = K8sNode(config=cfg, name="yo").list()
+
+            for node in nodes:
+                pods = node.pods
+                self.assertIsInstance(pods, list)
+                for pod in pods:
+                    self.assertIsInstance(pod, K8sPod)
+
     # --------------------------------------------------------------------------------- api - drain
 
     def test_drain_vanilla(self):
@@ -310,10 +325,13 @@ class K8sNodeTest(BaseTest):
         if _utils.is_reachable(cfg):
             nodes = K8sNode(config=cfg, name="yo").list()
 
-            for node in nodes:
-                with self.assertRaises(DrainNodeException):
+            try:
+                for node in nodes:
                     node.drain()
                     self.assertEqual(True, node.unschedulable)
+
+            except Exception as err:
+                self.assertIsInstance(err, DrainNodeException)
 
     def test_drain_ignore_daemonsets(self):
         cfg = _utils.create_config()
@@ -321,8 +339,12 @@ class K8sNodeTest(BaseTest):
         if _utils.is_reachable(cfg):
             nodes = K8sNode(config=cfg, name="yo").list()
 
-            for node in nodes:
-                node.drain(ignore_daemonsets=True)
-                self.assertTrue(node.unschedulable)
-                node.uncordon()
-                self.assertFalse(node.unschedulable)
+            try:
+                for node in nodes:
+                    node.drain(ignore_daemonsets=True)
+                    self.assertTrue(node.unschedulable)
+                    node.uncordon()
+                    self.assertFalse(node.unschedulable)
+
+            except Exception as err:
+                self.assertIsInstance(err, DrainNodeException)
