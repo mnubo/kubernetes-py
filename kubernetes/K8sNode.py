@@ -133,6 +133,16 @@ class K8sNode(K8sObject):
             return filtered[0]
         return None
 
+    # ------------------------------------------------------------------------------------- pods
+
+    @property
+    def pods(self):
+        return self._pod_inventory()
+
+    @pods.setter
+    def pods(self, p=None):
+        raise NotImplementedError("K8sNode: pods is read-only.")
+
     # ------------------------------------------------------------------------------------- drain
 
     def drain(self, ignore_daemonsets=False, delete_local_storage=False, force=False):
