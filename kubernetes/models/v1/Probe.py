@@ -38,7 +38,7 @@ class Probe(object):
 
     def _build_with_model(self, model=None):
         if 'exec' in model:
-            self.exec_action = ExecAction(model['execAction'])
+            self.exec_action = ExecAction(model['exec'])
         if 'httpGet' in model:
             self.http_get_action = HTTPGetAction(model['httpGet'])
         if 'tcpSocket' in model:
