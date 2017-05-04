@@ -5,9 +5,9 @@
 
 Kubernetes API bindings in Python.
 
-Run on our own Kubernetes clusters at 1.4.7
+Run on our own on-prem and AWS Kubernetes clusters at 1.5.6
 
-Unit tests run on Google GKE clusters at 1.5.6
+Also unit tested on Google GKE clusters at 1.5.6
 
 Currently supported Kubernetes objects:
 
