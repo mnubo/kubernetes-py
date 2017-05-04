@@ -9,6 +9,7 @@
 from kubernetes.K8sObject import K8sObject
 from kubernetes.K8sPod import K8sPod
 from kubernetes.models.v1beta1.ReplicaSet import ReplicaSet
+from kubernetes.K8sExceptions import NotFoundException
 
 
 class K8sReplicaSet(K8sObject):
@@ -48,7 +49,10 @@ class K8sReplicaSet(K8sObject):
         if cascade:
             pods = K8sPod(config=self.config, name="yo").list(pattern=self.name)
             for pod in pods:
-                pod.delete(cascade)
+                try:
+                    pod.delete(cascade)
+                except NotFoundException:
+                    pass
         return self
 
     # -------------------------------------------------------------------------------------  revision
