@@ -263,7 +263,7 @@ class K8sNode(K8sObject):
     def _check_timeout(self, start_time=None):
         elapsed_time = time.time() - start_time
         if elapsed_time >= self.DRAIN_WAIT_TIMEOUT_SECONDS:  # timeout
-            raise TimedOutException("Timed out draining Node: [ {0} ]".format(self.name))
+            raise TimedOutException("Timed out draining K8sNode: [ {0} ]".format(self.name))
 
     # ------------------------------------------------------------------------------------- uncordon
 
@@ -271,9 +271,9 @@ class K8sNode(K8sObject):
         """
         Returns this K8sNode into the pool addressable by the kube-scheduler.
         
-        :return: None
+        :return: self
         """
 
         self.unschedulable = False
         self.update()
-        return
+        return self
