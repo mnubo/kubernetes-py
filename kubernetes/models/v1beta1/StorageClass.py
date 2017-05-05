@@ -22,6 +22,7 @@ class StorageClass(BaseModel):
 
         self._kind = 'StorageClass'
         self._api_version = 'storage.k8s.io/v1beta1'
+
         self._metadata = ObjectMeta()
         self._provisioner = None
         self._parameters = None
@@ -30,12 +31,8 @@ class StorageClass(BaseModel):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'kind' in model:
-            self.kind = model['kind']
-        if 'apiVersion' in model:
-            self.api_version = model['apiVersion']
-        if 'metadata' in model:
-            self.metadata = ObjectMeta(model['metadata'])
+        super(StorageClass, self).build_with_model(model)
+
         if 'provisioner' in model:
             self.provisioner = model['provisioner']
         if 'parameters' in model:
@@ -104,13 +101,8 @@ class StorageClass(BaseModel):
     # ------------------------------------------------------------------------------------- serialize
 
     def serialize(self):
-        data = {}
-        if self.kind is not None:
-            data['kind'] = self.kind
-        if self.api_version is not None:
-            data['apiVersion'] = self.api_version
-        if self.metadata is not None:
-            data['metadata'] = self.metadata.serialize()
+        data = super(StorageClass, self).serialize()
+
         if self.provisioner is not None:
             data['provisioner'] = self.provisioner
         if self.parameters is not None:
