@@ -17,7 +17,8 @@ from tests import _utils
 from tests.BaseTest import BaseTest
 
 
-class K8sJobTests(BaseTest):
+class K8sHorizontalPodAutoscalerTests(BaseTest):
+
     def setUp(self):
         _utils.cleanup_hpas()
         _utils.cleanup_services()
@@ -82,25 +83,27 @@ class K8sJobTests(BaseTest):
         https://github.com/kubernetes/community/blob/master/contributors/design-proposals/horizontal-pod-autoscaler.md
         """
 
-        k8s_dep = _utils.create_deployment(name="php-apache")
-        k8s_dep.model = Deployment(_constants.hpa_example_deployment())
+        n = "php-apache"
+        dep = _utils.create_deployment(name=n)
+        dep.model = Deployment(
+            _constants.hpa_example_deployment())
+        svc = _utils.create_service(name=n)
+        svc.model = Service(
+            _constants.hpa_example_service())
+        hpa = _utils.create_hpa(name=n)
+        hpa.model = HorizontalPodAutoscaler(
+            _constants.hpa_example_autoscaler())
 
-        k8s_svc = _utils.create_service(name="php-apache")
-        k8s_svc.model = Service(_constants.hpa_example_service())
-
-        k8s_hpa = _utils.create_hpa(name="php-apache")
-        k8s_hpa.model = HorizontalPodAutoscaler(_constants.hpa_example_autoscaler())
-
-        if _utils.is_reachable(k8s_hpa.config):
+        if _utils.is_reachable(hpa.config):
             # //--- Step One: Run & expose php-apache server
-            k8s_dep.create()
-            k8s_svc.create()
+            dep.create()
+            svc.create()
             # // --- Step Two: Create Horizontal Pod Autoscaler
-            k8s_hpa.create()
+            hpa.create()
 
         # // --- Step Three: Increase Load
         # $ kubectl run -i --tty load-generator --image=busybox /bin/sh
         # $ while true; do wget -q -O- http://php-apache.default.svc.cluster.local; done
-        # watch 'kubectl config current-context; echo; kubectl get deployments; echo; kubectl get replicasets; echo; kubectl get pods; echo; kubectl top nodes; echo; kubectl top pods'
+        # $ watch 'kubectl config current-context; echo; kubectl get deployments; echo; kubectl get replicasets; echo; kubectl get pods; echo; kubectl top nodes; echo; kubectl top pods'
 
         time.sleep(10)  # wait for 10 secs; set a breakpoint if you need.
