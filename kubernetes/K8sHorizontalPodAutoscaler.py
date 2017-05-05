@@ -7,7 +7,6 @@
 #
 
 from kubernetes.K8sObject import K8sObject
-from kubernetes.utils import is_valid_dict
 from kubernetes.models.v1.HorizontalPodAutoscaler import HorizontalPodAutoscaler
 from kubernetes.models.v1beta1.SubresourceReference import SubresourceReference
 
@@ -80,7 +79,7 @@ class K8sHorizontalPodAutoscaler(K8sObject):
     @max_replicas.setter
     def max_replicas(self, max=None):
         self.model.spec.max_replicas = max
-        
+
     # ------------------------------------------------------------------------------------- scaleRef
 
     @property

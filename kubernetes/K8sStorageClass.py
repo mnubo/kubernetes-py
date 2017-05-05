@@ -11,7 +11,6 @@ from kubernetes.models.v1beta1.StorageClass import StorageClass
 
 
 class K8sStorageClass(K8sObject):
-
     def __init__(self, config=None, name=None):
 
         super(K8sStorageClass, self).__init__(

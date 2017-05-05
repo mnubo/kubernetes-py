@@ -11,12 +11,12 @@ import json
 import yaml
 
 from kubernetes.K8sVolumeMount import K8sVolumeMount
+from kubernetes.models.v1.Capabilities import Capabilities
 from kubernetes.models.v1.Container import Container
 from kubernetes.models.v1.ContainerPort import ContainerPort
 from kubernetes.models.v1.EnvVar import EnvVar
 from kubernetes.models.v1.Probe import Probe
 from kubernetes.models.v1.ResourceRequirements import ResourceRequirements
-from kubernetes.models.v1.Capabilities import Capabilities
 
 
 class K8sContainer(object):
