@@ -31,12 +31,14 @@ class ServiceAccount(BaseModel):
 
     def _build_with_model(self, model=None):
         super(ServiceAccount, self).build_with_model(model)
+
         if 'secrets' in model:
             secrets = []
             for x in model['secrets']:
                 s = ObjectReference(x)
                 secrets.append(s)
             self.secrets = secrets
+
         if 'imagePullSecrets' in model:
             secrets = []
             for x in model['imagePullSecrets']:
@@ -72,6 +74,7 @@ class ServiceAccount(BaseModel):
 
     def serialize(self):
         data = super(ServiceAccount, self).serialize()
+
         if self.secrets is not None:
             data['secrets'] = [x.serialize() for x in self.secrets]
         if self.image_pull_secrets is not None:

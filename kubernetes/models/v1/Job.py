@@ -22,6 +22,7 @@ class Job(BaseModel):
 
         self.kind = 'Job'
         self.api_version = 'batch/v1'
+
         self.spec = JobSpec()
         self.status = JobStatus()
 
@@ -29,12 +30,8 @@ class Job(BaseModel):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'kind' in model:
-            self.kind = model['kind']
-        if 'apiVersion' in model:
-            self.api_version = model['apiVersion']
-        if 'metadata' in model:
-            self.metadata = ObjectMeta(model['metadata'])
+        super(Job, self).build_with_model(model)
+
         if 'spec' in model:
             self.spec = JobSpec(model['spec'])
         if 'status' in model:
@@ -68,6 +65,7 @@ class Job(BaseModel):
 
     def serialize(self):
         data = super(Job, self).serialize()
+
         if self.spec is not None:
             data['spec'] = self.spec.serialize()
         if self.status is not None:
