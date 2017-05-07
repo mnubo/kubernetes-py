@@ -17,6 +17,7 @@ from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sCronJob import K8sCronJob
 from kubernetes.K8sDaemonSet import K8sDaemonSet
 from kubernetes.K8sDeployment import K8sDeployment
+from kubernetes.K8sEvent import K8sEvent
 from kubernetes.K8sExceptions import NotFoundException
 from kubernetes.K8sExceptions import VersionMismatchException
 from kubernetes.K8sHorizontalPodAutoscaler import K8sHorizontalPodAutoscaler
@@ -343,6 +344,16 @@ def create_hpa(config=None, name=None):
     if config is None:
         config = create_config()
     obj = K8sHorizontalPodAutoscaler(
+        config=config,
+        name=name
+    )
+    return obj
+
+
+def create_event(config=None, name=None):
+    if config is None:
+        config = create_config()
+    obj = K8sEvent(
         config=config,
         name=name
     )

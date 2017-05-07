@@ -22,11 +22,11 @@ class Event(BaseModel):
 
         self._count = None
         self._first_timestamp = None
-        self._involved_object = None
+        self._involved_object = ObjectReference()
         self._last_timestamp = None
         self._message = None
         self._reason = None
-        self._source = None
+        self._source = EventSource()
         self._type = None
 
         if model is not None:
@@ -152,6 +152,7 @@ class Event(BaseModel):
 
     def serialize(self):
         data = super(Event, self).serialize()
+
         if self.count is not None:
             data['count'] = self.count
         if self.first_timestamp is not None:
