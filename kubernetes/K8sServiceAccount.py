@@ -8,12 +8,11 @@
 
 from kubernetes.K8sObject import K8sObject
 from kubernetes.K8sSecret import K8sSecret
-from kubernetes.models.v1.ServiceAccount import ServiceAccount
 from kubernetes.models.v1.LocalObjectReference import LocalObjectReference
+from kubernetes.models.v1.ServiceAccount import ServiceAccount
 
 
 class K8sServiceAccount(K8sObject):
-
     def __init__(self, config=None, name=None):
 
         super(K8sServiceAccount, self).__init__(

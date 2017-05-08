@@ -20,6 +20,7 @@ class DeploymentRollback(object):
 
         self._kind = 'DeploymentRollback'
         self._api_version = 'extensions/v1beta1'
+
         self._name = None
         self._updated_annotations = {}
         self._rollback_to = RollbackConfig()

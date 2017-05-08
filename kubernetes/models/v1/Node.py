@@ -23,6 +23,7 @@ class Node(BaseModel):
 
         self.kind = 'Node'
         self.api_version = 'v1'
+
         self.spec = NodeSpec()
         self.status = NodeStatus()
 
@@ -31,12 +32,8 @@ class Node(BaseModel):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'kind' in model:
-            self.kind = model['kind']
-        if 'apiVersion' in model:
-            self.api_version = model['apiVersion']
-        if 'metadata' in model:
-            self.metadata = ObjectMeta(model['metadata'])
+        super(Node, self).build_with_model(model)
+
         if 'spec' in model:
             self.spec = NodeSpec(model['spec'])
         if 'status' in model:

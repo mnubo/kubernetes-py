@@ -22,6 +22,7 @@ class Deployment(BaseModel):
 
         self.kind = 'Deployment'
         self.api_version = 'extensions/v1beta1'
+
         self.spec = DeploymentSpec()
         self.status = DeploymentStatus()
 
@@ -29,12 +30,8 @@ class Deployment(BaseModel):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'kind' in model:
-            self.kind = model['kind']
-        if 'apiVersion' in model:
-            self.api_version = model['apiVersion']
-        if 'metadata' in model:
-            self.metadata = ObjectMeta(model['metadata'])
+        super(Deployment, self).build_with_model(model)
+
         if 'spec' in model:
             self.spec = DeploymentSpec(model['spec'])
         if 'status' in model:

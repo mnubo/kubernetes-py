@@ -38,12 +38,8 @@ class Secret(BaseModel):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'kind' in model:
-            self.kind = model['kind']
-        if 'apiVersion' in model:
-            self.api_version = model['apiVersion']
-        if 'metadata' in model:
-            self.metadata = ObjectMeta(model['metadata'])
+        super(Secret, self).build_with_model(model)
+
         if 'data' in model:
             d = {}
             for k, v in model['data'].items():
@@ -235,6 +231,7 @@ class Secret(BaseModel):
 
     def serialize(self):
         data = super(Secret, self).serialize()
+
         if self.data is not None:
             d = {}
             for k, v in self.data.items():

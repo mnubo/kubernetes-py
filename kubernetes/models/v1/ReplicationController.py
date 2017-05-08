@@ -29,12 +29,8 @@ class ReplicationController(BaseModel):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'apiVersion' in model:
-            self.api_version = model['apiVersion']
-        if 'kind' in model:
-            self.kind = model['kind']
-        if 'metadata' in model:
-            self.metadata = ObjectMeta(model['metadata'])
+        super(ReplicationController, self).build_with_model(model)
+
         if 'spec' in model:
             self.spec = ReplicationControllerSpec(model['spec'])
         if 'status' in model:
@@ -68,6 +64,7 @@ class ReplicationController(BaseModel):
 
     def serialize(self):
         data = super(ReplicationController, self).serialize()
+
         if self.spec is not None:
             data['spec'] = self.spec.serialize()
         if self.status is not None:

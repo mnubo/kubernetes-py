@@ -9,7 +9,7 @@
 import uuid
 
 from kubernetes import K8sObject, K8sConfig
-from kubernetes.K8sExceptions import UnprocessableEntityException, NotFoundException
+from kubernetes.K8sExceptions import UnprocessableEntityException, NotFoundException, InvalidObjectException
 from tests import _utils
 from tests.BaseTest import BaseTest
 
@@ -46,12 +46,12 @@ class K8sObjectTest(BaseTest):
 
     def test_init_invalid_object_type(self):
         ot = 666
-        with self.assertRaises(SyntaxError):
+        with self.assertRaises(InvalidObjectException):
             _utils.create_object(obj_type=ot)
 
     def test_init_unknown_object_type(self):
         ot = "yomama"
-        with self.assertRaises(SyntaxError):
+        with self.assertRaises(InvalidObjectException):
             _utils.create_object(obj_type=ot)
 
     def test_init_object_type_pod(self):

@@ -7,6 +7,11 @@
 #
 
 
+class InvalidObjectException(Exception):
+    def __init__(self, *args, **kwargs):
+        super(InvalidObjectException, self).__init__(*args, **kwargs)
+
+
 class UnauthorizedException(Exception):
     def __init__(self, *args, **kwargs):
         super(UnauthorizedException, self).__init__(*args, **kwargs)

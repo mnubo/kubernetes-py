@@ -8,6 +8,7 @@
 
 import re
 from os.path import expanduser, isfile
+
 import yaml
 from yaml import YAMLError
 
@@ -18,12 +19,12 @@ DEFAULT_NAMESPACE = "default"
 
 VALID_API_VERSIONS = ["v1"]
 
-VALID_IP_RE = re.compile(r'^(http[s]?\:\/\/)?((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3})(:[0-9]+)?$')
+VALID_IP_RE = re.compile(
+    r'^(http[s]?\:\/\/)?((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3})(:[0-9]+)?$')
 VALID_HOST_RE = re.compile(r'^(http[s]?\:\/\/)?([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-\.]*[A-Za-z])+(:[0-9]+)?$')
 
 
 class K8sConfig(object):
-
     def __init__(self, kubeconfig=DEFAULT_KUBECONFIG, api_host=DEFAULT_API_HOST, auth=None, cert=None,
                  namespace=DEFAULT_NAMESPACE, pull_secret=None, token=None, version=DEFAULT_API_VERSION):
         """
@@ -108,7 +109,8 @@ class K8sConfig(object):
         if dotconf is None:
 
             if not isinstance(api_host, str) or not isinstance(version, str):
-                raise SyntaxError('K8sConfig: host: [ {0} ] and version: [ {1} ] must be strings.'.format(api_host, version))
+                raise SyntaxError(
+                    'K8sConfig: host: [ {0} ] and version: [ {1} ] must be strings.'.format(api_host, version))
             if not (VALID_IP_RE.match(api_host) or VALID_HOST_RE.match(api_host)):
                 raise SyntaxError('K8sConfig: host: [ {0} ] is invalid.'.format(api_host))
             if auth is not None and not isinstance(auth, tuple):

@@ -18,6 +18,7 @@ class PodStatus(object):
 
     def __init__(self, model=None):
         super(PodStatus, self).__init__()
+
         self._conditions = []
         self._container_statuses = []
         self._phase = None

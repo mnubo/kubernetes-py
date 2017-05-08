@@ -52,6 +52,7 @@ class NodeSystemInfo(object):
             self.operating_system = model['operatingSystem']
         if 'architecture' in model:
             self.architecture = model['architecture']
+
     # ------------------------------------------------------------------------------------- machine_id
 
     @property

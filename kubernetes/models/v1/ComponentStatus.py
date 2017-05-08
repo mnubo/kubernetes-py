@@ -18,7 +18,7 @@ class ComponentStatus(BaseModel):
     """
 
     def __init__(self, model=None):
-        super(ComponentStatus, self).__init__()
+        super(ComponentStatus, self).__init__(model=model)
 
         self._conditions = None
 
@@ -27,12 +27,8 @@ class ComponentStatus(BaseModel):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'kind' in model:
-            self.kind = model['kind']
-        if 'apiVersion' in model:
-            self.api_version = model['apiVersion']
-        if 'metadata' in model:
-            self.metadata = ObjectMeta(model['metadata'])
+        super(ComponentStatus, self).build_with_model(model)
+
         if 'conditions' in model:
             if not isinstance(model['conditions'], list):
                 raise SyntaxError('ComponentStatus: _build_with_model: conditions : [ {0} ] is invalid.'
@@ -58,6 +54,7 @@ class ComponentStatus(BaseModel):
 
     def serialize(self):
         data = super(ComponentStatus, self).serialize()
+
         if self.conditions:
             l = list()
             for c in self.conditions:

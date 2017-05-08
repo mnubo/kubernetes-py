@@ -19,6 +19,7 @@ class DaemonSet(BaseModel):
 
         self.kind = 'DaemonSet'
         self.api_version = 'extensions/v1beta1'
+        
         self.spec = DaemonSetSpec()
         self.status = DaemonSetStatus()
 
@@ -26,12 +27,8 @@ class DaemonSet(BaseModel):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'kind' in model:
-            self.kind = model['kind']
-        if 'apiVersion' in model:
-            self.api_version = model['apiVersion']
-        if 'metadata' in model:
-            self.metadata = ObjectMeta(model['metadata'])
+        super(DaemonSet, self).build_with_model(model)
+
         if 'spec' in model:
             self.spec = DaemonSetSpec(model['spec'])
         if 'status' in model:
@@ -65,6 +62,7 @@ class DaemonSet(BaseModel):
 
     def serialize(self):
         data = super(DaemonSet, self).serialize()
+
         if self.spec is not None:
             data['spec'] = self.spec.serialize()
         if self.status is not None:

@@ -13,6 +13,7 @@ class ServiceStatus(object):
 
     def __init__(self, model=None):
         super(ServiceStatus, self).__init__()
+
         self._load_balancer = None
 
         if model is not None:
@@ -41,4 +42,3 @@ class ServiceStatus(object):
         if self.load_balancer is not None:
             data['loadBalancer'] = self.load_balancer.serialize()
         return data
-

@@ -23,6 +23,7 @@ VALID_K8s_OBJS = [
     'CronJob',  # server version >= 1.5
     'DaemonSet',
     'Deployment',
+    'Event',
     'HorizontalPodAutoscaler',
     'Job',
     'Namespace',
@@ -58,7 +59,7 @@ class K8sObject(object):
 
         if obj_type not in VALID_K8s_OBJS:
             valid = ", ".join(VALID_K8s_OBJS)
-            raise SyntaxError('K8sObject: obj_type: [ {0} ] must be in: [ {1} ]'.format(obj_type, valid))
+            raise InvalidObjectException('K8sObject: obj_type: [ {0} ] must be in: [ {1} ]'.format(obj_type, valid))
         self.obj_type = obj_type
 
         self.model = str_to_class(obj_type)
@@ -67,7 +68,7 @@ class K8sObject(object):
         try:
             urls = BaseUrls(api=self.config.version, namespace=self.config.namespace)
             self.base_url = urls.get_base_url(object_type=obj_type)
-        except:
+        except Exception as err:
             raise Exception('Could not set BaseUrl for type: [ {0} ]'.format(obj_type))
 
     def __str__(self):
@@ -168,7 +169,7 @@ class K8sObject(object):
         self.model.metadata.name = name
         self.model.metadata.labels['name'] = name
 
-    # ------------------------------------------------------------------------------------- name
+    # ------------------------------------------------------------------------------------- status
 
     @property
     def status(self):
@@ -177,6 +178,16 @@ class K8sObject(object):
     @status.setter
     def status(self, status=None):
         raise NotImplementedError()
+
+    # ------------------------------------------------------------------------------------- uid
+
+    @property
+    def uid(self):
+        return self.model.metadata.uid
+
+    @uid.setter
+    def uid(self, uid=None):
+        raise NotImplementedError("K8sObject: uid is read-only.")
 
     # ------------------------------------------------------------------------------------- serialize
 

@@ -19,7 +19,6 @@ READY_WAIT_TIMEOUT_SECONDS = 60
 
 
 class K8sPersistentVolumeClaim(K8sObject):
-
     def __init__(self, config=None, name=None):
         super(K8sPersistentVolumeClaim, self).__init__(
             config=config,

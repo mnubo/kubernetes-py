@@ -6,10 +6,10 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+from kubernetes.K8sExceptions import NotFoundException
 from kubernetes.K8sObject import K8sObject
 from kubernetes.K8sPod import K8sPod
 from kubernetes.models.v1beta1.ReplicaSet import ReplicaSet
-from kubernetes.K8sExceptions import NotFoundException
 
 
 class K8sReplicaSet(K8sObject):
