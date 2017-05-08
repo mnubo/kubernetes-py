@@ -58,3 +58,13 @@ class K8sEventTests(BaseTest):
             objs = K8sEvent(config=cfg, name="yo").list()
             for x in objs:
                 self.assertIsInstance(x, K8sEvent)
+
+    # --------------------------------------------------------------------------------- api - warnings
+
+    def test_warnings(self):
+        cfg = _utils.create_config()
+
+        if _utils.is_reachable(cfg):
+            objs = K8sEvent(config=cfg, name="yo").warnings()
+            for x in objs:
+                self.assertIsInstance(x, K8sEvent)
