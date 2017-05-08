@@ -80,7 +80,7 @@ class K8sEvent(K8sObject):
 
     @property
     def message(self):
-        return self.model.message
+        return self.model.message.strip()
 
     @message.setter
     def message(self, m=None):
