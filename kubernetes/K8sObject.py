@@ -169,7 +169,7 @@ class K8sObject(object):
         self.model.metadata.name = name
         self.model.metadata.labels['name'] = name
 
-    # ------------------------------------------------------------------------------------- name
+    # ------------------------------------------------------------------------------------- status
 
     @property
     def status(self):
@@ -178,6 +178,16 @@ class K8sObject(object):
     @status.setter
     def status(self, status=None):
         raise NotImplementedError()
+
+    # ------------------------------------------------------------------------------------- uid
+
+    @property
+    def uid(self):
+        return self.model.metadata.uid
+
+    @uid.setter
+    def uid(self, uid=None):
+        raise NotImplementedError("K8sObject: uid is read-only.")
 
     # ------------------------------------------------------------------------------------- serialize
 
