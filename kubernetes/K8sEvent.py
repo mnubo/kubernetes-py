@@ -56,6 +56,16 @@ class K8sEvent(K8sObject):
     def type(self, t=None):
         raise NotImplementedError("K8sEvent: type is read-only.")
 
+    # ------------------------------------------------------------------------------------- count
+
+    @property
+    def count(self):
+        return self.model.count
+
+    @count.setter
+    def count(self, c=None):
+        raise NotImplementedError("K8sEvent: count is read-only.")
+
     # ------------------------------------------------------------------------------------- source
 
     @property
