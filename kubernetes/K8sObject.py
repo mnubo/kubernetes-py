@@ -77,7 +77,9 @@ class K8sObject(object):
     def __eq__(self, other):
         # see https://github.com/kubernetes/kubernetes/blob/release-1.3/docs/design/identifiers.md
         if isinstance(other, self.__class__):
-            return self.config.namespace == other.config.namespace and self.name == other.name
+            return self.config.namespace == other.config.namespace \
+                   and self.name == other.name \
+                   and self.uid == other.uid
         return NotImplemented
 
     # ------------------------------------------------------------------------------------- get
