@@ -51,7 +51,7 @@ class K8sDeploymentTests(BaseTest):
     def test_init_with_invalid_name(self):
         name = object()
         with self.assertRaises(SyntaxError):
-            _utils.create_rc(name=name)
+            _utils.create_deployment(name=name)
 
     def test_init_with_name(self):
         name = "yomama"
