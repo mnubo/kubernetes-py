@@ -21,8 +21,13 @@ class Secret(BaseModel):
     """
 
     K8s_ANNOTATION_SERVICE_ACCOUNT_NAME = "kubernetes.io/service-account.name"
-    K8s_TYPE_DOCKER_CONFIG = "kubernetes.io/.dockerconfigjson"
+    K8s_TYPE_DOCKER_CONFIG = "kubernetes.io/dockerconfigjson"
     K8s_TYPE_SERVICE_ACCOUNT = "kubernetes.io/service-account-token"
+    K8s_TYPE_OPAQUE = "Opaque"
+    K8s_TYPE_DOCKER_CONFIG_V1 = "kubernetes.io/dockercfg"
+    K8s_TYPE_BASIC_AUTH = "kubernetes.io/basic-auth"
+    K8s_TYPE_SSH_AUTH = "kubernetes.io/ssh-auth"
+    K8s_TYPE_TLS = "kubernetes.io/tls"
 
     def __init__(self, model=None):
         super(Secret, self).__init__()
