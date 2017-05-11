@@ -9,7 +9,10 @@
 import uuid
 
 from kubernetes import K8sObject, K8sConfig
-from kubernetes.K8sExceptions import UnprocessableEntityException, NotFoundException, InvalidObjectException
+from kubernetes.K8sExceptions import (
+    UnprocessableEntityException, NotFoundException,
+    InvalidObjectException
+)
 from tests import _utils
 from tests.BaseTest import BaseTest
 
@@ -28,6 +31,8 @@ class K8sObjectTest(BaseTest):
             K8sObject()
             self.fail("Should not fail.")
         except SyntaxError:
+            pass
+        except InvalidObjectException:
             pass
         except IOError:
             pass
