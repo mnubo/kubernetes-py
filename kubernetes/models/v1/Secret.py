@@ -21,6 +21,7 @@ class Secret(BaseModel):
     """
 
     K8s_ANNOTATION_SERVICE_ACCOUNT_NAME = "kubernetes.io/service-account.name"
+    K8s_ANNOTATION_SERVICE_ACCOUNT_UID = "kubernetes.io/service-account.uid"
     K8s_TYPE_DOCKER_CONFIG = "kubernetes.io/dockerconfigjson"
     K8s_TYPE_SERVICE_ACCOUNT = "kubernetes.io/service-account-token"
     K8s_TYPE_OPAQUE = "Opaque"
@@ -193,7 +194,7 @@ class Secret(BaseModel):
     def dockerconfigjson(self, secret=None):
         if not is_valid_dict(secret):
             raise SyntaxError('Secret: .dockerconfigjson: [ {} ] is invalid.'.format(secret))
-        self.type = 'kubernetes.io/.dockerconfigjson'
+        self.type = self.K8s_TYPE_DOCKER_CONFIG
         s = json.dumps(secret)
         utf = s.encode('utf-8')
         self.data = {'.dockerconfigjson': utf}
@@ -212,11 +213,11 @@ class Secret(BaseModel):
             raise SyntaxError('Secret.set_service_account() token: [ {} ] is invalid.'.format(token))
 
         anns = {
-            'kubernetes.io/service-account.name': account_name,
-            'kubernetes.io/service-account.uid': account_uid
+            self.K8s_ANNOTATION_SERVICE_ACCOUNT_NAME: account_name,
+            self.K8s_ANNOTATION_SERVICE_ACCOUNT_UID: account_uid
         }
 
-        self.type = 'kubernetes.io/service-account-token'
+        self.type = self.K8s_TYPE_SERVICE_ACCOUNT
         self.metadata.annotations = anns
         self.data = {'token': token}
 
