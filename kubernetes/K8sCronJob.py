@@ -188,6 +188,20 @@ class K8sCronJob(K8sObject):
             new.append(found[0])
             self.containers = new
 
+    # -------------------------------------------------------------------------------------  dnsPolicy
+
+    @property
+    def dns_policy(self):
+        return self.model.spec.template.spec.dns_policy
+
+    @dns_policy.setter
+    def dns_policy(self, policy=None):
+        # if policy not in self.model.spec.template.spec.VALID_DNS_POLICIES:
+        if policy not in self.model.spec.job_template.spec.template.spec.VALID_DNS_POLICIES:
+            raise SyntaxError('K8sJob: dns_policy: [ {} ] is invalid, expected [ {} ].'
+                              .format(policy, self.model.spec.job_template.spec.template.spec.VALID_DNS_POLICIES))
+        self.model.spec.job_template.spec.template.spec.dns_policy = policy
+
     # -------------------------------------------------------------------------------------  restartPolicy
 
     @property
