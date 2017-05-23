@@ -161,6 +161,18 @@ class K8sJob(K8sObject):
             raise SyntaxError('K8sJob: restart_policy: [ {} ] is invalid.'.format(policy))
         self.model.spec.template.spec.restart_policy = policy
 
+    # -------------------------------------------------------------------------------------  dnsPolicy
+
+    @property
+    def dns_policy(self):
+        return self.model.spec.template.spec.dns_policy
+
+    @dns_policy.setter
+    def dns_policy(self, policy=None):
+        if policy not in self.model.spec.template.spec.VALID_DNS_POLICIES:
+            raise SyntaxError('K8sJob: dns_policy: [ {} ] is invalid.'.format(policy))
+        self.model.spec.template.spec.dns_policy = policy
+
     # -------------------------------------------------------------------------------------  start time
 
     @property
