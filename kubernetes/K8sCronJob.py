@@ -80,7 +80,8 @@ class K8sCronJob(K8sObject):
 
     def add_volume(self, volume=None):
         if not isinstance(volume, K8sVolume):
-            raise SyntaxError('K8sCronJob.add_volume() volume: [ {0} ] is invalid.'.format(volume))
+            raise SyntaxError(
+                'K8sCronJob.add_volume() volume: [ {0} ] is invalid.'.format(volume))
         volumes = self.model.spec.job_template.spec.template.spec.volumes
         if volume.model not in volumes:
             volumes.append(volume.model)
@@ -161,7 +162,8 @@ class K8sCronJob(K8sObject):
     @containers.setter
     def containers(self, containers=None):
         if not is_valid_list(containers, K8sContainer):
-            raise SyntaxError('K8sCronJob: containers: [ {} ] is invalid.'.format(containers))
+            raise SyntaxError(
+                'K8sCronJob: containers: [ {} ] is invalid.'.format(containers))
         models = []
         for obj in containers:
             models.append(obj.model)
@@ -179,7 +181,8 @@ class K8sCronJob(K8sObject):
     @container_image.setter
     def container_image(self, tup=None):
         if not isinstance(tup, tuple):
-            raise SyntaxError('K8sCronJob.container_image() must be a tuple of the form (name, image)')
+            raise SyntaxError(
+                'K8sCronJob.container_image() must be a tuple of the form (name, image)')
         name, image = tup
         found = list(filter(lambda x: x.name == name, self.containers))
         if found:
@@ -206,4 +209,5 @@ class K8sCronJob(K8sObject):
 
     @last_schedule_time.setter
     def last_schedule_time(self, t=None):
-        raise NotImplementedError('K8sCronJob: last_schedule_time: this property is read-only.')
+        raise NotImplementedError(
+            'K8sCronJob: last_schedule_time: this property is read-only.')
