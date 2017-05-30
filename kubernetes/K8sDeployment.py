@@ -324,12 +324,15 @@ class K8sDeployment(K8sObject):
         """
 
         if name is None:
-            raise SyntaxError('Deployment: name: [ {0} ] cannot be None.'.format(name))
+            raise SyntaxError(
+                'Deployment: name: [ {0} ] cannot be None.'.format(name))
         if not isinstance(name, str):
-            raise SyntaxError('Deployment: name: [ {0} ] must be a string.'.format(name))
+            raise SyntaxError(
+                'Deployment: name: [ {0} ] must be a string.'.format(name))
 
         if config is not None and not isinstance(config, K8sConfig):
-            raise SyntaxError('Deployment: config: [ {0} ] must be a K8sConfig'.format(config))
+            raise SyntaxError(
+                'Deployment: config: [ {0} ] must be a K8sConfig'.format(config))
 
         dep_list = list()
         data = {'labelSelector': 'name={0}'.format(name)}
