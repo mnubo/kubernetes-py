@@ -24,6 +24,7 @@ from kubernetes.utils import is_valid_list
 class K8sDeployment(K8sObject):
 
     SCALE_WAIT_TIMEOUT_SECONDS = 120
+    REVISION_ANNOTATION = 'deployment.kubernetes.io/revision'
 
     def __init__(self, config=None, name=None, image=None, replicas=0):
 
@@ -367,7 +368,7 @@ class K8sDeployment(K8sObject):
             rollback.rollback_to.revision = revision
         # to the revision immediately preceding the current revision
         else:
-            current_revision = int(self.get_annotation('deployment.kubernetes.io/revision'))
+            current_revision = int(self.get_annotation(self.REVISION_ANNOTATION))
             rev = max(current_revision - 1, 0)
             rollback.rollback_to.revision = rev
 
