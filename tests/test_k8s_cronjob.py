@@ -10,7 +10,9 @@ import time
 import uuid
 
 from kubernetes.K8sCronJob import K8sCronJob
+from kubernetes.K8sPod import K8sPod
 from kubernetes.models.v2alpha1.CronJob import CronJob
+from kubernetes.K8sExceptions import CronJobAlreadyRunningException
 from tests import _constants
 from tests import _utils
 from tests.BaseTest import BaseTest
@@ -152,3 +154,56 @@ class K8sCronJobTests(BaseTest):
             lst = k8s_cronjob.last_schedule_time
             self.assertIsNotNone(lst)
             self.assertIsInstance(lst, str)
+
+    # --------------------------------------------------------------------------------- api - pod
+
+    def test_pod(self):
+        name = "job-{}".format(uuid.uuid4())
+        model = CronJob(_constants.scheduledjob_90())
+
+        cj = _utils.create_cronjob(name=name)
+        cj.model = model
+        cj.concurrency_policy = "Forbid"
+        cj.starting_deadline_seconds = 10
+
+        if _utils.is_reachable(cj.config):
+            cj.create()
+            while not cj.last_schedule_time:
+                cj.get()
+                time.sleep(2)
+            pod = cj.pod
+            self.assertIsInstance(pod, K8sPod)
+
+    # --------------------------------------------------------------------------------- api - run
+
+    def test_run_already_running(self):
+        name = "job-{}".format(uuid.uuid4())
+        model = CronJob(_constants.scheduledjob_90())
+
+        cj = _utils.create_cronjob(name=name)
+        cj.model = model
+        cj.concurrency_policy = "Forbid"
+        cj.starting_deadline_seconds = 10
+
+        if _utils.is_reachable(cj.config):
+            cj.create()
+            while not cj.last_schedule_time:
+                cj.get()
+                time.sleep(2)
+            with self.assertRaises(CronJobAlreadyRunningException):
+                cj.run()
+
+    def test_run(self):
+        name = "job-{}".format(uuid.uuid4())
+        model = CronJob(_constants.scheduledjob_90())
+
+        cj = _utils.create_cronjob(name=name)
+        cj.model = model
+        cj.concurrency_policy = "Forbid"
+        cj.starting_deadline_seconds = 10
+
+        if _utils.is_reachable(cj.config):
+            cj.create()
+            self.assertFalse(cj.suspend)
+            cj.run()
+            self.assertFalse(cj.suspend)
