@@ -65,13 +65,16 @@ class K8sPod(K8sObject):
             time.sleep(0.2)
             elapsed_time = time.time() - start_time
             if elapsed_time >= self.POD_READY_TIMEOUT_SECONDS:
-                raise TimedOutException("Timed out on Pod readiness: [ {0} ]".format(self.name))
+                raise TimedOutException(
+                    "Timed out on Pod readiness: [ {0} ]".format(self.name))
 
     # -------------------------------------------------------------------------------------  add
 
     def add_container(self, container=None):
         if not isinstance(container, K8sContainer):
-            raise SyntaxError('K8sPod.add_container() container: [ {0} ] is invalid.'.format(container))
+            raise SyntaxError(
+                'K8sPod.add_container() container: [ {0} ] is invalid.'.format(container))
+
         containers = self.model.spec.containers
         if container not in containers:
             containers.append(container.model)
@@ -217,14 +220,17 @@ class K8sPod(K8sObject):
     @liveness_probes.setter
     def liveness_probes(self, tup=None):
         if not isinstance(tup, tuple):
-            raise SyntaxError('K8sPod: liveness_probes: [ {} ] is invalid.'.format(tup))
+            raise SyntaxError(
+                'K8sPod: liveness_probes: [ {} ] is invalid.'.format(tup))
 
         c_name, probe = tup
         container_names = [c.name for c in self.model.spec.containers]
         if c_name not in container_names:
-            raise SyntaxError('K8sPod: liveness_probes: container [ {} ] not found.'.format(c_name))
+            raise SyntaxError(
+                'K8sPod: liveness_probes: container [ {} ] not found.'.format(c_name))
         if not isinstance(probe, Probe):
-            raise SyntaxError('K8sPod: liveness_probe: probe: [ {} ] is invalid.'.format(probe))
+            raise SyntaxError(
+                'K8sPod: liveness_probe: probe: [ {} ] is invalid.'.format(probe))
 
         containers = []
         for c in self.model.spec.containers:
@@ -247,14 +253,17 @@ class K8sPod(K8sObject):
     @readiness_probes.setter
     def readiness_probes(self, tup=None):
         if not isinstance(tup, tuple):
-            raise SyntaxError('K8sPod: readiness_probes: [ {} ] is invalid.'.format(tup))
+            raise SyntaxError(
+                'K8sPod: readiness_probes: [ {} ] is invalid.'.format(tup))
 
         c_name, probe = tup
         container_names = [c.name for c in self.model.spec.template.spec.containers]
         if c_name not in container_names:
-            raise SyntaxError('K8sPod: readiness_probes: container [ {} ] not found.'.format(c_name))
+            raise SyntaxError(
+                'K8sPod: readiness_probes: container [ {} ] not found.'.format(c_name))
         if not isinstance(probe, Probe):
-            raise SyntaxError('K8sPod: readiness_probes: probe: [ {} ] is invalid.'.format(probe))
+            raise SyntaxError(
+                'K8sPod: readiness_probes: probe: [ {} ] is invalid.'.format(probe))
 
         containers = []
         for c in self.model.spec.template.spec.containers:
@@ -341,7 +350,8 @@ class K8sPod(K8sObject):
         if config is None:
             config = K8sConfig()
         if not is_valid_string(name):
-            raise SyntaxError('K8sPod.get_by_name(): name: [ {0} ] is invalid.'.format(name))
+            raise SyntaxError(
+                'K8sPod.get_by_name(): name: [ {0} ] is invalid.'.format(name))
 
         pod_list = []
         data = {'labelSelector': 'name={0}'.format(name)}
@@ -362,7 +372,8 @@ class K8sPod(K8sObject):
         if config is None:
             config = K8sConfig()
         if not is_valid_dict(labels):
-            raise SyntaxError('K8sPod.get_by_labels(): labels: [ {} ] is invalid.'.format(labels))
+            raise SyntaxError(
+                'K8sPod.get_by_labels(): labels: [ {} ] is invalid.'.format(labels))
 
         pod_list = []
         selector = ",".join(['%s=%s' % (key, value) for (key, value) in labels.items()])
