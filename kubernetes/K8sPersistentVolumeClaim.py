@@ -19,6 +19,7 @@ READY_WAIT_TIMEOUT_SECONDS = 60
 
 
 class K8sPersistentVolumeClaim(K8sObject):
+
     def __init__(self, config=None, name=None):
         super(K8sPersistentVolumeClaim, self).__init__(
             config=config,
@@ -83,7 +84,9 @@ class K8sPersistentVolumeClaim(K8sObject):
     @resources.setter
     def resources(self, res=None):
         if not is_valid_dict(res):
-            raise SyntaxError('K8sPersistentVolumeClaim: resources: [ {} ] is invalid.'.format(res))
+            raise SyntaxError(
+                'K8sPersistentVolumeClaim: resources: [ {} ] is invalid.'.format(res))
+
         resources = ResourceRequirements(res)
         self.model.spec.resources = resources
 
@@ -96,6 +99,8 @@ class K8sPersistentVolumeClaim(K8sObject):
     @selector.setter
     def selector(self, sel=None):
         if not is_valid_dict(sel):
-            raise SyntaxError('K8sPersistentVolumeClaim: selector: [ {} ] is invalid.'.format(sel))
+            raise SyntaxError(
+                'K8sPersistentVolumeClaim: selector: [ {} ] is invalid.'.format(sel))
+
         selector = LabelSelector(sel)
         self.model.spec.selector = selector
