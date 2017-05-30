@@ -17,6 +17,9 @@ class K8sReplicaSet(K8sObject):
     http://kubernetes.io/docs/api-reference/extensions/v1beta1/definitions/#_v1beta1_replicaset
     """
 
+    REVISION_ANNOTATION = 'deployment.kubernetes.io/revision'
+    REVISION_HISTORY_ANNOTATION = 'deployment.kubernetes.io/revision-history'
+
     def __init__(self, config=None, name=None):
 
         super(K8sReplicaSet, self).__init__(
@@ -59,24 +62,26 @@ class K8sReplicaSet(K8sObject):
 
     @property
     def revision(self):
-        if 'deployment.kubernetes.io/revision' in self.model.metadata.annotations:
-            return self.model.metadata.annotations['deployment.kubernetes.io/revision']
+        if self.REVISION_ANNOTATION in self.model.metadata.annotations:
+            return self.model.metadata.annotations[self.REVISION_ANNOTATION]
         return None
 
     @revision.setter
     def revision(self, r=None):
-        raise NotImplementedError('K8sReplicaSet: revision is read-only.')
+        raise NotImplementedError(
+            'K8sReplicaSet: revision is read-only.')
 
     # -------------------------------------------------------------------------------------  revision history
 
     @property
     def revision_history(self):
-        if 'deployment.kubernetes.io/revision-history' in self.model.metadata.annotations:
-            comma_string = self.model.metadata.annotations['deployment.kubernetes.io/revision-history']
+        if self.REVISION_HISTORY_ANNOTATION in self.model.metadata.annotations:
+            comma_string = self.model.metadata.annotations[self.REVISION_HISTORY_ANNOTATION]
             version_array = comma_string.split(",")
             return map(lambda x: int(x), version_array)
         return None
 
     @revision_history.setter
     def revision_history(self, r=None):
-        raise NotImplementedError('K8sReplicaSet: revision_history is read-only.')
+        raise NotImplementedError(
+            'K8sReplicaSet: revision_history is read-only.')

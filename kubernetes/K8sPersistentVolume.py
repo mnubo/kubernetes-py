@@ -18,15 +18,15 @@ READY_WAIT_TIMEOUT_SECONDS = 60
 
 
 class K8sPersistentVolume(K8sObject):
-    VALID_VOLUME_TYPES = list(filter(lambda x: x not in ['emptyDir', 'gitRepo', 'secret'],
-                                     Volume.VOLUME_TYPES_TO_SOURCE_MAP.keys()))
+
+    VALID_VOLUME_TYPES = list(filter(
+        lambda x: x not in ['emptyDir', 'gitRepo', 'secret'], Volume.VOLUME_TYPES_TO_SOURCE_MAP.keys()))
 
     def __init__(self, config=None, name=None, type=None):
         super(K8sPersistentVolume, self).__init__(
             config=config,
             name=name,
-            obj_type='PersistentVolume'
-        )
+            obj_type='PersistentVolume')
 
         self._type = None
         self.model = PersistentVolume()
@@ -92,7 +92,9 @@ class K8sPersistentVolume(K8sObject):
     @type.setter
     def type(self, t=None):
         if t not in self.VALID_VOLUME_TYPES:
-            raise SyntaxError('K8sPersistentVolume: type: [ {} ] is invalid.'.format(t))
+            raise SyntaxError(
+                'K8sPersistentVolume: type: [ {} ] is invalid.'.format(t))
+
         self._type = t
         setattr(self.model.spec, t, Volume.vol_type_to_source(t))
 

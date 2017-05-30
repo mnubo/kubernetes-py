@@ -24,6 +24,7 @@ from kubernetes.utils import is_valid_list
 class K8sDeployment(K8sObject):
 
     SCALE_WAIT_TIMEOUT_SECONDS = 120
+    REVISION_ANNOTATION = 'deployment.kubernetes.io/revision'
 
     def __init__(self, config=None, name=None, image=None, replicas=0):
 
@@ -323,12 +324,15 @@ class K8sDeployment(K8sObject):
         """
 
         if name is None:
-            raise SyntaxError('Deployment: name: [ {0} ] cannot be None.'.format(name))
+            raise SyntaxError(
+                'Deployment: name: [ {0} ] cannot be None.'.format(name))
         if not isinstance(name, str):
-            raise SyntaxError('Deployment: name: [ {0} ] must be a string.'.format(name))
+            raise SyntaxError(
+                'Deployment: name: [ {0} ] must be a string.'.format(name))
 
         if config is not None and not isinstance(config, K8sConfig):
-            raise SyntaxError('Deployment: config: [ {0} ] must be a K8sConfig'.format(config))
+            raise SyntaxError(
+                'Deployment: config: [ {0} ] must be a K8sConfig'.format(config))
 
         dep_list = list()
         data = {'labelSelector': 'name={0}'.format(name)}
@@ -367,7 +371,7 @@ class K8sDeployment(K8sObject):
             rollback.rollback_to.revision = revision
         # to the revision immediately preceding the current revision
         else:
-            current_revision = int(self.get_annotation('deployment.kubernetes.io/revision'))
+            current_revision = int(self.get_annotation(self.REVISION_ANNOTATION))
             rev = max(current_revision - 1, 0)
             rollback.rollback_to.revision = rev
 

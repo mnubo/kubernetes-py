@@ -48,7 +48,8 @@ class Pod(BaseModel):
     @spec.setter
     def spec(self, spec=None):
         if not isinstance(spec, PodSpec):
-            raise SyntaxError('Pod: spec: [ {0} ] is invalid.'.format(spec))
+            raise SyntaxError(
+                'Pod: spec: [ {0} ] is invalid.'.format(spec))
         self._spec = spec
 
     # ------------------------------------------------------------------------------------- status
@@ -60,7 +61,8 @@ class Pod(BaseModel):
     @status.setter
     def status(self, status=None):
         if not isinstance(status, PodStatus):
-            raise SyntaxError('Pod: status: [ {0} ] is invalid.'.format(status))
+            raise SyntaxError(
+                'Pod: status: [ {0} ] is invalid.'.format(status))
         self._status = status
 
     # ------------------------------------------------------------------------------------- serialize

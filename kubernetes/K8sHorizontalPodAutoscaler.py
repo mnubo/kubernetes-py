@@ -12,6 +12,9 @@ from kubernetes.models.v1beta1.SubresourceReference import SubresourceReference
 
 
 class K8sHorizontalPodAutoscaler(K8sObject):
+
+    VALID_HPA_TARGET_KINDS = ['ReplicationController', 'Deployment']
+
     def __init__(self, config=None, name=None):
 
         super(K8sHorizontalPodAutoscaler, self).__init__(
@@ -89,16 +92,19 @@ class K8sHorizontalPodAutoscaler(K8sObject):
     @scale_ref.setter
     def scale_ref(self, ref=None):
         if not isinstance(ref, tuple):
-            raise SyntaxError('K8sHorizontalPodAutoscaler: scale_ref must be a tuple of the form (kind, name).')
+            raise SyntaxError(
+                'K8sHorizontalPodAutoscaler: scale_ref must be a tuple of the form (kind, name).')
 
         kind, name = ref
-        if kind not in ['ReplicationController', 'Deployment']:
-            raise SyntaxError('K8sHorizontalPodAutoscaler: scale_ref.kind: [ {} ] is invalid.'.format(kind))
+        if kind not in self.VALID_HPA_TARGET_KINDS:
+            raise SyntaxError(
+                'K8sHorizontalPodAutoscaler: scale_ref.kind: [ {} ] is invalid.'.format(kind))
 
         ref = {
             'apiVersion': 'v1' if kind == 'ReplicationController' else 'extensions/v1beta1',
             'kind': kind,
             'name': name
         }
+
         sub = SubresourceReference(ref)
         self.model.spec.scale_target_ref = sub

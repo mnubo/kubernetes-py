@@ -55,3 +55,14 @@ class VersionMismatchException(Exception):
 class DrainNodeException(Exception):
     def __init__(self, *args, **kwargs):
         super(DrainNodeException, self).__init__(*args, **kwargs)
+
+
+class CronJobAlreadyRunningException(Exception):
+    def __init__(self, *args, **kwargs):
+        super(CronJobAlreadyRunningException, self).__init__(*args, **kwargs)
+
+
+class CronJobRunException(Exception):
+    def __init__(self, *args, **kwargs):
+        super(CronJobRunException, self).__init__(*args, **kwargs)
+
