@@ -266,7 +266,7 @@ class K8sCronJob(K8sObject):
 
     # -------------------------------------------------------------------------------------  run
 
-    def run(self):
+    def run(self, timeout=POD_RUN_WAIT_TIMEOUT_SECONDS):
         """
         Forces a K8sCronJob to run immediately.
 
@@ -275,19 +275,27 @@ class K8sCronJob(K8sObject):
         - Spawn a K8sPod.
         - Unsuspend a K8sCronJob.
 
+        :param timeout: The timeout, in seconds, after which to kill the K8sPod.
+
         :return: None.
         """
 
+        if not isinstance(timeout, int):
+            raise SyntaxError("K8sCronJob.run() timeout: [ {} ] is invalid.")
+
         if len(self.active):
             raise CronJobAlreadyRunningException(
-                "K8sCronJob: run() failed: CronJob: [ {} ] "
+                "K8sCronJob.run() failed: CronJob: [ {} ] "
                 "has [ {} ] active Jobs currently.".format(self.name, len(self.active)))
 
         self.suspend = True
         self.update()
 
+        pod = self.pod
+        if timeout:
+            self.POD_RUN_WAIT_TIMEOUT_SECONDS = timeout
+
         try:
-            pod = self.pod
             pod.create()
             start_time = time.time()
             while pod.phase not in ['Succeeded', 'Failed']:
@@ -296,9 +304,10 @@ class K8sCronJob(K8sObject):
                 self._check_timeout(start_time)
 
         except Exception as err:
-            raise CronJobRunException("K8sCronJob: run() failed: {}".format(err))
+            raise CronJobRunException("K8sCronJob.run() failed: {}".format(err))
 
         finally:
+            pod.delete()
             self.suspend = False
             self.update()
 
