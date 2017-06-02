@@ -236,7 +236,7 @@ class K8sCronJob(K8sObject):
     @last_schedule_time.setter
     def last_schedule_time(self, t=None):
         raise NotImplementedError(
-            'K8sCronJob: last_schedule_time: this property is read-only.')
+            'K8sCronJob: last_schedule_time is read-only.')
 
     # -------------------------------------------------------------------------------------  active
 
