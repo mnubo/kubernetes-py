@@ -105,13 +105,14 @@ class PodSpec(object):
     def add_image_pull_secrets(self, secrets=None):
         if not is_valid_list(secrets, dict):
             raise SyntaxError('PodSpec.add_image_pull_secrets() secrets : [ {0} ] is invalid.'.format(secrets))
+
         s = self.image_pull_secrets
         if s is None:
-            combined = secrets
+            l = secrets
         else:
-            combined = s + secrets
-        filtered = list(filter(lambda x: isinstance(x, dict), combined))
-        self.image_pull_secrets = filtered
+            l = s + secrets
+
+        self.image_pull_secrets = [dict(t) for t in set([tuple(d.items()) for d in l])]
         return self
 
     # ------------------------------------------------------------------------------------- del

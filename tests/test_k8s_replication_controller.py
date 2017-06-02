@@ -225,17 +225,13 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_rc_add_image_pull_secrets(self):
         config = _utils.create_config()
-        config.pull_secret = [{'name': 'secretname'}]
-        name = "yorc"
-        rc = _utils.create_rc(config=config, name=name)
-        self.assertEqual(1, len(rc.image_pull_secrets))
-        self.assertEqual(config.pull_secret, rc.image_pull_secrets)
-        container = _utils.create_container(name="nginx", image="nginx:latest")
-        rc.add_container(container)
-        if _utils.is_reachable(rc.config):
-            rc.create()
-            self.assertIsInstance(rc, K8sReplicationController)
-            self.assertEqual(config.pull_secret, rc.image_pull_secrets)
+        config.pull_secret = [
+            {'name': 'secret-name'},
+            {'name': 'other-secret-name'},
+            {'name': 'secret-name'}  # duplicate
+        ]
+        rc = _utils.create_rc(config=config, name="yo")
+        self.assertEqual(2, len(rc.image_pull_secrets))  # duplicate not present
 
     # --------------------------------------------------------------------------------- del annotation
 
