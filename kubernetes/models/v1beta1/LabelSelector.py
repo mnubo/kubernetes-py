@@ -43,7 +43,9 @@ class LabelSelector(object):
     @match_labels.setter
     def match_labels(self, ml=None):
         if not is_valid_dict(ml):
-            raise SyntaxError('LabelSelector: match_labels: [ {} ] is invalid.'.format(ml))
+            raise SyntaxError(
+                'LabelSelector: match_labels: [ {} ] is invalid.'.format(ml))
+
         self._match_labels = ml
 
     # ------------------------------------------------------------------------------------- matchExpressions
@@ -55,7 +57,9 @@ class LabelSelector(object):
     @match_expressions.setter
     def match_expressions(self, me=None):
         if not is_valid_list(me, LabelSelectorRequirement):
-            raise SyntaxError('LabelSelector: match_expressions: [ {} ] is invalid.'.format(me))
+            raise SyntaxError(
+                'LabelSelector: match_expressions: [ {} ] is invalid.'.format(me))
+
         self._match_expressions = me
 
     # ------------------------------------------------------------------------------------- serialize
@@ -66,4 +70,5 @@ class LabelSelector(object):
             data['matchLabels'] = self.match_labels
         if self.match_expressions is not None:
             data['matchExpressions'] = [x.serialize() for x in self.match_expressions]
+
         return data
