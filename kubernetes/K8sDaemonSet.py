@@ -8,6 +8,7 @@
 
 from kubernetes.K8sObject import K8sObject
 from kubernetes.models.v1beta1.DaemonSet import DaemonSet
+from kubernetes.models.v1beta1.LabelSelector import LabelSelector
 from kubernetes.K8sContainer import K8sContainer
 from kubernetes.K8sVolume import K8sVolume
 
@@ -21,6 +22,12 @@ class K8sDaemonSet(K8sObject):
             name=name,
             obj_type='DaemonSet'
         )
+
+        self.model.spec.template.metadata.labels = self.model.metadata.labels
+
+        sel = LabelSelector()
+        sel.match_labels = {'name': name}
+        self.selector = sel
 
     # -------------------------------------------------------------------------------------  override
 
@@ -81,3 +88,13 @@ class K8sDaemonSet(K8sObject):
             volumes.append(volume.model)
         self.model.spec.template.spec.volumes = volumes
         return self
+
+    # -------------------------------------------------------------------------------------  selector
+
+    @property
+    def selector(self):
+        return self.model.spec.selector
+
+    @selector.setter
+    def selector(self, selector=None):
+        self.model.spec.selector = selector

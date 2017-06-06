@@ -36,7 +36,8 @@ class DaemonSetSpec(object):
     @selector.setter
     def selector(self, s=None):
         if not isinstance(s, LabelSelector):
-            raise SyntaxError('DaemonSetSpec: selector: [ {} ] is invalid.'.format(s))
+            raise SyntaxError(
+                'DaemonSetSpec: selector: [ {} ] is invalid.'.format(s))
         self._selector = s
 
     # ------------------------------------------------------------------------------------- template
@@ -48,7 +49,8 @@ class DaemonSetSpec(object):
     @template.setter
     def template(self, t=None):
         if not isinstance(t, PodTemplateSpec):
-            raise SyntaxError('DaemonSetSpec: template: [ {} ] is invalid.'.format(t))
+            raise SyntaxError(
+                'DaemonSetSpec: template: [ {} ] is invalid.'.format(t))
         self._template = t
 
     # ------------------------------------------------------------------------------------- serialize

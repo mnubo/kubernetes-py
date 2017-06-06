@@ -76,3 +76,14 @@ class K8sDaemonSetTests(BaseTest):
             _list = k8s_ds.list()
             for x in _list:
                 self.assertIsInstance(x, K8sDaemonSet)
+
+    # --------------------------------------------------------------------------------- test add selector
+
+    def test_create_without_selector(self):
+        k8s_container = _utils.create_container(name="nginx", image="nginx:latest")
+        k8s_ds = _utils.create_daemonset(name="yo")
+        k8s_ds.add_container(k8s_container)
+        if _utils.is_reachable(k8s_ds.config):
+            k8s_ds.create()
+            self.assertIsInstance(k8s_ds, K8sDaemonSet)
+            self.assertEqual(k8s_ds.name, "yo")
