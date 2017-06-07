@@ -37,6 +37,9 @@ class K8sCronJob(K8sObject):
             name=name
         )
 
+        if config is not None and config.pull_secret is not None:
+            self.add_image_pull_secrets(config.pull_secret)
+
     # -------------------------------------------------------------------------------------  override
 
     def create(self):
@@ -83,7 +86,7 @@ class K8sCronJob(K8sObject):
         return self
 
     def add_image_pull_secrets(self, secrets=None):
-        self.model.spec.add_image_pull_secrets(secrets)
+        self.model.spec.job_template.spec.template.spec.add_image_pull_secrets(secrets)
         return self
 
     def add_volume(self, volume=None):
@@ -210,11 +213,11 @@ class K8sCronJob(K8sObject):
 
     @dns_policy.setter
     def dns_policy(self, policy=None):
-        # if policy not in self.model.spec.template.spec.VALID_DNS_POLICIES:
         if policy not in self.model.spec.job_template.spec.template.spec.VALID_DNS_POLICIES:
             raise SyntaxError(
-                'K8sJob: dns_policy: [ {} ] is invalid, expected [ {} ].'
-                    .format(policy, self.model.spec.job_template.spec.template.spec.VALID_DNS_POLICIES))
+                'K8sJob: dns_policy: [ {} ] is invalid, expected [ {} ].'.format(
+                    policy, self.model.spec.job_template.spec.template.spec.VALID_DNS_POLICIES))
+
         self.model.spec.job_template.spec.template.spec.dns_policy = policy
 
     # -------------------------------------------------------------------------------------  restartPolicy
@@ -263,6 +266,16 @@ class K8sCronJob(K8sObject):
     def pod(self, p=None):
         raise NotImplementedError(
             'K8sCronjob: pod is read-only.')
+
+    # -------------------------------------------------------------------------------------  image pull secrets
+
+    @property
+    def image_pull_secrets(self):
+        return self.model.spec.job_template.spec.template.spec.image_pull_secrets
+
+    @image_pull_secrets.setter
+    def image_pull_secrets(self, secrets=None):
+        self.model.spec.job_template.spec.template.spec.image_pull_secrets = secrets
 
     # -------------------------------------------------------------------------------------  run
 
