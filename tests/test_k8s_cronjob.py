@@ -79,6 +79,18 @@ class K8sCronJobTests(BaseTest):
         self.assertEqual(1, len(cj.containers))
         self.assertEqual(c_image_2, cj.container_image[c_name])
 
+    # --------------------------------------------------------------------------------- imagePullSecrets
+
+    def test_add_image_pull_secrets(self):
+        cfg = _utils.create_config()
+        cfg.pull_secret = [
+            {'name': 'secret-name'},
+            {'name': 'other-secret-name'},
+            {'name': 'secret-name'}  # duplicate
+        ]
+        cj = _utils.create_cronjob(config=cfg, name="yo")
+        self.assertEqual(2, len(cj.image_pull_secrets))  # duplicate not present
+
     # --------------------------------------------------------------------------------- api - create
 
     def test_api_create(self):
