@@ -9,6 +9,7 @@
 import uuid
 
 from kubernetes.K8sJob import K8sJob
+from kubernetes.K8sObject import K8sObject
 from kubernetes.models.v1.Job import Job
 from kubernetes.models.v1.JobSpec import JobSpec
 from kubernetes.models.v1.JobStatus import JobStatus
@@ -239,3 +240,14 @@ class K8sJobTests(BaseTest):
             k8s_job.create()
             k8s_job.scale(10)
             self.assertEqual(k8s_job.parallelism, 10)
+
+    # --------------------------------------------------------------------------------- api - createdBy
+
+    def test_api_created_by(self):
+        job = _utils.create_job(name="yo")
+        if _utils.is_reachable(job.config):
+            jobs = job.list()
+            for job in jobs:
+                obj = job.created_by
+                self.assertIsInstance(obj, K8sObject)
+

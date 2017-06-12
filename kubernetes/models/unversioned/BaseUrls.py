@@ -72,9 +72,7 @@ class BaseUrls(object):
         self.urls['Volume'] = None
 
     def get_base_url(self, object_type=None):
-        if object_type is None \
-                or not isinstance(object_type, str) \
-                or object_type not in self.urls.keys():
+        if object_type is None or object_type not in self.urls.keys():
             types = ', '.join(self.urls.keys())
             raise SyntaxError('BaseUrls: object_type: [ {0} ] must be in: [ {1} ]'.format(object_type, types))
         return self.urls[object_type]
