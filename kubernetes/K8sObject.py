@@ -150,6 +150,24 @@ class K8sObject(object):
     def creation_timestamp(self, t=None):
         raise NotImplementedError('K8sObject: creation_timestamp is read-only.')
 
+    # -------------------------------------------------------------------------------------  createdBy
+
+    @property
+    def created_by(self):
+        if 'kubernetes.io/created-by' in self.annotations:
+            ref = json.loads(self.annotations['kubernetes.io/created-by'])
+            obj = K8sObject(
+                config=self.config,
+                name=ref['reference']['name'],
+                obj_type=ref['reference']['kind'])
+            obj.get_model()
+            return obj
+        return None
+
+    @created_by.setter
+    def created_by(self, cb=None):
+        raise NotImplementedError('K8sObject: created_by is read-only.')
+
     # ------------------------------------------------------------------------------------- labels
 
     @property
