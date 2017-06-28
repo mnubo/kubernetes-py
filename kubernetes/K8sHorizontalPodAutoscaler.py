@@ -115,11 +115,11 @@ class K8sHorizontalPodAutoscaler(K8sObject):
     # ------------------------------------------------------------------------------------- from_json
 
     @staticmethod
-    def from_json(j=None):
+    def from_json(j=None, cfg=None):
         try:
             d = convert(json.loads(j))
             model = HorizontalPodAutoscaler(model=d)
-            k8s = K8sHorizontalPodAutoscaler(name="yo")
+            k8s = K8sHorizontalPodAutoscaler(config=cfg, name="yo")
             k8s.model = model
             return k8s
 

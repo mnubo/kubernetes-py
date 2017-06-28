@@ -133,3 +133,5 @@ class K8sHorizontalPodAutoscalerTests(BaseTest):
         j = json.dumps(d)
         k8s = K8sHorizontalPodAutoscaler.from_json(j)
         self.assertIsInstance(k8s, K8sHorizontalPodAutoscaler)
+        k8s = K8sHorizontalPodAutoscaler.from_json(j, cfg)
+        self.assertIsInstance(k8s, K8sHorizontalPodAutoscaler)
