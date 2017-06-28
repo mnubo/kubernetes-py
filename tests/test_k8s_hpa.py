@@ -131,7 +131,5 @@ class K8sHorizontalPodAutoscalerTests(BaseTest):
         hpa = _utils.create_hpa(config=cfg, name="yo")
         d = hpa.model.serialize()
         j = json.dumps(d)
-        k8s = K8sHorizontalPodAutoscaler.from_json(j)
-        self.assertIsInstance(k8s, K8sHorizontalPodAutoscaler)
         k8s = K8sHorizontalPodAutoscaler.from_json(j, cfg)
         self.assertIsInstance(k8s, K8sHorizontalPodAutoscaler)
