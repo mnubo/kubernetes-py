@@ -19,6 +19,7 @@ from tests.BaseTest import BaseTest
 
 
 class K8sCronJobTests(BaseTest):
+
     def setUp(self):
         _utils.cleanup_cronjobs()
         _utils.cleanup_jobs()
@@ -219,3 +220,25 @@ class K8sCronJobTests(BaseTest):
             self.assertFalse(cj.suspend)
             cj.run()
             self.assertFalse(cj.suspend)
+
+    # --------------------------------------------------------------------------------- api - activeDeadlineSeconds
+
+    def test_active_deadline_seconds(self):
+        ads = 50
+        cfg = _utils.create_config()
+        cj = CronJob(_constants.cronjob())
+        k8s = K8sCronJob(config=cfg, name="yo")
+        k8s.model = cj
+        self.assertIsNone(k8s.active_deadline_seconds)
+        k8s.active_deadline_seconds = ads
+        self.assertIsNotNone(k8s.active_deadline_seconds)
+        self.assertEqual(k8s.active_deadline_seconds, ads)
+
+    def test_observe_active_deadline_seconds(self):
+        cfg = _utils.create_config()
+        cj = CronJob(_constants.cronjob_exit_1())
+        k8s = K8sCronJob(config=cfg, name="yo")
+        k8s.model = cj
+        if _utils.is_reachable(cfg):
+            k8s.create()
+            self.assertIsInstance(k8s, K8sCronJob)

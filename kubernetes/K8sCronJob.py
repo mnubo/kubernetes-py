@@ -120,6 +120,16 @@ class K8sCronJob(K8sObject):
     def starting_deadline_seconds(self, s=None):
         self.model.spec.starting_deadline_seconds = s
 
+    # -------------------------------------------------------------------------------------  activeDeadlineSeconds
+
+    @property
+    def active_deadline_seconds(self):
+        return self.model.spec.job_template.spec.active_deadline_seconds
+
+    @active_deadline_seconds.setter
+    def active_deadline_seconds(self, s=None):
+        self.model.spec.job_template.spec.active_deadline_seconds = s
+
     # -------------------------------------------------------------------------------------  concurrencyPolicy
 
     @property

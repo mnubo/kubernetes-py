@@ -372,6 +372,44 @@ def cronjob():
     }
 
 
+def cronjob_exit_1():
+    """
+    Simulates a constantly crashing CronJob
+
+    """
+
+    return {
+        "apiVersion": "batch/v2alpha1",
+        "kind": "CronJob",
+        "metadata": {
+            "name": "jerome"
+        },
+        "spec": {
+            "schedule": "*/2 * * * *",
+            "jobTemplate": {
+                "spec": {
+                    "activeDeadlineSeconds": 20,
+                    "template": {
+                        "spec": {
+                            "containers": [
+                                {
+                                    "name": "jerome",
+                                    "image": "busybox",
+                                    "args": [
+                                        "/bin/sh",
+                                        "-c",
+                                        "sleep 40"
+                                    ]
+                                }
+                            ],
+                            "restartPolicy": "Never"
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 # --------------------------------------------------------------------------------- cloud-native cassandra example
 
 def cassandra_service():
