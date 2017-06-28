@@ -6,9 +6,12 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+import json
+
 from kubernetes.K8sObject import K8sObject
 from kubernetes.models.v1.HorizontalPodAutoscaler import HorizontalPodAutoscaler
 from kubernetes.models.v1beta1.SubresourceReference import SubresourceReference
+from kubernetes.utils import convert
 
 
 class K8sHorizontalPodAutoscaler(K8sObject):
@@ -108,3 +111,22 @@ class K8sHorizontalPodAutoscaler(K8sObject):
 
         sub = SubresourceReference(ref)
         self.model.spec.scale_target_ref = sub
+
+    # ------------------------------------------------------------------------------------- from_json
+
+    @staticmethod
+    def from_json(j=None):
+        try:
+            d = convert(json.loads(j))
+            model = HorizontalPodAutoscaler(model=d)
+            k8s = K8sHorizontalPodAutoscaler(name="yo")
+            k8s.model = model
+            return k8s
+
+        except TypeError as err:
+            raise SyntaxError(
+                'K8sHorizontalPodAutoscaler: json: [ {} ] is invalid: [ {} ]'.format(j, err))
+
+        except ValueError as err:
+            raise SyntaxError(
+                'K8sHorizontalPodAutoscaler: json: [ {} ] is invalid: [ {} ]'.format(j, err))

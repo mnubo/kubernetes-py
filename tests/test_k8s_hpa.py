@@ -7,6 +7,7 @@
 #
 
 import time
+import json
 
 from kubernetes.K8sHorizontalPodAutoscaler import K8sHorizontalPodAutoscaler
 from kubernetes.models.v1.HorizontalPodAutoscaler import HorizontalPodAutoscaler
@@ -85,14 +86,11 @@ class K8sHorizontalPodAutoscalerTests(BaseTest):
 
         n = "php-apache"
         dep = _utils.create_deployment(name=n)
-        dep.model = Deployment(
-            _constants.hpa_example_deployment())
+        dep.model = Deployment(_constants.hpa_example_deployment())
         svc = _utils.create_service(name=n)
-        svc.model = Service(
-            _constants.hpa_example_service())
+        svc.model = Service(_constants.hpa_example_service())
         hpa = _utils.create_hpa(name=n)
-        hpa.model = HorizontalPodAutoscaler(
-            _constants.hpa_example_autoscaler())
+        hpa.model = HorizontalPodAutoscaler(_constants.hpa_example_autoscaler())
 
         if _utils.is_reachable(hpa.config):
             # //--- Step One: Run & expose php-apache server
@@ -107,3 +105,29 @@ class K8sHorizontalPodAutoscalerTests(BaseTest):
         # $ watch 'kubectl config current-context; echo; kubectl get deployments; echo; kubectl get replicasets; echo; kubectl get pods; echo; kubectl top nodes; echo; kubectl top pods'
 
         time.sleep(10)  # wait for 10 secs; set a breakpoint if you need.
+
+    # ------------------------------------------------------------------------------------- from_json
+
+    def test_from_json_invalid_object(self):
+        j = object()
+        with self.assertRaises(SyntaxError):
+            K8sHorizontalPodAutoscaler.from_json(j)
+
+    def test_from_json_invalid_string(self):
+        j = "invalid string"
+        with self.assertRaises(SyntaxError):
+            K8sHorizontalPodAutoscaler.from_json(j)
+
+    def test_from_json_invalid_json_model(self):
+        secret = _utils.create_secret(name="yo")
+        d = secret.model.serialize()
+        j = json.dumps(d)
+        with self.assertRaises(SyntaxError):
+            K8sHorizontalPodAutoscaler.from_json(j)
+
+    def test_from_json(self):
+        hpa = _utils.create_hpa(name="yo")
+        d = hpa.model.serialize()
+        j = json.dumps(d)
+        k8s = K8sHorizontalPodAutoscaler.from_json(j)
+        self.assertIsInstance(k8s, K8sHorizontalPodAutoscaler)
