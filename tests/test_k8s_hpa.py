@@ -119,14 +119,16 @@ class K8sHorizontalPodAutoscalerTests(BaseTest):
             K8sHorizontalPodAutoscaler.from_json(j)
 
     def test_from_json_invalid_json_model(self):
-        secret = _utils.create_secret(name="yo")
+        cfg = _utils.create_config()
+        secret = _utils.create_secret(config=cfg, name="yo")
         d = secret.model.serialize()
         j = json.dumps(d)
         with self.assertRaises(SyntaxError):
             K8sHorizontalPodAutoscaler.from_json(j)
 
     def test_from_json(self):
-        hpa = _utils.create_hpa(name="yo")
+        cfg = _utils.create_config()
+        hpa = _utils.create_hpa(config=cfg, name="yo")
         d = hpa.model.serialize()
         j = json.dumps(d)
         k8s = K8sHorizontalPodAutoscaler.from_json(j)
