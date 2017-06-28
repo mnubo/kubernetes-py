@@ -28,6 +28,9 @@ class HorizontalPodAutoscaler(BaseModel):
         self.status = HorizontalPodAutoscalerStatus()
 
         if model is not None:
+            if model['kind'] != self.kind:
+                raise TypeError(
+                    'HorizontalPodAutoscaler: model.kind: [ {} ] is invalid.'.format(model['kind']))
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
