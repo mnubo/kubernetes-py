@@ -85,14 +85,11 @@ class K8sHorizontalPodAutoscalerTests(BaseTest):
 
         n = "php-apache"
         dep = _utils.create_deployment(name=n)
-        dep.model = Deployment(
-            _constants.hpa_example_deployment())
+        dep.model = Deployment(_constants.hpa_example_deployment())
         svc = _utils.create_service(name=n)
-        svc.model = Service(
-            _constants.hpa_example_service())
+        svc.model = Service(_constants.hpa_example_service())
         hpa = _utils.create_hpa(name=n)
-        hpa.model = HorizontalPodAutoscaler(
-            _constants.hpa_example_autoscaler())
+        hpa.model = HorizontalPodAutoscaler(_constants.hpa_example_autoscaler())
 
         if _utils.is_reachable(hpa.config):
             # //--- Step One: Run & expose php-apache server
