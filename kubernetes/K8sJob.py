@@ -9,6 +9,7 @@
 import time
 
 from kubernetes.K8sContainer import K8sContainer
+from kubernetes.K8sVolume import K8sVolume
 from kubernetes.K8sObject import K8sObject
 from kubernetes.models.v1.Job import Job
 from kubernetes.K8sExceptions import TimedOutException
@@ -70,6 +71,36 @@ class K8sJob(K8sObject):
 
     def get(self):
         self.model = Job(self.get_model())
+        return self
+
+    # -------------------------------------------------------------------------------------  add
+
+    def add_container(self, container=None):
+        if not isinstance(container, K8sContainer):
+            raise SyntaxError(
+                'K8sJob.add_container() container: [ {0} ] is invalid.'.format(container))
+
+        containers = self.model.spec.template.spec.containers
+        if containers is None:
+            containers = []
+        filtered = list(filter(lambda x: x.name != container.name, containers))
+        filtered.append(container.model)
+        self.model.spec.template.spec.containers = filtered
+        return self
+
+    def add_image_pull_secrets(self, secrets=None):
+        self.model.spec.template.spec.add_image_pull_secrets(secrets=secrets)
+        return self
+
+    def add_volume(self, volume=None):
+        if not isinstance(volume, K8sVolume):
+            raise SyntaxError(
+                'K8sJob.add_volume() volume: [ {0} ] is invalid.'.format(volume))
+
+        volumes = self.model.spec.template.spec.volumes
+        if volume.model not in volumes:
+            volumes.append(volume.model)
+        self.model.spec.template.spec.volumes = volumes
         return self
 
     # ------------------------------------------------------------------------------------- scale
