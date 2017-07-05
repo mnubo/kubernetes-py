@@ -60,6 +60,7 @@ class NodeAffinity(object):
         if not isinstance(r, NodeSelector):
             raise SyntaxError(
                 'NodeAffinity: required_during_scheduling_ignored_during_execution: [ {} ] is invalid.'.format(r))
+        self._required_during_scheduling_ignored_during_execution = r
 
     # ------------------------------------------------------------------------------------- serialize
 

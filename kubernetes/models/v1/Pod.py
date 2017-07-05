@@ -69,7 +69,6 @@ class Pod(BaseModel):
 
     def serialize(self):
         data = super(Pod, self).serialize()
-
         if self.spec is not None:
             data['spec'] = self.spec.serialize()
         if self.status is not None:

@@ -83,3 +83,15 @@ class NodeSelectorRequirement(object):
                 raise SyntaxError(
                     'NodeSelectorRequirement: values: [ {} ] must contain a single integer, if operator in [ "Gt", "Lt" ]'.format(v))
         self._values = v
+
+    # ------------------------------------------------------------------------------------- serialize
+
+    def serialize(self):
+        data = {}
+        if self.key is not None:
+            data['key'] = self.key
+        if self.operator is not None:
+            data['operator'] = self.operator
+        if self.values is not None:
+            data['values'] = self.values
+        return data

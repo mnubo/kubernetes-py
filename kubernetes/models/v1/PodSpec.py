@@ -36,7 +36,7 @@ class PodSpec(object):
         self._node_name = None
         self._node_selector = {}
         self._restart_policy = 'Always'
-        self._security_context = None
+        self._security_context = PodSecurityContext()
         self._service_account = None  # deprecated
         self._service_account_name = None
         self._subdomain = None
