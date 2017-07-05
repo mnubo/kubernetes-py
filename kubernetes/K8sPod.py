@@ -343,6 +343,16 @@ class K8sPod(K8sObject):
     def phase(self, p=None):
         raise NotImplementedError()
 
+    # -------------------------------------------------------------------------------------  affinity
+
+    @property
+    def affinity(self):
+        return self.model.spec.affinity
+
+    @affinity.setter
+    def affinity(self, a):
+        self.model.spec.affinity = a
+
     # ------------------------------------------------------------------------------------- filtering
 
     @staticmethod

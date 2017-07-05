@@ -9,6 +9,7 @@
 from kubernetes.models.v1.Container import Container
 from kubernetes.models.v1.PodSecurityContext import PodSecurityContext
 from kubernetes.models.v1.Volume import Volume
+from kubernetes.models.v1.Affinity import Affinity
 from kubernetes.utils import is_valid_list, filter_model, is_valid_string
 
 
@@ -24,6 +25,7 @@ class PodSpec(object):
         super(PodSpec, self).__init__()
 
         self._active_deadline_seconds = None
+        self._affinity = None
         self._containers = []
         self._dns_policy = 'Default'
         self._host_ipc = None
@@ -48,6 +50,8 @@ class PodSpec(object):
     def _build_with_model(self, model=None):
         if 'activeDeadlineSeconds' in model:
             self.active_deadline_seconds = model['activeDeadlineSeconds']
+        if 'affinity' in model:
+            self.affinity = Affinity(model['affinity'])
         if 'containers' in model:
             containers = []
             for c in model['containers']:
@@ -131,6 +135,18 @@ class PodSpec(object):
         if not isinstance(secs, int):
             raise SyntaxError('PodSpec: active_deadline_seconds: [ {0} ] is invalid.'.format(secs))
         self._active_deadline_seconds = secs
+
+    # ------------------------------------------------------------------------------------- affinity
+
+    @property
+    def affinity(self):
+        return self._affinity
+
+    @affinity.setter
+    def affinity(self, a=None):
+        if not isinstance(a, Affinity):
+            raise SyntaxError('PodSpec: affinity: [ {} ] is invalid.'.format(a))
+        self._affinity = a
 
     # ------------------------------------------------------------------------------------- containers
 
@@ -347,6 +363,8 @@ class PodSpec(object):
         data = {}
         if self.active_deadline_seconds:
             data['activeDeadlineSeconds'] = self.active_deadline_seconds
+        if self.affinity:
+            data['affinity'] = self.affinity.serialize()
         if self.containers:
             data['containers'] = []
             for c in self.containers:
