@@ -488,7 +488,7 @@ def cleanup_deployments():
         while len(_list) > 0:
             for d in _list:
                 try:
-                    d.delete(cascade=False)
+                    d.delete(cascade=True)
                 except NotFoundException:
                     continue
             _list = ref.list()
