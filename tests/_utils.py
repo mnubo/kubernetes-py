@@ -381,10 +381,10 @@ def cleanup_namespaces():
     ref = create_namespace(name="yo")
     if is_reachable(ref.config):
         _list = ref.list()
-        while len(_list) > 2:
+        while len(_list) > 3:
             for ns in _list:
                 try:
-                    if ns.name not in ['kube-system', 'default']:
+                    if ns.name not in ['kube-system', 'default', 'kube-public']:
                         ns.delete(cascade=True)
                 except NotFoundException:
                     continue
