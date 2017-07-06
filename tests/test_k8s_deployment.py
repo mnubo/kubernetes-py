@@ -435,7 +435,7 @@ class K8sDeploymentTests(BaseTest):
         name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = _utils.create_deployment(name=name)
         dep.add_container(c_redis)
-        dep.desired_replicas = 3
+        dep.desired_replicas = 2
 
         if _utils.is_reachable(dep.config):
             dep.create()
@@ -464,7 +464,7 @@ class K8sDeploymentTests(BaseTest):
         name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = _utils.create_deployment(name=name)
         dep.add_container(c_redis)
-        dep.desired_replicas = 3
+        dep.desired_replicas = 2
 
         if _utils.is_reachable(dep.config):
             dep.create()
@@ -491,7 +491,7 @@ class K8sDeploymentTests(BaseTest):
         name = "yodep-{0}".format(str(uuid.uuid4()))
         dep = _utils.create_deployment(name=name)
         dep.add_container(c_redis)
-        dep.desired_replicas = 3
+        dep.desired_replicas = 2
 
         if _utils.is_reachable(dep.config):
             dep.create()

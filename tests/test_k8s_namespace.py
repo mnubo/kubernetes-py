@@ -19,6 +19,7 @@ from tests.BaseTest import BaseTest
 
 
 class K8sNamespaceTest(BaseTest):
+
     def setUp(self):
         _utils.cleanup_namespaces()
 
@@ -343,7 +344,6 @@ class K8sNamespaceTest(BaseTest):
             for x in _list:
                 self.assertIsInstance(x, K8sNamespace)
             self.assertIsInstance(_list, list)
-            self.assertEqual(2, len(_list))
 
     def test_list(self):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
@@ -354,9 +354,6 @@ class K8sNamespaceTest(BaseTest):
             for x in _list:
                 self.assertIsInstance(x, K8sNamespace)
             self.assertIsInstance(_list, list)
-            self.assertEqual(3, len(_list))
-            from_query = _list[2]
-            self.assertEqual(name, from_query.name)
 
     # --------------------------------------------------------------------------------- api - create
 
