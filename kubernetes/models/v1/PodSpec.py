@@ -10,6 +10,7 @@ from kubernetes.models.v1.Container import Container
 from kubernetes.models.v1.PodSecurityContext import PodSecurityContext
 from kubernetes.models.v1.Volume import Volume
 from kubernetes.models.v1.Affinity import Affinity
+from kubernetes.models.v1.Toleration import Toleration
 from kubernetes.utils import is_valid_list, filter_model, is_valid_string
 
 
@@ -41,6 +42,7 @@ class PodSpec(object):
         self._service_account_name = None
         self._subdomain = None
         self._termination_grace_period_seconds = 30
+        self._tolerations = []
         self._volumes = []
 
         if model is not None:
@@ -86,6 +88,12 @@ class PodSpec(object):
             self.subdomain = model['subdomain']
         if 'terminationGracePeriodSeconds' in model:
             self.termination_grace_period_seconds = model['terminationGracePeriodSeconds']
+        if 'tolerations' in model:
+            tolerations = []
+            for t in model['tolerations']:
+                tol = Toleration(t)
+                tolerations.append(tol)
+            self.tolerations = tolerations
         if 'volumes' in model:
             volumes = []
             for v in model['volumes']:
@@ -345,6 +353,18 @@ class PodSpec(object):
             raise SyntaxError('PodSpec: termination_grace_period_seconds: [ {0} ] is invalid.'.format(secs))
         self._termination_grace_period_seconds = secs
 
+    # ------------------------------------------------------------------------------------- tolerations
+
+    @property
+    def tolerations(self):
+        return self._tolerations
+
+    @tolerations.setter
+    def tolerations(self, t=None):
+        if not is_valid_list(t, Toleration):
+            raise SyntaxError('PodSpec: tolerations: [ {} ] is invalid.'.format(t))
+        self._tolerations = t
+
     # ------------------------------------------------------------------------------------- volumes
 
     @property
@@ -397,6 +417,12 @@ class PodSpec(object):
             data['subdomain'] = self.subdomain
         if self.termination_grace_period_seconds:
             data['terminationGracePeriodSeconds'] = self.termination_grace_period_seconds
+        if self.tolerations:
+            tolerations = []
+            for t in self.tolerations:
+                tol = t.serialize()
+                tolerations.append(tol)
+            data['tolerations'] = tolerations
         if self.volumes:
             data['volumes'] = []
             for v in self.volumes:
