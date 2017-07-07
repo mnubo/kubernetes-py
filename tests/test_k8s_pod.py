@@ -1124,6 +1124,7 @@ class K8sPodTest(BaseTest):
             for node in nodes:
                 node.labels.pop('kubernetes.io/e2e-az-name', None)
                 node.update()
+        pass
 
     def test_node_affinity_with_required_and_preferred(self):
         model = _constants.pod_with_node_affinity()
@@ -1157,3 +1158,64 @@ class K8sPodTest(BaseTest):
                 node.labels.pop('kubernetes.io/e2e-az-name', None)
                 node.labels.pop('another-node-label-key', None)
                 node.update()
+        pass
+
+    # ------------------------------------------------------------------------------------- api - pod affinity
+
+    def test_pod_affinity_no_good_nodes(self):
+        model = _constants.pod_with_pod_affinity()
+        pod = Pod(model)
+        config = _utils.create_config()
+        k8s = K8sPod(config=config, name="yo")
+        k8s.model = pod
+
+        if _utils.is_reachable(config):
+            nodes = K8sNode(config=config, name="yo").list()
+            # untag all nodes
+            for node in nodes:
+                node.labels.pop('kubernetes.io/e2e-az-name', None)
+                node.update()
+            with self.assertRaises(TimedOutException):
+                # timeout because of required
+                k8s.create()
+
+    def test_pod_affinities(self):
+        config = _utils.create_config()
+        container = _utils.create_container(name="nginx", image="nginx:latest")
+
+        pod_s1 = _utils.create_pod(config=config, name="s1")
+        pod_s1.labels.update({'security': 'S1'})
+        pod_s1.node_selector = {'kubernetes.io/e2e-az-name': 'e2e-az1'}
+        pod_s1.add_container(container)
+
+        pod_s2 = _utils.create_pod(config=config, name="s2")
+        pod_s2.labels.update({'security': 'S2'})
+        pod_s2.node_selector = {'kubernetes.io/e2e-az-name': 'e2e-az2'}
+        pod_s2.add_container(container)
+
+        model = _constants.pod_with_pod_affinity()
+        pod = Pod(model)
+        config = _utils.create_config()
+        k8s = K8sPod(config=config, name="yo")
+        k8s.model = pod
+
+        if _utils.is_reachable(config):
+            # ensure we have enough nodes
+            nodes = K8sNode(config=config, name="yo").list()
+            self.assertGreaterEqual(len(nodes), 3)
+            # tag the nodes
+            for i in range(len(nodes)):
+                node = nodes[i]
+                if i == 0:
+                    node.labels.update({'kubernetes.io/e2e-az-name': 'e2e-az1'})
+                if i == 1:
+                    node.labels.update({'kubernetes.io/e2e-az-name': 'e2e-az2'})
+                if i == 2:
+                    node.labels.update({'kubernetes.io/e2e-az-name': 'e2e-az3'})
+                node.update()
+            # create the pods for affinity lookup
+            pod_s1.create()
+            pod_s2.create()
+            # create the pod with affinities
+            k8s.create()
+            pass

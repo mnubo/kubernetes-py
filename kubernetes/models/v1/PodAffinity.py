@@ -20,7 +20,7 @@ class PodAffinity(object):
         super(PodAffinity, self).__init__()
 
         self._preferred_during_scheduling_ignored_during_execution = []
-        # self._required_during_scheduling_ignored_during_execution = []  # TODO(froch): Not yet implemented in 1.6
+        self._required_during_scheduling_ignored_during_execution = []  # TODO(froch): Not yet implemented in 1.6
 
         if model is not None:
             self._build_with_model(model)
@@ -56,16 +56,16 @@ class PodAffinity(object):
 
     @property
     def required_during_scheduling_ignored_during_execution(self):
-        raise NotImplementedError('Not yet implemented in Kubernetes 1.6')
-        # return self._required_during_scheduling_ignored_during_execution
+        # raise NotImplementedError('Not yet implemented in Kubernetes 1.6')
+        return self._required_during_scheduling_ignored_during_execution
 
     @required_during_scheduling_ignored_during_execution.setter
     def required_during_scheduling_ignored_during_execution(self, pats=None):
-        raise NotImplementedError('Not yet implemented in Kubernetes 1.6')
-        # if not is_valid_list(pats, PodAffinityTerm):
-        #     raise SyntaxError(
-        #         'PodAffinity: required_during_scheduling_ignored_during_execution: [ {} ] is invald.'.format(pats))
-        # self._required_during_scheduling_ignored_during_execution = pats
+        # raise NotImplementedError('Not yet implemented in Kubernetes 1.6')
+        if not is_valid_list(pats, PodAffinityTerm):
+            raise SyntaxError(
+                'PodAffinity: required_during_scheduling_ignored_during_execution: [ {} ] is invald.'.format(pats))
+        self._required_during_scheduling_ignored_during_execution = pats
 
     # ------------------------------------------------------------------------------------- serialize
 
@@ -77,10 +77,10 @@ class PodAffinity(object):
                 wpat = x.serialize()
                 wpats.append(wpat)
             data['preferredDuringSchedulingIgnoredDuringExecution'] = wpats
-        # if self.required_during_scheduling_ignored_during_execution:
-        #     pats = []
-        #     for x in self.required_during_scheduling_ignored_during_execution:
-        #         pat = x.serialize()
-        #         pats.append(pat)
-        #     data['requiredDuringSchedulingIgnoredDuringExecution'] = pats
+        if self.required_during_scheduling_ignored_during_execution:
+            pats = []
+            for x in self.required_during_scheduling_ignored_during_execution:
+                pat = x.serialize()
+                pats.append(pat)
+            data['requiredDuringSchedulingIgnoredDuringExecution'] = pats
         return data
