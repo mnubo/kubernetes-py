@@ -14,6 +14,7 @@ from kubernetes.utils import is_valid_list
 class PodAffinity(object):
     """
     https://kubernetes.io/docs/api-reference/v1.6/#podaffinity-v1-core
+    https://github.com/kubernetes/community/blob/master/contributors/design-proposals/podaffinity.md
     """
 
     def __init__(self, model=None):
