@@ -21,7 +21,7 @@ class PodAffinity(object):
         super(PodAffinity, self).__init__()
 
         self._preferred_during_scheduling_ignored_during_execution = []
-        self._required_during_scheduling_ignored_during_execution = []  # TODO(froch): Not yet implemented in 1.6
+        self._required_during_scheduling_ignored_during_execution = []
 
         if model is not None:
             self._build_with_model(model)
