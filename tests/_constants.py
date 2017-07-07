@@ -882,7 +882,7 @@ def hpa_example_service():
             "namespace": "default",
         },
         "spec": {
-            "clusterIP": "10.250.1.253",
+            # "clusterIP": "10.250.1.253",
             "ports": [
                 {
                     "port": 80,

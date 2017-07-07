@@ -24,18 +24,18 @@ class HorizontalPodAutoscaler(BaseModel):
         self.kind = 'HorizontalPodAutoscaler'
         self.api_version = 'autoscaling/v1'
 
+        self.metadata = ObjectMeta()
         self.spec = HorizontalPodAutoscalerSpec()
         self.status = HorizontalPodAutoscalerStatus()
 
         if model is not None:
-            if model['kind'] != self.kind:
-                raise TypeError(
-                    'HorizontalPodAutoscaler: model.kind: [ {} ] is invalid.'.format(model['kind']))
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
         super(HorizontalPodAutoscaler, self).build_with_model(model)
 
+        if 'metadata' in model:
+            self.metadata = ObjectMeta(model['metadata'])
         if 'spec' in model:
             self.spec = HorizontalPodAutoscalerSpec(model['spec'])
         if 'status' in model:
