@@ -325,15 +325,15 @@ class K8sNode(K8sObject):
         return self
 
     def untaint(self, key=None, value=None):
-        if not (key and value):
-            raise SyntaxError('K8sNode: untaint: you must specify a key and a value.')
-        if not is_valid_string(key) or not is_valid_string(value):
-            raise SyntaxError('K8sNode: taint: key: [ {} ] or value: [ {} ] is invalid.'.format(key, value))
+        if key and value:
+            if not is_valid_string(key) or not is_valid_string(value):
+                raise SyntaxError('K8sNode: taint: key: [ {} ] or value: [ {} ] is invalid.'.format(key, value))
 
         remaining_taints = []
         for t in self.taints:
-            if t.key != key and t.value != value:
-                remaining_taints.append(t)
+            if key and value:
+                if t.key != key and t.value != value:
+                    remaining_taints.append(t)
 
         self.taints = remaining_taints
         self.update()
