@@ -14,6 +14,8 @@ from kubernetes.K8sNamespace import K8sNamespace
 from kubernetes.K8sObject import K8sObject
 from kubernetes.K8sPod import K8sPod
 from kubernetes.models.v1.Node import Node
+from kubernetes.utils import is_valid_string, is_valid_list
+from kubernetes.models.v1.Taint import Taint
 
 
 class K8sNode(K8sObject):
@@ -285,5 +287,54 @@ class K8sNode(K8sObject):
         """
 
         self.unschedulable = False
+        self.update()
+        return self
+
+    # ------------------------------------------------------------------------------------- taint
+
+    @property
+    def taints(self):
+        return self.model.spec.taints
+
+    @taints.setter
+    def taints(self, t=None):
+        if not is_valid_list(t, Taint):
+            raise SyntaxError('K8sNode: taints: [ {} ] is invalid.'.format(t))
+        self.model.spec.taints = t
+
+    def taint(self, key=None, value=None, effect=None):
+        if not (key and value and effect):
+            raise SyntaxError('K8sNode: taint: you must specify a key, a value and an effect.')
+        if not is_valid_string(key) or not is_valid_string(value):
+            raise SyntaxError('K8sNode: taint: key: [ {} ] or value: [ {} ] is invalid.'.format(key, value))
+        if effect not in Taint.VALID_TAINT_EFFECTS:
+            raise SyntaxError('K8sNode: taint: effect must be in {}'.format(Taint.VALID_TAINT_EFFECTS))
+
+        t = Taint()
+        t.key = key
+        t.value = value
+        t.effect = effect
+
+        exists = False
+        for existing_taint in self.taints:
+            if existing_taint.key == key and existing_taint.value == value and existing_taint.effect == effect:
+                exists = True
+        if not exists:
+            self.taints.append(t)
+            self.update()
+        return self
+
+    def untaint(self, key=None, value=None):
+        if not (key and value):
+            raise SyntaxError('K8sNode: untaint: you must specify a key and a value.')
+        if not is_valid_string(key) or not is_valid_string(value):
+            raise SyntaxError('K8sNode: taint: key: [ {} ] or value: [ {} ] is invalid.'.format(key, value))
+
+        remaining_taints = []
+        for t in self.taints:
+            if t.key != key and t.value != value:
+                remaining_taints.append(t)
+
+        self.taints = remaining_taints
         self.update()
         return self

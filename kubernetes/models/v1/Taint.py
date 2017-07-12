@@ -14,6 +14,8 @@ class Taint(object):
     https://kubernetes.io/docs/api-reference/v1.6/#taint-v1-core
     """
 
+    VALID_TAINT_EFFECTS = ['NoSchedule', 'PreferNoSchedule', 'NoExecute']
+
     def __init__(self, model=None):
         super(Taint, self).__init__()
 
@@ -43,7 +45,7 @@ class Taint(object):
 
     @effect.setter
     def effect(self, e=None):
-        if not is_valid_string(e):
+        if not is_valid_string(e) or e not in Taint.VALID_TAINT_EFFECTS:
             raise SyntaxError('Taint: effect: [ {} ] is invalid.'.format(e))
         self._effect = e
 
