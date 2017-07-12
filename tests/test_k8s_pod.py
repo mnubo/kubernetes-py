@@ -1219,3 +1219,53 @@ class K8sPodTest(BaseTest):
             # create the pod with affinities
             k8s.create()
             pass
+
+    # ------------------------------------------------------------------------------------- api - tolerations
+
+    def test_tolerations_default(self):
+        config = _utils.create_config()
+        container = _utils.create_container(name="nginx", image="nginx:latest")
+        pod = _utils.create_pod(config=config, name="yo")
+        pod.add_container(container)
+
+        if _utils.is_reachable(config):
+            pod.create()
+            pod.get()
+            # default 'NoExecute' tolerations
+            # 'node.alpha.kubernetes.io/notReady' && 'node.alpha.kubernetes.io/unreachable'
+            self.assertEqual(2, len(pod.tolerations))
+
+    def test_tolerations_timeout(self):
+        config = _utils.create_config()
+        container = _utils.create_container(name="nginx", image="nginx:latest")
+        pod = _utils.create_pod(config=config, name="yo")
+        pod.add_container(container)
+
+        key = "key"
+        value = "value"
+        effect = "NoSchedule"
+
+        if _utils.is_reachable(config):
+            nodes = K8sNode(config=config, name="yo").list()
+            for node in nodes:
+                node.taint(key=key, value=value, effect=effect)
+            with self.assertRaises(TimedOutException):
+                pod.create()
+
+    def test_tolerations_noschedule(self):
+        config = _utils.create_config()
+        container = _utils.create_container(name="nginx", image="nginx:latest")
+        pod = _utils.create_pod(config=config, name="yo")
+        pod.add_container(container)
+
+        key = "key"
+        value = "value"
+        effect = "NoSchedule"
+
+        if _utils.is_reachable(config):
+            nodes = K8sNode(config=config, name="yo").list()
+            for node in nodes:
+                node.taint(key=key, value=value, effect=effect)
+            pod.add_toleration(key=key, value=value, effect=effect)
+            pod.create()
+            self.assertEqual(3, len(pod.tolerations))
