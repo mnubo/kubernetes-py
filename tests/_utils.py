@@ -394,17 +394,10 @@ def cleanup_namespaces():
 def cleanup_nodes():
     ref = create_node(name="yo")
     if is_reachable(ref.config):
-        node_pattern = re.compile(r'yo-')
         _list = ref.list()
-        _filtered = list(filter(lambda x: node_pattern.match(x.name) is not None, _list))
-        while len(_filtered) > 1:
-            for n in _filtered:
-                try:
-                    n.delete(cascade=True)
-                except NotFoundException:
-                    continue
-            _list = ref.list()
-            _filtered = list(filter(lambda x: node_pattern.match(x.name) is not None, _list))
+        for n in _list:
+            n.untaint()
+            n.uncordon()
 
 
 def cleanup_pods():

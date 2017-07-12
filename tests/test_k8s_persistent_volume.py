@@ -85,6 +85,7 @@ class K8sPersistentVolumeTest(BaseTest):
         vol = _utils.create_pv(name=name, type=_type)
         vol.path = host_path
         self.assertEqual(host_path, vol.path)
+
         if _utils.is_reachable(vol.config):
             vol.create()
             self.assertIsInstance(vol, K8sPersistentVolume)
@@ -175,6 +176,7 @@ class K8sPersistentVolumeTest(BaseTest):
         vol = _utils.create_pv(name=name, type=_type)
         vol.pd_name = pd_name
         vol.fs_type = fs_type
+
         if _utils.is_reachable(vol.config):
             vol.create()
             self.assertIsInstance(vol, K8sPersistentVolume)
@@ -258,6 +260,7 @@ class K8sPersistentVolumeTest(BaseTest):
         vol = _utils.create_pv(name=name, type=_type)
         vol.volume_id = volume_id
         vol.fs_type = fs_type
+
         if _utils.is_reachable(vol.config):
             vol.create()
             self.assertIsInstance(vol, K8sPersistentVolume)
@@ -316,6 +319,7 @@ class K8sPersistentVolumeTest(BaseTest):
         vol = _utils.create_pv(name=name, type=_type)
         vol.nfs_server = server
         vol.nfs_path = path
+
         if _utils.is_reachable(vol.config):
             vol.create()
             self.assertIsInstance(vol, K8sPersistentVolume)
@@ -332,6 +336,7 @@ class K8sPersistentVolumeTest(BaseTest):
         vol = _utils.create_pv(name=name, type=_type)
         vol.pd_name = pd_name
         vol.fs_type = fs_type
+
         if _utils.is_reachable(vol.config):
             vol.create()
             _list = vol.list()

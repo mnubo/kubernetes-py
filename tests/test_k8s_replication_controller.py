@@ -23,13 +23,17 @@ from tests.BaseTest import BaseTest
 class K8sReplicationControllerTest(BaseTest):
 
     def setUp(self):
-        K8sReplicationController.SCALE_WAIT_TIMEOUT_SECONDS = 30
+        _utils.cleanup_nodes()
         _utils.cleanup_rc()
         _utils.cleanup_pods()
+        K8sReplicationController.SCALE_WAIT_TIMEOUT_SECONDS = 30
+        pass
 
     def tearDown(self):
+        _utils.cleanup_nodes()
         _utils.cleanup_rc()
         _utils.cleanup_pods()
+        pass
 
     # --------------------------------------------------------------------------------- init
 

@@ -22,14 +22,14 @@ from tests.BaseTest import BaseTest
 
 class K8sNodeTest(BaseTest):
     def setUp(self):
-        # _utils.cleanup_nodes()
+        _utils.cleanup_nodes()
         _utils.cleanup_deployments()
         _utils.cleanup_rs()
         _utils.cleanup_pods()
         pass
 
     def tearDown(self):
-        # _utils.cleanup_nodes()
+        _utils.cleanup_nodes()
         _utils.cleanup_deployments()
         _utils.cleanup_rs()
         _utils.cleanup_pods()
@@ -335,6 +335,10 @@ class K8sNodeTest(BaseTest):
             except Exception as err:
                 self.assertIsInstance(err, DrainNodeException)
 
+            finally:
+                for node in nodes:
+                    node.uncordon()
+
     def test_drain_ignore_daemonsets(self):
         cfg = _utils.create_config()
 
@@ -351,7 +355,22 @@ class K8sNodeTest(BaseTest):
             except Exception as err:
                 self.assertIsInstance(err, DrainNodeException)
 
+            finally:
+                for node in nodes:
+                    node.uncordon()
+
     # --------------------------------------------------------------------------------- api - taint
+
+    def test_untaint(self):
+        config = _utils.create_config()
+        key = "key"
+        value = "value"
+
+        if _utils.is_reachable(config):
+            nodes = K8sNode(config=config, name="yo").list()
+            for node in nodes:
+                node.untaint(key=key, value=value)
+                self.assertEqual(0, len(node.taints))
 
     def test_taint_no_args(self):
         config = _utils.create_config()

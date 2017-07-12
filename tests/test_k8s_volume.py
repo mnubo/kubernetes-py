@@ -27,16 +27,20 @@ from kubernetes.models.v1.SecretVolumeSource import SecretVolumeSource
 class K8sVolumeTest(BaseTest):
 
     def setUp(self):
+        _utils.cleanup_nodes()
+        _utils.cleanup_rc()
+        _utils.cleanup_pods()
+        _utils.cleanup_secrets()
         K8sPod.POD_READY_TIMEOUT_SECONDS = 20
         K8sReplicationController.SCALE_WAIT_TIMEOUT_SECONDS = 20
-        _utils.cleanup_rc()
-        _utils.cleanup_pods()
-        _utils.cleanup_secrets()
+        pass
 
     def tearDown(self):
+        _utils.cleanup_nodes()
         _utils.cleanup_rc()
         _utils.cleanup_pods()
         _utils.cleanup_secrets()
+        pass
 
     # --------------------------------------------------------------------------------- init
 
