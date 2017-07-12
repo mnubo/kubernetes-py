@@ -16,6 +16,7 @@ from kubernetes.models.v1.Pod import Pod
 from kubernetes.models.v1.PodStatus import PodStatus
 from kubernetes.models.v1.Probe import Probe
 from kubernetes.utils import is_valid_dict, is_valid_string, is_valid_list
+from kubernetes.models.v1.Toleration import Toleration
 
 
 class K8sPod(K8sObject):
@@ -92,10 +93,32 @@ class K8sPod(K8sObject):
         self.model.spec.volumes = volumes
         return self
 
+    def add_toleration(self, key=None, value=None, effect=None):
+        exists = False
+        for tol in self.tolerations:
+            if tol.key == key and tol.value == value and tol.effect == effect:
+                exists = True
+        if not exists:
+            tol = Toleration()
+            tol.key = key
+            tol.value = value
+            tol.effect = effect
+            self.tolerations.append(tol)
+        return self
+
     # ------------------------------------------------------------------------------------- delete
 
     def del_node_name(self):
         self.model.spec.node_name = None
+        return self
+
+    def del_toleration(self, key=None, value=None, effect=None):
+        remaining_tolerations = []
+        for tol in self.tolerations:
+            if tol.key != key and tol.value != value and tol.effect != effect:
+                remaining_tolerations.append(tol)
+        if self.tolerations != remaining_tolerations:
+            self.tolerations = remaining_tolerations
         return self
 
     # ------------------------------------------------------------------------------------- get
@@ -342,6 +365,26 @@ class K8sPod(K8sObject):
     @phase.setter
     def phase(self, p=None):
         raise NotImplementedError()
+
+    # -------------------------------------------------------------------------------------  affinity
+
+    @property
+    def affinity(self):
+        return self.model.spec.affinity
+
+    @affinity.setter
+    def affinity(self, a):
+        self.model.spec.affinity = a
+
+    # -------------------------------------------------------------------------------------  tolerations
+
+    @property
+    def tolerations(self):
+        return self.model.spec.tolerations
+
+    @tolerations.setter
+    def tolerations(self, t=None):
+        self.model.spec.tolerations = t
 
     # ------------------------------------------------------------------------------------- filtering
 

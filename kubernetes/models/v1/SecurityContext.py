@@ -20,9 +20,9 @@ class SecurityContext(object):
         super(SecurityContext, self).__init__()
 
         self._capabilities = None
-        self._privileged = False
-        self._read_only_root_filesystem = False
-        self._run_as_non_root = False
+        self._privileged = None
+        self._read_only_root_filesystem = None
+        self._run_as_non_root = None
         self._run_as_user = None
         self._se_linux_options = None
 

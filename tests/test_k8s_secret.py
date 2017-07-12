@@ -13,7 +13,7 @@ from tests import _utils
 from tests.BaseTest import BaseTest
 from kubernetes import K8sSecret, K8sConfig
 from kubernetes.K8sExceptions import *
-from kubernetes.models.v1 import Secret
+from kubernetes.models.v1.Secret import Secret
 
 
 class K8sSecretTest(BaseTest):

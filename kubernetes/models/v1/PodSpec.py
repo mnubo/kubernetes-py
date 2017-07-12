@@ -9,6 +9,8 @@
 from kubernetes.models.v1.Container import Container
 from kubernetes.models.v1.PodSecurityContext import PodSecurityContext
 from kubernetes.models.v1.Volume import Volume
+from kubernetes.models.v1.Affinity import Affinity
+from kubernetes.models.v1.Toleration import Toleration
 from kubernetes.utils import is_valid_list, filter_model, is_valid_string
 
 
@@ -24,6 +26,7 @@ class PodSpec(object):
         super(PodSpec, self).__init__()
 
         self._active_deadline_seconds = None
+        self._affinity = None
         self._containers = []
         self._dns_policy = 'Default'
         self._host_ipc = None
@@ -34,11 +37,12 @@ class PodSpec(object):
         self._node_name = None
         self._node_selector = {}
         self._restart_policy = 'Always'
-        self._security_context = None
+        self._security_context = PodSecurityContext()
         self._service_account = None  # deprecated
         self._service_account_name = None
         self._subdomain = None
         self._termination_grace_period_seconds = 30
+        self._tolerations = []
         self._volumes = []
 
         if model is not None:
@@ -48,6 +52,8 @@ class PodSpec(object):
     def _build_with_model(self, model=None):
         if 'activeDeadlineSeconds' in model:
             self.active_deadline_seconds = model['activeDeadlineSeconds']
+        if 'affinity' in model:
+            self.affinity = Affinity(model['affinity'])
         if 'containers' in model:
             containers = []
             for c in model['containers']:
@@ -82,6 +88,12 @@ class PodSpec(object):
             self.subdomain = model['subdomain']
         if 'terminationGracePeriodSeconds' in model:
             self.termination_grace_period_seconds = model['terminationGracePeriodSeconds']
+        if 'tolerations' in model:
+            tolerations = []
+            for t in model['tolerations']:
+                tol = Toleration(t)
+                tolerations.append(tol)
+            self.tolerations = tolerations
         if 'volumes' in model:
             volumes = []
             for v in model['volumes']:
@@ -131,6 +143,18 @@ class PodSpec(object):
         if not isinstance(secs, int):
             raise SyntaxError('PodSpec: active_deadline_seconds: [ {0} ] is invalid.'.format(secs))
         self._active_deadline_seconds = secs
+
+    # ------------------------------------------------------------------------------------- affinity
+
+    @property
+    def affinity(self):
+        return self._affinity
+
+    @affinity.setter
+    def affinity(self, a=None):
+        if not isinstance(a, Affinity):
+            raise SyntaxError('PodSpec: affinity: [ {} ] is invalid.'.format(a))
+        self._affinity = a
 
     # ------------------------------------------------------------------------------------- containers
 
@@ -329,6 +353,18 @@ class PodSpec(object):
             raise SyntaxError('PodSpec: termination_grace_period_seconds: [ {0} ] is invalid.'.format(secs))
         self._termination_grace_period_seconds = secs
 
+    # ------------------------------------------------------------------------------------- tolerations
+
+    @property
+    def tolerations(self):
+        return self._tolerations
+
+    @tolerations.setter
+    def tolerations(self, t=None):
+        if not is_valid_list(t, Toleration):
+            raise SyntaxError('PodSpec: tolerations: [ {} ] is invalid.'.format(t))
+        self._tolerations = t
+
     # ------------------------------------------------------------------------------------- volumes
 
     @property
@@ -347,6 +383,8 @@ class PodSpec(object):
         data = {}
         if self.active_deadline_seconds:
             data['activeDeadlineSeconds'] = self.active_deadline_seconds
+        if self.affinity:
+            data['affinity'] = self.affinity.serialize()
         if self.containers:
             data['containers'] = []
             for c in self.containers:
@@ -379,6 +417,12 @@ class PodSpec(object):
             data['subdomain'] = self.subdomain
         if self.termination_grace_period_seconds:
             data['terminationGracePeriodSeconds'] = self.termination_grace_period_seconds
+        if self.tolerations:
+            tolerations = []
+            for t in self.tolerations:
+                tol = t.serialize()
+                tolerations.append(tol)
+            data['tolerations'] = tolerations
         if self.volumes:
             data['volumes'] = []
             for v in self.volumes:

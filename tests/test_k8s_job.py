@@ -21,10 +21,14 @@ from tests.BaseTest import BaseTest
 
 class K8sJobTests(BaseTest):
     def setUp(self):
+        _utils.cleanup_rc()
+        _utils.cleanup_deployments()
         _utils.cleanup_jobs()
         _utils.cleanup_pods()
 
     def tearDown(self):
+        _utils.cleanup_rc()
+        _utils.cleanup_deployments()
         _utils.cleanup_jobs()
         _utils.cleanup_pods()
 

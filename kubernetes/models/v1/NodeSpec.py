@@ -5,7 +5,9 @@
 # This file is subject to the terms and conditions defined in
 # file 'LICENSE.md', which is part of this source code package.
 #
-from kubernetes.utils import filter_model
+
+from kubernetes.models.v1.Taint import Taint
+from kubernetes.utils import filter_model, is_valid_list
 
 
 class NodeSpec(object):
@@ -19,6 +21,7 @@ class NodeSpec(object):
         self._pod_cidr = None
         self._external_id = None
         self._provider_id = None
+        self._taints = []
         self._unschedulable = None
 
         if model is not None:
@@ -32,6 +35,12 @@ class NodeSpec(object):
             self.external_id = model['externalID']
         if 'providerID' in model:
             self.provider_id = model['providerID']
+        if 'taints' in model:
+            taints = []
+            for t in model['taints']:
+                taint = Taint(t)
+                taints.append(taint)
+            self.taints = taints
         if 'unschedulable' in model:
             self.unschedulable = model['unschedulable']
 
@@ -71,6 +80,18 @@ class NodeSpec(object):
             raise SyntaxError('NodeSpec: provider_id: [ {0} ] is invalid.'.format(provider_id))
         self._provider_id = provider_id
 
+    # ------------------------------------------------------------------------------------- taints
+
+    @property
+    def taints(self):
+        return self._taints
+
+    @taints.setter
+    def taints(self, t=None):
+        if not is_valid_list(t, Taint):
+            raise SyntaxError('NodeSpec: taints: [ {} ] is invalid.'.format(t))
+        self._taints = t
+
     # ------------------------------------------------------------------------------------- unschedulable
 
     @property
@@ -93,6 +114,12 @@ class NodeSpec(object):
             data['externalID'] = self.external_id
         if self.provider_id:
             data['providerID'] = self.provider_id
+        if self.taints:
+            taints = []
+            for t in self.taints:
+                taint = t.serialize()
+                taints.append(taint)
+            data['taints'] = taints
         if self.unschedulable is not None:
             data['unschedulable'] = self.unschedulable
         return data

@@ -882,7 +882,7 @@ def hpa_example_service():
             "namespace": "default",
         },
         "spec": {
-            "clusterIP": "10.250.1.253",
+            # "clusterIP": "10.250.1.253",
             "ports": [
                 {
                     "port": 80,
@@ -979,4 +979,119 @@ def hpa_example_autoscaler():
             },
             "targetCPUUtilizationPercentage": 70
         },
+    }
+
+
+# --------------------------------------------------------------------------------- affinities
+
+def pod_with_node_affinity():
+    return {
+        "kind": "Pod",
+        "spec": {
+            "affinity": {
+                "nodeAffinity": {
+                    "requiredDuringSchedulingIgnoredDuringExecution": {
+                        "nodeSelectorTerms": [
+                            {
+                                "matchExpressions": [
+                                    {
+                                        "operator": "In",
+                                        "values": [
+                                            "e2e-az1",
+                                            "e2e-az2"
+                                        ],
+                                        "key": "kubernetes.io/e2e-az-name"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "preferredDuringSchedulingIgnoredDuringExecution": [
+                        {
+                            "preference": {
+                                "matchExpressions": [
+                                    {
+                                        "operator": "In",
+                                        "values": [
+                                            "another-node-label-value"
+                                        ],
+                                        "key": "another-node-label-key"
+                                    }
+                                ]
+                            },
+                            "weight": 1
+                        }
+                    ]
+                }
+            },
+            "containers": [
+                {
+                    "image": "gcr.io/google_containers/pause:2.0",
+                    "name": "with-node-affinity"
+                }
+            ]
+        },
+        "apiVersion": "v1",
+        "metadata": {
+            "name": "with-node-affinity"
+        }
+    }
+
+
+def pod_with_pod_affinity():
+    return {
+        "kind": "Pod",
+        "spec": {
+            "affinity": {
+                "podAffinity": {
+                    "requiredDuringSchedulingIgnoredDuringExecution": [
+                        {
+                            "labelSelector": {
+                                "matchExpressions": [
+                                    {
+                                        "operator": "In",
+                                        "values": [
+                                            "S1"
+                                        ],
+                                        "key": "security"
+                                    }
+                                ]
+                            },
+                            "topologyKey": "failure-domain.beta.kubernetes.io/zone"
+                        }
+                    ]
+                },
+                "podAntiAffinity": {
+                    "preferredDuringSchedulingIgnoredDuringExecution": [
+                        {
+                            "podAffinityTerm": {
+                                "labelSelector": {
+                                    "matchExpressions": [
+                                        {
+                                            "operator": "In",
+                                            "values": [
+                                                "S2"
+                                            ],
+                                            "key": "security"
+                                        }
+                                    ]
+                                },
+                                "topologyKey": "kubernetes.io/hostname"
+                            },
+                            "weight": 100
+                        }
+                    ]
+                }
+            },
+            "containers": [
+                {
+                    "image": "gcr.io/google_containers/pause:2.0",
+                    "name": "with-pod-affinity"
+                }
+            ]
+        },
+        "apiVersion": "v1",
+        "metadata": {
+            "name": "with-pod-affinity"
+        }
     }

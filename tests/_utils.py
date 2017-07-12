@@ -381,10 +381,10 @@ def cleanup_namespaces():
     ref = create_namespace(name="yo")
     if is_reachable(ref.config):
         _list = ref.list()
-        while len(_list) > 2:
+        while len(_list) > 3:
             for ns in _list:
                 try:
-                    if ns.name not in ['kube-system', 'default']:
+                    if ns.name not in ['kube-system', 'default', 'kube-public']:
                         ns.delete(cascade=True)
                 except NotFoundException:
                     continue
@@ -394,17 +394,10 @@ def cleanup_namespaces():
 def cleanup_nodes():
     ref = create_node(name="yo")
     if is_reachable(ref.config):
-        node_pattern = re.compile(r'yo-')
         _list = ref.list()
-        _filtered = list(filter(lambda x: node_pattern.match(x.name) is not None, _list))
-        while len(_filtered) > 1:
-            for n in _filtered:
-                try:
-                    n.delete(cascade=True)
-                except NotFoundException:
-                    continue
-            _list = ref.list()
-            _filtered = list(filter(lambda x: node_pattern.match(x.name) is not None, _list))
+        for n in _list:
+            n.untaint()
+            n.uncordon()
 
 
 def cleanup_pods():
@@ -488,7 +481,7 @@ def cleanup_deployments():
         while len(_list) > 0:
             for d in _list:
                 try:
-                    d.delete(cascade=False)
+                    d.delete(cascade=True)
                 except NotFoundException:
                     continue
             _list = ref.list()

@@ -14,6 +14,7 @@ from kubernetes.K8sExceptions import BadRequestException
 from kubernetes.K8sExceptions import TimedOutException, NotFoundException
 from kubernetes.K8sObject import K8sObject
 from kubernetes.K8sVolume import K8sVolume
+from kubernetes.K8sPod import K8sPod
 from kubernetes.K8sReplicaSet import K8sReplicaSet
 from kubernetes.models.v1beta1.Deployment import Deployment
 from kubernetes.models.v1beta1.DeploymentRollback import DeploymentRollback
@@ -80,13 +81,29 @@ class K8sDeployment(K8sObject):
         return k8s
 
     def delete(self, cascade=False):
+        # delete cascade on top level
         super(K8sDeployment, self).delete(cascade)
         if cascade:
             rsets = K8sReplicaSet(
                 config=self.config,
                 name="yo"
             ).list(pattern=self.name)
-            [rset.delete(cascade=cascade) for rset in rsets]
+            # delete cascade on replicasets
+            for rset in rsets:
+                try:
+                    rset.delete(cascade=cascade)
+                except NotFoundException:
+                    pass
+            pods = K8sPod(
+                config=self.config,
+                name="yo"
+            ).list(pattern=self.name)
+            # delete cascade on pods
+            for pod in pods:
+                try:
+                    pod.delete(cascade=cascade)
+                except NotFoundException:
+                    pass
         return self
 
     # -------------------------------------------------------------------------------------  wait

@@ -85,7 +85,7 @@ class HttpRequest:
             except ValueError:
                 state['data'] = resp_data.strip()
 
-        if state['status'] in [200, 201]:
+        if 200 <= state['status'] <= 299:
             state['success'] = True
 
         return state
