@@ -198,6 +198,16 @@ class K8sContainer(object):
     def image(self, image=None):
         self.model.image = image
 
+    # -------------------------------------------------------------------------------------  image_pull_policy
+
+    @property
+    def image_pull_policy(self):
+        return self.model.image_pull_policy
+
+    @image_pull_policy.setter
+    def image_pull_policy(self, pull_policy=None):
+        self.model.image_pull_policy = pull_policy
+
     # -------------------------------------------------------------------------------------  volume_mounts
 
     @property
