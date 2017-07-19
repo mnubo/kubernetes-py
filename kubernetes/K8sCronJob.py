@@ -335,6 +335,8 @@ class K8sCronJob(K8sObject):
             self.update()
 
     def _check_timeout(self, start_time=None):
+        if self.POD_RUN_WAIT_TIMEOUT_SECONDS == -1:
+            return
         elapsed_time = time.time() - start_time
         if elapsed_time >= self.POD_RUN_WAIT_TIMEOUT_SECONDS:  # timeout
             raise TimedOutException(
