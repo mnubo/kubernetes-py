@@ -48,9 +48,9 @@ class K8sPod(K8sObject):
 
     def list(self, pattern=None):
         ls = super(K8sPod, self).list()
-        pods = list(map(lambda x: Pod(x), ls))
+        pods = list(map(lambda pod: Pod(pod), ls))
         if pattern is not None:
-            pods = list(filter(lambda x: pattern in x.name, pods))
+            pods = list(filter(lambda pod: pattern in pod.name, pods))
         k8s = []
         for x in pods:
             p = K8sPod(config=self.config, name=x.name)
@@ -386,6 +386,26 @@ class K8sPod(K8sObject):
     def tolerations(self, t=None):
         self.model.spec.tolerations = t
 
+    # -------------------------------------------------------------------------------------  host_ip
+
+    @property
+    def host_ip(self):
+        return self.model.status.host_ip
+
+    @host_ip.setter
+    def host_ip(self, ip=None):
+        raise NotImplementedError()
+
+    # -------------------------------------------------------------------------------------  pod_ip
+
+    @property
+    def pod_ip(self):
+        return self.model.status.pod_ip
+
+    @pod_ip.setter
+    def pod_ip(self, ip=None):
+        raise NotImplementedError()
+
     # ------------------------------------------------------------------------------------- filtering
 
     @staticmethod
@@ -433,3 +453,24 @@ class K8sPod(K8sObject):
                 pass
 
         return pod_list
+
+    @staticmethod
+    def get_by_pod_ip(config=None, ip=None):
+        if config is None:
+            config = K8sConfig()
+        if not is_valid_string(ip):
+            raise SyntaxError(
+                'K8sPod.get_by_pod_ip(): ip: [ {0} ] is invalid.'.format(ip))
+
+        found = None
+        pods = K8sPod(config=config, name='throwaway').list()
+
+        for pod in pods:
+            try:
+                assert isinstance(pod, K8sPod)
+                if pod.pod_ip == ip:
+                    found = pod
+                    break
+            except NotFoundException:
+                pass
+        return found
