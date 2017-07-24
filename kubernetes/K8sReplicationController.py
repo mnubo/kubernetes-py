@@ -478,6 +478,12 @@ class K8sReplicationController(K8sObject):
                 "Timed out scaling RC: [ {0} ] "
                 "to replica count: [ {1} ]".format(self.name, self.desired_replicas))
 
+    # -------------------------------------------------------------------------------------  get pods
+
+    def get_pods(self):
+        pods = K8sPod.get_by_labels(config=self.config, labels=self.pod_labels)
+        return pods
+
     # -------------------------------------------------------------------------------------  get by name
 
     @staticmethod

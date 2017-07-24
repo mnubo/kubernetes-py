@@ -300,6 +300,23 @@ class K8sObject(object):
             return []
         return items
 
+    def get_exportable(self):
+        if self.name is None:
+            raise SyntaxError('K8sObject: name: [ {0} ] must be set to fetch the object.'.format(self.name))
+
+        url = '{base}/{name}?export=true'.format(base=self.base_url, name=self.name)
+        state = self.request(method='GET', url=url)
+
+        if not state.get('success'):
+            status = state.get('status', '')
+            reason = state.get('data', dict()).get('message', None)
+            message = 'K8sObject: GET [ {0}:{1} ] failed: HTTP {2} : {3} '.format(
+                self.obj_type, self.name, status, reason)
+            raise NotFoundException(message)
+
+        data = state.get('data')
+        return data
+
     def create(self):
         if self.name is None:
             raise SyntaxError('K8sObject: name: [ {0} ] must be set to CREATE the object.'.format(self.name))
