@@ -54,7 +54,7 @@ class PodStatus(object):
         if 'hostIP' in model:
             self.host_ip = model['hostIP']
         if 'podIP' in model:
-            self.host_ip = model['podIP']
+            self.pod_ip = model['podIP']
         if 'startTime' in model:
             self.start_time = model['startTime']
 
