@@ -171,7 +171,7 @@ class K8sContainer(object):
 
     @property
     def resources(self):
-        return self.model.args
+        return self.model.resources
 
     @resources.setter
     def resources(self, res=None):
