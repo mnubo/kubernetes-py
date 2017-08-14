@@ -924,8 +924,9 @@ class K8sPodTest(BaseTest):
             self.assertIsInstance(pods, list)
             self.assertEqual(1, len(pods))
             self.assertEqual(pod, pods[0])
-        else:
-            self.fail('Could not connect to minikube')
+
+            pods = K8sPod.get_by_labels(config=pod.config, labels={'test.label': "world"})
+            self.assertEqual(0, len(pods))
 
     # ------------------------------------------------------------------------------------- api - create
 
