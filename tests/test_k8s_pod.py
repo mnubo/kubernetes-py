@@ -910,6 +910,23 @@ class K8sPodTest(BaseTest):
             self.assertEqual(1, len(pods))
             self.assertEqual(pod, pods[0])
 
+    def test_get_by_labels_without_name(self):
+        name = "yocontainer"
+        container = _utils.create_container(name=name)
+        name = "yopod-{0}".format(str(uuid.uuid4()))
+        pod = _utils.create_pod(name=name)
+        pod.add_container(container)
+        pod.add_label("test.label", "hello")
+
+        if _utils.is_reachable(pod.config):
+            pod.create()
+            pods = K8sPod.get_by_labels(config=pod.config, labels={'test.label': "hello"})
+            self.assertIsInstance(pods, list)
+            self.assertEqual(1, len(pods))
+            self.assertEqual(pod, pods[0])
+        else:
+            self.fail('Could not connect to minikube')
+
     # ------------------------------------------------------------------------------------- api - create
 
     def test_create_without_containers(self):
