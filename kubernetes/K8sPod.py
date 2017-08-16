@@ -163,6 +163,16 @@ class K8sPod(K8sObject):
     def active_deadline(self, secs=None):
         self.model.spec.active_deadline_seconds = secs
 
+    # ------------------------------------------------------------------------------------- automountServiceAccountToken
+
+    @property
+    def automount_service_account_token(self):
+        return self.model.spec.automount_service_account_token
+
+    @automount_service_account_token.setter
+    def automount_service_account_token(self, automount=None):
+        self.model.spec.automount_service_account_token = automount
+
     # ------------------------------------------------------------------------------------- containers
 
     @property
