@@ -116,7 +116,7 @@ class JobStatus(object):
     def failed(self, f=None):
         if not isinstance(f, int):
             raise SyntaxError('JobStatus: failed: [ {} ] is invalid.'.format(f))
-        self._succeeded = f
+        self._failed = f
 
     # --------------------------------------------------------------------------------- serialize
 
