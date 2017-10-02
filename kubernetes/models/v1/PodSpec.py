@@ -28,6 +28,7 @@ class PodSpec(object):
         self._active_deadline_seconds = None
         self._affinity = None
         self._containers = []
+        self._automount_service_account_token = True
         self._dns_policy = 'Default'
         self._host_ipc = None
         self._host_network = None
@@ -155,6 +156,18 @@ class PodSpec(object):
         if not isinstance(a, Affinity):
             raise SyntaxError('PodSpec: affinity: [ {} ] is invalid.'.format(a))
         self._affinity = a
+
+    # ------------------------------------------------------------------------------------- automount service account token
+
+    @property
+    def automount_service_account_token(self):
+        return self._automount_service_account_token
+
+    @automount_service_account_token.setter
+    def automount_service_account_token(self, automount=None):
+        if not isinstance(automount, bool):
+            raise SyntaxError('PodSpec: automount_service_account_token: [ {0} ] is invalid.'.format(automount))
+        self._automount_service_account_token = automount
 
     # ------------------------------------------------------------------------------------- containers
 
@@ -385,6 +398,8 @@ class PodSpec(object):
             data['activeDeadlineSeconds'] = self.active_deadline_seconds
         if self.affinity:
             data['affinity'] = self.affinity.serialize()
+        if not self.automount_service_account_token:
+            data['automountServiceAccountToken'] = self.automount_service_account_token
         if self.containers:
             data['containers'] = []
             for c in self.containers:
