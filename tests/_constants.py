@@ -1095,3 +1095,23 @@ def pod_with_pod_affinity():
             "name": "with-pod-affinity"
         }
     }
+
+# --------------------------------------------------------------------------------- configmap
+
+def configmap():
+    """
+    https://kubernetes.io/docs/tasks/configure-pod-container/configmap/
+    """
+
+    return {
+        'apiVersion': 'v1',
+        'kind': 'ConfigMap',
+        'metadata': {
+            'name': 'testcfgmap-game-config'
+        },
+        'data': {
+            'game.properties': "enemies=aliens\nlives=3\nenemies.cheat=true\nenemies.cheat.level=noGoodRotten\nsecret.code.passphrase=UUDDLRLRBABAS\nsecret.code.allowed=true\nsecret.code.lives=30",
+            'ui.properties': "color.good=purple\ncolor.bad=yellow\nallow.textmode=true\nhow.nice.to.look=fairlyNice"
+        }
+    }
+

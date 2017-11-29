@@ -20,6 +20,7 @@ from kubernetes.utils import HttpRequest, is_valid_dict, str_to_class
 
 VALID_K8s_OBJS = [
     'ComponentStatus',
+    'ConfigMap',
     'CronJob',  # server version >= 1.5
     'DaemonSet',
     'Deployment',

@@ -6,6 +6,8 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+import re
+
 from kubernetes.utils import is_valid_string, filter_model
 
 
@@ -55,6 +57,10 @@ class KeyToPath(object):
     def path(self, path=None):
         if not is_valid_string(path):
             raise SyntaxError('KeyToPath: path: [ {0} ] is invalid.'.format(path))
+        if re.match('/', path):
+            raise SyntaxError('KeyToPath: path: [ {0} ] is invalid. It may not be an absolute path'.format(path))
+        if re.search('\.\.', path):
+            raise SyntaxError('KeyToPath: path: [ {0} ] is invalid. It may not contain the string ".."'.format(path))
         self._path = path
 
     # ------------------------------------------------------------------------------------- mode
@@ -65,7 +71,12 @@ class KeyToPath(object):
 
     @mode.setter
     def mode(self, mode=None):
-        if not is_valid_string(mode):
+        if is_valid_string(mode):
+            try:
+                mode = int(mode)
+            except ValueError:
+                raise SyntaxError('KeyToPath: mode: [ {0} ] is invalid.'.format(mode))
+        if not isinstance(mode, int) and (0 >= mode <= 777):
             raise SyntaxError('KeyToPath: mode: [ {0} ] is invalid.'.format(mode))
         self._mode = mode
 
