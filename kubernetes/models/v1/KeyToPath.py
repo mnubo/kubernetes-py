@@ -76,7 +76,7 @@ class KeyToPath(object):
                 mode = int(mode)
             except ValueError:
                 raise SyntaxError('KeyToPath: mode: [ {0} ] is invalid.'.format(mode))
-        if not isinstance(mode, int) and (0 >= mode <= 777):
+        if not isinstance(mode, int):
             raise SyntaxError('KeyToPath: mode: [ {0} ] is invalid.'.format(mode))
         self._mode = mode
 

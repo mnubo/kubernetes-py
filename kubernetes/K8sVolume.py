@@ -239,6 +239,62 @@ class K8sVolume(object):
             raise NotImplementedError()
         self.source.claim_name = name
 
+    # ------------------------------------------------------------------------------------- configmap_name
+
+    @property
+    def configmap_name(self):
+        if not hasattr(self.source, 'name'):
+            raise NotImplementedError()
+        return self.source.name
+
+    @configmap_name.setter
+    def configmap_name(self, name=None):
+        if not hasattr(self.source, 'name'):
+            raise NotImplementedError()
+        self.source.name = name
+
+    # ------------------------------------------------------------------------------------- configmap_items
+
+    @property
+    def configmap_items(self):
+        if not hasattr(self.source, 'items'):
+            raise NotImplementedError()
+        return self.source.items
+
+    @configmap_items.setter
+    def configmap_items(self, v=None):
+        if not hasattr(self.source, 'items'):
+            raise NotImplementedError()
+        self.source.items = v
+
+    # ------------------------------------------------------------------------------------- configmap_default_mode
+
+    @property
+    def configmap_default_mode(self):
+        if not hasattr(self.source, 'default_mode'):
+            raise NotImplementedError()
+        return self.source.default_mode
+
+    @configmap_default_mode.setter
+    def configmap_default_mode(self, v=None):
+        if not hasattr(self.source, 'default_mode'):
+            raise NotImplementedError()
+        self.source.default_mode = v
+
+    # ------------------------------------------------------------------------------------- configmap_optional
+
+    @property
+    def configmap_optional(self):
+        if not hasattr(self.source, 'optional'):
+            raise NotImplementedError()
+        return self.source.optional
+
+    @configmap_optional.setter
+    def configmap_optional(self, v=None):
+        if not hasattr(self.source, 'optional'):
+            raise NotImplementedError()
+        self.source.optional = v
+
     # ------------------------------------------------------------------------------------- serialize
 
     def serialize(self):
