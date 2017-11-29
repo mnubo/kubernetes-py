@@ -188,7 +188,7 @@ class K8sVolumeTest(BaseTest):
         self.assertEqual('configMap', vol.type)
         self.assertIsInstance(vol.source, ConfigMapVolumeSource)
 
-    def test_hostpath_set_items(self):
+    def test_configmap_set_items(self):
         name = "yoname"
         type = "configMap"
         items = list()
@@ -198,7 +198,8 @@ class K8sVolumeTest(BaseTest):
         })
         vol = K8sVolume(name=name, type=type)
         vol.configmap_items = items
-        self.assertEqual(items, vol.configmap_items)
+        serialized_items = vol.serialize().get('configMap').get('items')
+        self.assertEqual(items, serialized_items)
 
     # --------------------------------------------------------------------------------- awsElasticBlockStore
 
