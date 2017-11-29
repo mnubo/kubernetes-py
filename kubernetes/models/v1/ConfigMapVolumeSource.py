@@ -54,7 +54,7 @@ class ConfigMapVolumeSource(object):
                 mode = int(mode)
             except ValueError:
                 raise SyntaxError('ConfigMapVolumeSource: defaultMode: [ {0} ] is invalid.'.format(mode))
-        if not isinstance(mode, int) and (0 >= mode <= 777):
+        if not isinstance(mode, int):
             raise SyntaxError('ConfigMapVolumeSource: defaultMode: [ {0} ] is invalid.'.format(mode))
         self._default_mode = mode
 
@@ -72,7 +72,7 @@ class ConfigMapVolumeSource(object):
         for i in items:
             tmp_item = KeyToPath(model=i)
             modeled_items.append(tmp_item)
-        self._items = items
+        self._items = modeled_items
 
     # ------------------------------------------------------------------------------------- name
 
@@ -102,16 +102,17 @@ class ConfigMapVolumeSource(object):
 
     def serialize(self):
         data = {}
+
         if self.default_mode is not None:
             data['defaultMode '] = self.default_mode
         if self.items is not None:
             tmp_items = list()
             for i in self.items:
-                assert isinstance(i, KeyToPath)
                 tmp_items.append(i.serialize())
             data['items'] = tmp_items
         if self.name is not None:
             data['name'] = self.name
         if self.optional is not None:
             data['optional'] = self.optional
+
         return data

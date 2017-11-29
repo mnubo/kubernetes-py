@@ -94,7 +94,7 @@ class Volume(object):
         if 'persistentVolumeClaim' in model:
             self.persistentVolumeClaim = PersistentVolumeClaimVolumeSource(model['persistentVolumeClaim'])
         if 'configMap' in model:
-            self.configMap = PersistentVolumeClaimVolumeSource(model['persistentVolumeClaim'])
+            self.configMap = ConfigMapVolumeSource(model['configMap'])
 
     @staticmethod
     def vol_type_to_source(vol_type=None):
