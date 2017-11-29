@@ -22,6 +22,7 @@ from kubernetes.models.v1.GitRepoVolumeSource import GitRepoVolumeSource
 from kubernetes.models.v1.HostPathVolumeSource import HostPathVolumeSource
 from kubernetes.models.v1.NFSVolumeSource import NFSVolumeSource
 from kubernetes.models.v1.SecretVolumeSource import SecretVolumeSource
+from kubernetes.models.v1.ConfigMapVolumeSource import ConfigMapVolumeSource
 
 
 class K8sVolumeTest(BaseTest):
@@ -175,6 +176,29 @@ class K8sVolumeTest(BaseTest):
         vol = K8sVolume(name=name, type=type)
         vol.secret_name = secret_name
         self.assertEqual(vol.secret_name, secret_name)
+
+    # --------------------------------------------------------------------------------- configMap
+
+    def test_init_config_map(self):
+        name = "yoname"
+        type = 'configMap'
+        vol = K8sVolume(name=name, type=type)
+        self.assertIsNotNone(vol)
+        self.assertIsInstance(vol, K8sVolume)
+        self.assertEqual('configMap', vol.type)
+        self.assertIsInstance(vol.source, ConfigMapVolumeSource)
+
+    def test_hostpath_set_items(self):
+        name = "yoname"
+        type = "configMap"
+        items = list()
+        items.append({
+            "key": "testkey",
+            "path": "testpath"
+        })
+        vol = K8sVolume(name=name, type=type)
+        vol.configmap_items = items
+        self.assertEqual(items, vol.configmap_items)
 
     # --------------------------------------------------------------------------------- awsElasticBlockStore
 
