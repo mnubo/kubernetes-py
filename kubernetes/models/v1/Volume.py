@@ -14,6 +14,7 @@ from kubernetes.models.v1.HostPathVolumeSource import HostPathVolumeSource
 from kubernetes.models.v1.NFSVolumeSource import NFSVolumeSource
 from kubernetes.models.v1.SecretVolumeSource import SecretVolumeSource
 from kubernetes.models.v1.PersistentVolumeClaimVolumeSource import PersistentVolumeClaimVolumeSource
+from kubernetes.models.v1.ConfigMapVolumeSource import ConfigMapVolumeSource
 from kubernetes.utils import is_valid_string, filter_model
 
 
@@ -31,6 +32,7 @@ class Volume(object):
         'nfs': NFSVolumeSource,
         'secret': SecretVolumeSource,
         'persistentVolumeClaim': PersistentVolumeClaimVolumeSource,
+        'configMap': ConfigMapVolumeSource
     }
 
     def __init__(self, model=None):
@@ -46,7 +48,7 @@ class Volume(object):
         # self._downward_api = None
         # self._fc = None
         # self._azure_file = None
-        # self._config_map = None
+
         # self._vsphere_volume
         # self._quobyte = None
         # self._azuredisk = None
@@ -60,6 +62,7 @@ class Volume(object):
         self._nfs = None
         self._persistentVolumeClaim = None
         self._secret = None
+        self._config_map = None
 
         if model is not None:
             m = filter_model(model)
@@ -90,6 +93,8 @@ class Volume(object):
             self.secret = SecretVolumeSource(model['secret'])
         if 'persistentVolumeClaim' in model:
             self.persistentVolumeClaim = PersistentVolumeClaimVolumeSource(model['persistentVolumeClaim'])
+        if 'configMap' in model:
+            self.configMap = PersistentVolumeClaimVolumeSource(model['persistentVolumeClaim'])
 
     @staticmethod
     def vol_type_to_source(vol_type=None):
@@ -106,6 +111,18 @@ class Volume(object):
         if not isinstance(ebs, AWSElasticBlockStoreVolumeSource):
             raise SyntaxError('Volume: aws_elastic_block_store: [ {0} ] is invalid.'.format(ebs))
         self._awsElasticBlockStore = ebs
+
+    # ------------------------------------------------------------------------------------- configMap
+
+    @property
+    def configMap(self):
+        return self._config_map
+
+    @configMap.setter
+    def configMap(self, config_map=None):
+        if not isinstance(config_map, ConfigMapVolumeSource):
+            raise SyntaxError('Volume: config_map: [ {0} ] is invalid.'.format(config_map))
+        self._config_map = config_map
 
     # ------------------------------------------------------------------------------------- emptyDir
 
@@ -225,4 +242,6 @@ class Volume(object):
             data['secret'] = self.secret.serialize()
         if self.persistentVolumeClaim is not None:
             data['persistentVolumeClaim'] = self.persistentVolumeClaim.serialize()
+        if self.configMap is not None:
+            data['configMap'] = self.configMap.serialize()
         return data

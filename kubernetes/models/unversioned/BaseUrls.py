@@ -39,6 +39,7 @@ class BaseUrls(object):
 
         # api
         self.urls['ComponentStatus'] = '/api/{0}/componentstatuses'.format(api)
+        self.urls['ConfigMap'] = '/api/{0}/namespaces/{1}/configmaps'.format(api, namespace)
         self.urls['Event'] = '/api/{0}/events'.format(api)
         self.urls['Namespace'] = '/api/{0}/namespaces'.format(api)
         self.urls['Node'] = '/api/{0}/nodes'.format(api)

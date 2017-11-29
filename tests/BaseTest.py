@@ -14,6 +14,7 @@ class BaseTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        logging.captureWarnings(True)
         # Logging
         logging.getLogger("requests").setLevel(logging.WARNING)
-        logging.getLogger("urllib3").setLevel(logging.WARNING)
+        logging.getLogger("urllib3").setLevel(logging.ERROR)

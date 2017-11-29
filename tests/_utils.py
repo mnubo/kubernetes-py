@@ -38,6 +38,7 @@ from kubernetes.K8sStatefulSet import K8sStatefulSet
 from kubernetes.K8sStorageClass import K8sStorageClass
 from kubernetes.K8sVolume import K8sVolume
 from kubernetes.K8sVolumeMount import K8sVolumeMount
+from kubernetes.K8sConfigMap import K8sConfigMap
 
 
 kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
@@ -360,6 +361,16 @@ def create_event(config=None, name=None):
     return obj
 
 
+def create_configmap(config=None, name=None):
+    if config is None:
+        config = create_config()
+    obj = K8sConfigMap(
+        config=config,
+        name=name
+    )
+    return obj
+
+
 # --------------------------------------------------------------------------------- delete
 
 def cleanup_objects():
@@ -617,6 +628,19 @@ def cleanup_hpas():
     ref = create_hpa(name="yo")
     if is_reachable(ref.config):
         _list = ref.list()
+        while len(_list) > 0:
+            for p in _list:
+                try:
+                    p.delete(cascade=True)
+                except NotFoundException:
+                    continue
+            _list = ref.list()
+
+
+def cleanup_configmap():
+    ref = create_configmap(name="yo")
+    if is_reachable(ref.config):
+        _list = ref.list(pattern="testcfgmap")
         while len(_list) > 0:
             for p in _list:
                 try:
