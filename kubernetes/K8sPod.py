@@ -418,27 +418,14 @@ class K8sPod(K8sObject):
 
     # ------------------------------------------------------------------------------------- filtering
 
-    @staticmethod
-    def get_by_name(config=None, name=None):
-        if config is None:
-            config = K8sConfig()
+    @classmethod
+    def get_by_name(cls, config=None, name=None):
         if not is_valid_string(name):
             raise SyntaxError(
                 'K8sPod.get_by_name(): name: [ {0} ] is invalid.'.format(name))
-
-        pod_list = []
-        data = {'labelSelector': 'name={0}'.format(name)}
-        pods = K8sPod(config=config, name=name).get_with_params(data=data)
-
-        for pod in pods:
-            try:
-                p = Pod(pod)
-                k8s_pod = K8sPod(config=config, name=p.metadata.name).get()
-                pod_list.append(k8s_pod)
-            except NotFoundException:
-                pass
-
-        return pod_list
+        return cls.get_by_labels(config=config, labels={
+            "name": name,
+        })
 
     @staticmethod
     def get_by_labels(config=None, labels=None):
@@ -451,7 +438,7 @@ class K8sPod(K8sObject):
         pod_list = []
         selector = ",".join(['%s=%s' % (key, value) for (key, value) in labels.items()])
         data = {'labelSelector': selector}
-        p = K8sPod(config=config, name=labels['name'])
+        p = K8sPod(config=config, name="")
         pods = p.get_with_params(data=data)
 
         for pod in pods:
