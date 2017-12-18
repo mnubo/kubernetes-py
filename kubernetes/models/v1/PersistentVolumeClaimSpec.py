@@ -26,6 +26,7 @@ class PersistentVolumeClaimSpec(object):
         self._selector = LabelSelector()
         self._resources = ResourceRequirements()
         self._volume_name = None
+        self._storage_class_name = ""
 
         self.access_modes = ['ReadWriteOnce']
         self.resources.requests = {'storage': '10Gi'}
@@ -36,10 +37,12 @@ class PersistentVolumeClaimSpec(object):
     def _build_with_model(self, model=None):
         if 'accessModes' in model:
             self.access_modes = model['accessModes']
-        if 'selector' in model:
-            self.selector = LabelSelector(model['selector'])
         if 'resources' in model:
             self.resources = ResourceRequirements(model['resources'])
+        if 'storageClassName' in model:
+            self.storage_class_name = model['storageClassName']
+        if 'selector' in model:
+            self.selector = LabelSelector(model['selector'])
         if 'volumeName' in model:
             self.volume_name = model['volumeName']
 
@@ -56,6 +59,18 @@ class PersistentVolumeClaimSpec(object):
         filtered = list(filter(lambda x: x in PersistentVolumeSpec.VALID_ACCESS_MODES, modes))
         self._access_modes = filtered
 
+    # ------------------------------------------------------------------------------------- resources
+
+    @property
+    def resources(self):
+        return self._resources
+
+    @resources.setter
+    def resources(self, res=None):
+        if not isinstance(res, ResourceRequirements):
+            raise SyntaxError('PersistentVolumeClaimSpec: resources: [ {} ] is invalid.'.format(res))
+        self._resources = res
+
     # ------------------------------------------------------------------------------------- selector
 
     @property
@@ -68,17 +83,17 @@ class PersistentVolumeClaimSpec(object):
             raise SyntaxError('PersistentVolumeClaimSpec: selector: [ {} ] is invalid.'.format(sel))
         self._selector = sel
 
-    # ------------------------------------------------------------------------------------- resources
+    # ------------------------------------------------------------------------------------- storage_class_name
 
     @property
-    def resources(self):
-        return self._resources
+    def storage_class_name(self):
+        return self._storage_class_name
 
-    @resources.setter
-    def resources(self, res=None):
-        if not isinstance(res, ResourceRequirements):
-            raise SyntaxError('PersistentVolumeClaimSpec: resources: [ {} ] is invalid.'.format(res))
-        self._resources = res
+    @storage_class_name.setter
+    def storage_class_name(self, name=None):
+        if not is_valid_string(name):
+            raise SyntaxError('PersistentVolumeClaimSpec: storage_class_name: [ {} ] is invalid.'.format(name))
+        self._storage_class_name = name
 
     # ------------------------------------------------------------------------------------- volumeName
 
@@ -100,6 +115,8 @@ class PersistentVolumeClaimSpec(object):
             data['accessModes'] = self.access_modes
         if self.selector is not None:
             data['selector'] = self.selector.serialize()
+        if self.storage_class_name is not None:
+            data['storageClassName'] = self.storage_class_name
         if self.resources is not None:
             data['resources'] = self.resources.serialize()
         if self.volume_name is not None:

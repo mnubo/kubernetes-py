@@ -104,3 +104,13 @@ class K8sPersistentVolumeClaim(K8sObject):
 
         selector = LabelSelector(sel)
         self.model.spec.selector = selector
+
+    # ------------------------------------------------------------------------------------- storage_class_name
+
+    @property
+    def storage_class_name(self):
+        return self.model.spec.storage_class_name
+
+    @storage_class_name.setter
+    def storage_class_name(self, name=None):
+        self.model.spec.storage_class_name = name

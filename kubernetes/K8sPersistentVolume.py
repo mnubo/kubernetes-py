@@ -13,6 +13,7 @@ from kubernetes.K8sExceptions import TimedOutException
 from kubernetes.models.v1.PersistentVolume import PersistentVolume
 from kubernetes.models.v1.PersistentVolumeSpec import PersistentVolumeSpec
 from kubernetes.models.v1.Volume import Volume
+from kubernetes.utils import is_valid_string
 
 READY_WAIT_TIMEOUT_SECONDS = 60
 
@@ -211,3 +212,25 @@ class K8sPersistentVolume(K8sObject):
         if not hasattr(self.source, 'path'):
             raise NotImplementedError()
         self.source.path = p
+
+    # ------------------------------------------------------------------------------------- storage_class_name
+
+    @property
+    def storage_class_name(self):
+        return self.model.spec.storage_class_name
+
+    @storage_class_name.setter
+    def storage_class_name(self, name=None):
+        if not is_valid_string(name):
+            raise SyntaxError("K8sPersistentVolume: storage_class_name: [ {} ] is invalid.".format(name))
+        self.model.spec.storage_class_name = name
+
+    # ------------------------------------------------------------------------------------- reclaim_policy
+
+    @property
+    def reclaim_policy(self):
+        return self.model.spec.reclaim_policy
+
+    @reclaim_policy.setter
+    def reclaim_policy(self, pol=None):
+        self.model.spec.reclaim_policy = pol
