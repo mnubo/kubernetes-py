@@ -211,3 +211,37 @@ class K8sPersistentVolumeClaimTest(BaseTest):
                 self.assertIsInstance(pvc, K8sPersistentVolumeClaim)
             except Exception as err:
                 self.assertIsInstance(err, TimedOutException)
+
+    def test_api_create_hostpath_minikube(self):
+        cfg = _utils.create_config()
+
+        if _utils.is_reachable(cfg):
+            pv = K8sPersistentVolume(
+                name="pv-mysql",
+                type="hostPath")
+            try:
+                pv.get()
+            except NotFoundException:
+                pv.capacity = {"storage": "512Mi"}
+                pv.access_modes = ["ReadWriteOnce"]
+                pv.reclaim_policy = "Delete"
+                pv.path = "/tmp/mysql/data"
+                pv.storage_class_name = "manual"
+                pv.add_label('type', 'local')
+                print("** creating mysql persistent volume...")
+                pv.create()
+
+            pvc = K8sPersistentVolumeClaim(
+                config=cfg,
+                name="pvc-mysql")
+            try:
+                pvc.get()
+            except NotFoundException:
+                pvc.storage_class_name = "manual"
+                pvc.access_modes = ['ReadWriteOnce']
+                pvc.resources = {'requests': {'storage': '512Mi'}}
+                print("** creating mysql persistent volume claim...")
+                pvc.create()
+
+            self.assertIsInstance(pv, K8sPersistentVolume)
+            self.assertIsInstance(pvc, K8sPersistentVolumeClaim)

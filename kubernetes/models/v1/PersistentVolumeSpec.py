@@ -70,6 +70,7 @@ class PersistentVolumeSpec(object):
         self._access_modes = ['ReadWriteOnce']
         self._claim_ref = None
         self._reclaim_policy = 'Retain'
+        self._storage_class_name = ""
 
         if model is not None:
             self._build_with_model(model)
@@ -97,6 +98,8 @@ class PersistentVolumeSpec(object):
             self.reclaim_policy = model['persistentVolumeReclaimPolicy']
         if 'persistentVolumeClaim' in model:
             self.persistentVolumeClaim = PersistentVolumeClaimVolumeSource(model['persistentVolumeClaim'])
+        if 'storageClassName' in model:
+            self._storage_class_name = model['storageClassName']
 
     # ------------------------------------------------------------------------------------- aws ebs
 
@@ -255,6 +258,18 @@ class PersistentVolumeSpec(object):
             raise SyntaxError('PersistentVolumeSpec: persistentVolumeClaim: [ {} ] is invalid.'.format(pvc))
         self._persistentVolumeClaim = pvc
 
+    # ------------------------------------------------------------------------------------- storageClassName
+
+    @property
+    def storage_class_name(self):
+        return self._storage_class_name
+
+    @storage_class_name.setter
+    def storage_class_name(self, name=None):
+        if not is_valid_string(name):
+            raise SyntaxError('PersistentVolumeSpec: storage_class_name: [ {} ] is invalid.'.format(name))
+        self._storage_class_name = name
+
     # ------------------------------------------------------------------------------------- serialize
 
     def serialize(self):
@@ -285,4 +300,6 @@ class PersistentVolumeSpec(object):
             data['persistentVolumeReclaimPolicy'] = self.reclaim_policy
         if self.persistentVolumeClaim is not None:
             data['persistentVolumeClaim'] = self.reclaim_policy
+        if self.storage_class_name is not None:
+            data['storageClassName'] = self.storage_class_name
         return data
