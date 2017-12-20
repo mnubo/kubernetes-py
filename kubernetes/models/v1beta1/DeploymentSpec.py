@@ -159,7 +159,7 @@ class DeploymentSpec(object):
         if self.strategy is not None:
             data['strategy'] = self.strategy.serialize()
         if self.min_ready_seconds is not None:
-            data['minRedySeconds'] = self.min_ready_seconds
+            data['minReadySeconds'] = self.min_ready_seconds
         if self.revision_history_limit is not None:
             data['revisionHistoryLimit'] = self.revision_history_limit
         if self.paused is not None:
