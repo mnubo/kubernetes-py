@@ -6,9 +6,7 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.models.v1 import (
-    LoadBalancerIngress
-)
+from kubernetes.models.v1.LoadBalancerIngress import LoadBalancerIngress
 from kubernetes.utils import is_valid_list
 
 
