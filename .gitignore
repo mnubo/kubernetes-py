@@ -70,3 +70,5 @@ docs/_build/
 
 # PyBuilder
 target/
+
+\.python-version
