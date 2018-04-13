@@ -71,4 +71,8 @@ docs/_build/
 # PyBuilder
 target/
 
-\.python-version
+# pyenv
+.python-version
+
+# nosetests
+.noseids
