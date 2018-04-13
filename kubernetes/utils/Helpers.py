@@ -20,6 +20,9 @@ from kubernetes.utils.HttpRequest import HttpRequest
 RE_VALID_IP = re.compile(
     r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')
 
+# if some string starts with a number, extract it in first group
+RE_EXTRACT_VERSION_NUMBER = re.compile('^(\d+)')
+
 
 def is_valid_string(target=None):
     if target is None:
@@ -108,6 +111,19 @@ def is_reachable(cfg=None):
 
         except Exception as err:
             return False
+
+
+# Because of version number like: 1.8.8+coreos.0:
+# minor is returned as 8+, which kind of breaks numeric comparisons X_x
+def sanitize_version_number(v_num):
+    try:
+        return int(v_num)
+    except ValueError:
+        match = RE_EXTRACT_VERSION_NUMBER.match(v_num)
+        if match.lastindex is not None and match.lastindex == 1:
+            return int(match.group(1))
+        else:
+            raise ValueError("Unable to extract number at beginning of string [ {} ]".format(v_num))
 
 
 def filter_model(model=None):

@@ -14,7 +14,7 @@ from kubernetes.K8sObject import K8sObject
 from kubernetes.K8sPod import K8sPod
 from kubernetes.K8sVolume import K8sVolume
 from kubernetes.models.v2alpha1.CronJob import CronJob
-from kubernetes.utils import is_valid_list, is_reachable
+from kubernetes.utils import is_valid_list, is_reachable, sanitize_version_number
 
 
 class K8sCronJob(K8sObject):
@@ -28,7 +28,7 @@ class K8sCronJob(K8sObject):
 
         if config and is_reachable(config):
             v = temp.server_version()
-            if int(v['major']) == 1 and int(v['minor']) == 4:
+            if sanitize_version_number(v['major']) == 1 and sanitize_version_number(v['minor']) == 4:
                 _type = 'ScheduledJob'
 
         super(K8sCronJob, self).__init__(

@@ -8,7 +8,7 @@
 
 from kubernetes.K8sObject import K8sObject
 from kubernetes.models.v1alpha1.PetSet import PetSet
-from kubernetes.utils import is_reachable
+from kubernetes.utils import is_reachable, sanitize_version_number
 
 
 class K8sPetSet(K8sObject):
@@ -24,9 +24,11 @@ class K8sPetSet(K8sObject):
         if config and is_reachable(config):
             temp = K8sObject(config=config, obj_type='Pod', name='temp')
             v = temp.server_version()
-            if int(v['major']) <= 1 and int(v['minor']) < 4:
+            major_vernum = sanitize_version_number(v['major'])
+            minor_vernum = sanitize_version_number(v['minor'])
+            if major_vernum <= 1 and minor_vernum < 4:
                 raise NotImplementedError('PetSets exist only on Kubernetes == 1.4.x.')
-            if int(v['major']) >= 1 and int(v['minor']) >= 5:
+            if major_vernum >= 1 and minor_vernum >= 5:
                 raise NotImplementedError('PetSets were refactored into StatefulSets on Kubernetes >= 1.5.x.')
 
         super(K8sPetSet, self).__init__(
