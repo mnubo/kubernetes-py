@@ -59,25 +59,25 @@ def is_reachable(cfg=None):
             host = trimmed
             address = (host, 80)
         sock.connect(address)
-        return True
+        sock.close()
+        req = HttpRequest(
+            host=cfg.api_host,
+            method='GET',
+            auth=cfg.auth,
+            cert=cfg.cert,
+            ca_cert=cfg.ca_cert,
+            ca_cert_data=cfg.ca_cert_data,
+            token=cfg.token
+        )
+        r = req.send()
+        return r['success']
+
+    except socket.timeout:
+        return False
 
     except Exception as err:
-        try:
-            req = HttpRequest(
-                host=cfg.api_host,
-                method='GET',
-                auth=cfg.auth,
-                cert=cfg.cert,
-                ca_cert=cfg.ca_cert,
-                ca_cert_data=cfg.ca_cert_data,
-                token=cfg.token
-            )
-            r = req.send()
-            return r['success']
-
-        except Exception as err:
-            print(err)
-            return False
+        print(err)
+        return False
 
 
 def assert_server_version(api_host=None, major=None, minor=None, type='exact'):
