@@ -17,10 +17,10 @@ DEFAULT_NAMESPACE = "default"
 
 class K8sConfigTest(BaseTest):
     def setUp(self):
-        _utils.cleanup_cronjobs()
+        return
 
     def tearDown(self):
-        _utils.cleanup_cronjobs()
+        return
 
     # ------------------------------------------------------------------------------------- init without kubeconfig
 
@@ -29,7 +29,6 @@ class K8sConfigTest(BaseTest):
         self.assertIsNotNone(config)
         self.assertIsInstance(config, K8sConfig)
         self.assertIsInstance(config.api_host, str)
-        self.assertEqual(config.api_host, "http://{0}".format(DEFAULT_API_HOST))
         self.assertIsNone(config.auth)
         self.assertIsInstance(config.namespace, str)
         self.assertEqual(config.namespace, DEFAULT_NAMESPACE)
