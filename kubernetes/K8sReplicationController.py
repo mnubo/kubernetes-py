@@ -132,7 +132,7 @@ class K8sReplicationController(K8sObject):
         labels = self.model.spec.template.metadata.labels
         if k in labels:
             labels.pop(k)
-            self.model.spec.template.metadata.annotations = labels
+            self.model.spec.template.metadata.labels = labels
         return self
 
     def del_pod_node_name(self):

@@ -89,6 +89,14 @@ class K8sCronJob(K8sObject):
         self.model.spec.job_template.spec.template.spec.add_image_pull_secrets(secrets)
         return self
 
+    def add_pod_label(self, k=None, v=None):
+        labels = self.model.spec.job_template.spec.template.metadata.labels
+        if labels is None:
+            labels = {}
+        labels.update({k: v})
+        self.model.spec.job_template.spec.template.metadata.labels = labels
+        return self
+
     def add_volume(self, volume=None):
         if not isinstance(volume, K8sVolume):
             raise SyntaxError(
@@ -98,6 +106,15 @@ class K8sCronJob(K8sObject):
         if volume.model not in volumes:
             volumes.append(volume.model)
         self.model.spec.job_template.spec.template.spec.volumes = volumes
+        return self
+
+    # -------------------------------------------------------------------------------------  del
+
+    def del_pod_label(self, k=None):
+        labels = self.model.spec.job_template.spec.template.metadata.labels
+        if k in labels:
+            labels.pop(k)
+            self.model.spec.job_template.spec.template.metadata.labels = labels
         return self
 
     # -------------------------------------------------------------------------------------  schedule
@@ -276,6 +293,17 @@ class K8sCronJob(K8sObject):
     def pod(self, p=None):
         raise NotImplementedError(
             'K8sCronjob: pod is read-only.')
+
+    # -------------------------------------------------------------------------------------  pod labels
+
+    @property
+    def pod_labels(self):
+        return self.model.spec.job_template.spec.template.metadata.labels
+
+    @pod_labels.setter
+    def pod_labels(self, labels=None):
+        self.model.spec.job_template.spec.template.metadata.labels = labels
+
 
     # -------------------------------------------------------------------------------------  image pull secrets
 
