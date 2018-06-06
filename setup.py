@@ -15,7 +15,7 @@ del os.link
 
 def version():
     with open(os.path.abspath(__file__).replace('setup.py', 'version.meta'), 'r') as v:
-        return v.read()
+        return v.read().replace('\n', '')
 
 
 setup(
