@@ -8,6 +8,7 @@
 
 import re
 from os.path import expanduser, isfile
+import logging
 import os
 
 import yaml
@@ -70,13 +71,16 @@ class K8sConfig(object):
 
         # Default fallback host.
         if self.api_host is None:
+            logging.debug('Overriding api host with: [ {0} ]'.format(DEFAULT_API_HOST))
             self.api_host = DEFAULT_API_HOST
 
         # Set defaults if not caught in kubeconfig file or environments.
         if self.namespace is None:
+            logging.debug('Overriding namespace with: [ {0} ]'.format(DEFAULT_NAMESPACE))
             self.namespace = DEFAULT_NAMESPACE
 
         if self.version is None:
+            logging.debug('Overriding api version with: [ {0} ]'.format(DEFAULT_API_VERSION))
             self.version = DEFAULT_API_VERSION
 
         # Process overrides from arguments
@@ -85,7 +89,13 @@ class K8sConfig(object):
                 raise SyntaxError('K8sConfig: host: [ {0} ] is invalid.'.format(api_host))
             schema_re = re.compile(r"^http[s]*")
             if not schema_re.search(api_host):
-                api_host = "http://{0}".format(api_host)
+                https_port_re = re.compile(r"\:443$")
+                if not https_port_re:
+                    logging.debug('Pre-pending http to api host [ {0} ] since port is not 443.'.format(self.api_host))
+                    api_host = 'http://{0}'.format(api_host)
+                else:
+                    logging.debug('Pre-pending https to api host [ {0} ] since port is 443.'.format(self.api_host))
+                    api_host = 'https://{0}'.format(api_host)
             self.api_host = api_host
 
         if auth is not None:
@@ -148,7 +158,7 @@ class K8sConfig(object):
         # Initialize the API server host
         host = os.getenv(ENV_SERVICE_HOST, None)
         port = os.getenv(ENV_SERVICE_PORT, None)
-        self.api_host = '{0}:{1}'.format(host, port)
+        self.api_host = 'https://{0}:{1}'.format(host, port)
         # Initialize the token
         if not isfile(SERVICE_ACCOUNT_TOKEN):
             raise IOError('K8sConfig: Cannot find in-cluster token file [ {1} ]'.format(SERVICE_ACCOUNT_TOKEN))
