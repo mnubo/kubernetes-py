@@ -6,6 +6,7 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+import time
 import uuid
 
 from tests import _utils
@@ -787,7 +788,7 @@ class K8sServiceTest(BaseTest):
         config = _utils.create_config()
         config.namespace = 'kube-system'
 
-        service = _utils.create_service(config, name="kubernetes-dashboard")
+        service = _utils.create_service(config, name="my-kubernetes-dashboard")
         service.type = 'ClusterIP'
         service.add_port(
             port=80,
@@ -801,8 +802,24 @@ class K8sServiceTest(BaseTest):
             'kubernetes.io/cluster-service': 'true'
         }
 
+        service2 = _utils.create_service(config, name="my-kubernetes-dashboard")
+        service2.type = 'ClusterIP'
+        service2.add_port(
+            port=80,
+            target_port="k8s-dashport",
+            name="kubernetes-dashboard",
+            protocol="TCP"
+        )
+        service2.selector = {'k8s-app': "kubernetes-dashboard"}
+        service2.labels = {
+            'k8s-app': "kubernetes-dashboard",
+            'kubernetes.io/cluster-service': 'true'
+        }
+
         if _utils.is_reachable(service.config):
+            service.create()
+            time.sleep(0.2)
             with self.assertRaises(AlreadyExistsException):
-                service.create()
-            service.get()
+                service2.create()
             service.update()
+            service.delete()

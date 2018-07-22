@@ -283,25 +283,47 @@ class K8sNodeTest(BaseTest):
 
         if _utils.is_reachable(node.config):
             nodes = node.list()
+            ready_nodes = list(filter(lambda x: x.is_ready, nodes))
 
-            for i in range(len(nodes)):
-                node = nodes[i]
-                labels = node.labels
-                labels.update({'mnubo.com/selector': str(i)})
-                node.labels = labels
-                node.update()
+            if len(ready_nodes) > 1:
+                for i in range(len(nodes)):
+                    node = nodes[i]
+                    labels = node.labels
+                    labels.update({'mnubo.com/selector': str(i)})
+                    node.labels = labels
+                    node.update()
 
-            d_nginx.node_selector = {"mnubo.com/selector": "0"}
-            d_pg.node_selector = {"mnubo.com/selector": "1"}
-            d_redis.node_selector = {"mnubo.com/selector": "2"}
+                d_nginx.node_selector = {"mnubo.com/selector": "0"}
+                d_pg.node_selector = {"mnubo.com/selector": "1"}
+                d_redis.node_selector = {"mnubo.com/selector": "2"}
 
-            d_nginx.create()
-            d_pg.create()
-            d_redis.create()
+                d_nginx.create()
+                d_pg.create()
+                d_redis.create()
 
-            self.assertEqual(d_nginx.node_selector, {"mnubo.com/selector": "0"})
-            self.assertEqual(d_pg.node_selector, {"mnubo.com/selector": "1"})
-            self.assertEqual(d_redis.node_selector, {"mnubo.com/selector": "2"})
+                self.assertEqual(d_nginx.node_selector, {"mnubo.com/selector": "0"})
+                self.assertEqual(d_pg.node_selector, {"mnubo.com/selector": "1"})
+                self.assertEqual(d_redis.node_selector, {"mnubo.com/selector": "2"})
+
+            else:
+                for i in range(len(nodes)):
+                    node = nodes[i]
+                    labels = node.labels
+                    labels.update({'mnubo.com/selector': str(1)})
+                    node.labels = labels
+                    node.update()
+
+                d_nginx.node_selector = {"mnubo.com/selector": str(1)}
+                d_pg.node_selector = {"mnubo.com/selector": str(1)}
+                d_redis.node_selector = {"mnubo.com/selector": str(1)}
+
+                d_nginx.create()
+                d_pg.create()
+                d_redis.create()
+
+                self.assertEqual(d_nginx.node_selector, {"mnubo.com/selector": str(1)})
+                self.assertEqual(d_pg.node_selector, {"mnubo.com/selector": str(1)})
+                self.assertEqual(d_redis.node_selector, {"mnubo.com/selector": str(1)})
 
             pass  # set breakpoint; play around with killing pods
 

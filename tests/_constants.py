@@ -109,34 +109,9 @@ def admintool():
                     'dnsPolicy': 'ClusterFirst',
                     'terminationGracePeriodSeconds': 30,
                     'restartPolicy': 'Always',
-
-                    # docker in docker is evil
-                    # 'volumes': [{
-                    #     'hostPath': {
-                    #         'path': '/root/.docker/config.json'
-                    #     },
-                    #     'name': 'dockercred'
-                    # }, {
-                    #     'hostPath': {
-                    #         'path': '/usr/bin/docker'
-                    #     },
-                    #     'name': 'dockerbin'
-                    # }, {
-                    #     'hostPath': {
-                    #         'path': '/var/run/docker.sock'
-                    #     },
-                    #     'name': 'dockersock'
-                    # }, {
-                    #     'hostPath': {
-                    #         'path': '/root/.docker'
-                    #     },
-                    #     'name': 'dockerconfig'
-                    # }],
-
-                    'imagePullSecrets': [{'name': 'privateregistry'}],
                     'containers': [{
                         'livenessProbe': {
-                            'initialDelaySeconds': 15,
+                            'initialDelaySeconds': 1,
                             'tcpSocket': {
                                 'port': 'admintoolport'
                             },
@@ -144,26 +119,6 @@ def admintool():
                         },
                         'name': 'admintool',
                         'image': 'nginx:latest',
-
-                        # docker in docker is evil
-                        # 'volumeMounts': [{
-                        #     'mountPath': '/root/.dockercfg',
-                        #     'name': 'dockercred',
-                        #     'readOnly': True
-                        # }, {
-                        #     'mountPath': '/usr/bin/docker',
-                        #     'name': 'dockerbin',
-                        #     'readOnly': True
-                        # }, {
-                        #     'mountPath': '/var/run/docker.sock',
-                        #     'name': 'dockersock',
-                        #     'readOnly': True
-                        # }, {
-                        #     'mountPath': '/root/.docker',
-                        #     'name': 'dockerconfig',
-                        #     'readOnly': True
-                        # }],
-
                         'env': [{
                             'name': 'docker_env',
                             'value': 'prod'
@@ -191,8 +146,7 @@ def admintool():
                         'ports': [{
                             'protocol': 'TCP',
                             'containerPort': 80,
-                            'name': 'admintoolport',
-                            'hostPort': 80
+                            'name': 'admintoolport'
                         }],
                         'resources': {
                             'requests': {
@@ -917,7 +871,7 @@ def hpa_example_deployment():
             "namespace": "default",
         },
         "spec": {
-            "replicas": 6,
+            "replicas": 3,
             "selector": {
                 "matchLabels": {
                     "run": "php-apache"
@@ -970,7 +924,7 @@ def hpa_example_autoscaler():
             "namespace": "default",
         },
         "spec": {
-            "maxReplicas": 10,
+            "maxReplicas": 4,
             "minReplicas": 1,
             "scaleTargetRef": {
                 "apiVersion": "extensions/v1beta1",
