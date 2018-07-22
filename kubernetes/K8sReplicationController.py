@@ -51,14 +51,16 @@ class K8sReplicationController(K8sObject):
         # _hash = base64.b64encode(self.as_json())
         # self.add_annotation('kubernetes.io/deployment', _hash)
         super(K8sReplicationController, self).create()
-        self._wait_for_desired_replicas()
+        if self.desired_replicas > 0:
+            self._wait_for_desired_replicas()
         return self
 
     def update(self):
         # _hash = base64.b64encode(self.as_json())
         # self.add_annotation('kubernetes.io/deployment', _hash)
         super(K8sReplicationController, self).update()
-        self._wait_for_desired_replicas()
+        if self.desired_replicas > 0:
+            self._wait_for_desired_replicas()
         return self
 
     def list(self, pattern=None):
