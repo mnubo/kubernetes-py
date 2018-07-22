@@ -204,7 +204,7 @@ class NodeStatus(object):
 
     @volumes_attached.setter
     def volumes_attached(self, v):
-        if not isinstance(v, AttachedVolume):
+        if not isinstance(v, list):
             raise SyntaxError('NodeStatus: volumes_attached: [ {0} ] is invalid.'.format(v))
         self._volumes_attached = v
 
