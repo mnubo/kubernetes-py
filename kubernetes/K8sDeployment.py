@@ -18,6 +18,7 @@ from kubernetes.K8sPod import K8sPod
 from kubernetes.K8sReplicaSet import K8sReplicaSet
 from kubernetes.models.v1beta1.Deployment import Deployment
 from kubernetes.models.v1beta1.DeploymentRollback import DeploymentRollback
+from kubernetes.models.v1beta1.RollbackConfig import RollbackConfig
 from kubernetes.models.v1beta1.LabelSelector import LabelSelector
 from kubernetes.utils import is_valid_list
 
@@ -383,14 +384,18 @@ class K8sDeployment(K8sObject):
         rollback = DeploymentRollback()
         rollback.name = self.name
 
+        rollback_config = RollbackConfig()
+
         # to the specified revision
         if revision is not None:
-            rollback.rollback_to.revision = revision
+            rollback_config.revision = revision
         # to the revision immediately preceding the current revision
         else:
             current_revision = int(self.get_annotation(self.REVISION_ANNOTATION))
             rev = max(current_revision - 1, 0)
-            rollback.rollback_to.revision = rev
+            rollback_config.revision = rev
+
+        rollback.rollback_to = rollback_config
 
         if annotations is not None:
             rollback.updated_annotations = annotations
@@ -401,14 +406,15 @@ class K8sDeployment(K8sObject):
             url=url,
             data=rollback.serialize())
 
-        self.get()
-        self._wait_for_desired_replicas()
-
         if not state.get('success'):
             status = state.get('status', '')
             reason = state.get('data', dict()).get('message', None)
             message = 'K8sDeployment: ROLLBACK failed : HTTP {0} : {1}'.format(status, reason)
             raise BadRequestException(message)
+
+        time.sleep(0.2)
+        self._wait_for_desired_replicas()
+        self.get()
 
         return self
 
