@@ -37,15 +37,14 @@ class K8sServiceAccount(K8sObject):
         self.get()
         return self
 
-    def list(self, pattern=None):
-        ls = super(K8sServiceAccount, self).list()
+    def list(self, pattern=None, labels=None):
+        ls = super(K8sServiceAccount, self).list(labels=labels)
         accts = list(map(lambda x: ServiceAccount(x), ls))
         if pattern is not None:
             accts = list(filter(lambda x: pattern in x.name, accts))
         k8s = []
         for x in accts:
-            j = K8sServiceAccount(config=self.config, name=x.name)
-            j.model = x
+            j = K8sServiceAccount(config=self.config, name=x.name).from_model(m=x)
             k8s.append(j)
         return k8s
 

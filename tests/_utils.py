@@ -405,10 +405,9 @@ def cleanup_namespaces():
 def cleanup_nodes():
     ref = create_node(name="yo")
     if is_reachable(ref.config):
-        _list = ref.list()
+        _list = ref.list(pattern="yo")
         for n in _list:
-            n.untaint()
-            n.uncordon()
+            n.delete()
 
 
 def cleanup_pods():

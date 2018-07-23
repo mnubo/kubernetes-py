@@ -1146,7 +1146,10 @@ class K8sPodTest(BaseTest):
         if _utils.is_reachable(config):
             # ensure we have enough nodes
             nodes = K8sNode(config=config, name="yo").list()
-            self.assertGreaterEqual(len(nodes), 3)
+            if len(nodes) < 3:
+                self.skipTest(reason='Not enough nodes to perform test.')
+            else:
+                self.assertGreaterEqual(len(nodes), 3)
             # tag the nodes
             for i in range(len(nodes)):
                 node = nodes[i]
@@ -1178,7 +1181,10 @@ class K8sPodTest(BaseTest):
         if _utils.is_reachable(config):
             # ensure we have enough nodes
             nodes = K8sNode(config=config, name="yo").list()
-            self.assertGreaterEqual(len(nodes), 3)
+            if len(nodes) < 3:
+                self.skipTest(reason='Not enough nodes to perform test.')
+            else:
+                self.assertGreaterEqual(len(nodes), 3)
             # tag the nodes
             for i in range(len(nodes)):
                 node = nodes[i]
@@ -1244,7 +1250,10 @@ class K8sPodTest(BaseTest):
         if _utils.is_reachable(config):
             # ensure we have enough nodes
             nodes = K8sNode(config=config, name="yo").list()
-            self.assertGreaterEqual(len(nodes), 3)
+            if len(nodes) < 3:
+                self.skipTest(reason='Not enough nodes to perform test.')
+            else:
+                self.assertGreaterEqual(len(nodes), 3)
             # tag the nodes
             for i in range(len(nodes)):
                 node = nodes[i]

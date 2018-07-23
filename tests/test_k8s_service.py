@@ -6,6 +6,7 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+import time
 import uuid
 
 from tests import _utils
@@ -637,6 +638,7 @@ class K8sServiceTest(BaseTest):
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
         if _utils.is_reachable(svc.config):
             _list = svc.list()
+            self.assertIsInstance(_list, list)
 
     def test_list(self):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
@@ -645,12 +647,17 @@ class K8sServiceTest(BaseTest):
         if _utils.is_reachable(svc.config):
             svc.create()
             _list = svc.list()
+            self.assertIsInstance(_list, list)
             for x in _list:
                 self.assertIsInstance(x, K8sService)
-            self.assertIsInstance(_list, list)
-            self.assertEqual(2, len(_list))  # api server exists already
-            from_query = _list[1]
-            self.assertEqual(name, from_query.name)
+            self.assertGreaterEqual(len(_list), 1)
+            found = None
+            for s in _list:
+                if s.name == name:
+                    found = s
+                    break
+            self.assertEqual(name, found.name)
+        pass
 
     # --------------------------------------------------------------------------------- api - create
 
@@ -787,7 +794,7 @@ class K8sServiceTest(BaseTest):
         config = _utils.create_config()
         config.namespace = 'kube-system'
 
-        service = _utils.create_service(config, name="kubernetes-dashboard")
+        service = _utils.create_service(config, name="my-kubernetes-dashboard")
         service.type = 'ClusterIP'
         service.add_port(
             port=80,
@@ -801,8 +808,24 @@ class K8sServiceTest(BaseTest):
             'kubernetes.io/cluster-service': 'true'
         }
 
+        service2 = _utils.create_service(config, name="my-kubernetes-dashboard")
+        service2.type = 'ClusterIP'
+        service2.add_port(
+            port=80,
+            target_port="k8s-dashport",
+            name="kubernetes-dashboard",
+            protocol="TCP"
+        )
+        service2.selector = {'k8s-app': "kubernetes-dashboard"}
+        service2.labels = {
+            'k8s-app': "kubernetes-dashboard",
+            'kubernetes.io/cluster-service': 'true'
+        }
+
         if _utils.is_reachable(service.config):
+            service.create()
+            time.sleep(0.2)
             with self.assertRaises(AlreadyExistsException):
-                service.create()
-            service.get()
+                service2.create()
             service.update()
+            service.delete()

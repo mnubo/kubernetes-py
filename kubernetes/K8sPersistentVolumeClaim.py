@@ -38,15 +38,14 @@ class K8sPersistentVolumeClaim(K8sObject):
         self.model = PersistentVolumeClaim(self.get_model())
         return self
 
-    def list(self, pattern=None):
-        ls = super(K8sPersistentVolumeClaim, self).list()
+    def list(self, pattern=None, labels=None):
+        ls = super(K8sPersistentVolumeClaim, self).list(labels=labels)
         claims = list(map(lambda x: PersistentVolumeClaim(x), ls))
         if pattern is not None:
             claims = list(filter(lambda x: pattern in x.name, claims))
         k8s = []
         for x in claims:
-            j = K8sPersistentVolumeClaim(config=self.config, name=x.name)
-            j.model = x
+            j = K8sPersistentVolumeClaim(config=self.config, name=x.name).from_model(m=x)
             k8s.append(j)
         return k8s
 

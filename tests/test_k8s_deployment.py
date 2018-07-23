@@ -490,14 +490,16 @@ class K8sDeploymentTests(BaseTest):
             self.assertEqual(1, dep.revision)
             dep.add_container(c_nginx_1)
             dep.update()
+            dep.get()
             self.assertEqual(2, dep.revision)
             dep.add_container(c_nginx_2)
             dep.update()
+            dep.get()
             self.assertEqual(3, dep.revision)
 
             rsets = K8sReplicaSet(config=dep.config, name="yo").list()
             for i in range(0, len(rsets) - 1):
-                self.assertGreater(rsets[i].creation_timestamp, rsets[i + 1].creation_timestamp)
+                self.assertGreaterEqual(rsets[i].creation_timestamp, rsets[i + 1].creation_timestamp)
 
     # ---------------------------------------------------------------------------------- replicaset purge
 

@@ -38,15 +38,14 @@ class K8sHorizontalPodAutoscaler(K8sObject):
         self.get()
         return self
 
-    def list(self, pattern=None):
-        ls = super(K8sHorizontalPodAutoscaler, self).list()
+    def list(self, pattern=None, labels=None):
+        ls = super(K8sHorizontalPodAutoscaler, self).list(labels=labels)
         hpas = list(map(lambda x: HorizontalPodAutoscaler(x), ls))
         if pattern is not None:
             hpas = list(filter(lambda x: pattern in x.name, hpas))
         k8s = []
         for x in hpas:
-            z = K8sHorizontalPodAutoscaler(config=self.config, name=x.name)
-            z.model = x
+            z = K8sHorizontalPodAutoscaler(config=self.config, name=x.name).from_model(m=x)
             k8s.append(z)
         return k8s
 
@@ -119,8 +118,7 @@ class K8sHorizontalPodAutoscaler(K8sObject):
         try:
             d = convert(json.loads(j))
             model = HorizontalPodAutoscaler(model=d)
-            k8s = K8sHorizontalPodAutoscaler(config=cfg, name="yo")
-            k8s.model = model
+            k8s = K8sHorizontalPodAutoscaler(config=cfg, name="yo").from_model(m=model)
             return k8s
 
         except TypeError as err:

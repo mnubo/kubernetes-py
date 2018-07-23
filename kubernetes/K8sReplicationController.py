@@ -51,14 +51,16 @@ class K8sReplicationController(K8sObject):
         # _hash = base64.b64encode(self.as_json())
         # self.add_annotation('kubernetes.io/deployment', _hash)
         super(K8sReplicationController, self).create()
-        self._wait_for_desired_replicas()
+        if self.desired_replicas > 0:
+            self._wait_for_desired_replicas()
         return self
 
     def update(self):
         # _hash = base64.b64encode(self.as_json())
         # self.add_annotation('kubernetes.io/deployment', _hash)
         super(K8sReplicationController, self).update()
-        self._wait_for_desired_replicas()
+        if self.desired_replicas > 0:
+            self._wait_for_desired_replicas()
         return self
 
     def list(self, pattern=None):
@@ -487,7 +489,7 @@ class K8sReplicationController(K8sObject):
     # -------------------------------------------------------------------------------------  get by name
 
     @staticmethod
-    def get_by_name(config=None, name=None):
+    def get_by_name(config=None, name=None, name_label='name'):
         if config is not None and not isinstance(config, K8sConfig):
             raise SyntaxError(
                 'ReplicationController.get_by_name(): config: [ {0} ] is invalid.'.format(config))
@@ -496,14 +498,14 @@ class K8sReplicationController(K8sObject):
                 'K8sReplicationController.get_by_name() name: [ {0} ] is invalid.'.format(name))
 
         rc_list = []
-        data = {'labelSelector': 'name={0}'.format(name)}
+        data = {'labelSelector': '{0}={1}'.format(name_label, name)}
         rcs = K8sReplicationController(config=config, name=name).get_with_params(data=data)
 
         for rc in rcs:
             try:
                 model = ReplicationController(rc)
-                obj = K8sReplicationController(config=config, name=model.metadata.name)
-                rc_list.append(obj.get())
+                obj = K8sReplicationController(config=config, name=model.metadata.name).from_model(m=model)
+                rc_list.append(obj)
             except NotFoundException:
                 pass
 

@@ -980,7 +980,7 @@ class K8sReplicationControllerTest(BaseTest):
             self.assertIsInstance(result, list)
             self.assertEqual(1, len(result))
             self.assertIsInstance(result[0], K8sReplicationController)
-            self.assertEqual(rc, result[0])
+            self.assertEqual(rc.name, result[0].name)
 
     # -------------------------------------------------------------------------------------  resize
 
@@ -1545,7 +1545,7 @@ class K8sReplicationControllerTest(BaseTest):
             rc2 = result[0]
             self.assertIsInstance(rc2, K8sReplicationController)
             self.assertNotEqual(rc2.namespace, nspace)
-            self.assertEqual(rc, rc2)
+            self.assertEqual(rc.name, rc2.name)
             rc2.namespace = nspace
             with self.assertRaises(BadRequestException):
                 rc2.update()
