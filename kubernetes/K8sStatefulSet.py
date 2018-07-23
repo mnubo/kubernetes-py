@@ -38,14 +38,13 @@ class K8sStatefulSet(K8sObject):
         self.get()
         return self
 
-    def list(self, pattern=None):
-        ls = super(K8sStatefulSet, self).list()
+    def list(self, pattern=None, labels=None):
+        ls = super(K8sStatefulSet, self).list(labels=labels)
         ssets = list(map(lambda x: StatefulSet(x), ls))
         if pattern is not None:
             ssets = list(filter(lambda x: pattern in x.name, ssets))
         k8s = []
         for x in ssets:
-            j = K8sStatefulSet(config=self.config, name=x.name)
-            j.model = x
+            j = K8sStatefulSet(config=self.config, name=x.name).from_model(m=x)
             k8s.append(j)
         return k8s

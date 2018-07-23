@@ -69,15 +69,14 @@ class K8sDeployment(K8sObject):
             self._wait_for_desired_replicas()
         return self
 
-    def list(self, pattern=None):
-        ls = super(K8sDeployment, self).list()
-        deploys = list(map(lambda x: Deployment(x), ls))
+    def list(self, pattern=None, labels=None):
+        ls = super(K8sDeployment, self).list(labels=labels)
+        deploys = list(map(lambda d: Deployment(d), ls))
         if pattern is not None:
-            deploys = list(filter(lambda x: pattern in x.name, deploys))
-        k8s = []
+            deploys = list(filter(lambda dep: pattern in dep.name, deploys))
+        k8s = list()
         for x in deploys:
-            j = K8sDeployment(config=self.config, name=x.name)
-            j.model = x
+            j = K8sDeployment(config=self.config, name=x.name).from_model(m=x)
             k8s.append(j)
         return k8s
 
@@ -332,12 +331,13 @@ class K8sDeployment(K8sObject):
     # -------------------------------------------------------------------------------------  get by name
 
     @staticmethod
-    def get_by_name(config=None, name=None):
+    def get_by_name(config=None, name=None, name_label='name'):
         """
         Fetches a K8sDeployment by name.
         
         :param config: A K8sConfig object.
         :param name: The name we want.
+        :param name_label: The label key to use for name.
         :return: A list of K8sDeployment objects.
         """
 
@@ -352,19 +352,11 @@ class K8sDeployment(K8sObject):
             raise SyntaxError(
                 'Deployment: config: [ {0} ] must be a K8sConfig'.format(config))
 
-        dep_list = list()
-        data = {'labelSelector': 'name={0}'.format(name)}
-        deps = K8sDeployment(config=config, name=name).get_with_params(data=data)
+        deps = K8sDeployment(config=config, name=name).list(labels={
+            name_label: name
+        })
 
-        for dep in deps:
-            try:
-                d = Deployment(dep)
-                dep_name = d.metadata.name
-                dep_list.append(K8sDeployment(config=config, name=dep_name).get())
-            except NotFoundException:
-                pass
-
-        return dep_list
+        return deps
 
     # -------------------------------------------------------------------------------------  rollback
 

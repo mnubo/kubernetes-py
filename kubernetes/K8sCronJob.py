@@ -52,15 +52,14 @@ class K8sCronJob(K8sObject):
         self.get()
         return self
 
-    def list(self, pattern=None):
-        ls = super(K8sCronJob, self).list()
+    def list(self, pattern=None, labels=None):
+        ls = super(K8sCronJob, self).list(labels=labels)
         jobs = list(map(lambda x: CronJob(x), ls))
         if pattern is not None:
             jobs = list(filter(lambda x: pattern in x.name, jobs))
         k8s = []
         for x in jobs:
-            j = K8sCronJob(config=self.config, name=x.name)
-            j.model = x
+            j = K8sCronJob(config=self.config, name=x.name).from_model(m=x)
             k8s.append(j)
         return k8s
 

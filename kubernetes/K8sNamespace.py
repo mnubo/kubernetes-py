@@ -30,15 +30,14 @@ class K8sNamespace(K8sObject):
         self.get()
         return self
 
-    def list(self, pattern=None):
-        ls = super(K8sNamespace, self).list()
+    def list(self, pattern=None, labels=None):
+        ls = super(K8sNamespace, self).list(labels=labels)
         names = list(map(lambda x: Namespace(x), ls))
         if pattern is not None:
             names = list(filter(lambda x: pattern in x.name, names))
         k8s = []
         for x in names:
-            j = K8sNamespace(config=self.config, name=x.name)
-            j.model = x
+            j = K8sNamespace(config=self.config, name=x.name).from_model(m=x)
             k8s.append(j)
         return k8s
 

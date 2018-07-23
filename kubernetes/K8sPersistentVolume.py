@@ -45,16 +45,15 @@ class K8sPersistentVolume(K8sObject):
         self.model = PersistentVolume(self.get_model())
         return self
 
-    def list(self, pattern=None):
-        ls = super(K8sPersistentVolume, self).list()
+    def list(self, pattern=None, labels=None):
+        ls = super(K8sPersistentVolume, self).list(labels=labels)
         vols = list(map(lambda x: PersistentVolume(x), ls))
         if pattern is not None:
             vols = list(filter(lambda x: pattern in x.name, vols))
         k8s = []
         for x in vols:
             _types = list(filter(lambda z: z in PersistentVolumeSpec.VOLUME_TYPES_TO_SOURCE_MAP, dir(x.spec)))
-            j = K8sPersistentVolume(config=self.config, name=self.name, type=_types[0])
-            j.model = x
+            j = K8sPersistentVolume(config=self.config, name=self.name, type=_types[0]).from_model(m=x)
             k8s.append(j)
         return k8s
 

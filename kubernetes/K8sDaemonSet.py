@@ -41,15 +41,14 @@ class K8sDaemonSet(K8sObject):
         self.get()
         return self
 
-    def list(self, pattern=None):
-        ls = super(K8sDaemonSet, self).list()
+    def list(self, pattern=None, labels=None):
+        ls = super(K8sDaemonSet, self).list(labels=labels)
         daemons = list(map(lambda x: DaemonSet(x), ls))
         if pattern is not None:
             daemons = list(filter(lambda x: pattern in x.name, daemons))
         k8s = []
         for x in daemons:
-            j = K8sDaemonSet(config=self.config, name=x.name)
-            j.model = x
+            j = K8sDaemonSet(config=self.config, name=x.name).from_model(m=x)
             k8s.append(j)
         return k8s
 

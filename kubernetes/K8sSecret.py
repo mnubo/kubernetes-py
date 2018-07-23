@@ -38,15 +38,14 @@ class K8sSecret(K8sObject):
         self.get()
         return self
 
-    def list(self, pattern=None):
-        ls = super(K8sSecret, self).list()
+    def list(self, pattern=None, labels=None):
+        ls = super(K8sSecret, self).list(labels=labels)
         secrets = list(map(lambda x: Secret(x), ls))
         if pattern is not None:
             secrets = list(filter(lambda x: pattern in x.name, secrets))
         k8s = []
         for x in secrets:
-            j = K8sSecret(config=self.config, name=x.name)
-            j.model = x
+            j = K8sSecret(config=self.config, name=x.name).from_model(m=x)
             k8s.append(j)
         return k8s
 

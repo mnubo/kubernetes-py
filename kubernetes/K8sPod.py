@@ -46,15 +46,14 @@ class K8sPod(K8sObject):
         self._wait_for_readiness()
         return self
 
-    def list(self, pattern=None):
-        ls = super(K8sPod, self).list()
+    def list(self, pattern=None, labels=None):
+        ls = super(K8sPod, self).list(labels=labels)
         pods = list(map(lambda pod: Pod(pod), ls))
         if pattern is not None:
             pods = list(filter(lambda pod: pattern in pod.name, pods))
-        k8s = []
+        k8s = list()
         for x in pods:
-            p = K8sPod(config=self.config, name=x.name)
-            p.model = x
+            p = K8sPod(config=self.config, name=x.name).from_model(m=x)
             k8s.append(p)
         return k8s
 
@@ -419,12 +418,12 @@ class K8sPod(K8sObject):
     # ------------------------------------------------------------------------------------- filtering
 
     @classmethod
-    def get_by_name(cls, config=None, name=None):
+    def get_by_name(cls, config=None, name=None, name_label='name'):
         if not is_valid_string(name):
             raise SyntaxError(
                 'K8sPod.get_by_name(): name: [ {0} ] is invalid.'.format(name))
         return cls.get_by_labels(config=config, labels={
-            "name": name,
+            name_label: name,
         })
 
     @staticmethod
@@ -435,24 +434,12 @@ class K8sPod(K8sObject):
             raise SyntaxError(
                 'K8sPod.get_by_labels(): labels: [ {} ] is invalid.'.format(labels))
 
-        pod_list = []
-        selector = ",".join(['%s=%s' % (key, value) for (key, value) in labels.items()])
-        data = {'labelSelector': selector}
-        p = K8sPod(config=config, name="")
-        pods = p.get_with_params(data=data)
+        pods = K8sPod(config=config, name='whatever').list(labels=labels)
 
-        for pod in pods:
-            try:
-                p = Pod(pod)
-                k8s_pod = K8sPod(config=config, name=p.metadata.name).get()
-                pod_list.append(k8s_pod)
-            except NotFoundException:
-                pass
-
-        return pod_list
+        return pods
 
     @staticmethod
-    def get_by_pod_ip(config=None, ip=None):
+    def get_by_pod_ip(config=None, ip=None, labels=None):
         if config is None:
             config = K8sConfig()
         if not is_valid_string(ip):
@@ -460,7 +447,7 @@ class K8sPod(K8sObject):
                 'K8sPod.get_by_pod_ip(): ip: [ {0} ] is invalid.'.format(ip))
 
         found = None
-        pods = K8sPod(config=config, name='throwaway').list()
+        pods = K8sPod(config=config, name='throwaway').list(labels=labels)
 
         for pod in pods:
             try:

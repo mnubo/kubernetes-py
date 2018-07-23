@@ -34,15 +34,14 @@ class K8sConfigMap(K8sObject):
         self.get()
         return self
 
-    def list(self, pattern=None):
-        ls = super(K8sConfigMap, self).list()
+    def list(self, pattern=None, labels=None):
+        ls = super(K8sConfigMap, self).list(labels=labels)
         cm = list(map(lambda x: ConfigMap(x), ls))
         if pattern is not None:
             cm = list(filter(lambda x: pattern in x.name, cm))
         k8s = []
         for x in cm:
-            j = K8sConfigMap(config=self.config, name=x.name)
-            j.model = x
+            j = K8sConfigMap(config=self.config, name=x.name).from_model(m=x)
             k8s.append(j)
         return k8s
 

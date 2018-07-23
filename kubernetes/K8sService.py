@@ -31,15 +31,14 @@ class K8sService(K8sObject):
         self.get()
         return self
 
-    def list(self, pattern=None):
-        ls = super(K8sService, self).list()
+    def list(self, pattern=None, labels=None):
+        ls = super(K8sService, self).list(labels=labels)
         svcs = list(map(lambda x: Service(x), ls))
         if pattern is not None:
             svcs = list(filter(lambda x: pattern in x.name, svcs))
         k8s = []
         for x in svcs:
-            j = K8sService(config=self.config, name=x.name)
-            j.model = x
+            j = K8sService(config=self.config, name=x.name).from_model(m=x)
             k8s.append(j)
         return k8s
 
@@ -178,11 +177,8 @@ class K8sService(K8sObject):
     # ------------------------------------------------------------------------------------- filter
 
     @staticmethod
-    def get_by_name(config=None, name=None):
-        service_list = []
-        data = {'labelSelector': 'name={}'.format(name)}
-        services = K8sService(config=config, name=name).get_with_params(data=data)
-        for svc in services:
-            service_name = Service(svc).metadata.name
-            service_list.append(K8sService(config=config, name=service_name).get())
-        return service_list
+    def get_by_name(config=None, name=None, name_label='name'):
+        services = K8sService(config=config, name=name).list(labels={
+            name_label: name
+        })
+        return services
