@@ -43,8 +43,8 @@ class K8sNode(K8sObject):
         self.get()
         return self
 
-    def list(self, pattern=None):
-        ls = super(K8sNode, self).list()
+    def list(self, pattern=None, labels=None):
+        ls = super(K8sNode, self).list(labels=labels)
         nodes = list(map(lambda x: Node(x), ls))
         if pattern is not None:
             nodes = list(filter(lambda x: pattern in x.name, nodes))
@@ -162,7 +162,7 @@ class K8sNode(K8sObject):
                 'K8sNode.get_by_labels() labels: [ {0} ] is invalid.'.format(labels))
 
         node_list = list()
-        nodes = K8sObject(config=config, name='whatever').list(labels=labels)
+        nodes = K8sNode(config=config, name='whatever').list(labels=labels)
 
         for n in nodes:
             try:
