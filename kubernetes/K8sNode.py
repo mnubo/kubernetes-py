@@ -9,11 +9,13 @@
 import json
 import time
 
-from kubernetes.K8sExceptions import DrainNodeException, TimedOutException
+from kubernetes.K8sExceptions import DrainNodeException, TimedOutException, NotFoundException
 from kubernetes.K8sNamespace import K8sNamespace
 from kubernetes.K8sObject import K8sObject
 from kubernetes.K8sPod import K8sPod
+from kubernetes.K8sConfig import K8sConfig
 from kubernetes.models.v1.Node import Node
+from kubernetes.models.v1.NodeCondition import NodeCondition
 from kubernetes.utils import is_valid_string, is_valid_list
 from kubernetes.models.v1.Taint import Taint
 
@@ -48,8 +50,7 @@ class K8sNode(K8sObject):
             nodes = list(filter(lambda x: pattern in x.name, nodes))
         k8s = []
         for x in nodes:
-            j = K8sNode(config=self.config, name=x.name)
-            j.model = x
+            j = K8sNode(config=self.config, name=x.name).from_model(x)
             k8s.append(j)
         return k8s
 
@@ -125,6 +126,21 @@ class K8sNode(K8sObject):
     def name(self, name=None):
         self.model.metadata.name = name
 
+    # ------------------------------------------------------------------------------------- is_ready
+
+    @property
+    def is_ready(self):
+        rc = False
+        if self.model.status.conditions is not None:
+            for c in self.model.status.conditions:
+                assert isinstance(c, NodeCondition)
+                if c.condition_type == 'Ready' and c.status == 'True':
+                    rc = True
+                    break
+                else:
+                    continue
+        return rc
+
     # ------------------------------------------------------------------------------------- filter
 
     @staticmethod
@@ -134,6 +150,29 @@ class K8sNode(K8sObject):
         if filtered:
             return filtered[0]
         return None
+
+    @staticmethod
+    def get_by_labels(config=None, labels=None):
+
+        if config is not None and not isinstance(config, K8sConfig):
+            raise SyntaxError(
+                'K8sNode.get_by_labels(): config: [ {0} ] is invalid.'.format(config))
+        if not isinstance(labels, dict):
+            raise SyntaxError(
+                'K8sNode.get_by_labels() labels: [ {0} ] is invalid.'.format(labels))
+
+        node_list = list()
+        nodes = K8sObject(config=config, name='whatever').list(labels=labels)
+
+        for n in nodes:
+            try:
+                model = Node(n)
+                obj = K8sNode(config=config, name=model.metadata.name).from_model(n)
+                node_list.append(obj.get())
+            except NotFoundException:
+                pass
+
+        return node_list
 
     # ------------------------------------------------------------------------------------- pods
 
