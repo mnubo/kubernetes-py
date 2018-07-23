@@ -638,6 +638,7 @@ class K8sServiceTest(BaseTest):
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
         if _utils.is_reachable(svc.config):
             _list = svc.list()
+            self.assertIsInstance(_list, list)
 
     def test_list(self):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
@@ -646,12 +647,17 @@ class K8sServiceTest(BaseTest):
         if _utils.is_reachable(svc.config):
             svc.create()
             _list = svc.list()
+            self.assertIsInstance(_list, list)
             for x in _list:
                 self.assertIsInstance(x, K8sService)
-            self.assertIsInstance(_list, list)
-            self.assertEqual(2, len(_list))  # api server exists already
-            from_query = _list[1]
-            self.assertEqual(name, from_query.name)
+            self.assertGreaterEqual(len(_list), 1)
+            found = None
+            for s in _list:
+                if s.name == name:
+                    found = s
+                    break
+            self.assertEqual(name, found.name)
+        pass
 
     # --------------------------------------------------------------------------------- api - create
 
