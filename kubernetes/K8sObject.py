@@ -255,8 +255,18 @@ class K8sObject(object):
         except IOError as err:
             raise BadRequestException('K8sObject: IOError: {0}'.format(err))
 
-    def list(self):
-        state = self.request(method='GET')
+    def list(self, labels=None):
+        if labels is not None and isinstance(labels, dict):
+            filter_list = list()
+            for k, v in labels.items():
+                filter_list.append('{0}={1}'.format(k, v))
+            if len(filter_list) > 1:
+                data = {'labelSelector': ','.join(filter_list)}
+            else:
+                data = {'labelSelector': filter_list[0]}
+            state = self.request(method='GET', data=data)
+        else:
+            state = self.request(method='GET')
         if not state.get('status'):
             raise Exception('K8sObject: Could not fetch list of objects of type: [ {0} ]'.format(self.obj_type))
         if not state.get('success'):
@@ -272,7 +282,7 @@ class K8sObject(object):
                 raise UnprocessableEntityException(message)
             raise BadRequestException(message)
         items = state.get('data', dict()).get('items', list())
-        return items if items is not None else []
+        return items if items is not None else list()
 
     def get_model(self):
         if self.name is None:
@@ -298,7 +308,7 @@ class K8sObject(object):
         state = self.request(method='GET', url=url, data=data)
         items = state.get('data', None).get('items', list())
         if items is None:
-            return []
+            return list()
         return items
 
     def get_exportable(self):
@@ -317,6 +327,14 @@ class K8sObject(object):
 
         data = state.get('data')
         return data
+
+    def from_model(self, m=None):
+        if m is not None:
+            if isinstance(m, type(self.model)):
+                self.model = m
+            else:
+                raise SyntaxError('Wrong data structure. We need an object of type [ {} ].'.format(type(self.model)))
+        return self
 
     def create(self):
         if self.name is None:
