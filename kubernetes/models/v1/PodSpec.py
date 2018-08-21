@@ -19,7 +19,7 @@ class PodSpec(object):
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_podspec
     """
 
-    VALID_DNS_POLICIES = ['ClusterFirst', 'Default']
+    VALID_DNS_POLICIES = ['ClusterFirst', 'ClusterFirstWithHostNet', 'Default', 'None']
     VALID_RESTART_POLICIES = ['Always', 'OnFailure', 'Never']
 
     def __init__(self, model=None):
