@@ -39,7 +39,7 @@ setup(
     ],
     install_requires=[
         'six>=1.10.0',
-        'PyYAML==3.11',
+        'PyYAML==3.13',
         'requests>=2.10.0',
         'uuid==1.30',
         'python-dateutil>=2.6.0'
