@@ -183,7 +183,7 @@ class K8sConfig(object):
         self.current_context_dict = [context['context']
                                      for context in self.contexts
                                      if context['name'] == self.current_context][0]
-        self.preferences = dotconf['preferences']
+        self.preferences = dotconf.get('preferences', '')
         self.users = dotconf['users']
         self.version = dotconf['apiVersion']
 
