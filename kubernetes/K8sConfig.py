@@ -177,15 +177,15 @@ class K8sConfig(object):
         except YAMLError as err:
             raise SyntaxError('K8sConfig: kubeconfig: [ {0} ] is not a valid YAML file: {1}'.format(filename, err))
 
-        self.clusters = dotconf['clusters']
-        self.contexts = dotconf['contexts']
-        self.current_context = dotconf['current-context']
-        self.current_context_dict = [context['context']
+        self.clusters = dotconf.get('clusters')
+        self.contexts = dotconf.get('contexts')
+        self.current_context = dotconf.get('current-context')
+        self.current_context_dict = [context.get('context')
                                      for context in self.contexts
-                                     if context['name'] == self.current_context][0]
+                                     if context.get('name') == self.current_context][0]
         self.preferences = dotconf.get('preferences', '')
-        self.users = dotconf['users']
-        self.version = dotconf['apiVersion']
+        self.users = dotconf.get('users')
+        self.version = dotconf.get('apiVersion')
 
         if self.clusters:
             for cluster in self.clusters:
