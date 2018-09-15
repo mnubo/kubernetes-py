@@ -760,7 +760,7 @@ class K8sServiceTest(BaseTest):
             port=8082,
             target_port="feport",
             node_port=8082,
-            protocol='tcp'
+            protocol='TCP'
         )
 
         self.assertEqual(1, len(k8s_service.ports))
