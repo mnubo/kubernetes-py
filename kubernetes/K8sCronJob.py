@@ -13,7 +13,7 @@ from kubernetes.K8sExceptions import CronJobAlreadyRunningException, CronJobRunE
 from kubernetes.K8sObject import K8sObject
 from kubernetes.K8sPod import K8sPod
 from kubernetes.K8sVolume import K8sVolume
-from kubernetes.models.v2alpha1.CronJob import CronJob
+from kubernetes.models.v1beta1.CronJob import CronJob
 from kubernetes.utils import is_valid_list, is_reachable, sanitize_version_number
 
 

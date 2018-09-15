@@ -18,7 +18,7 @@ class BaseUrls(object):
     default_autoscaling_version = 'v1'
     default_batch_version = 'v1'
     default_extensions_version = 'v1beta1'
-    default_cron_version = 'v2alpha1'
+    default_cron_version = 'v1beta1'
 
     def __init__(self, namespace='default', api=None, apps=None, autoscaling=None, extensions=None, batch=None, cron=None):
 
