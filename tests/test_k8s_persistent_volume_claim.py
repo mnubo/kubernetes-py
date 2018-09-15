@@ -10,7 +10,7 @@ import uuid
 
 from tests import _utils
 from tests.BaseTest import BaseTest
-from kubernetes.K8sExceptions import TimedOutException
+from kubernetes.K8sExceptions import TimedOutException, NotFoundException
 from kubernetes.K8sPersistentVolume import K8sPersistentVolume
 from kubernetes.K8sPersistentVolumeClaim import K8sPersistentVolumeClaim
 from kubernetes.K8sPod import K8sPod
