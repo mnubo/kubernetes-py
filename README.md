@@ -1,5 +1,8 @@
 # kubernetes-py
 
+[![pypi](http://img.shields.io/pypi/v/kubernetes-py.png)](https://pypi.python.org/pypi/kubernetes-py)
+[![Supported Python Versions](https://img.shields.io/pypi/pyversions/kubernetes-py.svg)](https://pypi.python.org/pypi/kubernetes-py/)
+[![License](https://img.shields.io/pypi/l/kubernetes-py.svg)](https://pypi.python.org/pypi/kubernetes-py/)
 [![Build Status](https://travis-ci.org/mnubo/kubernetes-py.svg?branch=master)](https://travis-ci.org/mnubo/kubernetes-py)
 [![Coverage Status](https://coveralls.io/repos/github/mnubo/kubernetes-py/badge.svg?branch=master)](https://coveralls.io/github/mnubo/kubernetes-py?branch=master)
 
