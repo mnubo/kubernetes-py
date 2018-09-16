@@ -96,7 +96,7 @@ class K8sCronJobTests(BaseTest):
 
     def test_api_create(self):
         name = "job-{}".format(uuid.uuid4())
-        job = CronJob(_constants.scheduledjob())
+        job = CronJob(_constants.cronjob())
         k8s_cronjob = _utils.create_cronjob(name=name)
         k8s_cronjob.model = job
         if _utils.is_reachable(k8s_cronjob.config):
@@ -105,7 +105,7 @@ class K8sCronJobTests(BaseTest):
 
     def test_api_create_long_running_with_concurrency(self):
         name = "job-{}".format(uuid.uuid4())
-        job = CronJob(_constants.scheduledjob_90())
+        job = CronJob(_constants.cronjob_90())
 
         k8s_cronjob = _utils.create_cronjob(name=name)
         k8s_cronjob.model = job
@@ -118,7 +118,7 @@ class K8sCronJobTests(BaseTest):
 
     def test_api_create_long_running_no_concurrency(self):
         name = "job-{}".format(uuid.uuid4())
-        job = CronJob(_constants.scheduledjob_90())
+        job = CronJob(_constants.cronjob_90())
 
         k8s_cronjob = _utils.create_cronjob(name=name)
         k8s_cronjob.model = job
@@ -135,7 +135,7 @@ class K8sCronJobTests(BaseTest):
 
     def test_list(self):
         name = "job-{}".format(uuid.uuid4())
-        job = CronJob(_constants.scheduledjob_90())
+        job = CronJob(_constants.cronjob_90())
 
         k8s_cronjob = _utils.create_cronjob(name=name)
         k8s_cronjob.model = job
@@ -152,7 +152,7 @@ class K8sCronJobTests(BaseTest):
 
     def test_last_schedule_time(self):
         name = "job-{}".format(uuid.uuid4())
-        job = CronJob(_constants.scheduledjob_90())
+        job = CronJob(_constants.cronjob_90())
 
         k8s_cronjob = _utils.create_cronjob(name=name)
         k8s_cronjob.model = job
@@ -172,7 +172,7 @@ class K8sCronJobTests(BaseTest):
 
     def test_pod(self):
         name = "job-{}".format(uuid.uuid4())
-        model = CronJob(_constants.scheduledjob_90())
+        model = CronJob(_constants.cronjob_90())
 
         cj = _utils.create_cronjob(name=name)
         cj.model = model
@@ -191,7 +191,7 @@ class K8sCronJobTests(BaseTest):
 
     def test_run_already_running(self):
         name = "job-{}".format(uuid.uuid4())
-        model = CronJob(_constants.scheduledjob_90())
+        model = CronJob(_constants.cronjob_90())
 
         cj = _utils.create_cronjob(name=name)
         cj.model = model
@@ -208,7 +208,7 @@ class K8sCronJobTests(BaseTest):
 
     def test_run(self):
         name = "job-{}".format(uuid.uuid4())
-        model = CronJob(_constants.scheduledjob_90())
+        model = CronJob(_constants.cronjob_90())
 
         cj = _utils.create_cronjob(name=name)
         cj.model = model

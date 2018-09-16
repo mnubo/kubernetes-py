@@ -63,16 +63,18 @@ class Service(BaseModel):
         if port is None or not (isinstance(port, str) or isinstance(port, int)):
             raise SyntaxError('Service.add_port() port: [ {} ] is invalid.'.format(name))
         ports = []
+        port_found = False
         # exists previously
         for p in self.spec.ports:
-            if int(p.port) == int(port):
+            if int(p.port) == int(port) and p.protocol == protocol:
                 p.name = name
                 p.target_port = target_port
-                p.protocol = protocol
+                p.protocol = str(protocol).upper()
                 p.node_port = node_port
+                port_found = True
             ports.append(p)
         # doesn't exist yet
-        if int(port) not in [int(x.port) for x in ports]:
+        if not port_found:
             p = ServicePort()
             p.name = name
             p.port = port

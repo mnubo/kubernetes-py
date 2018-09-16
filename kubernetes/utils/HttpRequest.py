@@ -5,13 +5,18 @@
 # This file is subject to the terms and conditions defined in
 # file 'LICENSE.md', which is part of this source code package.
 #
+import re
 import base64
 import json
 import os
 import tempfile
 import requests
+import urllib3
 from kubernetes.utils.ConvertData import convert
 from six.moves.urllib.parse import urlencode
+
+RE_VALID_SSL_IP = re.compile(
+    r'^https://(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])')
 
 
 class HttpRequest:
@@ -56,6 +61,13 @@ class HttpRequest:
             temp.close()
             verify = temp.name
 
+        # TODO: TLS issue with Python 2.7 and urllib3 when hostname is an IP address
+        # A better fix should be found but I can't think of anything else for now.
+        search_result = RE_VALID_SSL_IP.search(self.http_host)
+        if search_result:
+            verify = False
+            urllib3.disable_warnings()
+
         try:
 
             response = requests.request(
@@ -82,8 +94,8 @@ class HttpRequest:
         if len(resp_data) > 0:
             try:
                 state['data'] = convert(data=json.loads(resp_data))
-            except ValueError:
-                state['data'] = resp_data.strip()
+            except Exception:
+                state['data'] = resp_data
 
         if 200 <= state['status'] <= 299:
             state['success'] = True

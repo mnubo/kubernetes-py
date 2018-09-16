@@ -6,6 +6,7 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
+import time
 import uuid
 
 from kubernetes.K8sConfig import K8sConfig
@@ -463,14 +464,22 @@ class K8sDeploymentTests(BaseTest):
             self.assertEqual(1, dep.revision)
             dep.add_container(c_nginx)
             dep.update()
+            time.sleep(5)
+            dep.get()
             self.assertEqual(2, dep.revision)
             dep.add_container(c_postgres)
             dep.update()
+            time.sleep(5)
+            dep.get()
             self.assertEqual(3, dep.revision)
             dep.rollback(revision=1)
+            time.sleep(5)
+            dep.get()
             self.assertEqual(4, dep.revision)
             dep.add_container(c_nginx)
             dep.update()
+            time.sleep(5)
+            dep.get()
             self.assertEqual(5, dep.revision)
 
     # ---------------------------------------------------------------------------------- replicaset creationTimestamp

@@ -295,7 +295,7 @@ def cronjob():
     """
 
     return {
-        "apiVersion": "batch/v2alpha1",
+        "apiVersion": "batch/v1beta1",
         "kind": "CronJob",
         "metadata": {
             "name": "hello"
@@ -326,6 +326,46 @@ def cronjob():
     }
 
 
+def cronjob_90():
+    """
+    http://kubernetes.io/docs/user-guide/cron-jobs/#creating-a-cron-job
+
+    Note:: ScheduledJob resource was introduced in Kubernetes version 1.4,
+    but starting from version 1.5 its current name is CronJob.
+    """
+
+    return {
+        "apiVersion": "batch/v1beta1",
+        "kind": "CronJob",
+        "metadata": {
+            "name": "hello"
+        },
+        "spec": {
+            "schedule": "*/1 * * * *",
+            "jobTemplate": {
+                "spec": {
+                    "template": {
+                        "spec": {
+                            "containers": [
+                                {
+                                    "name": "hello",
+                                    "image": "busybox",
+                                    "args": [
+                                        "/bin/sh",
+                                        "-c",
+                                        "date; echo Sleeping; sleep 90"
+                                    ]
+                                }
+                            ],
+                            "restartPolicy": "OnFailure"
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
 def cronjob_exit_1():
     """
     Simulates a constantly crashing CronJob
@@ -333,7 +373,7 @@ def cronjob_exit_1():
     """
 
     return {
-        "apiVersion": "batch/v2alpha1",
+        "apiVersion": "batch/v1beta1",
         "kind": "CronJob",
         "metadata": {
             "name": "jerome"
