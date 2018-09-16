@@ -8,7 +8,7 @@
 
 Kubernetes API bindings in Python.
 
-Run on our own on-prem and AWS Kubernetes clusters at `1.10.3`
+Run on our own on-prem and AWS Kubernetes clusters at `1.10.5`
 
 Also unit tested on :
 * Minikube at `1.10.0`
@@ -41,6 +41,13 @@ Currently supported Kubernetes objects:
 * VolumeMount
 
 
+## Installation
+
+For a normal installation, simply run the following command.
+```
+pip install kubernetes-py
+```
+
 ## Usage
 
 Find some code snippets below to help understand how to use this module.
@@ -48,8 +55,9 @@ Find some code snippets below to help understand how to use this module.
 
 ### Configuration
 
-By default, the module attempts to load existing configuration from `~/.kube/config`. You are welcome to specify
-another location if you so choose. 
+By default, the module attempts to load existing configuration from `~/.kube/config` or from a kubeconfig using 
+the `KUBECONFIG` environment variable. It can also initialize automatically with `in-cluster` configurations.
+You are welcome to specify another location if you so choose. 
 
 Otherwise, individual configuration parameters can be overridden piecemeal. In this case you must 
 specify `kubeconfig=None` when initializing a K8sConfig object; the `~/kube/.config` file 
