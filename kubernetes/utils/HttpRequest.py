@@ -89,7 +89,13 @@ class HttpRequest:
 
         state['status'] = response.status_code
         state['reason'] = response.reason
-        resp_data = response.content.decode()
+
+        # There was an issue with "kubectl logs" type requests where returned content is "text/plain" and
+        # we do have characters of unknown origin.
+        try:
+            resp_data = response.content.decode('utf-8')
+        except UnicodeDecodeError:
+            resp_data = response.content
 
         if len(resp_data) > 0:
             try:
