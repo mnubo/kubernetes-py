@@ -8,8 +8,8 @@
 
 import uuid
 
-from kubernetes import K8sObject, K8sConfig
-from kubernetes.K8sExceptions import (
+from kubernetes_py import K8sObject, K8sConfig
+from kubernetes_py.K8sExceptions import (
     UnprocessableEntityException, NotFoundException,
     InvalidObjectException
 )

@@ -8,10 +8,19 @@
 
 Kubernetes API bindings in Python.
 
+```
+**************************************** WARNING **************************************** 
+
+The package has been renamed to kubernetes_py in version 1.10.7.1. Please update your 
+code accordingly. This was based on a request backed by several users.
+
+*****************************************************************************************
+```
+
 Run on our own on-prem and AWS Kubernetes clusters at `1.10.5`
 
 Also unit tested on :
-* Minikube at `1.10.0`
+* Minikube at `1.10.7`
 * Google GKE clusters at `1.6.4`
 
 Currently supported Kubernetes objects:
@@ -63,7 +72,7 @@ Otherwise, individual configuration parameters can be overridden piecemeal. In t
 specify `kubeconfig=None` when initializing a K8sConfig object; the `~/kube/.config` file 
 takes precedence if it exists.
     
-    from kubernetes import K8sConfig
+    from kubernetes_py import K8sConfig
     
     # Defaults found in ~/.kube/config
     cfg_default = K8sConfig()
@@ -99,7 +108,7 @@ This module assumes the default container runtime.
 
 ##### Defining a container:
 
-    from kubernetes import K8sContainer
+    from kubernetes_py import K8sContainer
     
     container = K8sContainer(name='redis', image='redis:3.0.7')
     container.add_port(
@@ -113,7 +122,7 @@ This module assumes the default container runtime.
 
 ##### Creating a CronJob
 
-    from kubernetes import K8sCronJob
+    from kubernetes_py import K8sCronJob
     
     cj = K8sCronJob(
         config=cfg_cert,
@@ -126,7 +135,7 @@ This module assumes the default container runtime.
 
 ##### Updating a CronJob
 
-    from kubernetes import K8sCronJob
+    from kubernetes_py import K8sCronJob
     
     cj = K8sCronJob(config=cfg_cert, name='my-cronjob').get()
     cj.suspend = True
@@ -134,7 +143,7 @@ This module assumes the default container runtime.
     
 ##### Deleting a CronJob
 
-    from kubernetes import K8sCronJob
+    from kubernetes_py import K8sCronJob
     
     cj = K8sCronJob(config=cfg_cert, name='my-cronjob').get()
     cj.delete()
@@ -144,7 +153,7 @@ This module assumes the default container runtime.
 
 ##### Creating a Deployment:
 
-    from kubernetes import K8sDeployment
+    from kubernetes_py import K8sDeployment
     
     deployment = K8sDeployment(
         config=cfg_cert, 
@@ -156,7 +165,7 @@ This module assumes the default container runtime.
 
 ##### Fetching a Deployment:
 
-    from kubernetes import K8sDeployment
+    from kubernetes_py import K8sDeployment
     
     deployment = K8sDeployment(config=cfg_cert, name='my-deployment')
     deployment.get()
@@ -164,7 +173,7 @@ This module assumes the default container runtime.
 
 ##### Fetching all available Deployments:
 
-    from kubernetes import K8sDeployment
+    from kubernetes_py import K8sDeployment
     
     deployment = K8sDeployment(config=cfg_cert, name='my-deployment')
     deployment.list()
@@ -172,7 +181,7 @@ This module assumes the default container runtime.
 
 ##### Updating a Deployment:
 
-    from kubernetes import K8sDeployment, K8sContainer
+    from kubernetes_py import K8sDeployment, K8sContainer
     
     deployment = K8sDeployment(config=cfg_cert, name='my-deployment')
     container = K8sContainer(name='nginx', image='nginx:1.7.9')
@@ -184,7 +193,7 @@ This module assumes the default container runtime.
 
 ##### Scaling a Deployment:
 
-    from kubernetes import K8sDeployment, K8sContainer
+    from kubernetes_py import K8sDeployment, K8sContainer
     
     deployment = K8sDeployment(config=cfg_cert, name='my-deployment')
     container = K8sContainer(name='nginx', image='nginx:1.7.9')
@@ -196,7 +205,7 @@ This module assumes the default container runtime.
 
 ##### Deleting a Deployment:
 
-    from kubernetes import K8sDeployment
+    from kubernetes_py import K8sDeployment
     
     deployment = K8sDeployment(config=cfg_cert, name='my-deployment')
     deployment.delete()    
@@ -206,7 +215,7 @@ This module assumes the default container runtime.
 
 ##### Creating a Job
 
-    from kubernetes import K8sJob
+    from kubernetes_py import K8sJob
     
     job = K8sJob(config=cfg_cert, name='my-job')
     job.parallelism = 10
@@ -215,7 +224,7 @@ This module assumes the default container runtime.
     
 ##### Updating a Job
 
-    from kubernetes import K8sJob
+    from kubernetes_py import K8sJob
     
     job = K8sJob(config=cfg_cert, name='my-job').get()
     job.parallelism = 5
@@ -223,7 +232,7 @@ This module assumes the default container runtime.
     
 ##### Deleting a Job
 
-    from kubernetes import K8sJob
+    from kubernetes_py import K8sJob
     
     job = K8sJob(config=cfg_cert, name='my-job').get()
     job.delete()
@@ -233,7 +242,7 @@ This module assumes the default container runtime.
 
 ##### Creating an AWS EBS Persistent Volume:
 
-    from kubernetes import K8sPersistentVolume
+    from kubernetes_py import K8sPersistentVolume
     
     pv_aws = K8sPersistentVolume(
         config=cfg_cert, 
@@ -254,7 +263,7 @@ Pod creation will timeout waiting for readiness if not on AWS; unschedulable.
 
 ##### Creating a GCE PD Persistent Volume
 
-    from kubernetes import K8sPersistentVolume
+    from kubernetes_py import K8sPersistentVolume
     
     pv_gce = K8sPersistentVolume(
         config=cfg_cert, 
@@ -274,7 +283,7 @@ Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
 
 ##### Creating an NFS Persistent Volume
 
-    from kubernetes import K8sPersistentVolume
+    from kubernetes_py import K8sPersistentVolume
     
     pv = K8sPersistentVolume(
         config=cfg_cert,
@@ -291,11 +300,11 @@ Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
 
 ##### Creating and Mounting a PersistentVolumeClaim
 
-    from kubernetes import K8sContainer
-    from kubernetes import K8sPersistentVolumeClaim
-    from kubernetes import K8sPod
-    from kubernetes import K8sVolume
-    from kubernetes import K8sVolumeMount
+    from kubernetes_py import K8sContainer
+    from kubernetes_py import K8sPersistentVolumeClaim
+    from kubernetes_py import K8sPod
+    from kubernetes_py import K8sVolume
+    from kubernetes_py import K8sVolumeMount
     
     container = K8sContainer(name='nginx', image='nginx:1.9.1')
     
@@ -332,7 +341,7 @@ Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
 
 ##### Creating a Pod:
 
-    from kubernetes import K8sPod
+    from kubernetes_py import K8sPod
     
     pod = K8sPod(config=cfg_basic, name='redis')
     pod.add_container(container)
@@ -340,21 +349,21 @@ Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
     
 ##### Fetching a Pod:
 
-    from kubernetes import K8sPod
+    from kubernetes_py import K8sPod
     
     pod = K8sPod(config=cfg_token, name='redis')
     pod.get()
     
 ##### Fetching all available Pods:
 
-    from kubernetes import K8sPod
+    from kubernetes_py import K8sPod
     
     pod = K8sPod(config=cfg_token, name='redis')
     pod.list()
 
 ##### Deleting a Pod:
 
-    from kubernetes import K8sPod
+    from kubernetes_py import K8sPod
     
     pod = K8sPod(config=cfg_cert, name='redis')
     pod.delete()
@@ -363,7 +372,7 @@ Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
 
 ##### Creating a ReplicationController:
 
-    from kubernetes import K8sReplicationController
+    from kubernetes_py import K8sReplicationController
     
     rc = K8sReplicationController(
         config=cfg_cert, 
@@ -375,21 +384,21 @@ Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
 
 ##### Fetching a ReplicationController:
 
-    from kubernetes import K8sReplicationController
+    from kubernetes_py import K8sReplicationController
     
     rc = K8sReplicationController(config=cfg_cert, name='redis')
     rc.get()
     
 ##### Fetching all available ReplicationControllers:
 
-    from kubernetes import K8sReplicationController
+    from kubernetes_py import K8sReplicationController
     
     rc = K8sReplicationController(config=cfg_cert, name='redis')
     rc.list()    
 
 ##### Deleting a ReplicationController:
 
-    from kubernetes import K8sReplicationController
+    from kubernetes_py import K8sReplicationController
     
     rc = K8sReplicationController(config=cfg_cert, name='redis')
     rc.delete()
@@ -398,7 +407,7 @@ Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
 
 ##### Creating a service:
 
-    from kubernetes import K8sService
+    from kubernetes_py import K8sService
     
     svc = K8sService(config=cfg_cert, name='redis')
     svc.add_port(name='redisport', port=31010, target_port='redisport')
@@ -408,14 +417,14 @@ Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
 
 ##### Fetching a service:
 
-    from kubernetes import K8sService
+    from kubernetes_py import K8sService
 
     svc = K8sService(config=cfg_cert, name='redis')
     svc.get()
 
 ##### Deleting a service:
 
-    from kubernetes import K8sService
+    from kubernetes_py import K8sService
     
     svc = K8sService(config=cfg_cert, name='redis')
     svc.delete()
@@ -424,7 +433,7 @@ Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
 
 ##### Creating a secret:
 
-    from kubernetes import K8sSecret
+    from kubernetes_py import K8sSecret
     
     data = { "auths": {
                 "repo:port": {
@@ -438,14 +447,14 @@ Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
         
 ##### Fetching a secret:
 
-    from kubernetes import K8sSecret
+    from kubernetes_py import K8sSecret
 
     secret = K8sSecret(config=cfg_cert, name='my-registry')
     secret.get()
 
 ##### Deleting a secret:
 
-    from kubernetes import K8sSecret
+    from kubernetes_py import K8sSecret
     
     secret = K8sSecret(config=cfg_cert, name='my-registry')
     secret.delete()
@@ -454,7 +463,7 @@ Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
 
 ##### Mounting an AWS EBS volume inside a Pod:
     
-    from kubernetes import K8sVolume
+    from kubernetes_py import K8sVolume
     
     volume = K8sVolume(
         config=cfg_cert,
@@ -478,7 +487,7 @@ It is recommended to begin testing things out against `minikube`. However, be aw
 that minikube does not support the entire feature set of a full Kubernetes install.
 
 ```
-$ nosetests --with-coverage --cover-package=kubernetes
+$ nosetests --with-coverage --cover-package=kubernetes_py
 ```
 
 Please note that when using minikube, and Kubernetes in general, the default hosts are as below:

@@ -10,19 +10,19 @@ import uuid
 
 from tests import _utils
 from tests.BaseTest import BaseTest
-from kubernetes.K8sExceptions import TimedOutException
-from kubernetes.K8sPod import K8sPod
-from kubernetes.K8sReplicationController import K8sReplicationController
-from kubernetes.K8sVolume import K8sVolume
-from kubernetes.K8sVolumeMount import K8sVolumeMount
-from kubernetes.models.v1.AWSElasticBlockStoreVolumeSource import AWSElasticBlockStoreVolumeSource
-from kubernetes.models.v1.EmptyDirVolumeSource import EmptyDirVolumeSource
-from kubernetes.models.v1.GCEPersistentDiskVolumeSource import GCEPersistentDiskVolumeSource
-from kubernetes.models.v1.GitRepoVolumeSource import GitRepoVolumeSource
-from kubernetes.models.v1.HostPathVolumeSource import HostPathVolumeSource
-from kubernetes.models.v1.NFSVolumeSource import NFSVolumeSource
-from kubernetes.models.v1.SecretVolumeSource import SecretVolumeSource
-from kubernetes.models.v1.ConfigMapVolumeSource import ConfigMapVolumeSource
+from kubernetes_py.K8sExceptions import TimedOutException
+from kubernetes_py.K8sPod import K8sPod
+from kubernetes_py.K8sReplicationController import K8sReplicationController
+from kubernetes_py.K8sVolume import K8sVolume
+from kubernetes_py.K8sVolumeMount import K8sVolumeMount
+from kubernetes_py.models.v1.AWSElasticBlockStoreVolumeSource import AWSElasticBlockStoreVolumeSource
+from kubernetes_py.models.v1.EmptyDirVolumeSource import EmptyDirVolumeSource
+from kubernetes_py.models.v1.GCEPersistentDiskVolumeSource import GCEPersistentDiskVolumeSource
+from kubernetes_py.models.v1.GitRepoVolumeSource import GitRepoVolumeSource
+from kubernetes_py.models.v1.HostPathVolumeSource import HostPathVolumeSource
+from kubernetes_py.models.v1.NFSVolumeSource import NFSVolumeSource
+from kubernetes_py.models.v1.SecretVolumeSource import SecretVolumeSource
+from kubernetes_py.models.v1.ConfigMapVolumeSource import ConfigMapVolumeSource
 
 
 class K8sVolumeTest(BaseTest):
@@ -584,7 +584,7 @@ class K8sVolumeTest(BaseTest):
         container_image = "nginx:1.7.9"
         container = _utils.create_container(name=container_name, image=container_image)
 
-        pd_name = "kubernetes-py-test-pd"
+        pd_name = "kubernetes_py-py-test-pd"
         vol_name = "persistent"
         vol_type = "gcePersistentDisk"
         volume = _utils.create_volume(name=vol_name, type=vol_type)

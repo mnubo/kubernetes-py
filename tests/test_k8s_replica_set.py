@@ -10,7 +10,7 @@ import uuid
 
 from tests import _utils
 from tests.BaseTest import BaseTest
-from kubernetes.K8sExceptions import *
+from kubernetes_py.K8sExceptions import *
 
 
 class K8sReplicaSetTests(BaseTest):

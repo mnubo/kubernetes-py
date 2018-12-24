@@ -10,11 +10,11 @@ import json
 
 import yaml
 
-from kubernetes.K8sContainer import K8sContainer
-from kubernetes.K8sVolumeMount import K8sVolumeMount
-from kubernetes.models.v1.Capabilities import Capabilities
-from kubernetes.models.v1.Container import Container
-from kubernetes.models.v1.Probe import Probe
+from kubernetes_py.K8sContainer import K8sContainer
+from kubernetes_py.K8sVolumeMount import K8sVolumeMount
+from kubernetes_py.models.v1.Capabilities import Capabilities
+from kubernetes_py.models.v1.Container import Container
+from kubernetes_py.models.v1.Probe import Probe
 from tests import _constants
 from tests import _utils
 from tests.BaseTest import BaseTest

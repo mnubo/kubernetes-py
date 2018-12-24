@@ -8,15 +8,15 @@
 
 import uuid
 
-from kubernetes.K8sConfig import K8sConfig
-from kubernetes.K8sContainer import K8sContainer
-from kubernetes.K8sExceptions import *
-from kubernetes.K8sNode import K8sNode
-from kubernetes.K8sPod import K8sPod
-from kubernetes.models.v1.ObjectMeta import ObjectMeta
-from kubernetes.models.v1.Pod import Pod
-from kubernetes.models.v1.PodSpec import PodSpec
-from kubernetes.models.v1.PodStatus import PodStatus
+from kubernetes_py.K8sConfig import K8sConfig
+from kubernetes_py.K8sContainer import K8sContainer
+from kubernetes_py.K8sExceptions import *
+from kubernetes_py.K8sNode import K8sNode
+from kubernetes_py.K8sPod import K8sPod
+from kubernetes_py.models.v1.ObjectMeta import ObjectMeta
+from kubernetes_py.models.v1.Pod import Pod
+from kubernetes_py.models.v1.PodSpec import PodSpec
+from kubernetes_py.models.v1.PodStatus import PodStatus
 from tests import _utils, _constants
 from tests.BaseTest import BaseTest
 

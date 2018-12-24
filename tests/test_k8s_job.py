@@ -8,12 +8,12 @@
 
 import uuid
 
-from kubernetes.K8sJob import K8sJob
-from kubernetes.K8sObject import K8sObject
-from kubernetes.models.v1.Job import Job
-from kubernetes.models.v1.JobSpec import JobSpec
-from kubernetes.models.v1.JobStatus import JobStatus
-from kubernetes.models.v1.ObjectMeta import ObjectMeta
+from kubernetes_py.K8sJob import K8sJob
+from kubernetes_py.K8sObject import K8sObject
+from kubernetes_py.models.v1.Job import Job
+from kubernetes_py.models.v1.JobSpec import JobSpec
+from kubernetes_py.models.v1.JobStatus import JobStatus
+from kubernetes_py.models.v1.ObjectMeta import ObjectMeta
 from tests import _constants
 from tests import _utils
 from tests.BaseTest import BaseTest

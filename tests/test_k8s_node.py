@@ -9,13 +9,13 @@
 import re
 import uuid
 
-from kubernetes import K8sNode, K8sConfig
-from kubernetes.K8sExceptions import *
-from kubernetes.K8sPod import K8sPod
-from kubernetes.models.v1.Node import Node
-from kubernetes.models.v1.NodeSpec import NodeSpec
-from kubernetes.models.v1.NodeStatus import NodeStatus
-from kubernetes.models.v1.ObjectMeta import ObjectMeta
+from kubernetes_py import K8sNode, K8sConfig
+from kubernetes_py.K8sExceptions import *
+from kubernetes_py.K8sPod import K8sPod
+from kubernetes_py.models.v1.Node import Node
+from kubernetes_py.models.v1.NodeSpec import NodeSpec
+from kubernetes_py.models.v1.NodeStatus import NodeStatus
+from kubernetes_py.models.v1.ObjectMeta import ObjectMeta
 from tests import _utils
 from tests.BaseTest import BaseTest
 

@@ -8,8 +8,8 @@
 
 from tests import _utils
 from tests.BaseTest import BaseTest
-from kubernetes.K8sStorageClass import K8sStorageClass
-from kubernetes.models.v1beta1.StorageClass import StorageClass
+from kubernetes_py.K8sStorageClass import K8sStorageClass
+from kubernetes_py.models.v1beta1.StorageClass import StorageClass
 
 
 class K8sStorageClassTests(BaseTest):

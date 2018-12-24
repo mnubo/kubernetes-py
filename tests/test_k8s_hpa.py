@@ -9,10 +9,10 @@
 import time
 import json
 
-from kubernetes.K8sHorizontalPodAutoscaler import K8sHorizontalPodAutoscaler
-from kubernetes.models.v1.HorizontalPodAutoscaler import HorizontalPodAutoscaler
-from kubernetes.models.v1.Service import Service
-from kubernetes.models.v1beta1.Deployment import Deployment
+from kubernetes_py.K8sHorizontalPodAutoscaler import K8sHorizontalPodAutoscaler
+from kubernetes_py.models.v1.HorizontalPodAutoscaler import HorizontalPodAutoscaler
+from kubernetes_py.models.v1.Service import Service
+from kubernetes_py.models.v1beta1.Deployment import Deployment
 from tests import _constants
 from tests import _utils
 from tests.BaseTest import BaseTest
@@ -81,7 +81,7 @@ class K8sHorizontalPodAutoscalerTests(BaseTest):
     def test_hpa_walkthrough(self):
         """
         https://kubernetes.io/docs/user-guide/horizontal-pod-autoscaling/walkthrough/
-        https://github.com/kubernetes/community/blob/master/contributors/design-proposals/horizontal-pod-autoscaler.md
+        https://github.com/kubernetes_py/community/blob/master/contributors/design-proposals/horizontal-pod-autoscaler.md
         """
 
         n = "php-apache"

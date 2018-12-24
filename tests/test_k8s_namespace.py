@@ -8,12 +8,12 @@
 
 import uuid
 
-from kubernetes import K8sNamespace, K8sConfig
-from kubernetes.K8sExceptions import *
-from kubernetes.models.v1.Namespace import Namespace
-from kubernetes.models.v1.NamespaceSpec import NamespaceSpec
-from kubernetes.models.v1.NamespaceStatus import NamespaceStatus
-from kubernetes.models.v1.ObjectMeta import ObjectMeta
+from kubernetes_py import K8sNamespace, K8sConfig
+from kubernetes_py.K8sExceptions import *
+from kubernetes_py.models.v1.Namespace import Namespace
+from kubernetes_py.models.v1.NamespaceSpec import NamespaceSpec
+from kubernetes_py.models.v1.NamespaceStatus import NamespaceStatus
+from kubernetes_py.models.v1.ObjectMeta import ObjectMeta
 from tests import _utils
 from tests.BaseTest import BaseTest
 

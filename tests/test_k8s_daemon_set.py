@@ -6,8 +6,8 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.K8sDaemonSet import K8sDaemonSet
-from kubernetes.models.v1beta1.DaemonSet import DaemonSet
+from kubernetes_py.K8sDaemonSet import K8sDaemonSet
+from kubernetes_py.models.v1beta1.DaemonSet import DaemonSet
 from tests import _constants
 from tests import _utils
 from tests.BaseTest import BaseTest

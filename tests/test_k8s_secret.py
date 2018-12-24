@@ -11,9 +11,9 @@ import uuid
 
 from tests import _utils
 from tests.BaseTest import BaseTest
-from kubernetes import K8sSecret, K8sConfig
-from kubernetes.K8sExceptions import *
-from kubernetes.models.v1.Secret import Secret
+from kubernetes_py import K8sSecret, K8sConfig
+from kubernetes_py.K8sExceptions import *
+from kubernetes_py.models.v1.Secret import Secret
 
 
 class K8sSecretTest(BaseTest):
@@ -281,11 +281,11 @@ class K8sSecretTest(BaseTest):
         self.assertEqual('kubernetes.io/service-account-token', secret.type)
 
         self.assertIn('ca.crt', secret.data)
-        self.assertIn('kubernetes.kubeconfig', secret.data)
+        self.assertIn('kubernetes_py.kubeconfig', secret.data)
         self.assertIn('token', secret.data)
 
         self.assertEqual(cacert, secret.data['ca.crt'])
-        self.assertEqual(kubecfg_data, secret.data['kubernetes.kubeconfig'])
+        self.assertEqual(kubecfg_data, secret.data['kubernetes_py.kubeconfig'])
         self.assertEqual(token, secret.data['token'])
 
         self.assertIn('kubernetes.io/service-account.name', secret.annotations)

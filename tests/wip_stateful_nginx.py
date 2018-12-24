@@ -8,10 +8,10 @@
 
 from tests import _utils
 from tests.BaseTest import BaseTest
-from kubernetes.K8sService import K8sService
-from kubernetes.K8sStatefulSet import K8sStatefulSet
-from kubernetes.models.v1.Service import Service
-from kubernetes.models.v1beta1.StatefulSet import StatefulSet
+from kubernetes_py.K8sService import K8sService
+from kubernetes_py.K8sStatefulSet import K8sStatefulSet
+from kubernetes_py.models.v1.Service import Service
+from kubernetes_py.models.v1beta1.StatefulSet import StatefulSet
 
 
 class StatefulSetNginxTests(BaseTest):
