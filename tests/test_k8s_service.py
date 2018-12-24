@@ -11,12 +11,12 @@ import uuid
 
 from tests import _utils
 from tests.BaseTest import BaseTest
-from kubernetes import K8sService, K8sConfig
-from kubernetes.K8sExceptions import *
-from kubernetes.models.v1.ObjectMeta import ObjectMeta
-from kubernetes.models.v1.Service import Service
-from kubernetes.models.v1.ServiceSpec import ServiceSpec
-from kubernetes.models.v1.ServiceStatus import ServiceStatus
+from kubernetes_py import K8sService, K8sConfig
+from kubernetes_py.K8sExceptions import *
+from kubernetes_py.models.v1.ObjectMeta import ObjectMeta
+from kubernetes_py.models.v1.Service import Service
+from kubernetes_py.models.v1.ServiceSpec import ServiceSpec
+from kubernetes_py.models.v1.ServiceStatus import ServiceStatus
 
 
 class K8sServiceTest(BaseTest):

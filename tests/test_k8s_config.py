@@ -6,7 +6,7 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes import K8sConfig, K8sCronJob
+from kubernetes_py import K8sConfig, K8sCronJob
 from tests import _utils
 from tests.BaseTest import BaseTest
 

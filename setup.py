@@ -26,16 +26,16 @@ setup(
     author_email='it-admin@mnubo.com',
     url='https://github.com/mnubo/kubernetes-py',
     download_url='https://github.com/mnubo/kubernetes-py/tarball/' + version(),
-    keywords=['kubernetes', 'k8s'],
+    keywords=['kubernetes_py', 'k8s', 'kubernetes'],
     packages=[
-        'kubernetes',
-        'kubernetes.models',
-        'kubernetes.models.unversioned',
-        'kubernetes.models.v1',
-        'kubernetes.models.v1alpha1',
-        'kubernetes.models.v1beta1',
-        'kubernetes.models.v2alpha1',
-        'kubernetes.utils'
+        'kubernetes_py',
+        'kubernetes_py.models',
+        'kubernetes_py.models.unversioned',
+        'kubernetes_py.models.v1',
+        'kubernetes_py.models.v1alpha1',
+        'kubernetes_py.models.v1beta1',
+        'kubernetes_py.models.v2alpha1',
+        'kubernetes_py.utils'
     ],
     install_requires=[
         'six>=1.10.0',

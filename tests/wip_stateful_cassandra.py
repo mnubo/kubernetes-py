@@ -8,16 +8,16 @@
 
 from tests import _utils
 from tests.BaseTest import BaseTest
-from kubernetes.K8sReplicationController import K8sReplicationController
-from kubernetes.K8sService import K8sService
-from kubernetes.models.v1.ReplicationController import ReplicationController
-from kubernetes.models.v1.Service import Service
-from kubernetes.models.v1beta1.DaemonSet import DaemonSet
+from kubernetes_py.K8sReplicationController import K8sReplicationController
+from kubernetes_py.K8sService import K8sService
+from kubernetes_py.models.v1.ReplicationController import ReplicationController
+from kubernetes_py.models.v1.Service import Service
+from kubernetes_py.models.v1beta1.DaemonSet import DaemonSet
 
 
 class StatefulSetCassandraTests(BaseTest):
     """
-    https://github.com/kubernetes/kubernetes/tree/master/examples/storage/cassandra
+    https://github.com/kubernetes_py/kubernetes_py/tree/master/examples/storage/cassandra
 
     Currently incomplete.
     """

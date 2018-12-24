@@ -10,9 +10,9 @@ import uuid
 
 from tests import _utils
 from tests.BaseTest import BaseTest
-from kubernetes.K8sConfig import K8sConfig
-from kubernetes.K8sSecret import K8sSecret
-from kubernetes.K8sServiceAccount import K8sServiceAccount
+from kubernetes_py.K8sConfig import K8sConfig
+from kubernetes_py.K8sSecret import K8sSecret
+from kubernetes_py.K8sServiceAccount import K8sServiceAccount
 
 
 class K8sServiceAccountTests(BaseTest):

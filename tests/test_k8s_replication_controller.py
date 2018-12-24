@@ -8,13 +8,13 @@
 
 import uuid
 
-from kubernetes import K8sReplicationController, K8sConfig, K8sPod, K8sContainer
-from kubernetes.K8sExceptions import *
-from kubernetes.models.v1.ObjectMeta import ObjectMeta
-from kubernetes.models.v1.Probe import Probe
-from kubernetes.models.v1.ReplicationController import ReplicationController
-from kubernetes.models.v1.ReplicationControllerSpec import ReplicationControllerSpec
-from kubernetes.models.v1.ReplicationControllerStatus import ReplicationControllerStatus
+from kubernetes_py import K8sReplicationController, K8sConfig, K8sPod, K8sContainer
+from kubernetes_py.K8sExceptions import *
+from kubernetes_py.models.v1.ObjectMeta import ObjectMeta
+from kubernetes_py.models.v1.Probe import Probe
+from kubernetes_py.models.v1.ReplicationController import ReplicationController
+from kubernetes_py.models.v1.ReplicationControllerSpec import ReplicationControllerSpec
+from kubernetes_py.models.v1.ReplicationControllerStatus import ReplicationControllerStatus
 from tests import _utils
 from tests import _constants
 from tests.BaseTest import BaseTest

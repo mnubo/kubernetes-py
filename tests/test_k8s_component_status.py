@@ -9,12 +9,12 @@
 import re
 import uuid
 
-from kubernetes.K8sComponentStatus import K8sComponentStatus
-from kubernetes.K8sConfig import K8sConfig
-from kubernetes.K8sExceptions import *
-from kubernetes.models.v1.ComponentCondition import ComponentCondition
-from kubernetes.models.v1.ComponentStatus import ComponentStatus
-from kubernetes.models.v1.ObjectMeta import ObjectMeta
+from kubernetes_py.K8sComponentStatus import K8sComponentStatus
+from kubernetes_py.K8sConfig import K8sConfig
+from kubernetes_py.K8sExceptions import *
+from kubernetes_py.models.v1.ComponentCondition import ComponentCondition
+from kubernetes_py.models.v1.ComponentStatus import ComponentStatus
+from kubernetes_py.models.v1.ObjectMeta import ObjectMeta
 from tests import _constants
 from tests import _utils
 from tests.BaseTest import BaseTest

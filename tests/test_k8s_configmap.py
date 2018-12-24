@@ -9,8 +9,8 @@
 import time
 import uuid
 
-from kubernetes.K8sConfigMap import K8sConfigMap
-from kubernetes.models.v1.ConfigMap import ConfigMap
+from kubernetes_py.K8sConfigMap import K8sConfigMap
+from kubernetes_py.models.v1.ConfigMap import ConfigMap
 from tests import _constants
 from tests import _utils
 from tests.BaseTest import BaseTest

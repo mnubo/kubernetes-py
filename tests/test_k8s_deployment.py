@@ -9,12 +9,12 @@
 import time
 import uuid
 
-from kubernetes.K8sConfig import K8sConfig
-from kubernetes.K8sContainer import K8sContainer
-from kubernetes.K8sDeployment import K8sDeployment
-from kubernetes.K8sExceptions import *
-from kubernetes.K8sPod import K8sPod
-from kubernetes.K8sReplicaSet import K8sReplicaSet
+from kubernetes_py.K8sConfig import K8sConfig
+from kubernetes_py.K8sContainer import K8sContainer
+from kubernetes_py.K8sDeployment import K8sDeployment
+from kubernetes_py.K8sExceptions import *
+from kubernetes_py.K8sPod import K8sPod
+from kubernetes_py.K8sReplicaSet import K8sReplicaSet
 from tests import _utils
 from tests.BaseTest import BaseTest
 

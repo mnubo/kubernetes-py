@@ -6,11 +6,11 @@
 # file 'LICENSE.md', which is part of this source code package.
 #
 
-from kubernetes.K8sPersistentVolume import K8sPersistentVolume
-from kubernetes.models.v1.AWSElasticBlockStoreVolumeSource import AWSElasticBlockStoreVolumeSource
-from kubernetes.models.v1.GCEPersistentDiskVolumeSource import GCEPersistentDiskVolumeSource
-from kubernetes.models.v1.HostPathVolumeSource import HostPathVolumeSource
-from kubernetes.models.v1.NFSVolumeSource import NFSVolumeSource
+from kubernetes_py.K8sPersistentVolume import K8sPersistentVolume
+from kubernetes_py.models.v1.AWSElasticBlockStoreVolumeSource import AWSElasticBlockStoreVolumeSource
+from kubernetes_py.models.v1.GCEPersistentDiskVolumeSource import GCEPersistentDiskVolumeSource
+from kubernetes_py.models.v1.HostPathVolumeSource import HostPathVolumeSource
+from kubernetes_py.models.v1.NFSVolumeSource import NFSVolumeSource
 from tests import _utils
 from tests.BaseTest import BaseTest
 

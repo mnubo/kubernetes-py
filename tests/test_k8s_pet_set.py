@@ -10,7 +10,7 @@ import unittest
 
 from tests import _utils
 from tests.BaseTest import BaseTest
-from kubernetes.K8sPetSet import K8sPetSet
+from kubernetes_py.K8sPetSet import K8sPetSet
 
 
 def should_skip():

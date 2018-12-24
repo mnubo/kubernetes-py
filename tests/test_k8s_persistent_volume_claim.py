@@ -10,11 +10,11 @@ import uuid
 
 from tests import _utils
 from tests.BaseTest import BaseTest
-from kubernetes.K8sExceptions import TimedOutException, NotFoundException
-from kubernetes.K8sPersistentVolume import K8sPersistentVolume
-from kubernetes.K8sPersistentVolumeClaim import K8sPersistentVolumeClaim
-from kubernetes.K8sPod import K8sPod
-from kubernetes.models.v1.ResourceRequirements import ResourceRequirements
+from kubernetes_py.K8sExceptions import TimedOutException, NotFoundException
+from kubernetes_py.K8sPersistentVolume import K8sPersistentVolume
+from kubernetes_py.K8sPersistentVolumeClaim import K8sPersistentVolumeClaim
+from kubernetes_py.K8sPod import K8sPod
+from kubernetes_py.models.v1.ResourceRequirements import ResourceRequirements
 
 
 class K8sPersistentVolumeClaimTest(BaseTest):

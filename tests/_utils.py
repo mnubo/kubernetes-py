@@ -10,35 +10,35 @@ import os
 import re
 import socket
 
-from kubernetes.utils import HttpRequest
-from kubernetes.K8sComponentStatus import K8sComponentStatus
-from kubernetes.K8sConfig import K8sConfig
-from kubernetes.K8sContainer import K8sContainer
-from kubernetes.K8sCronJob import K8sCronJob
-from kubernetes.K8sDaemonSet import K8sDaemonSet
-from kubernetes.K8sDeployment import K8sDeployment
-from kubernetes.K8sEvent import K8sEvent
-from kubernetes.K8sExceptions import NotFoundException
-from kubernetes.K8sExceptions import VersionMismatchException
-from kubernetes.K8sHorizontalPodAutoscaler import K8sHorizontalPodAutoscaler
-from kubernetes.K8sJob import K8sJob
-from kubernetes.K8sNamespace import K8sNamespace
-from kubernetes.K8sNode import K8sNode
-from kubernetes.K8sObject import K8sObject
-from kubernetes.K8sPersistentVolume import K8sPersistentVolume
-from kubernetes.K8sPersistentVolumeClaim import K8sPersistentVolumeClaim
-from kubernetes.K8sPetSet import K8sPetSet
-from kubernetes.K8sPod import K8sPod
-from kubernetes.K8sReplicaSet import K8sReplicaSet
-from kubernetes.K8sReplicationController import K8sReplicationController
-from kubernetes.K8sSecret import K8sSecret
-from kubernetes.K8sService import K8sService
-from kubernetes.K8sServiceAccount import K8sServiceAccount
-from kubernetes.K8sStatefulSet import K8sStatefulSet
-from kubernetes.K8sStorageClass import K8sStorageClass
-from kubernetes.K8sVolume import K8sVolume
-from kubernetes.K8sVolumeMount import K8sVolumeMount
-from kubernetes.K8sConfigMap import K8sConfigMap
+from kubernetes_py.utils import HttpRequest
+from kubernetes_py.K8sComponentStatus import K8sComponentStatus
+from kubernetes_py.K8sConfig import K8sConfig
+from kubernetes_py.K8sContainer import K8sContainer
+from kubernetes_py.K8sCronJob import K8sCronJob
+from kubernetes_py.K8sDaemonSet import K8sDaemonSet
+from kubernetes_py.K8sDeployment import K8sDeployment
+from kubernetes_py.K8sEvent import K8sEvent
+from kubernetes_py.K8sExceptions import NotFoundException
+from kubernetes_py.K8sExceptions import VersionMismatchException
+from kubernetes_py.K8sHorizontalPodAutoscaler import K8sHorizontalPodAutoscaler
+from kubernetes_py.K8sJob import K8sJob
+from kubernetes_py.K8sNamespace import K8sNamespace
+from kubernetes_py.K8sNode import K8sNode
+from kubernetes_py.K8sObject import K8sObject
+from kubernetes_py.K8sPersistentVolume import K8sPersistentVolume
+from kubernetes_py.K8sPersistentVolumeClaim import K8sPersistentVolumeClaim
+from kubernetes_py.K8sPetSet import K8sPetSet
+from kubernetes_py.K8sPod import K8sPod
+from kubernetes_py.K8sReplicaSet import K8sReplicaSet
+from kubernetes_py.K8sReplicationController import K8sReplicationController
+from kubernetes_py.K8sSecret import K8sSecret
+from kubernetes_py.K8sService import K8sService
+from kubernetes_py.K8sServiceAccount import K8sServiceAccount
+from kubernetes_py.K8sStatefulSet import K8sStatefulSet
+from kubernetes_py.K8sStorageClass import K8sStorageClass
+from kubernetes_py.K8sVolume import K8sVolume
+from kubernetes_py.K8sVolumeMount import K8sVolumeMount
+from kubernetes_py.K8sConfigMap import K8sConfigMap
 
 
 kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
@@ -114,7 +114,7 @@ def _is_api_server(service=None):
         return False
     if 'apiserver' != service['metadata']['labels']['component']:
         return False
-    if 'kubernetes' != service['metadata']['labels']['provider']:
+    if 'kubernetes_py' != service['metadata']['labels']['provider']:
         return False
     return True
 

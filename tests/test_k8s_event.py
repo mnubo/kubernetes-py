@@ -7,7 +7,7 @@
 #
 
 from tests.BaseTest import BaseTest
-from kubernetes.K8sEvent import K8sEvent
+from kubernetes_py.K8sEvent import K8sEvent
 from tests import _utils
 
 

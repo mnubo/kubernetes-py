@@ -9,10 +9,10 @@
 import time
 import uuid
 
-from kubernetes.K8sCronJob import K8sCronJob
-from kubernetes.K8sPod import K8sPod
-from kubernetes.models.v2alpha1.CronJob import CronJob
-from kubernetes.K8sExceptions import CronJobAlreadyRunningException
+from kubernetes_py.K8sCronJob import K8sCronJob
+from kubernetes_py.K8sPod import K8sPod
+from kubernetes_py.models.v2alpha1.CronJob import CronJob
+from kubernetes_py.K8sExceptions import CronJobAlreadyRunningException
 from tests import _constants
 from tests import _utils
 from tests.BaseTest import BaseTest
