@@ -141,6 +141,26 @@ class K8sPod(K8sObject):
                 return True
         return False
 
+    # ------------------------------------------------------------------------------------- logs
+
+    def get_log(self, container=None):
+        url = '{base}/{name}/log'.format(base=self.base_url, name=self.name)
+        if container and container in self.containers:
+            url = "{url}?container={container}".format(url=url, container=container)
+
+        state = self.request(method='GET', url=url)
+        if not state.get('success'):
+            status = state.get('status', '')
+            reason = state.get('data', dict()).get('message', None)
+            message = 'K8sPod: GET [ {0}:{1} ] failed: HTTP {2} : {3} '.format(
+                self.obj_type, self.name, status, reason)
+            raise NotFoundException(message)
+
+        if 'data' in state and state.get('data') is not None:
+            logs = state.get('data').splitlines()
+            return logs
+        return ""
+
     # ------------------------------------------------------------------------------------- set
 
     def set_container_image(self, name=None, image=None):
