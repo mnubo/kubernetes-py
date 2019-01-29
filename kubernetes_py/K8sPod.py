@@ -145,7 +145,7 @@ class K8sPod(K8sObject):
 
     def get_log(self, container=None):
         url = '{base}/{name}/log'.format(base=self.base_url, name=self.name)
-        if container and container in self.containers:
+        if container:
             url = "{url}?container={container}".format(url=url, container=container)
 
         state = self.request(method='GET', url=url)
