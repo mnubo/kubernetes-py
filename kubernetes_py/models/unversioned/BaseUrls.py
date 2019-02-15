@@ -44,6 +44,7 @@ class BaseUrls(object):
         self.urls['Namespace'] = '/api/{0}/namespaces'.format(api)
         self.urls['Node'] = '/api/{0}/nodes'.format(api)
         self.urls['Pod'] = '/api/{0}/namespaces/{1}/pods'.format(api, namespace)
+        self.urls['PodMetrics'] = '/apis/metrics.k8s.io/v1beta1/namespaces/{0}/pods'.format(namespace)
         self.urls['PersistentVolume'] = '/api/{0}/persistentvolumes'.format(api)
         self.urls['PersistentVolumeClaim'] = '/api/{0}/namespaces/{1}/persistentvolumeclaims'.format(api, namespace)
         self.urls['ReplicationController'] = '/api/{0}/namespaces/{1}/replicationcontrollers'.format(api, namespace)
