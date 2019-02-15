@@ -17,6 +17,7 @@ from kubernetes_py.models.v1.PodStatus import PodStatus
 from kubernetes_py.models.v1.Probe import Probe
 from kubernetes_py.utils import is_valid_dict, is_valid_string, is_valid_list
 from kubernetes_py.models.v1.Toleration import Toleration
+from kubernetes_py.models.unversioned.BaseUrls import BaseUrls
 
 
 class K8sPod(K8sObject):
@@ -159,6 +160,25 @@ class K8sPod(K8sObject):
         if 'data' in state and state.get('data') is not None:
             logs = state.get('data').splitlines()
             return logs
+        return ""
+
+    # ------------------------------------------------------------------------------------- metrics
+
+    def get_metrics(self):
+        bu = BaseUrls(api=self.config.version, namespace=self.config.namespace)
+        base_url = bu.get_base_url(object_type="PodMetrics")
+        url = '{base}/{name}'.format(base=base_url, name=self.name)
+
+        state = self.request(method='GET', url=url)
+        if not state.get('success'):
+            status = state.get('status', '')
+            reason = state.get('data', dict()).get('message', None)
+            message = 'K8sPod: GET [ {0}:{1} ] failed: HTTP {2} : {3} '.format(
+                self.obj_type, self.name, status, reason)
+            raise NotFoundException(message)
+
+        if 'data' in state and state.get('data') is not None:
+            return state.get('data')
         return ""
 
     # ------------------------------------------------------------------------------------- set
