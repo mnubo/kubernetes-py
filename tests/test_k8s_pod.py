@@ -617,9 +617,10 @@ class K8sPodTest(BaseTest):
         pod = _utils.create_pod(name=name)
         pod.add_container(container)
 
-        with self.assertRaises(NotFoundException):
-            pod.get_log()
-            pod.get_log(container=cname)
+        if _utils.is_reachable(pod.config):
+            with self.assertRaises(NotFoundException):
+                pod.get_log()
+                pod.get_log(container=cname)
 
     # ------------------------------------------------------------------------------------- is_ready
 
