@@ -608,6 +608,19 @@ class K8sPodTest(BaseTest):
             for i in ['conditions', 'container_statuses', 'host_ip', 'phase', 'pod_ip', 'reason', 'start_time']:
                 self.assertTrue(hasattr(result, i))
 
+    # ------------------------------------------------------------------------------------- get pod logs
+
+    def test_get_pod_logs(self):
+        cname = "yocontainer"
+        container = _utils.create_container(name=cname)
+        name = "yopod-{0}".format(str(uuid.uuid4()))
+        pod = _utils.create_pod(name=name)
+        pod.add_container(container)
+
+        with self.assertRaises(NotFoundException):
+            pod.get_log()
+            pod.get_log(container=cname)
+
     # ------------------------------------------------------------------------------------- is_ready
 
     def test_is_ready_nonexistent(self):
