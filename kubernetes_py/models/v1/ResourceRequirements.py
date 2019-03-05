@@ -14,7 +14,7 @@ class ResourceRequirements(object):
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_resourcerequirements
     """
 
-    VALID_RESOURCES = ['cpu', 'memory', 'storage']
+    VALID_RESOURCES = ['cpu', 'memory', 'storage', 'ephemeral-storage']
 
     def __init__(self, model=None):
         super(ResourceRequirements, self).__init__()
