@@ -173,7 +173,7 @@ class K8sConfig(object):
             raise IOError('K8sConfig: kubeconfig: [ {0} ] doesn\'t exist.'.format(filename))
         try:
             with open(filename, 'r') as stream:
-                dotconf = yaml.load(stream)
+                dotconf = yaml.safe_load(stream)
         except YAMLError as err:
             raise SyntaxError('K8sConfig: kubeconfig: [ {0} ] is not a valid YAML file: {1}'.format(filename, err))
 
