@@ -35,7 +35,7 @@ class EnvVarSource(object):
             self.resource_field_ref = ResourceFieldSelector(model['resourceFieldRef'])
         if 'configMapKeyRef' in model:
             self.config_map_key_ref = ConfigMapKeySelector(model['configMapKeyRef'])
-        if 'secretKeyRef' is model:
+        if 'secretKeyRef' in model:
             self.secret_key_ref = SecretKeySelector(model['secretKeyRef'])
 
     # ------------------------------------------------------------------------------------- fieldRef
