@@ -227,13 +227,14 @@ class K8sObject(object):
 
     # ------------------------------------------------------------------------------------- remote API calls
 
-    def request(self, method='GET', host=None, url=None, auth=None, cert=None,
+    def request(self, method='GET', host=None, url=None, auth=None, cert=None, cert_data=None,
                 data=None, token=None, ca_cert=None, ca_cert_data=None):
 
         host = self.config.api_host if host is None else host
         url = self.base_url if url is None else url
         auth = self.config.auth if auth is None else auth
         cert = self.config.cert if cert is None else cert
+        cert_data = self.config.cert_data if cert_data is None else cert_data
         token = self.config.token if token is None else token
         ca_cert = self.config.ca_cert if ca_cert is None else ca_cert
         ca_cert_data = self.config.ca_cert_data if ca_cert_data is None else ca_cert_data
@@ -244,6 +245,7 @@ class K8sObject(object):
             url=url,
             auth=auth,
             cert=cert,
+            cert_data=cert_data,
             ca_cert=ca_cert,
             ca_cert_data=ca_cert_data,
             data=data,

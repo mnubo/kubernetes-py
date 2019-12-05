@@ -208,6 +208,10 @@ class K8sConfig(object):
                         self.client_certificate = user['user']['client-certificate']
                         self.client_key = user['user']['client-key']
                         self.cert = (self.client_certificate, self.client_key)
+                    if 'client-certificate-data' in user['user'] and 'client-key-data' in user['user']:
+                        self.client_certificate_data = user['user']['client-certificate-data']
+                        self.client_key_data = user['user']['client-key-data']
+                        self.cert_data = (self.client_certificate_data, self.client_key_data)
 
         if self.contexts:
             for context in self.contexts:
