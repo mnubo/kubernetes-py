@@ -21,7 +21,7 @@ RE_VALID_SSL_IP = re.compile(
 
 class HttpRequest:
     def __init__(self, method='GET', host='localhost:80', url='/', data=None, auth=None,
-                 cert=None, ca_cert=None, ca_cert_data=None, token=None):
+                 cert=None, cert_data=None, ca_cert=None, ca_cert_data=None, token=None):
 
         self.http_method = method
         self.http_host = host
@@ -29,6 +29,7 @@ class HttpRequest:
         self.data = data
         self.auth = auth
         self.cert = cert
+        self.cert_data = cert_data
         self.ca_cert = ca_cert
         self.ca_cert_data = ca_cert_data
         self.token = token
@@ -51,6 +52,8 @@ class HttpRequest:
         self.url = self.http_host + self.url
 
         temp = None
+        this_cert_file = None
+        this_key_file = None
         verify = False
         if self.ca_cert is not None:
             verify = self.ca_cert
@@ -60,6 +63,17 @@ class HttpRequest:
             temp.write(data)
             temp.close()
             verify = temp.name
+        if self.cert_data is not None:
+            (this_cert_data, this_key_data) = self.cert_data
+            this_cert_file = tempfile.NamedTemporaryFile(delete=False)
+            decoded_cert = base64.b64decode(this_cert_data)
+            this_cert_file.write(decoded_cert)
+            this_cert_file.close()
+            this_key_file = tempfile.NamedTemporaryFile(delete=False)
+            decoded_key = base64.b64decode(this_key_data)
+            this_key_file.write(decoded_key)
+            this_key_file.close()
+            self.cert = (this_cert_file.name, this_key_file.name)
 
         # TODO: TLS issue with Python 2.7 and urllib3 when hostname is an IP address
         # A better fix should be found but I can't think of anything else for now.
@@ -86,6 +100,10 @@ class HttpRequest:
         finally:
             if temp is not None:
                 os.unlink(temp.name)
+            if this_cert_file is not None:
+                os.unlink(this_cert_file.name)
+            if this_key_file is not None:
+                os.unlink(this_key_file.name)
 
         state['status'] = response.status_code
         state['reason'] = response.reason
