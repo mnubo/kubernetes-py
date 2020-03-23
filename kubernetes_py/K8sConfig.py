@@ -57,6 +57,7 @@ class K8sConfig(object):
         self.cert = None
         self.client_certificate = None
         self.client_key = None
+        self.cert_data = None
         self.pull_secret = None
         self.namespace = None
         self.token = None
