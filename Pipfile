@@ -7,9 +7,16 @@ verify_ssl = true
 coverage = "==4.1"
 nose = "==1.3.7"
 nose-cover3 = "==0.1.0"
+version-query = "*"
+flake8 = "*"
+black = "*"
+coveralls = "*"
 
 [packages]
 kubernetes-py = {editable = true,path = "."}
 
 [requires]
 python_version = "3.8"
+
+[pipenv]
+allow_prereleases = true

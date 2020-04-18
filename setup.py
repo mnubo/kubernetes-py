@@ -1,23 +1,20 @@
-import os
+from version_query import predict_version_str
 
 try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
 
-def version():
-    with open(os.path.abspath(__file__).replace('setup.py', 'version.meta'), 'r') as v:
-        return v.read().replace('\n', '')
-
+my_version = predict_version_str()
 
 setup(
     name='kubernetes-py',
-    version=version(),
+    version=my_version,
     description='A python module for Kubernetes.',
     author='mnubo inc.',
     author_email='it-admin@mnubo.com',
     url='https://github.com/mnubo/kubernetes-py',
-    download_url='https://github.com/mnubo/kubernetes-py/tarball/' + version(),
+    download_url='https://github.com/mnubo/kubernetes-py/tarball/{}'.format(my_version),
     keywords=['kubernetes_py', 'k8s', 'kubernetes'],
     packages=[
         'kubernetes_py',
@@ -40,12 +37,11 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
     scripts=[],
     test_suite='nose.collector',
