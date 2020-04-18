@@ -35,7 +35,9 @@ jobs:
         TRAVIS_SKIP_SERVER_VERSION: 1
       run: |
         nosetests --with-coverage --cover-package=kubernetes_py --cover-xml-file=coverage-${{ matrix.python-version }}.xml --with-xunit --xunit-file=nosetests-${{ matrix.python-version }}.xml
-        coveralls
+        if [ -n "${COVERALLS_REPO_TOKEN}" ]; then
+          coveralls
+        fi
     - name: Upload test results
       uses: actions/upload-artifact@master
       with:
