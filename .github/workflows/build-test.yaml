@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.5, 3.6, 3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8]
 
     steps:
     - uses: actions/checkout@v2
@@ -23,7 +23,7 @@ jobs:
         pipenv install --dev --system
     - name: Code formatting with black
       run: |
-        black -l 127 --check --diff
+        black -l 127 --check --diff .
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
