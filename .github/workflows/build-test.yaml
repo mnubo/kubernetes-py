@@ -37,9 +37,9 @@ jobs:
         nosetests --with-coverage --cover-package=kubernetes_py --cover-xml-file=coverage-${{ matrix.python-version }}.xml --with-xunit --xunit-file=nosetests-${{ matrix.python-version }}.xml
         coveralls
     - name: Upload test results
-        uses: actions/upload-artifact@master
-        with:
-          name: nosetest-results-${{ matrix.python-version }}
-          path: nosetests-${{ matrix.python-version }}.xml
-        # Use always() to always run this step to publish test results when there are test failures
-        if: always()
+      uses: actions/upload-artifact@master
+      with:
+        name: nosetest-results-${{ matrix.python-version }}
+        path: nosetests-${{ matrix.python-version }}.xml
+      # Use always() to always run this step to publish test results when there are test failures
+      if: always()
