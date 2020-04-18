@@ -30,18 +30,14 @@ class K8sJob(K8sObject):
 
     """
 
-    VALID_RESTART_POLICIES = ['OnFailure', 'Never']
+    VALID_RESTART_POLICIES = ["OnFailure", "Never"]
     SCALE_WAIT_TIMEOUT_SECONDS = 120
 
     def __init__(self, config=None, name=None):
 
-        super(K8sJob, self).__init__(
-            config=config,
-            obj_type='Job',
-            name=name
-        )
+        super(K8sJob, self).__init__(config=config, obj_type="Job", name=name)
 
-        self.restart_policy = 'OnFailure'
+        self.restart_policy = "OnFailure"
 
     # -------------------------------------------------------------------------------------  override
 
@@ -76,8 +72,7 @@ class K8sJob(K8sObject):
 
     def add_container(self, container=None):
         if not isinstance(container, K8sContainer):
-            raise SyntaxError(
-                'K8sJob.add_container() container: [ {0} ] is invalid.'.format(container))
+            raise SyntaxError("K8sJob.add_container() container: [ {0} ] is invalid.".format(container))
 
         containers = self.model.spec.template.spec.containers
         if containers is None:
@@ -93,8 +88,7 @@ class K8sJob(K8sObject):
 
     def add_volume(self, volume=None):
         if not isinstance(volume, K8sVolume):
-            raise SyntaxError(
-                'K8sJob.add_volume() volume: [ {0} ] is invalid.'.format(volume))
+            raise SyntaxError("K8sJob.add_volume() volume: [ {0} ] is invalid.".format(volume))
 
         volumes = self.model.spec.template.spec.volumes
         if volume.model not in volumes:
@@ -121,8 +115,7 @@ class K8sJob(K8sObject):
     def _check_timeout(self, start_time=None, p=None):
         elapsed_time = time.time() - start_time
         if elapsed_time >= self.SCALE_WAIT_TIMEOUT_SECONDS:  # timeout
-            raise TimedOutException(
-                "Timed out scaling job: [ {0} ] to parallelism: [ {1} ]".format(self.name, p))
+            raise TimedOutException("Timed out scaling job: [ {0} ] to parallelism: [ {1} ]".format(self.name, p))
 
     # ------------------------------------------------------------------------------------- parallelism
 
@@ -188,7 +181,7 @@ class K8sJob(K8sObject):
     @restart_policy.setter
     def restart_policy(self, policy=None):
         if policy not in self.VALID_RESTART_POLICIES:
-            raise SyntaxError('K8sJob: restart_policy: [ {} ] is invalid.'.format(policy))
+            raise SyntaxError("K8sJob: restart_policy: [ {} ] is invalid.".format(policy))
         self.model.spec.template.spec.restart_policy = policy
 
     # -------------------------------------------------------------------------------------  dnsPolicy
@@ -200,7 +193,7 @@ class K8sJob(K8sObject):
     @dns_policy.setter
     def dns_policy(self, policy=None):
         if policy not in self.model.spec.template.spec.VALID_DNS_POLICIES:
-            raise SyntaxError('K8sJob: dns_policy: [ {} ] is invalid.'.format(policy))
+            raise SyntaxError("K8sJob: dns_policy: [ {} ] is invalid.".format(policy))
         self.model.spec.template.spec.dns_policy = policy
 
     # -------------------------------------------------------------------------------------  start time

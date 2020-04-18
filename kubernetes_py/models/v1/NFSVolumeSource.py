@@ -26,12 +26,12 @@ class NFSVolumeSource(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model):
-        if 'server' in model:
-            self.server = model['server']
-        if 'path' in model:
-            self.path = model['path']
-        if 'readOnly' in model:
-            self.read_only = model['readOnly']
+        if "server" in model:
+            self.server = model["server"]
+        if "path" in model:
+            self.path = model["path"]
+        if "readOnly" in model:
+            self.read_only = model["readOnly"]
 
     # ------------------------------------------------------------------------------------- server
 
@@ -42,7 +42,7 @@ class NFSVolumeSource(object):
     @server.setter
     def server(self, server=None):
         if not is_valid_string(server):
-            raise SyntaxError('NFSVolumeSource: server: [ {0} ] is invalid.'.format(server))
+            raise SyntaxError("NFSVolumeSource: server: [ {0} ] is invalid.".format(server))
         self._server = server
 
     # ------------------------------------------------------------------------------------- path
@@ -54,7 +54,7 @@ class NFSVolumeSource(object):
     @path.setter
     def path(self, path=None):
         if not is_valid_string(path):
-            raise SyntaxError('NFSVolumeSource: path: [ {0} ] is invalid.'.format(path))
+            raise SyntaxError("NFSVolumeSource: path: [ {0} ] is invalid.".format(path))
         self._path = path
 
     # ------------------------------------------------------------------------------------- readOnly
@@ -66,7 +66,7 @@ class NFSVolumeSource(object):
     @read_only.setter
     def read_only(self, ro=None):
         if not isinstance(ro, bool):
-            raise SyntaxError('NFSVolumeSource: read_only: [ {0} ] is invalid.'.format(ro))
+            raise SyntaxError("NFSVolumeSource: read_only: [ {0} ] is invalid.".format(ro))
         self._read_only = ro
 
     # ------------------------------------------------------------------------------------- serialize
@@ -74,9 +74,9 @@ class NFSVolumeSource(object):
     def serialize(self):
         data = {}
         if self.server is not None:
-            data['server'] = self.server
+            data["server"] = self.server
         if self.path is not None:
-            data['path'] = self.path
+            data["path"] = self.path
         if self.read_only is not None:
-            data['readOnly'] = self.read_only
+            data["readOnly"] = self.read_only
         return data

@@ -26,10 +26,10 @@ class ListMeta(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'selfLink' in model:
-            self.self_link = model['selfLink']
-        if 'resourceVersion' in model:
-            self.resource_version = model['resourceVersion']
+        if "selfLink" in model:
+            self.self_link = model["selfLink"]
+        if "resourceVersion" in model:
+            self.resource_version = model["resourceVersion"]
 
     # ------------------------------------------------------------------------------------- strip
 
@@ -46,7 +46,7 @@ class ListMeta(object):
     @self_link.setter
     def self_link(self, link=None):
         if not is_valid_string(link):
-            raise SyntaxError('ListMeta: self_link: [ {0} ] is invalid.'.format(link))
+            raise SyntaxError("ListMeta: self_link: [ {0} ] is invalid.".format(link))
         self._self_link = link
 
     # ------------------------------------------------------------------------------------- resourceVersion
@@ -59,7 +59,7 @@ class ListMeta(object):
     def resource_version(self, v=None):
         if v is not None:
             if not isinstance(v, str):
-                raise SyntaxError('ListMeta: resource_version: [ {0} ] is invalid.'.format(v))
+                raise SyntaxError("ListMeta: resource_version: [ {0} ] is invalid.".format(v))
         self._resource_version = v
 
     # ------------------------------------------------------------------------------------- serialize
@@ -67,7 +67,7 @@ class ListMeta(object):
     def serialize(self):
         data = {}
         if self.self_link:
-            data['selfLink'] = self.self_link
+            data["selfLink"] = self.self_link
         if self.resource_version:
-            data['resourceVersion'] = self.resource_version
+            data["resourceVersion"] = self.resource_version
         return data

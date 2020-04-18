@@ -14,19 +14,14 @@ from kubernetes_py.K8sVolume import K8sVolume
 
 
 class K8sDaemonSet(K8sObject):
-
     def __init__(self, config=None, name=None):
 
-        super(K8sDaemonSet, self).__init__(
-            config=config,
-            name=name,
-            obj_type='DaemonSet'
-        )
+        super(K8sDaemonSet, self).__init__(config=config, name=name, obj_type="DaemonSet")
 
         self.model.spec.template.metadata.labels = self.model.metadata.labels
 
         sel = LabelSelector()
-        sel.match_labels = {'name': name}
+        sel.match_labels = {"name": name}
         self.selector = sel
 
     # -------------------------------------------------------------------------------------  override
@@ -62,8 +57,7 @@ class K8sDaemonSet(K8sObject):
 
     def add_container(self, container=None):
         if not isinstance(container, K8sContainer):
-            raise SyntaxError(
-                'K8sDaemonSet.add_container() container: [ {0} ] is invalid.'.format(container))
+            raise SyntaxError("K8sDaemonSet.add_container() container: [ {0} ] is invalid.".format(container))
 
         containers = self.model.spec.template.spec.containers
         if containers is None:
@@ -79,8 +73,7 @@ class K8sDaemonSet(K8sObject):
 
     def add_volume(self, volume=None):
         if not isinstance(volume, K8sVolume):
-            raise SyntaxError(
-                'K8sDaemonSet.add_volume() volume: [ {0} ] is invalid.'.format(volume))
+            raise SyntaxError("K8sDaemonSet.add_volume() volume: [ {0} ] is invalid.".format(volume))
 
         volumes = self.model.spec.template.spec.volumes
         if volume.model not in volumes:

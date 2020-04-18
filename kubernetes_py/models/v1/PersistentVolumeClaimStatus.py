@@ -26,12 +26,12 @@ class PersistentVolumeClaimStatus(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'phase' in model:
-            self.phase = model['phase']
-        if 'accessModes' in model:
-            self.access_modes = model['accessModes']
-        if 'capacity' in model:
-            self.capacity = model['capacity']
+        if "phase" in model:
+            self.phase = model["phase"]
+        if "accessModes" in model:
+            self.access_modes = model["accessModes"]
+        if "capacity" in model:
+            self.capacity = model["capacity"]
 
     # ------------------------------------------------------------------------------------- phase
 
@@ -42,7 +42,7 @@ class PersistentVolumeClaimStatus(object):
     @phase.setter
     def phase(self, p=None):
         if not is_valid_string(p):
-            raise SyntaxError('PersistentVolumeClaimStatus: phase: [ {} ] is invalid.'.format(p))
+            raise SyntaxError("PersistentVolumeClaimStatus: phase: [ {} ] is invalid.".format(p))
         self._phase = p
 
     # ------------------------------------------------------------------------------------- accessModes
@@ -54,7 +54,7 @@ class PersistentVolumeClaimStatus(object):
     @access_modes.setter
     def access_modes(self, modes=None):
         if not is_valid_list(modes, str):
-            raise SyntaxError('PersistentVolumeClaimStatus: access_modes: [ {} ] is invalid.'.format(modes))
+            raise SyntaxError("PersistentVolumeClaimStatus: access_modes: [ {} ] is invalid.".format(modes))
         filtered = list(filter(lambda x: x in PersistentVolumeSpec.VALID_ACCESS_MODES, modes))
         self._access_modes = filtered
 
@@ -67,7 +67,7 @@ class PersistentVolumeClaimStatus(object):
     @capacity.setter
     def capacity(self, c=None):
         if not is_valid_dict(c):
-            raise SyntaxError('PersistentVolumeClaimStatus: capacity: [ {} ] is invalid.'.format(c))
+            raise SyntaxError("PersistentVolumeClaimStatus: capacity: [ {} ] is invalid.".format(c))
         self._capacity = c
 
     # ------------------------------------------------------------------------------------- serialize
@@ -75,9 +75,9 @@ class PersistentVolumeClaimStatus(object):
     def serialize(self):
         data = {}
         if self.phase is not None:
-            data['phase'] = self.phase
+            data["phase"] = self.phase
         if self.access_modes is not None:
-            data['accessModes'] = self.access_modes
+            data["accessModes"] = self.access_modes
         if self.capacity is not None:
-            data['capacity'] = self.capacity
+            data["capacity"] = self.capacity
         return data

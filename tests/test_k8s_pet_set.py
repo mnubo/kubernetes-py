@@ -15,14 +15,10 @@ from kubernetes_py.K8sPetSet import K8sPetSet
 
 def should_skip():
     config = _utils.create_config()
-    return _utils.assert_server_version(
-        api_host=config.api_host,
-        major=1, minor=4
-    )
+    return _utils.assert_server_version(api_host=config.api_host, major=1, minor=4)
 
 
 class K8sPetSetTests(BaseTest):
-
     def setUp(self):
         _utils.cleanup_petsets()
         _utils.cleanup_pods()

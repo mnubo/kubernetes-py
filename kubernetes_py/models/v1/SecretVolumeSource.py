@@ -28,16 +28,16 @@ class SecretVolumeSource(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'secretName' in model:
-            self.secret_name = model['secretName']
-        if 'items' in model:
+        if "secretName" in model:
+            self.secret_name = model["secretName"]
+        if "items" in model:
             items = []
-            for i in model['items']:
+            for i in model["items"]:
                 item = KeyToPath(i)
                 items.append(item)
             self.items = items
-        if 'defaultMode' in model:
-            self.default_mode = model['defaultMode']
+        if "defaultMode" in model:
+            self.default_mode = model["defaultMode"]
 
     # ------------------------------------------------------------------------------------- secret name
 
@@ -48,7 +48,7 @@ class SecretVolumeSource(object):
     @secret_name.setter
     def secret_name(self, name=None):
         if not is_valid_string(name):
-            raise SyntaxError('SecretVolumeSource: secret_name: [ {0} ] is invalid.'.format(name))
+            raise SyntaxError("SecretVolumeSource: secret_name: [ {0} ] is invalid.".format(name))
         self._secret_name = name
 
     # ------------------------------------------------------------------------------------- items
@@ -60,7 +60,7 @@ class SecretVolumeSource(object):
     @items.setter
     def items(self, items=None):
         if not is_valid_list(items, KeyToPath):
-            raise SyntaxError('SecretVolumeSource: items: [ {0} ] is invalid.'.format(items))
+            raise SyntaxError("SecretVolumeSource: items: [ {0} ] is invalid.".format(items))
         self._items = items
 
     # ------------------------------------------------------------------------------------- defaultMode
@@ -72,7 +72,7 @@ class SecretVolumeSource(object):
     @default_mode.setter
     def default_mode(self, mode=None):
         if not isinstance(mode, int):
-            raise SyntaxError('SecretVolumeSource: default_mode: [ {0} ] is invalid.'.format(mode))
+            raise SyntaxError("SecretVolumeSource: default_mode: [ {0} ] is invalid.".format(mode))
         self._default_mode = mode
 
     # ------------------------------------------------------------------------------------- serialize
@@ -80,9 +80,9 @@ class SecretVolumeSource(object):
     def serialize(self):
         data = {}
         if self.secret_name is not None:
-            data['secretName'] = self.secret_name
+            data["secretName"] = self.secret_name
         if self.items is not None:
-            data['items'] = [x.serialize() for x in self.items]
+            data["items"] = [x.serialize() for x in self.items]
         if self.default_mode is not None:
-            data['defaultMode'] = self.default_mode
+            data["defaultMode"] = self.default_mode
         return data

@@ -33,22 +33,22 @@ class DeploymentSpec(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'replicas' in model:
-            self.replicas = model['replicas']
-        if 'selector' in model:
-            self.selector = LabelSelector(model['selector'])
-        if 'template' in model:
-            self.template = PodTemplateSpec(model['template'])
-        if 'strategy' in model:
-            self.strategy = DeploymentStrategy(model['strategy'])
-        if 'minReadySeconds' in model:
-            self.min_ready_seconds = model['minReadySeconds']
-        if 'revisionHistoryLimit' in model:
-            self.revision_history_limit = model['revisionHistoryLimit']
-        if 'paused' in model:
-            self.paused = model['paused']
-        if 'rollbackTo' in model:
-            self.rollback_to = model['rollbackTo']
+        if "replicas" in model:
+            self.replicas = model["replicas"]
+        if "selector" in model:
+            self.selector = LabelSelector(model["selector"])
+        if "template" in model:
+            self.template = PodTemplateSpec(model["template"])
+        if "strategy" in model:
+            self.strategy = DeploymentStrategy(model["strategy"])
+        if "minReadySeconds" in model:
+            self.min_ready_seconds = model["minReadySeconds"]
+        if "revisionHistoryLimit" in model:
+            self.revision_history_limit = model["revisionHistoryLimit"]
+        if "paused" in model:
+            self.paused = model["paused"]
+        if "rollbackTo" in model:
+            self.rollback_to = model["rollbackTo"]
 
     # ------------------------------------------------------------------------------------- replicas
 
@@ -59,7 +59,7 @@ class DeploymentSpec(object):
     @replicas.setter
     def replicas(self, reps=None):
         if not isinstance(reps, int):
-            raise SyntaxError('DeploymentSpec: replicas: [ {} ] is invalid'.format(reps))
+            raise SyntaxError("DeploymentSpec: replicas: [ {} ] is invalid".format(reps))
         self._replicas = reps
 
     # ------------------------------------------------------------------------------------- selector
@@ -71,7 +71,7 @@ class DeploymentSpec(object):
     @selector.setter
     def selector(self, sel=None):
         if not isinstance(sel, LabelSelector):
-            raise SyntaxError('DeploymentSpec: selector: [ {} ] is invalid'.format(sel))
+            raise SyntaxError("DeploymentSpec: selector: [ {} ] is invalid".format(sel))
         self._selector = sel
 
     # ------------------------------------------------------------------------------------- template
@@ -83,7 +83,7 @@ class DeploymentSpec(object):
     @template.setter
     def template(self, t=None):
         if not isinstance(t, PodTemplateSpec):
-            raise SyntaxError('DeploymentSpec: template: [ {} ] is invalid'.format(t))
+            raise SyntaxError("DeploymentSpec: template: [ {} ] is invalid".format(t))
         self._template = t
 
     # ------------------------------------------------------------------------------------- strategy
@@ -95,7 +95,7 @@ class DeploymentSpec(object):
     @strategy.setter
     def strategy(self, strat=None):
         if not isinstance(strat, DeploymentStrategy):
-            raise SyntaxError('DeploymentSpec: strategy: [ {} ] is invalid'.format(strat))
+            raise SyntaxError("DeploymentSpec: strategy: [ {} ] is invalid".format(strat))
         self._strategy = strat
 
     # ------------------------------------------------------------------------------------- minReadySeconds
@@ -107,7 +107,7 @@ class DeploymentSpec(object):
     @min_ready_seconds.setter
     def min_ready_seconds(self, mrs=None):
         if not isinstance(mrs, int):
-            raise SyntaxError('DeploymentSpec: min_ready_seconds: [ {} ] is invalid'.format(mrs))
+            raise SyntaxError("DeploymentSpec: min_ready_seconds: [ {} ] is invalid".format(mrs))
         self._min_ready_seconds = mrs
 
     # ------------------------------------------------------------------------------------- revisionHistoryLimit
@@ -119,7 +119,7 @@ class DeploymentSpec(object):
     @revision_history_limit.setter
     def revision_history_limit(self, rhl=None):
         if not isinstance(rhl, int):
-            raise SyntaxError('DeploymentSpec: revision_history_limit: [ {} ] is invalid'.format(rhl))
+            raise SyntaxError("DeploymentSpec: revision_history_limit: [ {} ] is invalid".format(rhl))
         self._revision_history_limit = rhl
 
     # ------------------------------------------------------------------------------------- paused
@@ -131,7 +131,7 @@ class DeploymentSpec(object):
     @paused.setter
     def paused(self, p=None):
         if not isinstance(p, bool):
-            raise SyntaxError('DeploymentSpec: paused: [ {} ] is invalid'.format(p))
+            raise SyntaxError("DeploymentSpec: paused: [ {} ] is invalid".format(p))
         self._paused = p
 
     # ------------------------------------------------------------------------------------- rollbackTo
@@ -143,7 +143,7 @@ class DeploymentSpec(object):
     @rollback_to.setter
     def rollback_to(self, rc=None):
         if not isinstance(rc, RollbackConfig):
-            raise SyntaxError('DeploymentSpec: rollback_to: [ {} ] is invalid'.format(rc))
+            raise SyntaxError("DeploymentSpec: rollback_to: [ {} ] is invalid".format(rc))
         self._rollback_to = rc
 
     # ------------------------------------------------------------------------------------- serialize
@@ -151,19 +151,19 @@ class DeploymentSpec(object):
     def serialize(self):
         data = {}
         if self.replicas is not None:
-            data['replicas'] = self.replicas
+            data["replicas"] = self.replicas
         if self.selector is not None:
-            data['selector'] = self.selector.serialize()
+            data["selector"] = self.selector.serialize()
         if self.template is not None:
-            data['template'] = self.template.serialize()
+            data["template"] = self.template.serialize()
         if self.strategy is not None:
-            data['strategy'] = self.strategy.serialize()
+            data["strategy"] = self.strategy.serialize()
         if self.min_ready_seconds is not None:
-            data['minReadySeconds'] = self.min_ready_seconds
+            data["minReadySeconds"] = self.min_ready_seconds
         if self.revision_history_limit is not None:
-            data['revisionHistoryLimit'] = self.revision_history_limit
+            data["revisionHistoryLimit"] = self.revision_history_limit
         if self.paused is not None:
-            data['paused'] = self.paused
+            data["paused"] = self.paused
         if self.rollback_to is not None:
-            data['rollbackTo'] = self.rollback_to.serialize()
+            data["rollbackTo"] = self.rollback_to.serialize()
         return data

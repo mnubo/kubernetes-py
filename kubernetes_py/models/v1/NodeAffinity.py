@@ -26,14 +26,14 @@ class NodeAffinity(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'preferredDuringSchedulingIgnoredDuringExecution' in model:
+        if "preferredDuringSchedulingIgnoredDuringExecution" in model:
             terms = []
-            for t in model['preferredDuringSchedulingIgnoredDuringExecution']:
+            for t in model["preferredDuringSchedulingIgnoredDuringExecution"]:
                 term = PreferredSchedulingTerm(t)
                 terms.append(term)
             self.preferred_during_scheduling_ignored_during_execution = terms
-        if 'requiredDuringSchedulingIgnoredDuringExecution' in model:
-            sel = NodeSelector(model['requiredDuringSchedulingIgnoredDuringExecution'])
+        if "requiredDuringSchedulingIgnoredDuringExecution" in model:
+            sel = NodeSelector(model["requiredDuringSchedulingIgnoredDuringExecution"])
             self.required_during_scheduling_ignored_during_execution = sel
 
     # ----------------------------------------------------------------- preferredDuringSchedulingIgnoredDuringExecution
@@ -46,7 +46,8 @@ class NodeAffinity(object):
     def preferred_during_scheduling_ignored_during_execution(self, p=None):
         if not is_valid_list(p, PreferredSchedulingTerm):
             raise SyntaxError(
-                'NodeAffinity: preferred_during_scheduling_ignored_during_execution: [ {} ] is invalid.'.format(p))
+                "NodeAffinity: preferred_during_scheduling_ignored_during_execution: [ {} ] is invalid.".format(p)
+            )
         self._preferred_during_scheduling_ignored_during_execution = p
 
     # ----------------------------------------------------------------- requiredDuringSchedulingIgnoredDuringExecution
@@ -59,7 +60,8 @@ class NodeAffinity(object):
     def required_during_scheduling_ignored_during_execution(self, r=None):
         if not isinstance(r, NodeSelector):
             raise SyntaxError(
-                'NodeAffinity: required_during_scheduling_ignored_during_execution: [ {} ] is invalid.'.format(r))
+                "NodeAffinity: required_during_scheduling_ignored_during_execution: [ {} ] is invalid.".format(r)
+            )
         self._required_during_scheduling_ignored_during_execution = r
 
     # ------------------------------------------------------------------------------------- serialize
@@ -71,8 +73,8 @@ class NodeAffinity(object):
             for t in self.preferred_during_scheduling_ignored_during_execution:
                 term = t.serialize()
                 terms.append(term)
-            data['preferredDuringSchedulingIgnoredDuringExecution'] = terms
+            data["preferredDuringSchedulingIgnoredDuringExecution"] = terms
         if self.required_during_scheduling_ignored_during_execution is not None:
             sel = self.required_during_scheduling_ignored_during_execution.serialize()
-            data['requiredDuringSchedulingIgnoredDuringExecution'] = sel
+            data["requiredDuringSchedulingIgnoredDuringExecution"] = sel
         return data

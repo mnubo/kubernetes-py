@@ -14,13 +14,8 @@ from kubernetes_py.models.v1.Secret import Secret
 
 
 class K8sSecret(K8sObject):
-
     def __init__(self, config=None, name=None):
-        super(K8sSecret, self).__init__(
-            config=config,
-            obj_type='Secret',
-            name=name
-        )
+        super(K8sSecret, self).__init__(config=config, obj_type="Secret", name=name)
 
     # -------------------------------------------------------------------------------------  override
 
@@ -143,13 +138,8 @@ class K8sSecret(K8sObject):
 
     # ------------------------------------------------------------------------------------- set
 
-    def set_service_account_token(self, account_name=None, account_uid=None, token=None,
-                                  kubecfg_data=None, cacert=None):
+    def set_service_account_token(self, account_name=None, account_uid=None, token=None, kubecfg_data=None, cacert=None):
         self.model.set_service_account_token(
-            account_name=account_name,
-            account_uid=account_uid,
-            token=token,
-            kubecfg_data=kubecfg_data,
-            cacert=cacert
+            account_name=account_name, account_uid=account_uid, token=token, kubecfg_data=kubecfg_data, cacert=cacert
         )
         return self

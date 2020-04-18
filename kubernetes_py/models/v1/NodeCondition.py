@@ -28,18 +28,18 @@ class NodeCondition(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'type' in model:
-            self.condition_type = model['type']
-        if 'status' in model:
-            self.status = model['status']
-        if 'lastHeartbeatTime' in model:
-            self.last_heartbeat_time = model['lastHeartbeatTime']
-        if 'lastTransitionTime' in model:
-            self.last_transition_time = model['lastTransitionTime']
-        if 'reason' in model:
-            self.reason = model['reason']
-        if 'message' in model:
-            self.message = model['message']
+        if "type" in model:
+            self.condition_type = model["type"]
+        if "status" in model:
+            self.status = model["status"]
+        if "lastHeartbeatTime" in model:
+            self.last_heartbeat_time = model["lastHeartbeatTime"]
+        if "lastTransitionTime" in model:
+            self.last_transition_time = model["lastTransitionTime"]
+        if "reason" in model:
+            self.reason = model["reason"]
+        if "message" in model:
+            self.message = model["message"]
 
     # ------------------------------------------------------------------------------------- type
 
@@ -50,7 +50,7 @@ class NodeCondition(object):
     @condition_type.setter
     def condition_type(self, v):
         if not isinstance(v, str):
-            raise SyntaxError('NodeCondition: condition_type: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("NodeCondition: condition_type: [ {0} ] is invalid.".format(v))
         self._condition_type = v
 
     # ------------------------------------------------------------------------------------- status
@@ -62,7 +62,7 @@ class NodeCondition(object):
     @status.setter
     def status(self, v):
         if not isinstance(v, str):
-            raise SyntaxError('NodeCondition: status: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("NodeCondition: status: [ {0} ] is invalid.".format(v))
         self._status = v
 
     # ------------------------------------------------------------------------------------- last_heartbeat_time
@@ -74,7 +74,7 @@ class NodeCondition(object):
     @last_heartbeat_time.setter
     def last_heartbeat_time(self, v):
         if not isinstance(v, str) or not is_valid_date_time(v):
-            raise SyntaxError('NodeCondition: last_heartbeat_time: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("NodeCondition: last_heartbeat_time: [ {0} ] is invalid.".format(v))
         self._last_heartbeat_time = v
 
     # ------------------------------------------------------------------------------------- last_transition_time
@@ -86,7 +86,7 @@ class NodeCondition(object):
     @last_transition_time.setter
     def last_transition_time(self, v):
         if not isinstance(v, str) or not is_valid_date_time(v):
-            raise SyntaxError('NodeCondition: last_transition_time: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("NodeCondition: last_transition_time: [ {0} ] is invalid.".format(v))
         self._last_transition_time = v
 
     # ------------------------------------------------------------------------------------- last_transition_time
@@ -98,7 +98,7 @@ class NodeCondition(object):
     @reason.setter
     def reason(self, v):
         if not isinstance(v, str):
-            raise SyntaxError('NodeCondition: reason: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("NodeCondition: reason: [ {0} ] is invalid.".format(v))
         self._reason = v
 
     # ------------------------------------------------------------------------------------- message
@@ -110,7 +110,7 @@ class NodeCondition(object):
     @message.setter
     def message(self, v):
         if not isinstance(v, str):
-            raise SyntaxError('NodeCondition: message: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("NodeCondition: message: [ {0} ] is invalid.".format(v))
         self._message = v
 
     # ------------------------------------------------------------------------------------- serialize
@@ -118,15 +118,15 @@ class NodeCondition(object):
     def serialize(self):
         data = {}
         if self.condition_type:
-            data['type'] = self.condition_type
+            data["type"] = self.condition_type
         if self.status:
-            data['status'] = self.status
+            data["status"] = self.status
         if self.last_heartbeat_time:
-            data['lastHeartbeatTime'] = self.last_heartbeat_time
+            data["lastHeartbeatTime"] = self.last_heartbeat_time
         if self.last_transition_time:
-            data['lastTransitionTime'] = self.last_transition_time
+            data["lastTransitionTime"] = self.last_transition_time
         if self.reason:
-            data['reason'] = self.reason
+            data["reason"] = self.reason
         if self.message:
-            data['message'] = self.message
+            data["message"] = self.message
         return data

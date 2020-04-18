@@ -8,7 +8,6 @@
 
 
 class StatefulSetStatus(object):
-
     def __init__(self, model=None):
         super(StatefulSetStatus, self).__init__()
 
@@ -19,10 +18,10 @@ class StatefulSetStatus(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'observedGeneration' in model:
-            self.observed_generation = model['observedGeneration']
-        if 'replicas' in model:
-            self.replicas = model['replicas']
+        if "observedGeneration" in model:
+            self.observed_generation = model["observedGeneration"]
+        if "replicas" in model:
+            self.replicas = model["replicas"]
 
     # ------------------------------------------------------------------------------------- observedGeneration
 
@@ -45,7 +44,7 @@ class StatefulSetStatus(object):
     @replicas.setter
     def replicas(self, r=None):
         if not isinstance(r, int):
-            raise SyntaxError('StatefulSetStatus: replicas: [ {} ] is invalid.'.format(r))
+            raise SyntaxError("StatefulSetStatus: replicas: [ {} ] is invalid.".format(r))
         self._replicas = r
 
     # ------------------------------------------------------------------------------------- serialize
@@ -53,7 +52,7 @@ class StatefulSetStatus(object):
     def serialize(self):
         data = {}
         if self.observed_generation is not None:
-            data['observedGeneration'] = self.observed_generation
+            data["observedGeneration"] = self.observed_generation
         if self.replicas is not None:
-            data['replicas'] = self.replicas
+            data["replicas"] = self.replicas
         return data

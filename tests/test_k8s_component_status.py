@@ -55,7 +55,7 @@ class K8sComponentStatusTest(BaseTest):
         c = _utils.create_component_status(name=name)
         self.assertIsNotNone(c)
         self.assertIsInstance(c, K8sComponentStatus)
-        self.assertEqual('ComponentStatus', c.obj_type)
+        self.assertEqual("ComponentStatus", c.obj_type)
         self.assertEqual(c.name, name)
         self.assertIsInstance(c.config, K8sConfig)
 
@@ -67,7 +67,7 @@ class K8sComponentStatusTest(BaseTest):
         self.assertIsNotNone(c)
         self.assertIsInstance(c, K8sComponentStatus)
         self.assertEqual(c.name, name)
-        self.assertEqual('ComponentStatus', c.obj_type)
+        self.assertEqual("ComponentStatus", c.obj_type)
         self.assertIsInstance(c.config, K8sConfig)
 
     # --------------------------------------------------------------------------------- struct

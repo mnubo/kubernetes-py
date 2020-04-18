@@ -21,7 +21,6 @@ from tests.BaseTest import BaseTest
 
 
 class K8sReplicationControllerTest(BaseTest):
-
     def setUp(self):
         _utils.cleanup_nodes()
         _utils.cleanup_rc()
@@ -66,7 +65,7 @@ class K8sReplicationControllerTest(BaseTest):
         self.assertEqual(rc.name, name)
 
     def test_init_with_config_and_pull_secrets(self):
-        ps = [{'name': 'yomama'}]
+        ps = [{"name": "yomama"}]
         name = "sofat"
         config = K8sConfig(pull_secret=ps, kubeconfig=_utils.kubeconfig_fallback)
         rc = _utils.create_rc(config=config, name=name)
@@ -229,11 +228,7 @@ class K8sReplicationControllerTest(BaseTest):
 
     def test_rc_add_image_pull_secrets(self):
         config = _utils.create_config()
-        config.pull_secret = [
-            {'name': 'secret-name'},
-            {'name': 'other-secret-name'},
-            {'name': 'secret-name'}  # duplicate
-        ]
+        config.pull_secret = [{"name": "secret-name"}, {"name": "other-secret-name"}, {"name": "secret-name"}]  # duplicate
         rc = _utils.create_rc(config=config, name="yo")
         self.assertEqual(2, len(rc.image_pull_secrets))  # duplicate not present
 
@@ -417,8 +412,8 @@ class K8sReplicationControllerTest(BaseTest):
         name = "yorc"
         rc = _utils.create_rc(name=name)
         self.assertIsNotNone(rc.labels)  # 'name' is already a label
-        self.assertIn('name', rc.labels)
-        self.assertEqual(name, rc.labels['name'])
+        self.assertIn("name", rc.labels)
+        self.assertEqual(name, rc.labels["name"])
 
     def test_get_labels(self):
         name = "yorc"
@@ -501,9 +496,9 @@ class K8sReplicationControllerTest(BaseTest):
         name = "yorc"
         rc = _utils.create_rc(name=name)
         self.assertIsNotNone(rc.pod_labels)  # 'name' and 'rc_version' are already labels
-        self.assertIn('name', rc.pod_labels)
-        self.assertIn('rc_version', rc.pod_labels)
-        self.assertEqual(name, rc.pod_labels['name'])
+        self.assertIn("name", rc.pod_labels)
+        self.assertIn("rc_version", rc.pod_labels)
+        self.assertEqual(name, rc.pod_labels["name"])
 
     def test_get_pod_labels(self):
         name = "yorc"
@@ -566,13 +561,13 @@ class K8sReplicationControllerTest(BaseTest):
     def test_get_dns_policy_default(self):
         name = "yorc"
         rc = _utils.create_rc(name=name)
-        self.assertEqual('Default', rc.dns_policy)
+        self.assertEqual("Default", rc.dns_policy)
 
     def test_get_dns_policy(self):
         name = "yorc"
         rc = _utils.create_rc(name=name)
-        rc.dns_policy = 'ClusterFirst'
-        self.assertEqual('ClusterFirst', rc.dns_policy)
+        rc.dns_policy = "ClusterFirst"
+        self.assertEqual("ClusterFirst", rc.dns_policy)
 
     # --------------------------------------------------------------------------------- get pod restart policy
 
@@ -580,12 +575,12 @@ class K8sReplicationControllerTest(BaseTest):
         name = "yorc"
         rc = _utils.create_rc(name=name)
         rp = rc.restart_policy
-        self.assertEqual('Always', rp)  # set to 'Always' by default
+        self.assertEqual("Always", rp)  # set to 'Always' by default
 
     def test_rc_get_pod_restart_policy(self):
         name = "yorc"
         rc = _utils.create_rc(name=name)
-        p = 'OnFailure'
+        p = "OnFailure"
         rc.restart_policy = p
         self.assertEqual(p, rc.restart_policy)
 
@@ -597,9 +592,9 @@ class K8sReplicationControllerTest(BaseTest):
         self.assertIsNotNone(rc.selector)
         self.assertIsInstance(rc.selector, dict)
         self.assertEqual(2, len(rc.selector))
-        self.assertIn('name', rc.selector)
-        self.assertIn('rc_version', rc.selector)
-        self.assertEqual(name, rc.selector['name'])
+        self.assertIn("name", rc.selector)
+        self.assertIn("rc_version", rc.selector)
+        self.assertEqual(name, rc.selector["name"])
 
     # --------------------------------------------------------------------------------- get service account
 
@@ -656,7 +651,7 @@ class K8sReplicationControllerTest(BaseTest):
     def test_set_annotations(self):
         name = "yorc"
         rc = _utils.create_rc(name=name)
-        anns_in = {'k1': 'v1', 'k2': 'v2'}
+        anns_in = {"k1": "v1", "k2": "v2"}
         rc.annotations = anns_in
         anns_out = rc.annotations
         self.assertEqual(anns_in, anns_out)
@@ -679,7 +674,7 @@ class K8sReplicationControllerTest(BaseTest):
     def test_set_labels(self):
         name = "yorc"
         rc = _utils.create_rc(name=name)
-        labels = {'k1': 'v1', 'k2': 'v2'}
+        labels = {"k1": "v1", "k2": "v2"}
         rc.labels = labels
         self.assertEqual(labels, rc.labels)
 
@@ -723,7 +718,7 @@ class K8sReplicationControllerTest(BaseTest):
     def test_set_pod_annotations(self):
         name = "yorc"
         rc = _utils.create_rc(name=name)
-        anns = {'k1': 'v1', 'k2': 'v2'}
+        anns = {"k1": "v1", "k2": "v2"}
         rc.pod_annotations = anns
         self.assertEqual(anns, rc.pod_annotations)
 
@@ -791,7 +786,7 @@ class K8sReplicationControllerTest(BaseTest):
     def test_set_pod_labels(self):
         name = "yorc"
         rc = _utils.create_rc(name=name)
-        labels = {'k1': 'v1', 'k2': 'v2'}
+        labels = {"k1": "v1", "k2": "v2"}
         rc.pod_labels = labels
         self.assertEqual(labels, rc.pod_labels)
 
@@ -813,14 +808,14 @@ class K8sReplicationControllerTest(BaseTest):
     def test_rc_set_pod_restart_policy_invalid_arg(self):
         name = "yorc"
         obj = _utils.create_rc(name=name)
-        p = 'yopolicy'
+        p = "yopolicy"
         with self.assertRaises(SyntaxError):
             obj.restart_policy = p
 
     def test_rc_set_pod_restart_policy(self):
         name = "yorc"
         rc = _utils.create_rc(name=name)
-        p = 'Always'
+        p = "Always"
         rc.restart_policy = p
         self.assertEqual(p, rc.restart_policy)
 
@@ -890,7 +885,7 @@ class K8sReplicationControllerTest(BaseTest):
     def test_set_selector(self):
         name = "yorc"
         rc = _utils.create_rc(name=name)
-        sel = {'k1': 'v1', 'k2': 'v2'}
+        sel = {"k1": "v1", "k2": "v2"}
         rc.selector = sel
         self.assertEqual(sel, rc.selector)
 
@@ -1112,7 +1107,8 @@ class K8sReplicationControllerTest(BaseTest):
         if _utils.is_reachable(rc.config):
             rc.create()
             rollout = K8sReplicationController.rolling_update(
-                config=rc.config, name=name, image=new_image, container_name=cont_name_1)
+                config=rc.config, name=name, image=new_image, container_name=cont_name_1
+            )
             self.assertEqual(2, len(rollout.containers))
             for c in rollout.containers:
                 self.assertIn(c.name, [cont_name_1, cont_name_2])
@@ -1133,15 +1129,8 @@ class K8sReplicationControllerTest(BaseTest):
         rc.add_container(container_2)
         if _utils.is_reachable(rc.config):
             rc.create()
-            K8sReplicationController.scale(
-                config=rc.config,
-                name=name,
-                replicas=count
-            )
-            pods = K8sPod.get_by_labels(
-                config=rc.config,
-                labels=rc.pod_labels
-            )
+            K8sReplicationController.scale(config=rc.config, name=name, replicas=count)
+            pods = K8sPod.get_by_labels(config=rc.config, labels=rc.pod_labels)
 
             self.assertEqual(count, len(pods))
             for p in pods:
@@ -1149,15 +1138,9 @@ class K8sReplicationControllerTest(BaseTest):
                     self.assertIn(c.image, [image_1, image_2])
 
             rollout = K8sReplicationController.rolling_update(
-                config=rc.config,
-                name=name,
-                image=new_image,
-                container_name=cont_name_1
+                config=rc.config, name=name, image=new_image, container_name=cont_name_1
             )
-            pods = K8sPod.get_by_labels(
-                config=rc.config,
-                labels=rollout.pod_labels
-            )
+            pods = K8sPod.get_by_labels(config=rc.config, labels=rollout.pod_labels)
             self.assertEqual(count, len(pods))
             for p in pods:
                 for c in p.containers:
@@ -1178,32 +1161,17 @@ class K8sReplicationControllerTest(BaseTest):
         rc.add_container(container_2)
         if _utils.is_reachable(rc.config):
             rc.create()
-            K8sReplicationController.scale(
-                config=rc.config,
-                name=name,
-                replicas=count
-            )
-            pods = K8sPod.get_by_labels(
-                config=rc.config,
-                labels=rc.pod_labels
-            )
+            K8sReplicationController.scale(config=rc.config, name=name, replicas=count)
+            pods = K8sPod.get_by_labels(config=rc.config, labels=rc.pod_labels)
             self.assertEqual(count, len(pods))
             for p in pods:
                 for c in p.containers:
                     self.assertIn(c.image, [image_1, image_2])
 
-            K8sReplicationController.rolling_update(
-                config=rc.config,
-                name=name,
-                image=new_image,
-                container_name=cont_name_1
-            )
+            K8sReplicationController.rolling_update(config=rc.config, name=name, image=new_image, container_name=cont_name_1)
 
             rollout = rc.get()
-            pods = K8sPod.get_by_labels(
-                config=rc.config,
-                labels=rollout.pod_labels
-            )
+            pods = K8sPod.get_by_labels(config=rc.config, labels=rollout.pod_labels)
             self.assertEqual(count, len(pods))
             for p in pods:
                 for c in p.containers:
@@ -1278,29 +1246,15 @@ class K8sReplicationControllerTest(BaseTest):
 
         if _utils.is_reachable(rc_1.config):
             rc_1.create()
-            K8sReplicationController.scale(
-                config=rc_1.config,
-                name=name_1,
-                replicas=count
-            )
-            pods = K8sPod.get_by_labels(
-                config=rc_1.config,
-                labels=rc_1.pod_labels
-            )
+            K8sReplicationController.scale(config=rc_1.config, name=name_1, replicas=count)
+            pods = K8sPod.get_by_labels(config=rc_1.config, labels=rc_1.pod_labels)
             self.assertEqual(count, len(pods))
             for p in pods:
                 for c in p.containers:
                     self.assertIn(c.image, [image_1, image_2])
 
-            rollout = K8sReplicationController.rolling_update(
-                config=rc_1.config,
-                name=name_1,
-                rc_new=rc_2
-            )
-            pods = K8sPod.get_by_labels(
-                config=rc_1.config,
-                labels=rollout.pod_labels
-            )
+            rollout = K8sReplicationController.rolling_update(config=rc_1.config, name=name_1, rc_new=rc_2)
+            pods = K8sPod.get_by_labels(config=rc_1.config, labels=rollout.pod_labels)
             self.assertEqual(count, len(pods))
             for p in pods:
                 for c in p.containers:
@@ -1332,24 +1286,14 @@ class K8sReplicationControllerTest(BaseTest):
 
         if _utils.is_reachable(rc_1.config):
             rc_1.create()
-            pods = K8sPod.get_by_labels(
-                config=rc_1.config,
-                labels=rc_1.pod_labels
-            )
+            pods = K8sPod.get_by_labels(config=rc_1.config, labels=rc_1.pod_labels)
             self.assertEqual(count, len(pods))
             for p in pods:
                 for c in p.containers:
                     self.assertIn(c.image, [image_1, image_2])
 
-            rollout = K8sReplicationController.rolling_update(
-                config=rc_1.config,
-                name=name_1,
-                rc_new=rc_2
-            )
-            pods = K8sPod.get_by_labels(
-                config=rc_1.config,
-                labels=rollout.pod_labels
-            )
+            rollout = K8sReplicationController.rolling_update(config=rc_1.config, name=name_1, rc_new=rc_2)
+            pods = K8sPod.get_by_labels(config=rc_1.config, labels=rollout.pod_labels)
             self.assertEqual(count, len(pods))
             for p in pods:
                 for c in p.containers:
@@ -1363,7 +1307,7 @@ class K8sReplicationControllerTest(BaseTest):
         k8s_rc.model = rc
         self.assertEqual(1, len(k8s_rc.liveness_probes))
 
-        liveness = k8s_rc.liveness_probes['frontend']
+        liveness = k8s_rc.liveness_probes["frontend"]
         self.assertIsInstance(liveness, Probe)
         self.assertEqual(15, liveness.initial_delay_seconds)
 
@@ -1371,25 +1315,25 @@ class K8sReplicationControllerTest(BaseTest):
             k8s_rc.create()
             self.assertIsInstance(k8s_rc, K8sReplicationController)
 
-            liveness = k8s_rc.liveness_probes['frontend']
+            liveness = k8s_rc.liveness_probes["frontend"]
             liveness.initial_delay_seconds = 60
-            k8s_rc.liveness_probes = ('frontend', liveness)
+            k8s_rc.liveness_probes = ("frontend", liveness)
             k8s_rc.update()
 
             pods = K8sPod.get_by_labels(config=k8s_rc.config, labels=k8s_rc.pod_labels)
             self.assertEqual(2, len(pods))
             for pod in pods:
-                _liveness = pod.liveness_probes['frontend']
+                _liveness = pod.liveness_probes["frontend"]
                 self.assertNotEqual(_liveness.initial_delay_seconds, liveness.initial_delay_seconds)
 
-            k8s_rc.liveness_probes = ('frontend', liveness)
+            k8s_rc.liveness_probes = ("frontend", liveness)
             k8s_rc.rolling_update(config=k8s_rc.config, name=k8s_rc.name, rc_new=k8s_rc)
 
             from_update = k8s_rc.get()
             pods = K8sPod.get_by_labels(config=from_update.config, labels=from_update.pod_labels)
             self.assertEqual(2, len(pods))
             for pod in pods:
-                from_get = pod.liveness_probes['frontend']
+                from_get = pod.liveness_probes["frontend"]
                 self.assertEqual(from_get.initial_delay_seconds, liveness.initial_delay_seconds)
 
     def test_update_from_full_model_with_readiness_probes(self):
@@ -1400,7 +1344,7 @@ class K8sReplicationControllerTest(BaseTest):
         k8s_rc.model = rc
         self.assertEqual(1, len(k8s_rc.liveness_probes))
 
-        readiness = k8s_rc.readiness_probes['frontend']
+        readiness = k8s_rc.readiness_probes["frontend"]
         self.assertIsInstance(readiness, Probe)
         self.assertEqual("/", readiness.http_get_action.path)
 
@@ -1408,17 +1352,17 @@ class K8sReplicationControllerTest(BaseTest):
             k8s_rc.create()
             self.assertIsInstance(k8s_rc, K8sReplicationController)
 
-            readiness = k8s_rc.readiness_probes['frontend']
+            readiness = k8s_rc.readiness_probes["frontend"]
             readiness.http_get_action.path = "/new/path"
-            k8s_rc.readiness_probes = ('frontend', readiness)
+            k8s_rc.readiness_probes = ("frontend", readiness)
             k8s_rc.update()
 
             pods = K8sPod.get_by_labels(config=k8s_rc.config, labels=k8s_rc.pod_labels)
             for pod in pods:
-                _readiness = pod.readiness_probes['frontend']
+                _readiness = pod.readiness_probes["frontend"]
                 self.assertNotEqual(_readiness.http_get_action.path, readiness.http_get_action.path)
 
-            k8s_rc.readiness_probes = ('frontend', readiness)
+            k8s_rc.readiness_probes = ("frontend", readiness)
             with self.assertRaises(TimedOutException):
                 k8s_rc.rolling_update(config=k8s_rc.config, name=k8s_rc.name, rc_new=k8s_rc)
 
@@ -1558,7 +1502,7 @@ class K8sReplicationControllerTest(BaseTest):
         rc.add_container(container)
         if _utils.is_reachable(rc.config):
             rc.create()
-            rc.labels['yomama'] = 'sofat'
+            rc.labels["yomama"] = "sofat"
             rc.update()
             result = rc.get()
             self.assertIsInstance(result, K8sReplicationController)
@@ -1680,12 +1624,12 @@ class K8sReplicationControllerTest(BaseTest):
 
         if _utils.is_reachable(k8s_rc.config):
             k8s_rc.create()
-            probe = k8s_rc.liveness_probes['frontend']
+            probe = k8s_rc.liveness_probes["frontend"]
             probe.period_seconds = 60
-            k8s_rc.liveness_probes = ('frontend', probe)
+            k8s_rc.liveness_probes = ("frontend", probe)
             k8s_rc.update()
             rc = k8s_rc.get()
-            self.assertEqual(60, rc.liveness_probes['frontend'].period_seconds)
+            self.assertEqual(60, rc.liveness_probes["frontend"].period_seconds)
 
     def test_probe_period_seconds_with_model(self):
         data = _constants.frontend()
@@ -1697,7 +1641,7 @@ class K8sReplicationControllerTest(BaseTest):
 
         if _utils.is_reachable(k8s_rc.config):
             k8s_rc.create()
-            liveness = k8s_rc.liveness_probes['frontend']
+            liveness = k8s_rc.liveness_probes["frontend"]
             liveness.period_seconds = 60
             dict = liveness.serialize()
             container = k8s_rc.containers[0]

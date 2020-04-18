@@ -14,7 +14,7 @@ class Taint(object):
     https://kubernetes.io/docs/api-reference/v1.6/#taint-v1-core
     """
 
-    VALID_TAINT_EFFECTS = ['NoSchedule', 'PreferNoSchedule', 'NoExecute']
+    VALID_TAINT_EFFECTS = ["NoSchedule", "PreferNoSchedule", "NoExecute"]
 
     def __init__(self, model=None):
         super(Taint, self).__init__()
@@ -28,14 +28,14 @@ class Taint(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'effect' in model:
-            self.effect = model['effect']
-        if 'key' in model:
-            self.key = model['key']
-        if 'timeAdded' in model:
-            self.time_added = model['timeAdded']
-        if 'value' in model:
-            self.value = model['value']
+        if "effect" in model:
+            self.effect = model["effect"]
+        if "key" in model:
+            self.key = model["key"]
+        if "timeAdded" in model:
+            self.time_added = model["timeAdded"]
+        if "value" in model:
+            self.value = model["value"]
 
     # ------------------------------------------------------------------------------------- effect
 
@@ -46,7 +46,7 @@ class Taint(object):
     @effect.setter
     def effect(self, e=None):
         if not is_valid_string(e) or e not in Taint.VALID_TAINT_EFFECTS:
-            raise SyntaxError('Taint: effect: [ {} ] is invalid.'.format(e))
+            raise SyntaxError("Taint: effect: [ {} ] is invalid.".format(e))
         self._effect = e
 
     # ------------------------------------------------------------------------------------- key
@@ -58,7 +58,7 @@ class Taint(object):
     @key.setter
     def key(self, k=None):
         if not is_valid_string(k):
-            raise SyntaxError('Taint: key: [ {} ] is invalid.'.format(k))
+            raise SyntaxError("Taint: key: [ {} ] is invalid.".format(k))
         self._key = k
 
     # ------------------------------------------------------------------------------------- timeAdded
@@ -82,7 +82,7 @@ class Taint(object):
     @value.setter
     def value(self, v=None):
         if not is_valid_string(v):
-            raise SyntaxError('Taint: value: [ {} ] is invalid.'.format(v))
+            raise SyntaxError("Taint: value: [ {} ] is invalid.".format(v))
         self._value = v
 
     # ------------------------------------------------------------------------------------- serialize
@@ -90,11 +90,11 @@ class Taint(object):
     def serialize(self):
         data = {}
         if self.effect is not None:
-            data['effect'] = self.effect
+            data["effect"] = self.effect
         if self.key is not None:
-            data['key'] = self.key
+            data["key"] = self.key
         if self.time_added is not None:
-            data['timeAdded'] = self.time_added
+            data["timeAdded"] = self.time_added
         if self.value is not None:
-            data['value'] = self.value
+            data["value"] = self.value
         return data

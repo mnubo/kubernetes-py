@@ -24,10 +24,10 @@ class LoadBalancerIngress(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'ip' in model:
-            self.ip = model['ip']
-        if 'hostname' in model:
-            self.hostname = model['hostname']
+        if "ip" in model:
+            self.ip = model["ip"]
+        if "hostname" in model:
+            self.hostname = model["hostname"]
 
     # ------------------------------------------------------------------------------------- ip
 
@@ -38,7 +38,7 @@ class LoadBalancerIngress(object):
     @ip.setter
     def ip(self, ip=None):
         if not is_valid_string(ip):
-            raise SyntaxError('LoadBalancerIngress: ip: [ {} ] is invalid.'.format(ip))
+            raise SyntaxError("LoadBalancerIngress: ip: [ {} ] is invalid.".format(ip))
         self._ip = ip
 
     # ------------------------------------------------------------------------------------- hostname
@@ -50,7 +50,7 @@ class LoadBalancerIngress(object):
     @hostname.setter
     def hostname(self, hostname=None):
         if not is_valid_string(hostname):
-            raise SyntaxError('LoadBalancerIngress: hostname: [ {} ] is invalid.'.format(hostname))
+            raise SyntaxError("LoadBalancerIngress: hostname: [ {} ] is invalid.".format(hostname))
         self._hostname = hostname
 
     # ------------------------------------------------------------------------------------- serialize
@@ -58,7 +58,7 @@ class LoadBalancerIngress(object):
     def serialize(self):
         data = {}
         if self.ip is not None:
-            data['ip'] = self.ip
+            data["ip"] = self.ip
         if self.hostname is not None:
-            data['hostname'] = self.hostname
+            data["hostname"] = self.hostname
         return data

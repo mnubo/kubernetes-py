@@ -24,18 +24,14 @@ from kubernetes_py.utils import is_valid_string
 class K8sReplicationController(K8sObject):
 
     SCALE_WAIT_TIMEOUT_SECONDS = 600
-    DESIRED_REPLICAS_ANNOTATION = 'kubernetes.io/desired-replicas'
+    DESIRED_REPLICAS_ANNOTATION = "kubernetes.io/desired-replicas"
 
     def __init__(self, config=None, name=None, replicas=0):
 
-        super(K8sReplicationController, self).__init__(
-            config=config,
-            obj_type='ReplicationController',
-            name=name
-        )
+        super(K8sReplicationController, self).__init__(config=config, obj_type="ReplicationController", name=name)
 
         rc_version = str(uuid.uuid4())
-        labels = {'name': name, 'rc_version': rc_version}
+        labels = {"name": name, "rc_version": rc_version}
 
         self.labels = labels
         self.pod_labels = labels
@@ -95,8 +91,7 @@ class K8sReplicationController(K8sObject):
 
     def add_container(self, container=None):
         if not isinstance(container, K8sContainer):
-            raise SyntaxError(
-                'K8sReplicationController.add_container() container: [ {0} ] is invalid.'.format(container))
+            raise SyntaxError("K8sReplicationController.add_container() container: [ {0} ] is invalid.".format(container))
 
         containers = self.model.spec.template.spec.containers
         if containers is None:
@@ -112,8 +107,7 @@ class K8sReplicationController(K8sObject):
 
     def add_volume(self, volume=None):
         if not isinstance(volume, K8sVolume):
-            raise SyntaxError(
-                'K8sReplicationController.add_volume() volume: [ {0} ] is invalid.'.format(volume))
+            raise SyntaxError("K8sReplicationController.add_volume() volume: [ {0} ] is invalid.".format(volume))
 
         volumes = self.model.spec.template.spec.volumes
         if volume.model not in volumes:
@@ -197,8 +191,7 @@ class K8sReplicationController(K8sObject):
     @container_image.setter
     def container_image(self, tup=None):
         if not isinstance(tup, tuple):
-            raise SyntaxError(
-                'K8sReplicationController.container_image() must be a tuple of the form (name, image)')
+            raise SyntaxError("K8sReplicationController.container_image() must be a tuple of the form (name, image)")
 
         name, image = tup
         found = list(filter(lambda x: x.name == name, self.containers))
@@ -277,7 +270,7 @@ class K8sReplicationController(K8sObject):
     @pod_name.setter
     def pod_name(self, name=None):
         self.model.spec.template.metadata.name = name
-        self.model.spec.template.metadata.labels['name'] = name
+        self.model.spec.template.metadata.labels["name"] = name
 
     # -------------------------------------------------------------------------------------  pod node name
 
@@ -306,7 +299,7 @@ class K8sReplicationController(K8sObject):
         return self.model.spec.template.spec.dns_policy
 
     @dns_policy.setter
-    def dns_policy(self, policy='Default'):
+    def dns_policy(self, policy="Default"):
         self.model.spec.template.spec.dns_policy = policy
 
     # -------------------------------------------------------------------------------------  observedReplicas
@@ -333,18 +326,15 @@ class K8sReplicationController(K8sObject):
     @liveness_probes.setter
     def liveness_probes(self, tup=None):
         if not isinstance(tup, tuple):
-            raise SyntaxError(
-                'K8sReplicationController: liveness_probes: [ {} ] is invalid.'.format(tup))
+            raise SyntaxError("K8sReplicationController: liveness_probes: [ {} ] is invalid.".format(tup))
 
         c_name, probe = tup
         container_names = [c.name for c in self.model.spec.template.spec.containers]
 
         if c_name not in container_names:
-            raise SyntaxError(
-                'K8sReplicationController: liveness_probes: container [ {} ] not found.'.format(c_name))
+            raise SyntaxError("K8sReplicationController: liveness_probes: container [ {} ] not found.".format(c_name))
         if not isinstance(probe, Probe):
-            raise SyntaxError(
-                'K8sReplicationController: liveness_probe: probe: [ {} ] is invalid.'.format(probe))
+            raise SyntaxError("K8sReplicationController: liveness_probe: probe: [ {} ] is invalid.".format(probe))
 
         containers = []
         for c in self.model.spec.template.spec.containers:
@@ -367,18 +357,15 @@ class K8sReplicationController(K8sObject):
     @readiness_probes.setter
     def readiness_probes(self, tup=None):
         if not isinstance(tup, tuple):
-            raise SyntaxError(
-                'K8sReplicationController: readiness_probes: [ {} ] is invalid.'.format(tup))
+            raise SyntaxError("K8sReplicationController: readiness_probes: [ {} ] is invalid.".format(tup))
 
         c_name, probe = tup
         container_names = [c.name for c in self.model.spec.template.spec.containers]
 
         if c_name not in container_names:
-            raise SyntaxError(
-                'K8sReplicationController: readiness_probes: container [ {} ] not found.'.format(c_name))
+            raise SyntaxError("K8sReplicationController: readiness_probes: container [ {} ] not found.".format(c_name))
         if not isinstance(probe, Probe):
-            raise SyntaxError(
-                'K8sReplicationController: readiness_probes: probe: [ {} ] is invalid.'.format(probe))
+            raise SyntaxError("K8sReplicationController: readiness_probes: probe: [ {} ] is invalid.".format(probe))
 
         containers = []
         for c in self.model.spec.template.spec.containers:
@@ -477,8 +464,8 @@ class K8sReplicationController(K8sObject):
         elapsed_time = time.time() - start_time
         if elapsed_time >= self.SCALE_WAIT_TIMEOUT_SECONDS:  # timeout
             raise TimedOutException(
-                "Timed out scaling RC: [ {0} ] "
-                "to replica count: [ {1} ]".format(self.name, self.desired_replicas))
+                "Timed out scaling RC: [ {0} ] " "to replica count: [ {1} ]".format(self.name, self.desired_replicas)
+            )
 
     # -------------------------------------------------------------------------------------  get pods
 
@@ -489,16 +476,14 @@ class K8sReplicationController(K8sObject):
     # -------------------------------------------------------------------------------------  get by name
 
     @staticmethod
-    def get_by_name(config=None, name=None, name_label='name'):
+    def get_by_name(config=None, name=None, name_label="name"):
         if config is not None and not isinstance(config, K8sConfig):
-            raise SyntaxError(
-                'ReplicationController.get_by_name(): config: [ {0} ] is invalid.'.format(config))
+            raise SyntaxError("ReplicationController.get_by_name(): config: [ {0} ] is invalid.".format(config))
         if not is_valid_string(name):
-            raise SyntaxError(
-                'K8sReplicationController.get_by_name() name: [ {0} ] is invalid.'.format(name))
+            raise SyntaxError("K8sReplicationController.get_by_name() name: [ {0} ] is invalid.".format(name))
 
         rc_list = []
-        data = {'labelSelector': '{0}={1}'.format(name_label, name)}
+        data = {"labelSelector": "{0}={1}".format(name_label, name)}
         rcs = K8sReplicationController(config=config, name=name).get_with_params(data=data)
 
         for rc in rcs:
@@ -560,21 +545,15 @@ class K8sReplicationController(K8sObject):
         """
 
         if name is None:
-            raise SyntaxError(
-                'K8sReplicationController: name: [ {0} ] cannot be None.'.format(name))
+            raise SyntaxError("K8sReplicationController: name: [ {0} ] cannot be None.".format(name))
         if image is None and rc_new is None:
-            raise SyntaxError(
-                "K8sReplicationController: please specify either 'image' or 'rc_new'")
+            raise SyntaxError("K8sReplicationController: please specify either 'image' or 'rc_new'")
         if container_name is not None and image is not None and rc_new is not None:
-            raise SyntaxError(
-                'K8sReplicationController: rc_new is mutually exclusive with an (container_name, image) pair.')
+            raise SyntaxError("K8sReplicationController: rc_new is mutually exclusive with an (container_name, image) pair.")
 
         return K8sReplicationController._rolling_update_init(
-            config=config,
-            name=name,
-            image=image,
-            container_name=container_name,
-            rc_new=rc_new)
+            config=config, name=name, image=image, container_name=container_name, rc_new=rc_new
+        )
 
     @staticmethod
     def _rolling_update_init(config=None, name=None, image=None, container_name=None, rc_new=None):
@@ -593,8 +572,7 @@ class K8sReplicationController(K8sObject):
             pass
 
         if foo is None and foo_next is None:
-            raise NotFoundException(
-                'K8sReplicationController.rolling_update() RC: [ {} ] not found.'.format(name))
+            raise NotFoundException("K8sReplicationController.rolling_update() RC: [ {} ] not found.".format(name))
 
         if foo is not None and foo_next is None:
 
@@ -614,8 +592,9 @@ class K8sReplicationController(K8sObject):
 
             if image and len(foo_old.containers) > 1 and not container_name:
                 raise UnprocessableEntityException(
-                    'K8sReplicationController: Please specify the target container_name '
-                    'on which to apply image: [ {} ].'.format(image))
+                    "K8sReplicationController: Please specify the target container_name "
+                    "on which to apply image: [ {} ].".format(image)
+                )
 
             if len(foo_old.containers) == 1 and not container_name:
                 container_name = foo_old.containers[0].name
@@ -632,9 +611,9 @@ class K8sReplicationController(K8sObject):
 
             new_version = str(uuid.uuid4())
             foo_next.name = name
-            foo_next.add_pod_label(k='name', v=name)
-            foo_next.add_pod_label(k='rc_version', v=new_version)
-            foo_next.selector = {'name': name, 'rc_version': new_version}
+            foo_next.add_pod_label(k="name", v=name)
+            foo_next.add_pod_label(k="rc_version", v=new_version)
+            foo_next.selector = {"name": name, "rc_version": new_version}
             foo_next.add_annotation(K8sReplicationController.DESIRED_REPLICAS_ANNOTATION, foo_old.desired_replicas)
             foo_next.desired_replicas = 0
 
@@ -659,16 +638,10 @@ class K8sReplicationController(K8sObject):
 
         while foo_next.current_replicas < int(desired):
 
-            K8sReplicationController.scale(
-                config=config,
-                name=name,
-                replicas=foo_next.current_replicas + 1)
+            K8sReplicationController.scale(config=config, name=name, replicas=foo_next.current_replicas + 1)
 
             if foo.current_replicas > 0:
-                K8sReplicationController.scale(
-                    config=config,
-                    name=name_old,
-                    replicas=foo.current_replicas - 1)
+                K8sReplicationController.scale(config=config, name=name_old, replicas=foo.current_replicas - 1)
 
             foo.get()
             foo_next.get()
@@ -700,11 +673,11 @@ class K8sReplicationController(K8sObject):
 
         if foo_next is None:
             raise NotFoundException(
-                'K8sReplicationController.rolling_update() '
-                'No pending rollout of RC: [ {} ] to abort; perform a new rollout.'.format(name))
+                "K8sReplicationController.rolling_update() "
+                "No pending rollout of RC: [ {} ] to abort; perform a new rollout.".format(name)
+            )
         if foo is None:
-            raise NotFoundException(
-                'K8sReplicationController.rolling_update() RC: [ {} ] not found.'.format(name))
+            raise NotFoundException("K8sReplicationController.rolling_update() RC: [ {} ] not found.".format(name))
 
     # -------------------------------------------------------------------------------------  bad cattle
 
@@ -715,7 +688,4 @@ class K8sReplicationController(K8sObject):
         """
 
         rc_new = copy.deepcopy(self)
-        return K8sReplicationController.rolling_update(
-            config=self.config,
-            name=self.name,
-            rc_new=rc_new)
+        return K8sReplicationController.rolling_update(config=self.config, name=self.name, rc_new=rc_new)

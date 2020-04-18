@@ -24,14 +24,14 @@ class ReplicaSetStatus(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'replicas' in model:
-            self.replicas = model['replicas']
-        if 'fullyLabeledReplicas' in model:
-            self.fully_labeled_replicas = model['fullyLabeledReplicas']
-        if 'readyReplicas' in model:
-            self.ready_replicas = model['readyReplicas']
-        if 'observedGeneration' in model:
-            self.observed_generation = model['observedGeneration']
+        if "replicas" in model:
+            self.replicas = model["replicas"]
+        if "fullyLabeledReplicas" in model:
+            self.fully_labeled_replicas = model["fullyLabeledReplicas"]
+        if "readyReplicas" in model:
+            self.ready_replicas = model["readyReplicas"]
+        if "observedGeneration" in model:
+            self.observed_generation = model["observedGeneration"]
 
     # ------------------------------------------------------------------------------------- replicas
 
@@ -42,7 +42,7 @@ class ReplicaSetStatus(object):
     @replicas.setter
     def replicas(self, reps=None):
         if not isinstance(reps, int):
-            raise SyntaxError('ReplicaSetStatus: replicas: [ {} ] is invalid.'.format(reps))
+            raise SyntaxError("ReplicaSetStatus: replicas: [ {} ] is invalid.".format(reps))
         self._replicas = reps
 
     # ------------------------------------------------------------------------------------- fullyLabeledReplicas
@@ -54,7 +54,7 @@ class ReplicaSetStatus(object):
     @fully_labeled_replicas.setter
     def fully_labeled_replicas(self, reps=None):
         if not isinstance(reps, int):
-            raise SyntaxError('ReplicaSetStatus: fully_labeled_replicas: [ {} ] is invalid.'.format(reps))
+            raise SyntaxError("ReplicaSetStatus: fully_labeled_replicas: [ {} ] is invalid.".format(reps))
         self._fully_labeled_replicas = reps
 
     # ------------------------------------------------------------------------------------- readyReplicas
@@ -66,7 +66,7 @@ class ReplicaSetStatus(object):
     @ready_replicas.setter
     def ready_replicas(self, reps=None):
         if not isinstance(reps, int):
-            raise SyntaxError('ReplicaSetStatus: ready_replicas: [ {} ] is invalid.'.format(reps))
+            raise SyntaxError("ReplicaSetStatus: ready_replicas: [ {} ] is invalid.".format(reps))
         self._ready_replicas = reps
 
     # ------------------------------------------------------------------------------------- observedGeneration
@@ -78,7 +78,7 @@ class ReplicaSetStatus(object):
     @observed_generation.setter
     def observed_generation(self, og=None):
         if not isinstance(og, int):
-            raise SyntaxError('ReplicaSetStatus: observed_generation: [ {} ] is invalid.'.format(og))
+            raise SyntaxError("ReplicaSetStatus: observed_generation: [ {} ] is invalid.".format(og))
         self._observed_generation = og
 
     # ------------------------------------------------------------------------------------- serialize
@@ -86,11 +86,11 @@ class ReplicaSetStatus(object):
     def serialize(self):
         data = {}
         if self.replicas is not None:
-            data['replicas'] = self.replicas
+            data["replicas"] = self.replicas
         if self.fully_labeled_replicas is not None:
-            data['fullyLabeledReplicas'] = self.fully_labeled_replicas
+            data["fullyLabeledReplicas"] = self.fully_labeled_replicas
         if self.ready_replicas is not None:
-            data['readyReplicas'] = self.ready_replicas
+            data["readyReplicas"] = self.ready_replicas
         if self.observed_generation is not None:
-            data['observedGeneration'] = self.observed_generation
+            data["observedGeneration"] = self.observed_generation
         return data

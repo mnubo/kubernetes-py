@@ -11,13 +11,8 @@ from kubernetes_py.models.v1.Service import Service
 
 
 class K8sService(K8sObject):
-
     def __init__(self, config=None, name=None):
-        super(K8sService, self).__init__(
-            config=config,
-            name=name,
-            obj_type='Service'
-        )
+        super(K8sService, self).__init__(config=config, name=name, obj_type="Service")
 
     # -------------------------------------------------------------------------------------  override
 
@@ -55,13 +50,7 @@ class K8sService(K8sObject):
     def add_port(self, name=None, port=None, target_port=None, protocol=None, node_port=None):
         if isinstance(target_port, int):
             target_port = str(target_port)
-        self.model.add_port(
-            name=name,
-            port=port,
-            target_port=target_port,
-            protocol=protocol,
-            node_port=node_port
-        )
+        self.model.add_port(name=name, port=port, target_port=target_port, protocol=protocol, node_port=node_port)
         return self
 
     def add_selector(self, selector=None):
@@ -177,8 +166,6 @@ class K8sService(K8sObject):
     # ------------------------------------------------------------------------------------- filter
 
     @staticmethod
-    def get_by_name(config=None, name=None, name_label='name'):
-        services = K8sService(config=config, name=name).list(labels={
-            name_label: name
-        })
+    def get_by_name(config=None, name=None, name_label="name"):
+        services = K8sService(config=config, name=name).list(labels={name_label: name})
         return services

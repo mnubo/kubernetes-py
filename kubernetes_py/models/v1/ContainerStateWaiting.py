@@ -25,10 +25,10 @@ class ContainerStateWaiting(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'reason' in model:
-            self.reason = model['reason']
-        if 'message' in model:
-            self.message = model['message']
+        if "reason" in model:
+            self.reason = model["reason"]
+        if "message" in model:
+            self.message = model["message"]
 
     # ------------------------------------------------------------------------------------- reason
 
@@ -39,7 +39,7 @@ class ContainerStateWaiting(object):
     @reason.setter
     def reason(self, msg=None):
         if not is_valid_string(msg):
-            raise SyntaxError('ContainerStateWaiting: reason: [ {0} ] is invalid.'.format(msg))
+            raise SyntaxError("ContainerStateWaiting: reason: [ {0} ] is invalid.".format(msg))
         self._reason = msg
 
     # ------------------------------------------------------------------------------------- message
@@ -51,7 +51,7 @@ class ContainerStateWaiting(object):
     @message.setter
     def message(self, msg=None):
         if not is_valid_string(msg):
-            raise SyntaxError('ContainerStateWaiting: message: [ {0} ] is invalid.'.format(msg))
+            raise SyntaxError("ContainerStateWaiting: message: [ {0} ] is invalid.".format(msg))
         self._message = msg
 
     # ------------------------------------------------------------------------------------- serialize
@@ -59,7 +59,7 @@ class ContainerStateWaiting(object):
     def serialize(self):
         data = {}
         if self.reason is not None:
-            data['reason'] = self.reason
+            data["reason"] = self.reason
         if self.message is not None:
-            data['message'] = self.message
+            data["message"] = self.message
         return data

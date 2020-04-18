@@ -26,12 +26,12 @@ class EnvVar(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'name' in model:
-            self.name = model['name']
-        if 'value' in model:
-            self.value = model['value']
-        if 'valueFrom' in model:
-            self.value_from = EnvVarSource(model['valueFrom'])
+        if "name" in model:
+            self.name = model["name"]
+        if "value" in model:
+            self.value = model["value"]
+        if "valueFrom" in model:
+            self.value_from = EnvVarSource(model["valueFrom"])
 
     # ------------------------------------------------------------------------------------- name
 
@@ -42,7 +42,7 @@ class EnvVar(object):
     @name.setter
     def name(self, n=None):
         if not is_valid_string(n):
-            raise SyntaxError('EnvVar: name: [ {} ] is invalid.'.format(n))
+            raise SyntaxError("EnvVar: name: [ {} ] is invalid.".format(n))
         self._name = n
 
     # ------------------------------------------------------------------------------------- value
@@ -54,7 +54,7 @@ class EnvVar(object):
     @value.setter
     def value(self, v=None):
         if not is_valid_string(v):
-            raise SyntaxError('EnvVar: value: [ {} ] is invalid.'.format(v))
+            raise SyntaxError("EnvVar: value: [ {} ] is invalid.".format(v))
         self._value = v
 
     # ------------------------------------------------------------------------------------- valueFrom
@@ -66,7 +66,7 @@ class EnvVar(object):
     @value_from.setter
     def value_from(self, v=None):
         if not isinstance(v, EnvVarSource):
-            raise SyntaxError('EnvVar: value_from: [ {} ] is invalid.'.format(v))
+            raise SyntaxError("EnvVar: value_from: [ {} ] is invalid.".format(v))
         self._value_from = v
 
     # ------------------------------------------------------------------------------------- serialize
@@ -74,9 +74,9 @@ class EnvVar(object):
     def serialize(self):
         data = {}
         if self.name is not None:
-            data['name'] = self.name
+            data["name"] = self.name
         if self.value is not None:
-            data['value'] = self.value
+            data["value"] = self.value
         if self.value_from is not None:
-            data['valueFrom'] = self.value_from.serialize()
+            data["valueFrom"] = self.value_from.serialize()
         return data

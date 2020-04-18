@@ -24,10 +24,10 @@ class PreferredSchedulingTerm(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'preference' in model:
-            self.preference = NodeSelectorTerm(model['preference'])
-        if 'weight' in model:
-            self.weight = model['weight']
+        if "preference" in model:
+            self.preference = NodeSelectorTerm(model["preference"])
+        if "weight" in model:
+            self.weight = model["weight"]
 
     # ------------------------------------------------------------------------------------- preference
 
@@ -38,7 +38,7 @@ class PreferredSchedulingTerm(object):
     @preference.setter
     def preference(self, p=None):
         if not isinstance(p, NodeSelectorTerm):
-            raise SyntaxError('PreferredSchedulingTerm: preference: [ {} ] is invalid.'.format(p))
+            raise SyntaxError("PreferredSchedulingTerm: preference: [ {} ] is invalid.".format(p))
         self._preference = p
 
     # ------------------------------------------------------------------------------------- weight
@@ -50,9 +50,9 @@ class PreferredSchedulingTerm(object):
     @weight.setter
     def weight(self, w=None):
         if not isinstance(w, int):
-            raise SyntaxError('PreferredSchedulingTerm: weight: [ {} ] is invalid.'.format(w))
+            raise SyntaxError("PreferredSchedulingTerm: weight: [ {} ] is invalid.".format(w))
         if not 1 <= w <= 100:
-            raise SyntaxError('PreferredSchedulingTerm: weight: [ {} ] must be between 1 and 100.'.format(w))
+            raise SyntaxError("PreferredSchedulingTerm: weight: [ {} ] must be between 1 and 100.".format(w))
         self._weight = w
 
     # ------------------------------------------------------------------------------------- serialize
@@ -60,7 +60,7 @@ class PreferredSchedulingTerm(object):
     def serialize(self):
         data = {}
         if self.preference is not None:
-            data['preference'] = self.preference.serialize()
+            data["preference"] = self.preference.serialize()
         if self.weight is not None:
-            data['weight'] = self.weight
+            data["weight"] = self.weight
         return data

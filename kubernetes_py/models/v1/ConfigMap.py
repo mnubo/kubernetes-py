@@ -19,8 +19,8 @@ class ConfigMap(BaseModel):
     def __init__(self, model=None):
         super(ConfigMap, self).__init__()
 
-        self.kind = 'ConfigMap'
-        self.api_version = 'v1'
+        self.kind = "ConfigMap"
+        self.api_version = "v1"
 
         self._data = None
 
@@ -30,8 +30,8 @@ class ConfigMap(BaseModel):
     def _build_with_model(self, model=None):
         super(ConfigMap, self).build_with_model(model)
 
-        if 'data' in model:
-            self.data = model['data']
+        if "data" in model:
+            self.data = model["data"]
 
     # --------------------------------------------------------------------------------- data
 
@@ -42,16 +42,16 @@ class ConfigMap(BaseModel):
     @data.setter
     def data(self, v=None):
         if not isinstance(v, dict):
-            raise SyntaxError('ConfigMap: data: [ {} ] is invalid.'.format(v))
-        pattern = re.compile(r'^[0-9a-zA-Z\-\.\_]+$')
+            raise SyntaxError("ConfigMap: data: [ {} ] is invalid.".format(v))
+        pattern = re.compile(r"^[0-9a-zA-Z\-\.\_]+$")
         for k in v.keys():
             if not pattern.match(k):
-                raise SyntaxError('ConfigMap: data: Key [ {} ] is invalid.'.format(k))
+                raise SyntaxError("ConfigMap: data: Key [ {} ] is invalid.".format(k))
         self._data = v
 
     def serialize(self):
         tmp_data = super(ConfigMap, self).serialize()
 
         if self.data is not None:
-            tmp_data['data'] = self.data
+            tmp_data["data"] = self.data
         return tmp_data

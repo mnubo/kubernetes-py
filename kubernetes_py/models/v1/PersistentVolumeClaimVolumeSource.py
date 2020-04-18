@@ -24,10 +24,10 @@ class PersistentVolumeClaimVolumeSource(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'claimName' in model:
-            self.claim_name = model['claimName']
-        if 'readOnly' in model:
-            self.read_only = model['readOnly']
+        if "claimName" in model:
+            self.claim_name = model["claimName"]
+        if "readOnly" in model:
+            self.read_only = model["readOnly"]
 
     # ------------------------------------------------------------------------------------- claimName
 
@@ -38,7 +38,7 @@ class PersistentVolumeClaimVolumeSource(object):
     @claim_name.setter
     def claim_name(self, name=None):
         if not is_valid_string(name):
-            raise SyntaxError('PersistentVolumeClaimVolumeSource: claim_name: [ {} ] is invalid.'.format(name))
+            raise SyntaxError("PersistentVolumeClaimVolumeSource: claim_name: [ {} ] is invalid.".format(name))
         self._claim_name = name
 
     # ------------------------------------------------------------------------------------- readOnly
@@ -50,7 +50,7 @@ class PersistentVolumeClaimVolumeSource(object):
     @read_only.setter
     def read_only(self, ro=None):
         if not isinstance(ro, bool):
-            raise SyntaxError('PersistentVolumeClaimVolumeSource: read_only: [ {} ] is invalid.'.format(ro))
+            raise SyntaxError("PersistentVolumeClaimVolumeSource: read_only: [ {} ] is invalid.".format(ro))
         self._read_only = ro
 
     # ------------------------------------------------------------------------------------- serialize
@@ -58,7 +58,7 @@ class PersistentVolumeClaimVolumeSource(object):
     def serialize(self):
         data = {}
         if self.claim_name is not None:
-            data['claimName'] = self.claim_name
+            data["claimName"] = self.claim_name
         if self.read_only is not None:
-            data['readOnly'] = self.read_only
+            data["readOnly"] = self.read_only
         return data

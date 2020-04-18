@@ -20,7 +20,6 @@ from kubernetes_py.models.v1.ServiceStatus import ServiceStatus
 
 
 class K8sServiceTest(BaseTest):
-
     def setUp(self):
         _utils.cleanup_services()
 
@@ -55,7 +54,7 @@ class K8sServiceTest(BaseTest):
         svc = _utils.create_service(name=name)
         self.assertIsNotNone(svc)
         self.assertIsInstance(svc, K8sService)
-        self.assertEqual('Service', svc.obj_type)
+        self.assertEqual("Service", svc.obj_type)
         self.assertEqual(svc.name, name)
         self.assertIsInstance(svc.config, K8sConfig)
 
@@ -67,7 +66,7 @@ class K8sServiceTest(BaseTest):
         self.assertIsNotNone(svc)
         self.assertIsInstance(svc, K8sService)
         self.assertEqual(svc.name, name)
-        self.assertEqual('Service', svc.obj_type)
+        self.assertEqual("Service", svc.obj_type)
         self.assertIsInstance(svc.config, K8sConfig)
         self.assertEqual(nspace, svc.config.namespace)
 
@@ -197,15 +196,9 @@ class K8sServiceTest(BaseTest):
         port = 666
         port_name = "yoport"
         target_port = 666
-        protocol = 'TCP'
+        protocol = "TCP"
         node_port = 666
-        svc.add_port(
-            port=port,
-            name=port_name,
-            target_port=target_port,
-            protocol=protocol,
-            node_port=node_port
-        )
+        svc.add_port(port=port, name=port_name, target_port=target_port, protocol=protocol, node_port=node_port)
         self.assertEqual(1, len(svc.ports))
         self.assertEqual(port_name, svc.ports[0].name)
         self.assertEqual(port, svc.ports[0].port)
@@ -231,7 +224,7 @@ class K8sServiceTest(BaseTest):
     def test_add_selector(self):
         name = "yoservice"
         svc = _utils.create_service(name=name)
-        sel = {'abc': 'def'}
+        sel = {"abc": "def"}
         svc.add_selector(selector=sel)
         self.assertEqual(sel, svc.selector)
 
@@ -368,12 +361,12 @@ class K8sServiceTest(BaseTest):
         name = "yoservice"
         svc = _utils.create_service(name=name)
         self.assertIsNotNone(svc.labels)  # 'name' is already a label
-        self.assertIn('name', svc.labels)
+        self.assertIn("name", svc.labels)
 
     def test_get_labels(self):
         name = "yoservice"
         svc = _utils.create_service(name=name)
-        labels = {'yokey': 'yovalue'}
+        labels = {"yokey": "yovalue"}
         svc.labels = labels
         self.assertEqual(labels, svc.labels)
 
@@ -395,14 +388,14 @@ class K8sServiceTest(BaseTest):
     def test_set_annotations_str_int(self):
         name = "yoservice"
         svc = _utils.create_service(name=name)
-        labels = {'yokey': 1234}
+        labels = {"yokey": 1234}
         svc.annotations = labels
         self.assertEqual(svc.annotations, labels)
 
     def test_set_annotations(self):
         name = "yoservice"
         svc = _utils.create_service(name=name)
-        anns = {'yokey': 'yovalue'}
+        anns = {"yokey": "yovalue"}
         svc.annotations = anns
         self.assertEqual(anns, svc.annotations)
 
@@ -424,7 +417,7 @@ class K8sServiceTest(BaseTest):
     def test_set_cluster_ip_invalid_ip_address(self):
         name = "yoservice"
         svc = _utils.create_service(name=name)
-        svc.add_port('http', 80, 80, 'TCP')
+        svc.add_port("http", 80, 80, "TCP")
         if _utils.is_reachable(svc.config):
             svc.create()
             ip = "192.168.00000.1234345"
@@ -486,14 +479,14 @@ class K8sServiceTest(BaseTest):
     def test_set_labels_invalid_dict(self):
         name = "yoservice"
         svc = _utils.create_service(name=name)
-        labels = {'yokey': 1234}
+        labels = {"yokey": 1234}
         with self.assertRaises(SyntaxError):
             svc.labels = labels
 
     def test_set_labels(self):
         name = "yoservice"
         svc = _utils.create_service(name=name)
-        labels = {'yokey': 'yovalue'}
+        labels = {"yokey": "yovalue"}
         svc.labels = labels
         self.assertEqual(labels, svc.labels)
 
@@ -566,14 +559,14 @@ class K8sServiceTest(BaseTest):
     def test_set_session_affinity_invalid_string(self):
         name = "yoservice"
         svc = _utils.create_service(name=name)
-        aff = 'yoaffinity'
+        aff = "yoaffinity"
         with self.assertRaises(SyntaxError):
             svc.session_affinity = aff
 
     def test_set_session_affinity(self):
         name = "yoservice"
         svc = _utils.create_service(name=name)
-        for i in ['None', 'ClientIP']:
+        for i in ["None", "ClientIP"]:
             svc.session_affinity = i
             self.assertEqual(i, svc.session_affinity)
 
@@ -602,7 +595,7 @@ class K8sServiceTest(BaseTest):
     def test_set_service_type(self):
         name = "yoservice"
         svc = _utils.create_service(name=name)
-        for i in ['ClusterIP', 'NodePort', 'LoadBalancer']:
+        for i in ["ClusterIP", "NodePort", "LoadBalancer"]:
             svc.type = i
             self.assertEqual(i, svc.type)
 
@@ -712,7 +705,7 @@ class K8sServiceTest(BaseTest):
         name = "yo-{0}".format(str(uuid.uuid4().hex[:16]))
         svc = _utils.create_service(name=name)
         svc.add_port(name="redis", port=5432, target_port=5432, protocol="tcp")
-        ip = '192.168.123.123'
+        ip = "192.168.123.123"
         if _utils.is_reachable(svc.config):
             svc.create()
             svc.external_ips = [ip]
@@ -723,45 +716,22 @@ class K8sServiceTest(BaseTest):
         data = {
             "kind": "Service",
             "apiVersion": "v1",
-            "metadata": {
-                "name": "frontend",
-                "namespace": "default",
-                "labels": {
-                    "name": "frontend"
-                }
-            },
+            "metadata": {"name": "frontend", "namespace": "default", "labels": {"name": "frontend"}},
             "spec": {
-                "ports": [
-                    {
-                        "protocol": "TCP",
-                        "port": 8082,
-                        "targetPort": "feport",
-                        "nodePort": 8082
-                    }
-                ],
-                "selector": {
-                    "name": "frontend"
-                },
+                "ports": [{"protocol": "TCP", "port": 8082, "targetPort": "feport", "nodePort": 8082}],
+                "selector": {"name": "frontend"},
                 "clusterIP": "10.250.1.27",
                 "type": "NodePort",
-                "sessionAffinity": "None"
+                "sessionAffinity": "None",
             },
-            "status": {
-                "loadBalancer": {}
-            }
+            "status": {"loadBalancer": {}},
         }
 
         svc = Service(data)
         k8s_service = _utils.create_service(name=svc.name)
         k8s_service.model = svc
 
-        k8s_service.add_port(
-            name="frontend",
-            port=8082,
-            target_port="feport",
-            node_port=8082,
-            protocol='TCP'
-        )
+        k8s_service.add_port(name="frontend", port=8082, target_port="feport", node_port=8082, protocol="TCP")
 
         self.assertEqual(1, len(k8s_service.ports))
 
@@ -792,35 +762,19 @@ class K8sServiceTest(BaseTest):
 
     def test_system_service(self):
         config = _utils.create_config()
-        config.namespace = 'kube-system'
+        config.namespace = "kube-system"
 
         service = _utils.create_service(config, name="my-kubernetes-dashboard")
-        service.type = 'ClusterIP'
-        service.add_port(
-            port=80,
-            target_port="k8s-dashport",
-            name="kubernetes-dashboard",
-            protocol="TCP"
-        )
-        service.selector = {'k8s-app': "kubernetes-dashboard"}
-        service.labels = {
-            'k8s-app': "kubernetes-dashboard",
-            'kubernetes.io/cluster-service': 'true'
-        }
+        service.type = "ClusterIP"
+        service.add_port(port=80, target_port="k8s-dashport", name="kubernetes-dashboard", protocol="TCP")
+        service.selector = {"k8s-app": "kubernetes-dashboard"}
+        service.labels = {"k8s-app": "kubernetes-dashboard", "kubernetes.io/cluster-service": "true"}
 
         service2 = _utils.create_service(config, name="my-kubernetes-dashboard")
-        service2.type = 'ClusterIP'
-        service2.add_port(
-            port=80,
-            target_port="k8s-dashport",
-            name="kubernetes-dashboard",
-            protocol="TCP"
-        )
-        service2.selector = {'k8s-app': "kubernetes-dashboard"}
-        service2.labels = {
-            'k8s-app': "kubernetes-dashboard",
-            'kubernetes.io/cluster-service': 'true'
-        }
+        service2.type = "ClusterIP"
+        service2.add_port(port=80, target_port="k8s-dashport", name="kubernetes-dashboard", protocol="TCP")
+        service2.selector = {"k8s-app": "kubernetes-dashboard"}
+        service2.labels = {"k8s-app": "kubernetes-dashboard", "kubernetes.io/cluster-service": "true"}
 
         if _utils.is_reachable(service.config):
             service.create()

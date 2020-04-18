@@ -25,11 +25,7 @@ class K8sPod(K8sObject):
     POD_READY_TIMEOUT_SECONDS = 120
 
     def __init__(self, config=None, name=None):
-        super(K8sPod, self).__init__(
-            config=config,
-            obj_type='Pod',
-            name=name
-        )
+        super(K8sPod, self).__init__(config=config, obj_type="Pod", name=name)
         if self.config.pull_secret is not None:
             self.add_image_pull_secrets(self.config.pull_secret)
 
@@ -66,15 +62,13 @@ class K8sPod(K8sObject):
             time.sleep(0.2)
             elapsed_time = time.time() - start_time
             if elapsed_time >= self.POD_READY_TIMEOUT_SECONDS:
-                raise TimedOutException(
-                    "Timed out on Pod readiness: [ {0} ]".format(self.name))
+                raise TimedOutException("Timed out on Pod readiness: [ {0} ]".format(self.name))
 
     # -------------------------------------------------------------------------------------  add
 
     def add_container(self, container=None):
         if not isinstance(container, K8sContainer):
-            raise SyntaxError(
-                'K8sPod.add_container() container: [ {0} ] is invalid.'.format(container))
+            raise SyntaxError("K8sPod.add_container() container: [ {0} ] is invalid.".format(container))
 
         containers = self.model.spec.containers
         if container not in containers:
@@ -136,29 +130,28 @@ class K8sPod(K8sObject):
             conditions = self.status.conditions
             conditions_ok = 0
             for cond in conditions:
-                if cond.status == 'True':
+                if cond.status == "True":
                     conditions_ok += 1
-            if pod_phase == 'Running' and len(conditions) == conditions_ok:
+            if pod_phase == "Running" and len(conditions) == conditions_ok:
                 return True
         return False
 
     # ------------------------------------------------------------------------------------- logs
 
     def get_log(self, container=None):
-        url = '{base}/{name}/log'.format(base=self.base_url, name=self.name)
+        url = "{base}/{name}/log".format(base=self.base_url, name=self.name)
         if container:
             url = "{url}?container={container}".format(url=url, container=container)
 
-        state = self.request(method='GET', url=url)
-        if not state.get('success'):
-            status = state.get('status', '')
-            reason = state.get('data', dict()).get('message', None)
-            message = 'K8sPod: GET [ {0}:{1} ] failed: HTTP {2} : {3} '.format(
-                self.obj_type, self.name, status, reason)
+        state = self.request(method="GET", url=url)
+        if not state.get("success"):
+            status = state.get("status", "")
+            reason = state.get("data", dict()).get("message", None)
+            message = "K8sPod: GET [ {0}:{1} ] failed: HTTP {2} : {3} ".format(self.obj_type, self.name, status, reason)
             raise NotFoundException(message)
 
-        if 'data' in state and state.get('data') is not None:
-            logs = state.get('data').splitlines()
+        if "data" in state and state.get("data") is not None:
+            logs = state.get("data").splitlines()
             return logs
         return ""
 
@@ -167,18 +160,17 @@ class K8sPod(K8sObject):
     def get_metrics(self):
         bu = BaseUrls(api=self.config.version, namespace=self.config.namespace)
         base_url = bu.get_base_url(object_type="PodMetrics")
-        url = '{base}/{name}'.format(base=base_url, name=self.name)
+        url = "{base}/{name}".format(base=base_url, name=self.name)
 
-        state = self.request(method='GET', url=url)
-        if not state.get('success'):
-            status = state.get('status', '')
-            reason = state.get('data', dict()).get('message', None)
-            message = 'K8sPod: GET [ {0}:{1} ] failed: HTTP {2} : {3} '.format(
-                self.obj_type, self.name, status, reason)
+        state = self.request(method="GET", url=url)
+        if not state.get("success"):
+            status = state.get("status", "")
+            reason = state.get("data", dict()).get("message", None)
+            message = "K8sPod: GET [ {0}:{1} ] failed: HTTP {2} : {3} ".format(self.obj_type, self.name, status, reason)
             raise NotFoundException(message)
 
-        if 'data' in state and state.get('data') is not None:
-            return state.get('data')
+        if "data" in state and state.get("data") is not None:
+            return state.get("data")
         return ""
 
     # ------------------------------------------------------------------------------------- set
@@ -292,17 +284,14 @@ class K8sPod(K8sObject):
     @liveness_probes.setter
     def liveness_probes(self, tup=None):
         if not isinstance(tup, tuple):
-            raise SyntaxError(
-                'K8sPod: liveness_probes: [ {} ] is invalid.'.format(tup))
+            raise SyntaxError("K8sPod: liveness_probes: [ {} ] is invalid.".format(tup))
 
         c_name, probe = tup
         container_names = [c.name for c in self.model.spec.containers]
         if c_name not in container_names:
-            raise SyntaxError(
-                'K8sPod: liveness_probes: container [ {} ] not found.'.format(c_name))
+            raise SyntaxError("K8sPod: liveness_probes: container [ {} ] not found.".format(c_name))
         if not isinstance(probe, Probe):
-            raise SyntaxError(
-                'K8sPod: liveness_probe: probe: [ {} ] is invalid.'.format(probe))
+            raise SyntaxError("K8sPod: liveness_probe: probe: [ {} ] is invalid.".format(probe))
 
         containers = []
         for c in self.model.spec.containers:
@@ -325,17 +314,14 @@ class K8sPod(K8sObject):
     @readiness_probes.setter
     def readiness_probes(self, tup=None):
         if not isinstance(tup, tuple):
-            raise SyntaxError(
-                'K8sPod: readiness_probes: [ {} ] is invalid.'.format(tup))
+            raise SyntaxError("K8sPod: readiness_probes: [ {} ] is invalid.".format(tup))
 
         c_name, probe = tup
         container_names = [c.name for c in self.model.spec.template.spec.containers]
         if c_name not in container_names:
-            raise SyntaxError(
-                'K8sPod: readiness_probes: container [ {} ] not found.'.format(c_name))
+            raise SyntaxError("K8sPod: readiness_probes: container [ {} ] not found.".format(c_name))
         if not isinstance(probe, Probe):
-            raise SyntaxError(
-                'K8sPod: readiness_probes: probe: [ {} ] is invalid.'.format(probe))
+            raise SyntaxError("K8sPod: readiness_probes: probe: [ {} ] is invalid.".format(probe))
 
         containers = []
         for c in self.model.spec.template.spec.containers:
@@ -458,23 +444,19 @@ class K8sPod(K8sObject):
     # ------------------------------------------------------------------------------------- filtering
 
     @classmethod
-    def get_by_name(cls, config=None, name=None, name_label='name'):
+    def get_by_name(cls, config=None, name=None, name_label="name"):
         if not is_valid_string(name):
-            raise SyntaxError(
-                'K8sPod.get_by_name(): name: [ {0} ] is invalid.'.format(name))
-        return cls.get_by_labels(config=config, labels={
-            name_label: name,
-        })
+            raise SyntaxError("K8sPod.get_by_name(): name: [ {0} ] is invalid.".format(name))
+        return cls.get_by_labels(config=config, labels={name_label: name,})
 
     @staticmethod
     def get_by_labels(config=None, labels=None):
         if config is None:
             config = K8sConfig()
         if not is_valid_dict(labels):
-            raise SyntaxError(
-                'K8sPod.get_by_labels(): labels: [ {} ] is invalid.'.format(labels))
+            raise SyntaxError("K8sPod.get_by_labels(): labels: [ {} ] is invalid.".format(labels))
 
-        pods = K8sPod(config=config, name='whatever').list(labels=labels)
+        pods = K8sPod(config=config, name="whatever").list(labels=labels)
 
         return pods
 
@@ -483,11 +465,10 @@ class K8sPod(K8sObject):
         if config is None:
             config = K8sConfig()
         if not is_valid_string(ip):
-            raise SyntaxError(
-                'K8sPod.get_by_pod_ip(): ip: [ {0} ] is invalid.'.format(ip))
+            raise SyntaxError("K8sPod.get_by_pod_ip(): ip: [ {0} ] is invalid.".format(ip))
 
         found = None
-        pods = K8sPod(config=config, name='throwaway').list(labels=labels)
+        pods = K8sPod(config=config, name="throwaway").list(labels=labels)
 
         for pod in pods:
             try:

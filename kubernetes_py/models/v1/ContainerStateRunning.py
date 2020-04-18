@@ -24,8 +24,8 @@ class ContainerStateRunning(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'startedAt' in model:
-            self.started_at = model['startedAt']
+        if "startedAt" in model:
+            self.started_at = model["startedAt"]
 
     # ------------------------------------------------------------------------------------- reason
 
@@ -36,7 +36,7 @@ class ContainerStateRunning(object):
     @started_at.setter
     def started_at(self, time=None):
         if not is_valid_string(time):
-            raise SyntaxError('CoùntainerStateRunning: started_at: [ {0} ] is invalid.'.format(time))
+            raise SyntaxError("CoùntainerStateRunning: started_at: [ {0} ] is invalid.".format(time))
         self._started_at = time
 
     # ------------------------------------------------------------------------------------- serialize
@@ -44,5 +44,5 @@ class ContainerStateRunning(object):
     def serialize(self):
         data = {}
         if self.started_at is not None:
-            data['startedAt'] = self.started_at
+            data["startedAt"] = self.started_at
         return data

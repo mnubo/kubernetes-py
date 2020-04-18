@@ -25,12 +25,12 @@ class LabelSelectorRequirement(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'key' in model:
-            self.key = model['key']
-        if 'operator' in model:
-            self.operator = model['operator']
-        if 'values' in model:
-            self.values = model['values']
+        if "key" in model:
+            self.key = model["key"]
+        if "operator" in model:
+            self.operator = model["operator"]
+        if "values" in model:
+            self.values = model["values"]
 
     # ------------------------------------------------------------------------------------- key
 
@@ -41,7 +41,7 @@ class LabelSelectorRequirement(object):
     @key.setter
     def key(self, key=None):
         if not is_valid_string(key):
-            raise SyntaxError('LabelSelectorRequirements: key: [ {} ] is invalid.'.format(key))
+            raise SyntaxError("LabelSelectorRequirements: key: [ {} ] is invalid.".format(key))
         self._key = key
 
     # ------------------------------------------------------------------------------------- operator
@@ -53,7 +53,7 @@ class LabelSelectorRequirement(object):
     @operator.setter
     def operator(self, op=None):
         if not is_valid_string(op):
-            raise SyntaxError('LabelSelectorRequirements: operator: [ {} ] is invalid.'.format(op))
+            raise SyntaxError("LabelSelectorRequirements: operator: [ {} ] is invalid.".format(op))
         self._operator = op
 
     # ------------------------------------------------------------------------------------- values
@@ -65,7 +65,7 @@ class LabelSelectorRequirement(object):
     @values.setter
     def values(self, v=None):
         if not is_valid_list(v, str):
-            raise SyntaxError('LabelSelectorRequirements: values: [ {} ] is invalid.'.format(v))
+            raise SyntaxError("LabelSelectorRequirements: values: [ {} ] is invalid.".format(v))
         self._values = v
 
     # ------------------------------------------------------------------------------------- serialize
@@ -73,9 +73,9 @@ class LabelSelectorRequirement(object):
     def serialize(self):
         data = {}
         if self.key is not None:
-            data['key'] = self.key
+            data["key"] = self.key
         if self.operator is not None:
-            data['operator'] = self.operator
+            data["operator"] = self.operator
         if self.values is not None:
-            data['values'] = self.values
+            data["values"] = self.values
         return data

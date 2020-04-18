@@ -19,7 +19,6 @@ from tests.BaseTest import BaseTest
 
 
 class K8sCronJobTests(BaseTest):
-
     def setUp(self):
         _utils.cleanup_cronjobs()
         _utils.cleanup_jobs()
@@ -84,11 +83,7 @@ class K8sCronJobTests(BaseTest):
 
     def test_add_image_pull_secrets(self):
         cfg = _utils.create_config()
-        cfg.pull_secret = [
-            {'name': 'secret-name'},
-            {'name': 'other-secret-name'},
-            {'name': 'secret-name'}  # duplicate
-        ]
+        cfg.pull_secret = [{"name": "secret-name"}, {"name": "other-secret-name"}, {"name": "secret-name"}]  # duplicate
         cj = _utils.create_cronjob(config=cfg, name="yo")
         self.assertEqual(2, len(cj.image_pull_secrets))  # duplicate not present
 
@@ -114,7 +109,7 @@ class K8sCronJobTests(BaseTest):
         if _utils.is_reachable(k8s_cronjob.config):
             k8s_cronjob.create()
             self.assertIsInstance(k8s_cronjob, K8sCronJob)
-            self.assertEqual('Allow', k8s_cronjob.concurrency_policy)
+            self.assertEqual("Allow", k8s_cronjob.concurrency_policy)
 
     def test_api_create_long_running_no_concurrency(self):
         name = "job-{}".format(uuid.uuid4())
@@ -128,7 +123,7 @@ class K8sCronJobTests(BaseTest):
         if _utils.is_reachable(k8s_cronjob.config):
             k8s_cronjob.create()
             self.assertIsInstance(k8s_cronjob, K8sCronJob)
-            self.assertEqual('Forbid', k8s_cronjob.concurrency_policy)
+            self.assertEqual("Forbid", k8s_cronjob.concurrency_policy)
             self.assertEqual(10, k8s_cronjob.starting_deadline_seconds)
 
     # --------------------------------------------------------------------------------- api - list

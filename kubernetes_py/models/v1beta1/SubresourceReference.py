@@ -26,14 +26,14 @@ class SubresourceReference(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'kind' in model:
-            self.kind = model['kind']
-        if 'name' in model:
-            self.name = model['name']
-        if 'apiVersion' in model:
-            self.api_version = model['apiVersion']
-        if 'subresource' in model:
-            self.subresource = model['subresource']
+        if "kind" in model:
+            self.kind = model["kind"]
+        if "name" in model:
+            self.name = model["name"]
+        if "apiVersion" in model:
+            self.api_version = model["apiVersion"]
+        if "subresource" in model:
+            self.subresource = model["subresource"]
 
     # ------------------------------------------------------------------------------------- kind
 
@@ -44,9 +44,9 @@ class SubresourceReference(object):
     @kind.setter
     def kind(self, k=None):
         if not is_valid_string(k):
-            raise SyntaxError('SubresourceReference: kind: [ {} ] is invalid.'.format(k))
+            raise SyntaxError("SubresourceReference: kind: [ {} ] is invalid.".format(k))
         self._kind = k
-        
+
     # ------------------------------------------------------------------------------------- name
 
     @property
@@ -56,7 +56,7 @@ class SubresourceReference(object):
     @name.setter
     def name(self, n=None):
         if not is_valid_string(n):
-            raise SyntaxError('SubresourceReference: name: [ {} ] is invalid.'.format(n))
+            raise SyntaxError("SubresourceReference: name: [ {} ] is invalid.".format(n))
         self._name = n
 
     # ------------------------------------------------------------------------------------- apiVersion
@@ -68,7 +68,7 @@ class SubresourceReference(object):
     @api_version.setter
     def api_version(self, v=None):
         if not is_valid_string(v):
-            raise SyntaxError('SubresourceReference: api_version: [ {} ] is invalid.'.format(v))
+            raise SyntaxError("SubresourceReference: api_version: [ {} ] is invalid.".format(v))
         self._api_version = v
 
     # ------------------------------------------------------------------------------------- subresource
@@ -80,7 +80,7 @@ class SubresourceReference(object):
     @subresource.setter
     def subresource(self, s=None):
         if not is_valid_string(s):
-            raise SyntaxError('SubresourceReference: subresource: [ {} ] is invalid.'.format(s))
+            raise SyntaxError("SubresourceReference: subresource: [ {} ] is invalid.".format(s))
         self._subresource = s
 
     # ------------------------------------------------------------------------------------- serialize
@@ -88,11 +88,11 @@ class SubresourceReference(object):
     def serialize(self):
         data = {}
         if self.kind is not None:
-            data['kind'] = self.kind
+            data["kind"] = self.kind
         if self.name is not None:
-            data['name'] = self.name
+            data["name"] = self.name
         if self.api_version is not None:
-            data['apiVersion'] = self.api_version
+            data["apiVersion"] = self.api_version
         if self.subresource is not None:
-            data['subresource'] = self.subresource
+            data["subresource"] = self.subresource
         return data

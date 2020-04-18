@@ -24,8 +24,8 @@ class HostPathVolumeSource(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'path' in model:
-            self.path = model['path']
+        if "path" in model:
+            self.path = model["path"]
 
     # ------------------------------------------------------------------------------------- path
 
@@ -36,7 +36,7 @@ class HostPathVolumeSource(object):
     @path.setter
     def path(self, path=None):
         if not is_valid_string(path):
-            raise SyntaxError('HostPathVolumeSource: path: [ {0} ] is invalid.'.format(path))
+            raise SyntaxError("HostPathVolumeSource: path: [ {0} ] is invalid.".format(path))
         self._path = path
 
     # ------------------------------------------------------------------------------------- serialize
@@ -44,5 +44,5 @@ class HostPathVolumeSource(object):
     def serialize(self):
         data = {}
         if self.path is not None:
-            data['path'] = self.path
+            data["path"] = self.path
         return data

@@ -38,55 +38,54 @@ class NodeStatus(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'capacity' in model:
-            self.capacity = model['capacity']
-        if 'allocatable' in model:
-            self.allocatable = model['allocatable']
-        if 'phase' in model:
-            self.phase = model['phase']
-        if 'conditions' in model:
-            if isinstance(model['conditions'], list):
+        if "capacity" in model:
+            self.capacity = model["capacity"]
+        if "allocatable" in model:
+            self.allocatable = model["allocatable"]
+        if "phase" in model:
+            self.phase = model["phase"]
+        if "conditions" in model:
+            if isinstance(model["conditions"], list):
                 conditions = list()
-                for c in model['conditions']:
+                for c in model["conditions"]:
                     conditions.append(NodeCondition(c))
                 self.conditions = conditions
             else:
-                raise SyntaxError('NodeStatus: conditions model: [ {0} ] is invalid.'.format(model['conditions']))
-        if 'addresses' in model:
-            if isinstance(model['addresses'], list):
+                raise SyntaxError("NodeStatus: conditions model: [ {0} ] is invalid.".format(model["conditions"]))
+        if "addresses" in model:
+            if isinstance(model["addresses"], list):
                 addresses = list()
-                for a in model['addresses']:
+                for a in model["addresses"]:
                     addresses.append(NodeAddress(a))
                 self.addresses = addresses
             else:
-                raise SyntaxError('NodeStatus: addresses model: [ {0} ] is invalid.'.format(model['addresses']))
-        if 'daemonEndpoints' in model:
-            if isinstance(model['daemonEndpoints'], dict):
-                self.daemon_endpoints = NodeDaemonEndpoints(model['daemonEndpoints'])
-        if 'nodeInfo' in model:
-            if isinstance(model['nodeInfo'], dict):
-                self.node_info = NodeSystemInfo(model['nodeInfo'])
-        if 'images' in model:
-            if isinstance(model['images'], list):
+                raise SyntaxError("NodeStatus: addresses model: [ {0} ] is invalid.".format(model["addresses"]))
+        if "daemonEndpoints" in model:
+            if isinstance(model["daemonEndpoints"], dict):
+                self.daemon_endpoints = NodeDaemonEndpoints(model["daemonEndpoints"])
+        if "nodeInfo" in model:
+            if isinstance(model["nodeInfo"], dict):
+                self.node_info = NodeSystemInfo(model["nodeInfo"])
+        if "images" in model:
+            if isinstance(model["images"], list):
                 images = list()
-                for i in model['images']:
+                for i in model["images"]:
                     images.append(ContainerImage(i))
                 self.images = images
             else:
-                raise SyntaxError('NodeStatus: images model: [ {0} ] is invalid.'.format(model['images']))
-        if 'volumesInUse' in model:
-            if isinstance(model['volumesInUse'], list):
-                self.volumes_in_use = model['volumesInUse']
-        if 'volumesAttached' in model:
-            if isinstance(model['volumesAttached'], list):
+                raise SyntaxError("NodeStatus: images model: [ {0} ] is invalid.".format(model["images"]))
+        if "volumesInUse" in model:
+            if isinstance(model["volumesInUse"], list):
+                self.volumes_in_use = model["volumesInUse"]
+        if "volumesAttached" in model:
+            if isinstance(model["volumesAttached"], list):
                 volumes = list()
-                for v in model['volumesAttached']:
+                for v in model["volumesAttached"]:
                     volumes.append(AttachedVolume(v))
                 self.volumes_attached = volumes
             else:
-                raise SyntaxError('NodeStatus: volumesAttached model: [ {0} ] is invalid.'
-                                  .format(model['volumesAttached']))
-            self.volumes_attached = model['volumesAttached']
+                raise SyntaxError("NodeStatus: volumesAttached model: [ {0} ] is invalid.".format(model["volumesAttached"]))
+            self.volumes_attached = model["volumesAttached"]
 
     # ------------------------------------------------------------------------------------- capacity
 
@@ -97,7 +96,7 @@ class NodeStatus(object):
     @capacity.setter
     def capacity(self, v):
         if not isinstance(v, dict):
-            raise SyntaxError('NodeStatus: capacity: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("NodeStatus: capacity: [ {0} ] is invalid.".format(v))
         self._capacity = v
 
     # ------------------------------------------------------------------------------------- allocatable
@@ -109,7 +108,7 @@ class NodeStatus(object):
     @allocatable.setter
     def allocatable(self, v):
         if not isinstance(v, dict):
-            raise SyntaxError('NodeStatus: allocatable: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("NodeStatus: allocatable: [ {0} ] is invalid.".format(v))
         self._allocatable = v
 
     # ------------------------------------------------------------------------------------- phase
@@ -121,7 +120,7 @@ class NodeStatus(object):
     @phase.setter
     def phase(self, v):
         if not isinstance(v, str):
-            raise SyntaxError('NodeStatus: phase: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("NodeStatus: phase: [ {0} ] is invalid.".format(v))
         self._phase = v
 
     # ------------------------------------------------------------------------------------- conditions
@@ -133,7 +132,7 @@ class NodeStatus(object):
     @conditions.setter
     def conditions(self, v):
         if not isinstance(v, list):
-            raise SyntaxError('NodeStatus: conditions: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("NodeStatus: conditions: [ {0} ] is invalid.".format(v))
         self._conditions = v
 
     # ------------------------------------------------------------------------------------- addresses
@@ -145,7 +144,7 @@ class NodeStatus(object):
     @addresses.setter
     def addresses(self, v):
         if not isinstance(v, list):
-            raise SyntaxError('NodeStatus: addresses: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("NodeStatus: addresses: [ {0} ] is invalid.".format(v))
         self._addresses = v
 
     # ------------------------------------------------------------------------------------- daemon endpoints
@@ -157,7 +156,7 @@ class NodeStatus(object):
     @daemon_endpoints.setter
     def daemon_endpoints(self, v):
         if not isinstance(v, NodeDaemonEndpoints):
-            raise SyntaxError('NodeStatus: daemon_endpoints: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("NodeStatus: daemon_endpoints: [ {0} ] is invalid.".format(v))
         self._daemon_endpoints = v
 
     # ------------------------------------------------------------------------------------- node info
@@ -169,7 +168,7 @@ class NodeStatus(object):
     @node_info.setter
     def node_info(self, v):
         if not isinstance(v, NodeSystemInfo):
-            raise SyntaxError('NodeStatus: node_info: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("NodeStatus: node_info: [ {0} ] is invalid.".format(v))
         self._node_info = v
 
     # ------------------------------------------------------------------------------------- images
@@ -181,7 +180,7 @@ class NodeStatus(object):
     @images.setter
     def images(self, v):
         if not isinstance(v, list):
-            raise SyntaxError('NodeStatus: images: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("NodeStatus: images: [ {0} ] is invalid.".format(v))
         self._images = v
 
     # ------------------------------------------------------------------------------------- volumes in use
@@ -193,7 +192,7 @@ class NodeStatus(object):
     @volumes_in_use.setter
     def volumes_in_use(self, v):
         if not isinstance(v, list):
-            raise SyntaxError('NodeStatus: volumes_in_use: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("NodeStatus: volumes_in_use: [ {0} ] is invalid.".format(v))
         self._volumes_in_use = v
 
     # ------------------------------------------------------------------------------------- volumes attached
@@ -205,7 +204,7 @@ class NodeStatus(object):
     @volumes_attached.setter
     def volumes_attached(self, v):
         if not isinstance(v, list):
-            raise SyntaxError('NodeStatus: volumes_attached: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("NodeStatus: volumes_attached: [ {0} ] is invalid.".format(v))
         self._volumes_attached = v
 
     # ------------------------------------------------------------------------------------- serialize
@@ -213,39 +212,39 @@ class NodeStatus(object):
     def serialize(self):
         data = {}
         if self.capacity:
-            data['capacity'] = self.capacity
+            data["capacity"] = self.capacity
         if self.allocatable:
-            data['allocatable'] = self.allocatable
+            data["allocatable"] = self.allocatable
         if self.phase:
-            data['phase'] = self.phase
+            data["phase"] = self.phase
         if self.conditions:
             l = list()
             for c in self.conditions:
                 assert isinstance(c, NodeCondition)
                 l.append(c.serialize())
-            data['conditions'] = l
+            data["conditions"] = l
         if self.addresses:
             l = list()
             for a in self.addresses:
                 assert isinstance(a, NodeAddress)
                 l.append(a.serialize())
-            data['addresses'] = l
+            data["addresses"] = l
         if self.daemon_endpoints:
-            data['daemonEndpoints'] = self.daemon_endpoints.serialize()
+            data["daemonEndpoints"] = self.daemon_endpoints.serialize()
         if self.node_info:
-            data['nodeInfo'] = self.node_info.serialize()
+            data["nodeInfo"] = self.node_info.serialize()
         if self.images:
             l = list()
             for i in self.images:
                 assert isinstance(i, ContainerImage)
                 l.append(i.serialize())
-            data['images'] = l
+            data["images"] = l
         if self.volumes_in_use:
-            data['volumesInUse'] = self.volumes_in_use
+            data["volumesInUse"] = self.volumes_in_use
         if self.volumes_attached:
             l = list()
             for v in self.volumes_attached:
                 assert isinstance(v, AttachedVolume)
                 l.append(v.serialize())
-            data['volumesAttached'] = l
+            data["volumesAttached"] = l
         return data

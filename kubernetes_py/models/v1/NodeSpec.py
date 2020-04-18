@@ -29,20 +29,20 @@ class NodeSpec(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'podCIDR' in model:
-            self.pod_cidr = model['podCIDR']
-        if 'externalID' in model:
-            self.external_id = model['externalID']
-        if 'providerID' in model:
-            self.provider_id = model['providerID']
-        if 'taints' in model:
+        if "podCIDR" in model:
+            self.pod_cidr = model["podCIDR"]
+        if "externalID" in model:
+            self.external_id = model["externalID"]
+        if "providerID" in model:
+            self.provider_id = model["providerID"]
+        if "taints" in model:
             taints = []
-            for t in model['taints']:
+            for t in model["taints"]:
                 taint = Taint(t)
                 taints.append(taint)
             self.taints = taints
-        if 'unschedulable' in model:
-            self.unschedulable = model['unschedulable']
+        if "unschedulable" in model:
+            self.unschedulable = model["unschedulable"]
 
     # ------------------------------------------------------------------------------------- pod cidr
 
@@ -53,7 +53,7 @@ class NodeSpec(object):
     @pod_cidr.setter
     def pod_cidr(self, cidr):
         if not isinstance(cidr, str):
-            raise SyntaxError('NodeSpec: pod_cidr: [ {0} ] is invalid.'.format(cidr))
+            raise SyntaxError("NodeSpec: pod_cidr: [ {0} ] is invalid.".format(cidr))
         self._pod_cidr = cidr
 
     # ------------------------------------------------------------------------------------- external id
@@ -65,7 +65,7 @@ class NodeSpec(object):
     @external_id.setter
     def external_id(self, external_id):
         if not isinstance(external_id, str):
-            raise SyntaxError('NodeSpec: external_id: [ {0} ] is invalid.'.format(external_id))
+            raise SyntaxError("NodeSpec: external_id: [ {0} ] is invalid.".format(external_id))
         self._external_id = external_id
 
     # ------------------------------------------------------------------------------------- provider id
@@ -77,7 +77,7 @@ class NodeSpec(object):
     @provider_id.setter
     def provider_id(self, provider_id):
         if not isinstance(provider_id, str):
-            raise SyntaxError('NodeSpec: provider_id: [ {0} ] is invalid.'.format(provider_id))
+            raise SyntaxError("NodeSpec: provider_id: [ {0} ] is invalid.".format(provider_id))
         self._provider_id = provider_id
 
     # ------------------------------------------------------------------------------------- taints
@@ -89,7 +89,7 @@ class NodeSpec(object):
     @taints.setter
     def taints(self, t=None):
         if not is_valid_list(t, Taint):
-            raise SyntaxError('NodeSpec: taints: [ {} ] is invalid.'.format(t))
+            raise SyntaxError("NodeSpec: taints: [ {} ] is invalid.".format(t))
         self._taints = t
 
     # ------------------------------------------------------------------------------------- unschedulable
@@ -101,7 +101,7 @@ class NodeSpec(object):
     @unschedulable.setter
     def unschedulable(self, value):
         if not isinstance(value, bool):
-            raise SyntaxError('NodeSpec: unschedulable: [ {0} ] is invalid.'.format(value))
+            raise SyntaxError("NodeSpec: unschedulable: [ {0} ] is invalid.".format(value))
         self._unschedulable = value
 
     # ------------------------------------------------------------------------------------- serialize
@@ -109,17 +109,17 @@ class NodeSpec(object):
     def serialize(self):
         data = {}
         if self.pod_cidr:
-            data['podCIDR'] = self.pod_cidr
+            data["podCIDR"] = self.pod_cidr
         if self.external_id:
-            data['externalID'] = self.external_id
+            data["externalID"] = self.external_id
         if self.provider_id:
-            data['providerID'] = self.provider_id
+            data["providerID"] = self.provider_id
         if self.taints:
             taints = []
             for t in self.taints:
                 taint = t.serialize()
                 taints.append(taint)
-            data['taints'] = taints
+            data["taints"] = taints
         if self.unschedulable is not None:
-            data['unschedulable'] = self.unschedulable
+            data["unschedulable"] = self.unschedulable
         return data

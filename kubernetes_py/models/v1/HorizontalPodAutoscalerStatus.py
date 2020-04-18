@@ -27,16 +27,16 @@ class HorizontalPodAutoscalerStatus(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'observedGeneration' in model:
-            self.observed_generation = model['observedGeneration']
-        if 'lastScaleTime' in model:
-            self.last_scale_time = model['lastScaleTime']
-        if 'currentReplicas' in model:
-            self.current_replicas = model['currentReplicas']
-        if 'desiredReplicas' in model:
-            self.desired_replicas = model['desiredReplicas']
-        if 'currentCpuUtilizationPercentage' in model:
-            self.current_cpu_utilization_percentage = model['currentCpuUtilizationPercentage']
+        if "observedGeneration" in model:
+            self.observed_generation = model["observedGeneration"]
+        if "lastScaleTime" in model:
+            self.last_scale_time = model["lastScaleTime"]
+        if "currentReplicas" in model:
+            self.current_replicas = model["currentReplicas"]
+        if "desiredReplicas" in model:
+            self.desired_replicas = model["desiredReplicas"]
+        if "currentCpuUtilizationPercentage" in model:
+            self.current_cpu_utilization_percentage = model["currentCpuUtilizationPercentage"]
 
     # ------------------------------------------------------------------------------------- observedGeneration
 
@@ -47,7 +47,7 @@ class HorizontalPodAutoscalerStatus(object):
     @observed_generation.setter
     def observed_generation(self, og=None):
         if not isinstance(og, int):
-            raise SyntaxError('HorizontalPodAutoscalerStatus: observed_generation: [ {} ] is invalid.'.format(og))
+            raise SyntaxError("HorizontalPodAutoscalerStatus: observed_generation: [ {} ] is invalid.".format(og))
         self._observed_generation = og
 
     # ------------------------------------------------------------------------------------- lastScaleTime
@@ -59,7 +59,7 @@ class HorizontalPodAutoscalerStatus(object):
     @last_scale_time.setter
     def last_scale_time(self, t=None):
         if not is_valid_date_time(t):
-            raise SyntaxError('HorizontalPodAutoscaler: last_scale_time: [ {} ] is invalid.'.format(t))
+            raise SyntaxError("HorizontalPodAutoscaler: last_scale_time: [ {} ] is invalid.".format(t))
         self._last_scale_time = t
 
     # ------------------------------------------------------------------------------------- currentReplicas
@@ -71,7 +71,7 @@ class HorizontalPodAutoscalerStatus(object):
     @current_replicas.setter
     def current_replicas(self, r=None):
         if not isinstance(r, int):
-            raise SyntaxError('HorizontalPodAutoscaler: current_replicas: [ {} ] is invalid.'.format(r))
+            raise SyntaxError("HorizontalPodAutoscaler: current_replicas: [ {} ] is invalid.".format(r))
         self._current_replicas = r
 
     # ------------------------------------------------------------------------------------- desiredReplicas
@@ -83,7 +83,7 @@ class HorizontalPodAutoscalerStatus(object):
     @desired_replicas.setter
     def desired_replicas(self, r=None):
         if not isinstance(r, int):
-            raise SyntaxError('HorizontalPodAutoscaler: desired_replicas: [ {} ] is invalid.'.format(r))
+            raise SyntaxError("HorizontalPodAutoscaler: desired_replicas: [ {} ] is invalid.".format(r))
         self._desired_replicas = r
 
     # ------------------------------------------------------------------------------------- currentCPU
@@ -95,21 +95,21 @@ class HorizontalPodAutoscalerStatus(object):
     @current_cpu_utilization_percentage.setter
     def current_cpu_utilization_percentage(self, pct=None):
         if not isinstance(pct, int):
-            raise SyntaxError('HorizontalPodAutoscaler: current_cpu_utilization_percentage: [ {} ] is invalid.'.format(pct))
+            raise SyntaxError("HorizontalPodAutoscaler: current_cpu_utilization_percentage: [ {} ] is invalid.".format(pct))
         self._current_cpu_utilization_percentage = pct
-            
+
     # ------------------------------------------------------------------------------------- serialize
 
     def serialize(self):
         data = {}
         if self.observed_generation is not None:
-            data['observedGeneration'] = self.observed_generation
+            data["observedGeneration"] = self.observed_generation
         if self.last_scale_time is not None:
-            data['lastScaleTime'] = self.last_scale_time
+            data["lastScaleTime"] = self.last_scale_time
         if self.current_replicas is not None:
-            data['currentReplicas'] = self.current_replicas
+            data["currentReplicas"] = self.current_replicas
         if self.desired_replicas is not None:
-            data['desiredReplicas'] = self.desired_replicas
+            data["desiredReplicas"] = self.desired_replicas
         if self.current_cpu_utilization_percentage is not None:
-            data['currentCpuUtilizationPercentage'] = self.current_cpu_utilization_percentage
+            data["currentCpuUtilizationPercentage"] = self.current_cpu_utilization_percentage
         return data

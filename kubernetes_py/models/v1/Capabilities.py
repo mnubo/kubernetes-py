@@ -24,10 +24,10 @@ class Capabilities(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'add' in model:
-            self.add = model['add']
-        if 'drop' in model:
-            self.drop = model['drop']
+        if "add" in model:
+            self.add = model["add"]
+        if "drop" in model:
+            self.drop = model["drop"]
 
     # ------------------------------------------------------------------------------------- add
 
@@ -38,7 +38,7 @@ class Capabilities(object):
     @add.setter
     def add(self, a=None):
         if not is_valid_list(a, str):
-            raise SyntaxError('Capabilities: add: [ {} ] is invalid.'.format(a))
+            raise SyntaxError("Capabilities: add: [ {} ] is invalid.".format(a))
         self._add = a
 
     # ------------------------------------------------------------------------------------- drop
@@ -50,7 +50,7 @@ class Capabilities(object):
     @drop.setter
     def drop(self, d=None):
         if not is_valid_list(d, str):
-            raise SyntaxError('Capabilities: add: [ {} ] is invalid.'.format(d))
+            raise SyntaxError("Capabilities: add: [ {} ] is invalid.".format(d))
         self._drop = d
 
     # ------------------------------------------------------------------------------------- serialize
@@ -58,7 +58,7 @@ class Capabilities(object):
     def serialize(self):
         data = {}
         if self.add is not None:
-            data['add'] = self.add
+            data["add"] = self.add
         if self.drop is not None:
-            data['drop'] = self.drop
+            data["drop"] = self.drop
         return data

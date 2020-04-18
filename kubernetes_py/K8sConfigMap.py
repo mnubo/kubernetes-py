@@ -11,16 +11,11 @@ from kubernetes_py.models.v1.ConfigMap import ConfigMap
 
 
 class K8sConfigMap(K8sObject):
-
     def __init__(self, config=None, name=None):
 
-        _type = 'ConfigMap'
+        _type = "ConfigMap"
 
-        super(K8sConfigMap, self).__init__(
-            config=config,
-            obj_type=_type,
-            name=name
-        )
+        super(K8sConfigMap, self).__init__(config=config, obj_type=_type, name=name)
 
     # -------------------------------------------------------------------------------------  override
 
@@ -55,8 +50,7 @@ class K8sConfigMap(K8sObject):
 
     def add_data(self, k=None, v=None):
         if k is None or v is None:
-            raise SyntaxError(
-                'K8sConfigMap.add_data(): Key [ {0} ] or Value [ {1} ] is invalid.'.format(k, v))
+            raise SyntaxError("K8sConfigMap.add_data(): Key [ {0} ] or Value [ {1} ] is invalid.".format(k, v))
 
         tmp_data = self.data
         if tmp_data is None:

@@ -30,20 +30,20 @@ class ContainerStateTerminated(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'exitCode' in model:
-            self.exit_code = model['exitCode']
-        if 'signal' in model:
-            self.signal = model['signal']
-        if 'reason' in model:
-            self.reason = model['reason']
-        if 'message' in model:
-            self.message = model['message']
-        if 'startedAt' in model:
-            self.started_at = model['startedAt']
-        if 'finishedAt' in model:
-            self.finished_at = model['finishedAt']
-        if 'containerID' in model:
-            self.container_id = model['containerID']
+        if "exitCode" in model:
+            self.exit_code = model["exitCode"]
+        if "signal" in model:
+            self.signal = model["signal"]
+        if "reason" in model:
+            self.reason = model["reason"]
+        if "message" in model:
+            self.message = model["message"]
+        if "startedAt" in model:
+            self.started_at = model["startedAt"]
+        if "finishedAt" in model:
+            self.finished_at = model["finishedAt"]
+        if "containerID" in model:
+            self.container_id = model["containerID"]
 
     # ------------------------------------------------------------------------------------- exit code
 
@@ -54,7 +54,7 @@ class ContainerStateTerminated(object):
     @exit_code.setter
     def exit_code(self, code=None):
         if not isinstance(code, int):
-            raise SyntaxError('ContainerStateTerminated: exit_code: [ {0} ] is invalid.'.format(code))
+            raise SyntaxError("ContainerStateTerminated: exit_code: [ {0} ] is invalid.".format(code))
         self._exit_code = code
 
     # ------------------------------------------------------------------------------------- signal
@@ -66,7 +66,7 @@ class ContainerStateTerminated(object):
     @signal.setter
     def signal(self, signal=None):
         if not isinstance(signal, int):
-            raise SyntaxError('ContainerStateTerminated: signal: [ {0} ] is invalid.'.format(signal))
+            raise SyntaxError("ContainerStateTerminated: signal: [ {0} ] is invalid.".format(signal))
         self._signal = signal
 
     # ------------------------------------------------------------------------------------- reason
@@ -78,7 +78,7 @@ class ContainerStateTerminated(object):
     @reason.setter
     def reason(self, msg=None):
         if not is_valid_string(msg):
-            raise SyntaxError('ContainerStateTerminated: reason: [ {0} ] is invalid.'.format(msg))
+            raise SyntaxError("ContainerStateTerminated: reason: [ {0} ] is invalid.".format(msg))
         self._reason = msg
 
     # ------------------------------------------------------------------------------------- message
@@ -90,7 +90,7 @@ class ContainerStateTerminated(object):
     @message.setter
     def message(self, msg=None):
         if not is_valid_string(msg):
-            raise SyntaxError('ContainerStateTerminated: message: [ {0} ] is invalid.'.format(msg))
+            raise SyntaxError("ContainerStateTerminated: message: [ {0} ] is invalid.".format(msg))
         self._message = msg
 
     # ------------------------------------------------------------------------------------- started at
@@ -102,7 +102,7 @@ class ContainerStateTerminated(object):
     @started_at.setter
     def started_at(self, time=None):
         if not is_valid_string(time):
-            raise SyntaxError('ContainerStateTerminated: started_at: [ {0} ] is invalid.'.format(time))
+            raise SyntaxError("ContainerStateTerminated: started_at: [ {0} ] is invalid.".format(time))
         self._started_at = time
 
     # ------------------------------------------------------------------------------------- finished at
@@ -114,7 +114,7 @@ class ContainerStateTerminated(object):
     @finished_at.setter
     def finished_at(self, time=None):
         if not is_valid_string(time):
-            raise SyntaxError('ContainerStateTerminated: finished_at: [ {0} ] is invalid.'.format(time))
+            raise SyntaxError("ContainerStateTerminated: finished_at: [ {0} ] is invalid.".format(time))
         self._finished_at = time
 
     # ------------------------------------------------------------------------------------- containerID
@@ -126,7 +126,7 @@ class ContainerStateTerminated(object):
     @container_id.setter
     def container_id(self, cid=None):
         if not is_valid_string(cid):
-            raise SyntaxError('ContainerStateTerminated: container_id: [ {0} ] is invalid.'.format(cid))
+            raise SyntaxError("ContainerStateTerminated: container_id: [ {0} ] is invalid.".format(cid))
         self._container_id = cid
 
     # ------------------------------------------------------------------------------------- serialize
@@ -134,17 +134,17 @@ class ContainerStateTerminated(object):
     def serialize(self):
         data = {}
         if self.exit_code is not None:
-            data['exitCode'] = self.exit_code
+            data["exitCode"] = self.exit_code
         if self.signal is not None:
-            data['signal'] = self.signal
+            data["signal"] = self.signal
         if self.reason is not None:
-            data['reason'] = self.reason
+            data["reason"] = self.reason
         if self.message is not None:
-            data['message'] = self.message
+            data["message"] = self.message
         if self.started_at is not None:
-            data['startedAt'] = self.started_at
+            data["startedAt"] = self.started_at
         if self.finished_at is not None:
-            data['finishedAt'] = self.finished_at
+            data["finishedAt"] = self.finished_at
         if self.container_id is not None:
-            data['containerID'] = self.container_id
+            data["containerID"] = self.container_id
         return data

@@ -29,12 +29,13 @@ class ComponentStatus(BaseModel):
     def _build_with_model(self, model=None):
         super(ComponentStatus, self).build_with_model(model)
 
-        if 'conditions' in model:
-            if not isinstance(model['conditions'], list):
-                raise SyntaxError('ComponentStatus: _build_with_model: conditions : [ {0} ] is invalid.'
-                                  .format(model['conditions']))
+        if "conditions" in model:
+            if not isinstance(model["conditions"], list):
+                raise SyntaxError(
+                    "ComponentStatus: _build_with_model: conditions : [ {0} ] is invalid.".format(model["conditions"])
+                )
             l = list()
-            for c in model['conditions']:
+            for c in model["conditions"]:
                 l.append(ComponentCondition(c))
             self.conditions = l
 
@@ -47,7 +48,7 @@ class ComponentStatus(BaseModel):
     @conditions.setter
     def conditions(self, l):
         if not isinstance(l, list):
-            raise SyntaxError('ComponentStatus: conditions: [ {0} ] is invalid.'.format(l))
+            raise SyntaxError("ComponentStatus: conditions: [ {0} ] is invalid.".format(l))
         self._conditions = l
 
     # ------------------------------------------------------------------------------------- serialize
@@ -59,5 +60,5 @@ class ComponentStatus(BaseModel):
             l = list()
             for c in self.conditions:
                 l.append(c.serialize())
-            data['conditions'] = l
+            data["conditions"] = l
         return data

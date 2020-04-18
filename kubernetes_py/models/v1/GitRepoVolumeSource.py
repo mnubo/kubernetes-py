@@ -26,12 +26,12 @@ class GitRepoVolumeSource(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'repository' in model:
-            self.repository = model['repository']
-        if 'revision' in model:
-            self.revision = model['revision']
-        if 'directory' in model:
-            self.directory = model['directory']
+        if "repository" in model:
+            self.repository = model["repository"]
+        if "revision" in model:
+            self.revision = model["revision"]
+        if "directory" in model:
+            self.directory = model["directory"]
 
     # ------------------------------------------------------------------------------------- repository
 
@@ -42,7 +42,7 @@ class GitRepoVolumeSource(object):
     @repository.setter
     def repository(self, repo=None):
         if not is_valid_string(repo):
-            raise SyntaxError('GitRepoVolumeSource: repository: [ {0} ] is invalid.'.format(repo))
+            raise SyntaxError("GitRepoVolumeSource: repository: [ {0} ] is invalid.".format(repo))
         self._repository = repo
 
     # ------------------------------------------------------------------------------------- revision
@@ -54,7 +54,7 @@ class GitRepoVolumeSource(object):
     @revision.setter
     def revision(self, revision=None):
         if not is_valid_string(revision):
-            raise SyntaxError('GitRepoVolumeSource: revision: [ {0} ] is invalid.'.format(revision))
+            raise SyntaxError("GitRepoVolumeSource: revision: [ {0} ] is invalid.".format(revision))
         self._revision = revision
 
     # ------------------------------------------------------------------------------------- directory
@@ -66,7 +66,7 @@ class GitRepoVolumeSource(object):
     @directory.setter
     def directory(self, directory=None):
         if not is_valid_string(directory):
-            raise SyntaxError('GitRepoVolumeSource: directory: [ {0} ] is invalid.'.format(directory))
+            raise SyntaxError("GitRepoVolumeSource: directory: [ {0} ] is invalid.".format(directory))
         self._directory = directory
 
     # ------------------------------------------------------------------------------------- serialize
@@ -74,9 +74,9 @@ class GitRepoVolumeSource(object):
     def serialize(self):
         data = {}
         if self.repository is not None:
-            data['repository'] = self.repository
+            data["repository"] = self.repository
         if self.revision is not None:
-            data['revision'] = self.revision
+            data["revision"] = self.revision
         if self.directory is not None:
-            data['directory'] = self.directory
+            data["directory"] = self.directory
         return data

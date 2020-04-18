@@ -27,12 +27,12 @@ class Affinity(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'nodeAffinity' in model:
-            self.node_affinity = NodeAffinity(model['nodeAffinity'])
-        if 'podAffinity' in model:
-            self.pod_affinity = PodAffinity(model['podAffinity'])
-        if 'podAntiAffinity' in model:
-            self.pod_anti_affinity = PodAntiAffinity(model['podAntiAffinity'])
+        if "nodeAffinity" in model:
+            self.node_affinity = NodeAffinity(model["nodeAffinity"])
+        if "podAffinity" in model:
+            self.pod_affinity = PodAffinity(model["podAffinity"])
+        if "podAntiAffinity" in model:
+            self.pod_anti_affinity = PodAntiAffinity(model["podAntiAffinity"])
 
     # ------------------------------------------------------------------------------------- nodeAffinity
 
@@ -43,7 +43,7 @@ class Affinity(object):
     @node_affinity.setter
     def node_affinity(self, na=None):
         if not isinstance(na, NodeAffinity):
-            raise SyntaxError('Affinity: node_affinity: [ {} ] is invalid.'.format(na))
+            raise SyntaxError("Affinity: node_affinity: [ {} ] is invalid.".format(na))
         self._node_affinity = na
 
     # ------------------------------------------------------------------------------------- podAffinity
@@ -55,7 +55,7 @@ class Affinity(object):
     @pod_affinity.setter
     def pod_affinity(self, pa=None):
         if not isinstance(pa, PodAffinity):
-            raise SyntaxError('Affinity: pod_affinity: [ {} ] is invalid.'.format(pa))
+            raise SyntaxError("Affinity: pod_affinity: [ {} ] is invalid.".format(pa))
         self._pod_affinity = pa
 
     # ------------------------------------------------------------------------------------- podAntiAffinity
@@ -67,7 +67,7 @@ class Affinity(object):
     @pod_anti_affinity.setter
     def pod_anti_affinity(self, paa=None):
         if not isinstance(paa, PodAntiAffinity):
-            raise SyntaxError('Affinity: pod_anti_affinity: [ {} ] is invalid.'.format(paa))
+            raise SyntaxError("Affinity: pod_anti_affinity: [ {} ] is invalid.".format(paa))
         self._pod_anti_affinity = paa
 
     # ------------------------------------------------------------------------------------- serialize
@@ -75,9 +75,9 @@ class Affinity(object):
     def serialize(self):
         data = {}
         if self.node_affinity is not None:
-            data['nodeAffinity'] = self.node_affinity.serialize()
+            data["nodeAffinity"] = self.node_affinity.serialize()
         if self.pod_affinity is not None:
-            data['podAffinity'] = self.pod_affinity.serialize()
+            data["podAffinity"] = self.pod_affinity.serialize()
         if self.pod_anti_affinity is not None:
-            data['podAntiAffinity'] = self.pod_anti_affinity.serialize()
+            data["podAntiAffinity"] = self.pod_anti_affinity.serialize()
         return data

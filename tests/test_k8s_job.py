@@ -180,17 +180,17 @@ class K8sJobTests(BaseTest):
             job.restart_policy = p
 
     def test_restart_policy_invalid_arg(self):
-        p = 'Always'
+        p = "Always"
         name = "job-{}".format(str(uuid.uuid4()))
         job = _utils.create_job(name=name)
         with self.assertRaises(SyntaxError):
             job.restart_policy = p
 
     def test_restart_policy(self):
-        p = 'Never'
+        p = "Never"
         name = "job-{}".format(str(uuid.uuid4()))
         job = _utils.create_job(name=name)
-        self.assertEqual('OnFailure', job.restart_policy)
+        self.assertEqual("OnFailure", job.restart_policy)
         job.restart_policy = p
         self.assertEqual(p, job.restart_policy)
 
@@ -254,4 +254,3 @@ class K8sJobTests(BaseTest):
             for job in jobs:
                 obj = job.created_by
                 self.assertIsInstance(obj, K8sObject)
-

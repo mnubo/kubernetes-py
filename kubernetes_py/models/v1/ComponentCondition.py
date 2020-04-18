@@ -13,8 +13,8 @@ class ComponentCondition(object):
     https://kubernetes.io/docs/api-reference/v1/definitions/#_v1_componentcondition
     """
 
-    VALID_TYPE = ['Healthy']
-    VALID_STATUS = ['True', 'False', 'Unknown']
+    VALID_TYPE = ["Healthy"]
+    VALID_STATUS = ["True", "False", "Unknown"]
 
     def __init__(self, model=None):
         super(ComponentCondition, self).__init__()
@@ -29,14 +29,14 @@ class ComponentCondition(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'type' in model:
-            self.type = model['type']
-        if 'status' in model:
-            self.status = model['status']
-        if 'message' in model:
-            self.message = model['message']
-        if 'error' in model:
-            self.error = model['error']
+        if "type" in model:
+            self.type = model["type"]
+        if "status" in model:
+            self.status = model["status"]
+        if "message" in model:
+            self.message = model["message"]
+        if "error" in model:
+            self.error = model["error"]
 
     # ------------------------------------------------------------------------------------- type
 
@@ -47,7 +47,7 @@ class ComponentCondition(object):
     @type.setter
     def type(self, v):
         if not isinstance(v, str) or v not in self.VALID_TYPE:
-            raise SyntaxError('ComponentCondition: type: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("ComponentCondition: type: [ {0} ] is invalid.".format(v))
         self._type = v
 
     # ------------------------------------------------------------------------------------- status
@@ -59,7 +59,7 @@ class ComponentCondition(object):
     @status.setter
     def status(self, v):
         if not isinstance(v, str) or v not in self.VALID_STATUS:
-            raise SyntaxError('ComponentCondition: status: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("ComponentCondition: status: [ {0} ] is invalid.".format(v))
         self._status = v
 
     # ------------------------------------------------------------------------------------- message
@@ -71,7 +71,7 @@ class ComponentCondition(object):
     @message.setter
     def message(self, v):
         if not isinstance(v, str):
-            raise SyntaxError('ComponentCondition: message: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("ComponentCondition: message: [ {0} ] is invalid.".format(v))
         self._message = v
 
     # ------------------------------------------------------------------------------------- error
@@ -83,7 +83,7 @@ class ComponentCondition(object):
     @error.setter
     def error(self, v):
         if not isinstance(v, str):
-            raise SyntaxError('ComponentCondition: error: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("ComponentCondition: error: [ {0} ] is invalid.".format(v))
         self._error = v
 
     # ------------------------------------------------------------------------------------- serialize
@@ -91,11 +91,11 @@ class ComponentCondition(object):
     def serialize(self):
         data = {}
         if self.type:
-            data['type'] = self.type
+            data["type"] = self.type
         if self.type:
-            data['status'] = self.status
+            data["status"] = self.status
         if self.type:
-            data['message'] = self.message
+            data["message"] = self.message
         if self.type:
-            data['error'] = self.error
+            data["error"] = self.error
         return data

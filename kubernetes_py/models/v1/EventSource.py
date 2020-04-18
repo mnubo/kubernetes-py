@@ -24,10 +24,10 @@ class EventSource(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'component' in model:
-            self._component = model['component']
-        if 'host' in model:
-            self._host = model['host']
+        if "component" in model:
+            self._component = model["component"]
+        if "host" in model:
+            self._host = model["host"]
 
     # ------------------------------------------------------------------------------------- component
 
@@ -58,7 +58,7 @@ class EventSource(object):
     def serialize(self):
         data = {}
         if self.component is not None:
-            data['component'] = self.component
+            data["component"] = self.component
         if self.host is not None:
-            data['host'] = self.host
+            data["host"] = self.host
         return data

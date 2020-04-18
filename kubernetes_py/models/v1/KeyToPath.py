@@ -28,12 +28,12 @@ class KeyToPath(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'key' in model:
-            self.key = model['key']
-        if 'path' in model:
-            self.path = model['path']
-        if 'mode' in model:
-            self.mode = model['mode']
+        if "key" in model:
+            self.key = model["key"]
+        if "path" in model:
+            self.path = model["path"]
+        if "mode" in model:
+            self.mode = model["mode"]
 
     # ------------------------------------------------------------------------------------- key
 
@@ -44,7 +44,7 @@ class KeyToPath(object):
     @key.setter
     def key(self, key=None):
         if not is_valid_string(key):
-            raise SyntaxError('KeyToPath: key: [ {0} ] is invalid.'.format(key))
+            raise SyntaxError("KeyToPath: key: [ {0} ] is invalid.".format(key))
         self._key = key
 
     # ------------------------------------------------------------------------------------- path
@@ -56,10 +56,10 @@ class KeyToPath(object):
     @path.setter
     def path(self, path=None):
         if not is_valid_string(path):
-            raise SyntaxError('KeyToPath: path: [ {0} ] is invalid.'.format(path))
-        if re.match('/', path):
-            raise SyntaxError('KeyToPath: path: [ {0} ] is invalid. It may not be an absolute path'.format(path))
-        if re.search('\.\.', path):
+            raise SyntaxError("KeyToPath: path: [ {0} ] is invalid.".format(path))
+        if re.match("/", path):
+            raise SyntaxError("KeyToPath: path: [ {0} ] is invalid. It may not be an absolute path".format(path))
+        if re.search("\.\.", path):
             raise SyntaxError('KeyToPath: path: [ {0} ] is invalid. It may not contain the string ".."'.format(path))
         self._path = path
 
@@ -75,9 +75,9 @@ class KeyToPath(object):
             try:
                 mode = int(mode)
             except ValueError:
-                raise SyntaxError('KeyToPath: mode: [ {0} ] is invalid.'.format(mode))
+                raise SyntaxError("KeyToPath: mode: [ {0} ] is invalid.".format(mode))
         if not isinstance(mode, int):
-            raise SyntaxError('KeyToPath: mode: [ {0} ] is invalid.'.format(mode))
+            raise SyntaxError("KeyToPath: mode: [ {0} ] is invalid.".format(mode))
         self._mode = mode
 
     # ------------------------------------------------------------------------------------- serialize
@@ -85,9 +85,9 @@ class KeyToPath(object):
     def serialize(self):
         data = {}
         if self.key is not None:
-            data['key'] = self.key
+            data["key"] = self.key
         if self.path is not None:
-            data['path'] = self.path
+            data["path"] = self.path
         if self.mode is not None:
-            data['mode'] = self.mode
+            data["mode"] = self.mode
         return data

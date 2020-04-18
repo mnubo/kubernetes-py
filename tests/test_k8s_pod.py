@@ -78,7 +78,7 @@ class K8sPodTest(BaseTest):
         self.assertEqual(pod.name, name)
 
     def test_init_with_config_and_pull_secrets(self):
-        ps = [{'name': 'yomama'}]
+        ps = [{"name": "yomama"}]
         name = "sofat"
         cfg = K8sConfig(kubeconfig=_utils.kubeconfig_fallback, pull_secret=ps)
         pod = _utils.create_pod(config=cfg, name=name)
@@ -203,7 +203,7 @@ class K8sPodTest(BaseTest):
     def test_pod_add_image_pull_secrets(self):
         name = "yoname"
         pod = _utils.create_pod(name=name)
-        secret = [{'name': 'yosecret'}]
+        secret = [{"name": "yosecret"}]
         pod.add_image_pull_secrets(secret)
         self.assertEqual(1, len(pod.model.spec.image_pull_secrets))
         self.assertEqual(secret, pod.model.spec.image_pull_secrets)
@@ -296,11 +296,11 @@ class K8sPodTest(BaseTest):
         k = "yokey"
         v = "yovalue"
         pod.add_annotation(k, v)
-        self.assertTrue(hasattr(pod.model.metadata, 'annotations'))
+        self.assertTrue(hasattr(pod.model.metadata, "annotations"))
         self.assertIn(k, pod.model.metadata.annotations)
         self.assertEqual(v, pod.model.metadata.annotations[k])
         pod.del_annotation(k)
-        self.assertTrue(hasattr(pod.model.metadata, 'annotations'))
+        self.assertTrue(hasattr(pod.model.metadata, "annotations"))
         self.assertNotIn(k, pod.model.metadata.annotations)
 
     def test_del_annotation_does_not_exist(self):
@@ -310,11 +310,11 @@ class K8sPodTest(BaseTest):
         k_2 = "yonotexists"
         v = "yovalue"
         pod.add_annotation(k1, v)
-        self.assertTrue(hasattr(pod.model.metadata, 'annotations'))
+        self.assertTrue(hasattr(pod.model.metadata, "annotations"))
         self.assertIn(k1, pod.model.metadata.annotations)
         self.assertNotIn(k_2, pod.model.metadata.annotations)
         pod.del_annotation(k_2)
-        self.assertTrue(hasattr(pod.model.metadata, 'annotations'))
+        self.assertTrue(hasattr(pod.model.metadata, "annotations"))
         self.assertIn(k1, pod.model.metadata.annotations)
         self.assertNotIn(k_2, pod.model.metadata.annotations)
 
@@ -325,7 +325,7 @@ class K8sPodTest(BaseTest):
         pod = _utils.create_pod(name=name)
         pod.del_label()
         self.assertEqual(1, len(pod.labels))
-        self.assertIn('name', pod.labels)
+        self.assertIn("name", pod.labels)
 
     def test_del_label_invalid_arg(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
@@ -348,10 +348,10 @@ class K8sPodTest(BaseTest):
         k = "yokey"
         v = "yovalue"
         pod.add_label(k, v)
-        self.assertTrue(hasattr(pod.model.metadata, 'labels'))
+        self.assertTrue(hasattr(pod.model.metadata, "labels"))
         self.assertIn(k, pod.model.metadata.labels)
         pod.del_label(k)
-        self.assertTrue(hasattr(pod.model.metadata, 'labels'))
+        self.assertTrue(hasattr(pod.model.metadata, "labels"))
         self.assertNotIn(k, pod.model.metadata.labels)
 
     def test_del_label_does_not_exist(self):
@@ -361,11 +361,11 @@ class K8sPodTest(BaseTest):
         k_2 = "yonotexists"
         v = "yovalue"
         pod.add_label(k_1, v)
-        self.assertTrue(hasattr(pod.model.metadata, 'labels'))
+        self.assertTrue(hasattr(pod.model.metadata, "labels"))
         self.assertIn(k_1, pod.model.metadata.labels)
         self.assertNotIn(k_2, pod.model.metadata.labels)
         pod.del_label(k_2)
-        self.assertTrue(hasattr(pod.model.metadata, 'labels'))
+        self.assertTrue(hasattr(pod.model.metadata, "labels"))
         self.assertIn(k_1, pod.model.metadata.labels)
         self.assertNotIn(k_2, pod.model.metadata.labels)
 
@@ -485,7 +485,7 @@ class K8sPodTest(BaseTest):
         pod = _utils.create_pod(name=name)
         labels = pod.labels
         self.assertIsNotNone(labels)
-        self.assertIn('name', labels)
+        self.assertIn("name", labels)
 
     def test_get_labels(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
@@ -559,12 +559,12 @@ class K8sPodTest(BaseTest):
     def test_get_restart_policy_none(self):
         name = "yoname"
         pod = _utils.create_pod(name=name)
-        self.assertEqual('Always', pod.restart_policy)  # set to 'Always' by default
+        self.assertEqual("Always", pod.restart_policy)  # set to 'Always' by default
 
     def test_get_restart_policy(self):
         name = "yoname"
         pod = _utils.create_pod(name=name)
-        p = 'OnFailure'
+        p = "OnFailure"
         pod.restart_policy = p
         self.assertEqual(p, pod.restart_policy)
 
@@ -605,7 +605,7 @@ class K8sPodTest(BaseTest):
             p = pod.create()
             result = p.status
             self.assertIsInstance(result, PodStatus)
-            for i in ['conditions', 'container_statuses', 'host_ip', 'phase', 'pod_ip', 'reason', 'start_time']:
+            for i in ["conditions", "container_statuses", "host_ip", "phase", "pod_ip", "reason", "start_time"]:
                 self.assertTrue(hasattr(result, i))
 
     # ------------------------------------------------------------------------------------- get pod logs
@@ -685,7 +685,7 @@ class K8sPodTest(BaseTest):
     def test_set_annotations(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = _utils.create_pod(name=name)
-        anns = {'key': 'value'}
+        anns = {"key": "value"}
         pod.annotations = anns
         self.assertEqual(anns, pod.annotations)
 
@@ -707,7 +707,7 @@ class K8sPodTest(BaseTest):
     def test_set_labels(self):
         name = "yopod-{0}".format(str(uuid.uuid4()))
         pod = _utils.create_pod(name=name)
-        labels_in = {'key': 'value'}
+        labels_in = {"key": "value"}
         pod.labels = labels_in
         self.assertEqual(pod.labels, labels_in)
 
@@ -798,14 +798,14 @@ class K8sPodTest(BaseTest):
     def test_pod_set_pod_restart_policy_invalid_string(self):
         name = "yoname"
         pod = _utils.create_pod(name=name)
-        p = 'yopolicy'
+        p = "yopolicy"
         with self.assertRaises(SyntaxError):
             pod.restart_policy = p
 
     def test_pod_set_pod_restart_policy(self):
         name = "yoname"
         pod = _utils.create_pod(name=name)
-        p = 'Always'
+        p = "Always"
         pod.restart_policy = p
         self.assertEqual(p, pod.restart_policy)
 
@@ -906,7 +906,7 @@ class K8sPodTest(BaseTest):
         config = K8sConfig(kubeconfig=_utils.kubeconfig_fallback)
 
         if _utils.is_reachable(config):
-            pods = K8sPod.get_by_labels(config=config, labels={'name': name})
+            pods = K8sPod.get_by_labels(config=config, labels={"name": name})
             self.assertIsInstance(pods, list)
             self.assertEqual(0, len(pods))
 
@@ -919,7 +919,7 @@ class K8sPodTest(BaseTest):
 
         if _utils.is_reachable(pod.config):
             pod.create()
-            pods = K8sPod.get_by_labels(config=pod.config, labels={'name': name})
+            pods = K8sPod.get_by_labels(config=pod.config, labels={"name": name})
             self.assertIsInstance(pods, list)
             self.assertEqual(1, len(pods))
             self.assertEqual(pod, pods[0])
@@ -934,12 +934,12 @@ class K8sPodTest(BaseTest):
 
         if _utils.is_reachable(pod.config):
             pod.create()
-            pods = K8sPod.get_by_labels(config=pod.config, labels={'test.label': "hello"})
+            pods = K8sPod.get_by_labels(config=pod.config, labels={"test.label": "hello"})
             self.assertIsInstance(pods, list)
             self.assertEqual(1, len(pods))
             self.assertEqual(pod, pods[0])
 
-            pods = K8sPod.get_by_labels(config=pod.config, labels={'test.label': "world"})
+            pods = K8sPod.get_by_labels(config=pod.config, labels={"test.label": "world"})
             self.assertEqual(0, len(pods))
 
     # ------------------------------------------------------------------------------------- api - create
@@ -1075,7 +1075,7 @@ class K8sPodTest(BaseTest):
         if _utils.is_reachable(pod.config):
             pod.create()
             labels = pod.labels
-            labels['yomama'] = 'sofat'
+            labels["yomama"] = "sofat"
             pods = K8sPod.get_by_labels(config=pod.config, labels=labels)
             self.assertIsInstance(pods, list)
             self.assertEqual(0, len(pods))
@@ -1144,7 +1144,7 @@ class K8sPodTest(BaseTest):
             nodes = K8sNode(config=config, name="yo").list()
             # untag all nodes
             for node in nodes:
-                node.labels.pop('kubernetes.io/e2e-az-name', None)
+                node.labels.pop("kubernetes.io/e2e-az-name", None)
                 node.update()
             with self.assertRaises(TimedOutException):
                 # timeout because of required
@@ -1161,27 +1161,27 @@ class K8sPodTest(BaseTest):
             # ensure we have enough nodes
             nodes = K8sNode(config=config, name="yo").list()
             if len(nodes) < 3:
-                self.skipTest(reason='Not enough nodes to perform test.')
+                self.skipTest(reason="Not enough nodes to perform test.")
             else:
                 self.assertGreaterEqual(len(nodes), 3)
             # tag the nodes
             for i in range(len(nodes)):
                 node = nodes[i]
                 if i == 0:
-                    node.labels.update({'kubernetes.io/e2e-az-name': 'e2e-az1'})
+                    node.labels.update({"kubernetes.io/e2e-az-name": "e2e-az1"})
                 if i == 1:
-                    node.labels.update({'kubernetes.io/e2e-az-name': 'e2e-az2'})
+                    node.labels.update({"kubernetes.io/e2e-az-name": "e2e-az2"})
                 if i == 2:
-                    node.labels.update({'kubernetes.io/e2e-az-name': 'e2e-az3'})
+                    node.labels.update({"kubernetes.io/e2e-az-name": "e2e-az3"})
                 node.update()
             nodes = K8sNode(config=config, name="yo").list()
             for node in nodes:
-                self.assertIn('kubernetes.io/e2e-az-name', node.labels)
+                self.assertIn("kubernetes.io/e2e-az-name", node.labels)
             # create the pod
             k8s.create()
             # untag the nodes
             for node in nodes:
-                node.labels.pop('kubernetes.io/e2e-az-name', None)
+                node.labels.pop("kubernetes.io/e2e-az-name", None)
                 node.update()
         pass
 
@@ -1196,29 +1196,29 @@ class K8sPodTest(BaseTest):
             # ensure we have enough nodes
             nodes = K8sNode(config=config, name="yo").list()
             if len(nodes) < 3:
-                self.skipTest(reason='Not enough nodes to perform test.')
+                self.skipTest(reason="Not enough nodes to perform test.")
             else:
                 self.assertGreaterEqual(len(nodes), 3)
             # tag the nodes
             for i in range(len(nodes)):
                 node = nodes[i]
                 if i == 0:
-                    node.labels.update({'kubernetes.io/e2e-az-name': 'e2e-az1'})
-                    node.labels.update({'another-node-label-key': 'another-node-label-value'})
+                    node.labels.update({"kubernetes.io/e2e-az-name": "e2e-az1"})
+                    node.labels.update({"another-node-label-key": "another-node-label-value"})
                 if i == 1:
-                    node.labels.update({'kubernetes.io/e2e-az-name': 'e2e-az2'})
+                    node.labels.update({"kubernetes.io/e2e-az-name": "e2e-az2"})
                 if i == 2:
-                    node.labels.update({'kubernetes.io/e2e-az-name': 'e2e-az3'})
+                    node.labels.update({"kubernetes.io/e2e-az-name": "e2e-az3"})
                 node.update()
             nodes = K8sNode(config=config, name="yo").list()
             for node in nodes:
-                self.assertIn('kubernetes.io/e2e-az-name', node.labels)
+                self.assertIn("kubernetes.io/e2e-az-name", node.labels)
             # create the pod
             k8s.create()
             # untag the nodes
             for node in nodes:
-                node.labels.pop('kubernetes.io/e2e-az-name', None)
-                node.labels.pop('another-node-label-key', None)
+                node.labels.pop("kubernetes.io/e2e-az-name", None)
+                node.labels.pop("another-node-label-key", None)
                 node.update()
         pass
 
@@ -1235,7 +1235,7 @@ class K8sPodTest(BaseTest):
             nodes = K8sNode(config=config, name="yo").list()
             # untag all nodes
             for node in nodes:
-                node.labels.pop('kubernetes.io/e2e-az-name', None)
+                node.labels.pop("kubernetes.io/e2e-az-name", None)
                 node.update()
             with self.assertRaises(TimedOutException):
                 # timeout because of required
@@ -1246,13 +1246,13 @@ class K8sPodTest(BaseTest):
         container = _utils.create_container(name="nginx", image="nginx:latest")
 
         pod_s1 = _utils.create_pod(config=config, name="s1")
-        pod_s1.labels.update({'security': 'S1'})
-        pod_s1.node_selector = {'kubernetes.io/e2e-az-name': 'e2e-az1'}
+        pod_s1.labels.update({"security": "S1"})
+        pod_s1.node_selector = {"kubernetes.io/e2e-az-name": "e2e-az1"}
         pod_s1.add_container(container)
 
         pod_s2 = _utils.create_pod(config=config, name="s2")
-        pod_s2.labels.update({'security': 'S2'})
-        pod_s2.node_selector = {'kubernetes.io/e2e-az-name': 'e2e-az2'}
+        pod_s2.labels.update({"security": "S2"})
+        pod_s2.node_selector = {"kubernetes.io/e2e-az-name": "e2e-az2"}
         pod_s2.add_container(container)
 
         model = _constants.pod_with_pod_affinity()
@@ -1265,18 +1265,18 @@ class K8sPodTest(BaseTest):
             # ensure we have enough nodes
             nodes = K8sNode(config=config, name="yo").list()
             if len(nodes) < 3:
-                self.skipTest(reason='Not enough nodes to perform test.')
+                self.skipTest(reason="Not enough nodes to perform test.")
             else:
                 self.assertGreaterEqual(len(nodes), 3)
             # tag the nodes
             for i in range(len(nodes)):
                 node = nodes[i]
                 if i == 0:
-                    node.labels.update({'kubernetes.io/e2e-az-name': 'e2e-az1'})
+                    node.labels.update({"kubernetes.io/e2e-az-name": "e2e-az1"})
                 if i == 1:
-                    node.labels.update({'kubernetes.io/e2e-az-name': 'e2e-az2'})
+                    node.labels.update({"kubernetes.io/e2e-az-name": "e2e-az2"})
                 if i == 2:
-                    node.labels.update({'kubernetes.io/e2e-az-name': 'e2e-az3'})
+                    node.labels.update({"kubernetes.io/e2e-az-name": "e2e-az3"})
                 node.update()
             # create the pods for affinity lookup
             pod_s1.create()

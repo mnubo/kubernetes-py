@@ -29,20 +29,20 @@ class ObjectReference(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'kind' in model:
-            self.kind = model['kind']
-        if 'namespace' in model:
-            self.namespace = model['namespace']
-        if 'name' in model:
-            self.name = model['name']
-        if 'uid' in model:
-            self.uid = model['uid']
-        if 'apiVersion' in model:
-            self.api_version = model['apiVersion']
-        if 'resourceVersion' in model:
-            self.resource_version = model['resourceVersion']
-        if 'fieldPath' in model:
-            self.field_path = model['fieldPath']
+        if "kind" in model:
+            self.kind = model["kind"]
+        if "namespace" in model:
+            self.namespace = model["namespace"]
+        if "name" in model:
+            self.name = model["name"]
+        if "uid" in model:
+            self.uid = model["uid"]
+        if "apiVersion" in model:
+            self.api_version = model["apiVersion"]
+        if "resourceVersion" in model:
+            self.resource_version = model["resourceVersion"]
+        if "fieldPath" in model:
+            self.field_path = model["fieldPath"]
 
     # ------------------------------------------------------------------------------------- kind
 
@@ -53,7 +53,7 @@ class ObjectReference(object):
     @kind.setter
     def kind(self, k=None):
         if not is_valid_string(k):
-            raise SyntaxError('ObjectReference: kind: [ {} ] is invalid.'.format(k))
+            raise SyntaxError("ObjectReference: kind: [ {} ] is invalid.".format(k))
         self._kind = k
 
     # ------------------------------------------------------------------------------------- namespace
@@ -65,7 +65,7 @@ class ObjectReference(object):
     @namespace.setter
     def namespace(self, ns=None):
         if not is_valid_string(ns):
-            raise SyntaxError('ObjectReference: namespace: [ {} ] is invalid.'.format(ns))
+            raise SyntaxError("ObjectReference: namespace: [ {} ] is invalid.".format(ns))
         self._namespace = ns
 
     # ------------------------------------------------------------------------------------- name
@@ -77,7 +77,7 @@ class ObjectReference(object):
     @name.setter
     def name(self, name=None):
         if not is_valid_string(name):
-            raise SyntaxError('ObjectReference: name: [ {} ] is invalid.'.format(name))
+            raise SyntaxError("ObjectReference: name: [ {} ] is invalid.".format(name))
         self._name = name
 
     # ------------------------------------------------------------------------------------- uid
@@ -89,7 +89,7 @@ class ObjectReference(object):
     @uid.setter
     def uid(self, uid=None):
         if not is_valid_string(uid):
-            raise SyntaxError('ObjectReference: uid: [ {} ] is invalid.'.format(uid))
+            raise SyntaxError("ObjectReference: uid: [ {} ] is invalid.".format(uid))
         self._uid = uid
 
     # ------------------------------------------------------------------------------------- apiVersion
@@ -101,7 +101,7 @@ class ObjectReference(object):
     @api_version.setter
     def api_version(self, v=None):
         if not is_valid_string(v):
-            raise SyntaxError('ObjectReference: api_version: [ {} ] is invalid.'.format(v))
+            raise SyntaxError("ObjectReference: api_version: [ {} ] is invalid.".format(v))
         self._api_version = v
 
     # ------------------------------------------------------------------------------------- resourceVersion
@@ -113,7 +113,7 @@ class ObjectReference(object):
     @resource_version.setter
     def resource_version(self, v=None):
         if not is_valid_string(v):
-            raise SyntaxError('ObjectReference: resource_version: [ {} ] is invalid.'.format(v))
+            raise SyntaxError("ObjectReference: resource_version: [ {} ] is invalid.".format(v))
         self._resource_version = v
 
     # ------------------------------------------------------------------------------------- fieldPath
@@ -125,7 +125,7 @@ class ObjectReference(object):
     @field_path.setter
     def field_path(self, path=None):
         if not is_valid_string(path):
-            raise SyntaxError('ObjectReference: field_path: [ {} ] is invalid.'.format(path))
+            raise SyntaxError("ObjectReference: field_path: [ {} ] is invalid.".format(path))
         self._field_path = path
 
     # ------------------------------------------------------------------------------------- serialize
@@ -133,17 +133,17 @@ class ObjectReference(object):
     def serialize(self):
         data = {}
         if self.kind is not None:
-            data['kind'] = self.kind
+            data["kind"] = self.kind
         if self.namespace is not None:
-            data['namespace'] = self.namespace
+            data["namespace"] = self.namespace
         if self.name is not None:
-            data['name'] = self.name
+            data["name"] = self.name
         if self.uid is not None:
-            data['uid'] = self.uid
+            data["uid"] = self.uid
         if self.api_version is not None:
-            data['apiVersion'] = self.api_version
+            data["apiVersion"] = self.api_version
         if self.resource_version is not None:
-            data['resourceVersion'] = self.resource_version
+            data["resourceVersion"] = self.resource_version
         if self.field_path is not None:
-            data['fieldPath'] = self.field_path
+            data["fieldPath"] = self.field_path
         return data

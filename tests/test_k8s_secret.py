@@ -17,7 +17,6 @@ from kubernetes_py.models.v1.Secret import Secret
 
 
 class K8sSecretTest(BaseTest):
-
     def setUp(self):
         _utils.cleanup_service_accounts()
         _utils.cleanup_secrets()
@@ -55,8 +54,8 @@ class K8sSecretTest(BaseTest):
         self.assertIsNotNone(secret)
         self.assertIsInstance(secret, K8sSecret)
         self.assertEqual(secret.name, name)
-        self.assertEqual('default', secret.config.namespace)
-        self.assertEqual('Secret', secret.obj_type)
+        self.assertEqual("default", secret.config.namespace)
+        self.assertEqual("Secret", secret.obj_type)
 
     def test_init_with_name_and_config(self):
         name = "yoname"
@@ -67,7 +66,7 @@ class K8sSecretTest(BaseTest):
         self.assertIsInstance(secret, K8sSecret)
         self.assertEqual(secret.name, name)
         self.assertEqual(secret.config.namespace, nspace)
-        self.assertEqual('Secret', secret.obj_type)
+        self.assertEqual("Secret", secret.obj_type)
 
     # --------------------------------------------------------------------------------- struct
 
@@ -173,7 +172,7 @@ class K8sSecretTest(BaseTest):
         name = "yosecret"
         secret = _utils.create_secret(name=name)
         k = object()
-        v = {'key1': 'value1', 'key2': 'value2'}
+        v = {"key1": "value1", "key2": "value2"}
         with self.assertRaises(SyntaxError):
             secret.data = {k: v}
 
@@ -181,7 +180,7 @@ class K8sSecretTest(BaseTest):
         name = "yosecret"
         secret = _utils.create_secret(name=name)
         k = "yokey"
-        v = {'key1': 'value1', 'key2': 'value2'}
+        v = {"key1": "value1", "key2": "value2"}
         with self.assertRaises(SyntaxError):
             secret.data = {k: v}
 
@@ -189,7 +188,7 @@ class K8sSecretTest(BaseTest):
         name = "yosecret"
         secret = _utils.create_secret(name=name)
         k = "yokey"
-        v = {'key1': 'value1', 'key2': 'value2'}
+        v = {"key1": "value1", "key2": "value2"}
         secret.data = {k: json.dumps(v)}
         self.assertIn(k, secret.data)
         self.assertEqual(json.dumps(v), secret.data[k])
@@ -252,11 +251,7 @@ class K8sSecretTest(BaseTest):
         secret = _utils.create_secret(name=name)
         try:
             secret.set_service_account_token(
-                account_name=account_name,
-                account_uid=account_uid,
-                token=token,
-                kubecfg_data=kubecfg_data,
-                cacert=cacert
+                account_name=account_name, account_uid=account_uid, token=token, kubecfg_data=kubecfg_data, cacert=cacert
             )
         except Exception as err:
             self.assertIsInstance(err, SyntaxError)
@@ -271,32 +266,28 @@ class K8sSecretTest(BaseTest):
 
         secret = _utils.create_secret(name=name)
         secret.set_service_account_token(
-            account_name=account_name,
-            account_uid=account_uid,
-            token=token,
-            kubecfg_data=kubecfg_data,
-            cacert=cacert
+            account_name=account_name, account_uid=account_uid, token=token, kubecfg_data=kubecfg_data, cacert=cacert
         )
 
-        self.assertEqual('kubernetes.io/service-account-token', secret.type)
+        self.assertEqual("kubernetes.io/service-account-token", secret.type)
 
-        self.assertIn('ca.crt', secret.data)
-        self.assertIn('kubernetes_py.kubeconfig', secret.data)
-        self.assertIn('token', secret.data)
+        self.assertIn("ca.crt", secret.data)
+        self.assertIn("kubernetes_py.kubeconfig", secret.data)
+        self.assertIn("token", secret.data)
 
-        self.assertEqual(cacert, secret.data['ca.crt'])
-        self.assertEqual(kubecfg_data, secret.data['kubernetes_py.kubeconfig'])
-        self.assertEqual(token, secret.data['token'])
+        self.assertEqual(cacert, secret.data["ca.crt"])
+        self.assertEqual(kubecfg_data, secret.data["kubernetes_py.kubeconfig"])
+        self.assertEqual(token, secret.data["token"])
 
-        self.assertIn('kubernetes.io/service-account.name', secret.annotations)
-        self.assertIn('kubernetes.io/service-account.uid', secret.annotations)
-        self.assertIn('kubernetes.io/service-account.name', secret.annotations)
-        self.assertIn('kubernetes.io/service-account.uid', secret.annotations)
+        self.assertIn("kubernetes.io/service-account.name", secret.annotations)
+        self.assertIn("kubernetes.io/service-account.uid", secret.annotations)
+        self.assertIn("kubernetes.io/service-account.name", secret.annotations)
+        self.assertIn("kubernetes.io/service-account.uid", secret.annotations)
 
-        self.assertEqual(account_name, secret.annotations['kubernetes.io/service-account.name'])
-        self.assertEqual(account_uid, secret.annotations['kubernetes.io/service-account.uid'])
-        self.assertEqual(account_name, secret.annotations['kubernetes.io/service-account.name'])
-        self.assertEqual(account_uid, secret.annotations['kubernetes.io/service-account.uid'])
+        self.assertEqual(account_name, secret.annotations["kubernetes.io/service-account.name"])
+        self.assertEqual(account_uid, secret.annotations["kubernetes.io/service-account.uid"])
+        self.assertEqual(account_name, secret.annotations["kubernetes.io/service-account.name"])
+        self.assertEqual(account_uid, secret.annotations["kubernetes.io/service-account.uid"])
 
     # --------------------------------------------------------------------------------- api - create
 
@@ -366,7 +357,7 @@ class K8sSecretTest(BaseTest):
             secret.data = {k: v}
             secret.update()
             from_get = secret.get()
-            self.assertEqual('Opaque', from_get.type)
+            self.assertEqual("Opaque", from_get.type)
             d = from_get.data[k]
             self.assertEqual(d, v)
 
@@ -404,8 +395,8 @@ class K8sSecretTest(BaseTest):
         secret = _utils.create_secret(name=name)
         data = {"auths": {"repo:port": {"auth": "authstring", "email": "you@company.com"}}}
         secret.dockerconfigjson = data
-        self.assertEqual('kubernetes.io/dockerconfigjson', secret.type)
-        self.assertIn('.dockerconfigjson', secret.data)
+        self.assertEqual("kubernetes.io/dockerconfigjson", secret.type)
+        self.assertIn(".dockerconfigjson", secret.data)
         self.assertEqual(data, secret.dockerconfigjson)
         if _utils.is_reachable(secret.config):
             s = secret.create()
@@ -414,12 +405,12 @@ class K8sSecretTest(BaseTest):
     def test_set_system_dockerconfigjson(self):
         name = "docker-registry"
         config = _utils.create_config()
-        config.namespace = 'kube-system'
+        config.namespace = "kube-system"
         secret = _utils.create_secret(config=config, name=name)
         data = {"auths": {"repo:port": {"auth": "authstring", "email": "you@company.com"}}}
         secret.dockerconfigjson = data
-        self.assertEqual('kubernetes.io/dockerconfigjson', secret.type)
-        self.assertIn('.dockerconfigjson', secret.data)
+        self.assertEqual("kubernetes.io/dockerconfigjson", secret.type)
+        self.assertIn(".dockerconfigjson", secret.data)
         self.assertEqual(data, secret.dockerconfigjson)
         if _utils.is_reachable(secret.config):
             try:
@@ -432,16 +423,12 @@ class K8sSecretTest(BaseTest):
     # --------------------------------------------------------------------------------- api - create API token
 
     def test_create_service_account_api_token(self):
-        sa = _utils.create_service_account(name='build-robot')
+        sa = _utils.create_service_account(name="build-robot")
         if _utils.is_reachable(sa.config):
             sa.create()
-            secret = K8sSecret.create_service_account_api_token(
-                config=sa.config,
-                name=sa.name)
+            secret = K8sSecret.create_service_account_api_token(config=sa.config, name=sa.name)
             self.assertIsInstance(secret, K8sSecret)
-            secrets = K8sSecret.api_tokens_for_service_account(
-                config=sa.config,
-                name=sa.name)
+            secrets = K8sSecret.api_tokens_for_service_account(config=sa.config, name=sa.name)
             self.assertEqual(2, len(secrets))
 
     # --------------------------------------------------------------------------------- issues

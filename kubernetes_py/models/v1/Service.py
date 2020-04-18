@@ -22,8 +22,8 @@ class Service(BaseModel):
     def __init__(self, model=None):
         super(Service, self).__init__()
 
-        self.kind = 'Service'
-        self.api_version = 'v1'
+        self.kind = "Service"
+        self.api_version = "v1"
 
         self.spec = ServiceSpec()
         self.status = ServiceStatus()
@@ -34,10 +34,10 @@ class Service(BaseModel):
     def _build_with_model(self, model=None):
         super(Service, self).build_with_model(model)
 
-        if 'spec' in model:
-            self.spec = ServiceSpec(model['spec'])
-        if 'status' in model:
-            self.status = ServiceStatus(model['status'])
+        if "spec" in model:
+            self.spec = ServiceSpec(model["spec"])
+        if "status" in model:
+            self.status = ServiceStatus(model["status"])
 
     # ------------------------------------------------------------------------------------- add
 
@@ -59,9 +59,9 @@ class Service(BaseModel):
 
     def add_port(self, name=None, port=None, target_port=None, protocol=None, node_port=None):
         if not is_valid_string(name):
-            raise SyntaxError('Service.add_port() name: [ {} ] is invalid.'.format(name))
+            raise SyntaxError("Service.add_port() name: [ {} ] is invalid.".format(name))
         if port is None or not (isinstance(port, str) or isinstance(port, int)):
-            raise SyntaxError('Service.add_port() port: [ {} ] is invalid.'.format(name))
+            raise SyntaxError("Service.add_port() port: [ {} ] is invalid.".format(name))
         ports = []
         port_found = False
         # exists previously
@@ -86,7 +86,7 @@ class Service(BaseModel):
 
     def add_selector(self, selector=None):
         if not is_valid_dict(selector):
-            raise SyntaxError('Service.add_selector() selector: [ {} ] is invalid.'.format(selector))
+            raise SyntaxError("Service.add_selector() selector: [ {} ] is invalid.".format(selector))
         s = self.spec.selector
         if s is None:
             s = {}
@@ -102,7 +102,7 @@ class Service(BaseModel):
     @spec.setter
     def spec(self, spec=None):
         if not isinstance(spec, ServiceSpec):
-            raise SyntaxError('Service: spec: [ {0} ] is invalid.'.format(spec))
+            raise SyntaxError("Service: spec: [ {0} ] is invalid.".format(spec))
         self._spec = spec
 
     # ------------------------------------------------------------------------------------- status
@@ -114,7 +114,7 @@ class Service(BaseModel):
     @status.setter
     def status(self, status=None):
         if not isinstance(status, ServiceStatus):
-            raise SyntaxError('Service: status: [ {0} ] is invalid.'.format(status))
+            raise SyntaxError("Service: status: [ {0} ] is invalid.".format(status))
         self._status = status
 
     # ------------------------------------------------------------------------------------- serialize
@@ -123,7 +123,7 @@ class Service(BaseModel):
         data = super(Service, self).serialize()
 
         if self.spec is not None:
-            data['spec'] = self.spec.serialize()
+            data["spec"] = self.spec.serialize()
         if self.status is not None:
-            data['status'] = self.status.serialize()
+            data["status"] = self.status.serialize()
         return data

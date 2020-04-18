@@ -25,11 +25,7 @@ class K8sNode(K8sObject):
     DRAIN_WAIT_TIMEOUT_SECONDS = 60
 
     def __init__(self, config=None, name=None):
-        super(K8sNode, self).__init__(
-            config=config,
-            name=name,
-            obj_type='Node'
-        )
+        super(K8sNode, self).__init__(config=config, name=name, obj_type="Node")
 
     # -------------------------------------------------------------------------------------  override
 
@@ -134,7 +130,7 @@ class K8sNode(K8sObject):
         if self.model.status.conditions is not None:
             for c in self.model.status.conditions:
                 assert isinstance(c, NodeCondition)
-                if c.condition_type == 'Ready' and c.status == 'True':
+                if c.condition_type == "Ready" and c.status == "True":
                     rc = True
                     break
                 else:
@@ -155,14 +151,12 @@ class K8sNode(K8sObject):
     def get_by_labels(config=None, labels=None):
 
         if config is not None and not isinstance(config, K8sConfig):
-            raise SyntaxError(
-                'K8sNode.get_by_labels(): config: [ {0} ] is invalid.'.format(config))
+            raise SyntaxError("K8sNode.get_by_labels(): config: [ {0} ] is invalid.".format(config))
         if not isinstance(labels, dict):
-            raise SyntaxError(
-                'K8sNode.get_by_labels() labels: [ {0} ] is invalid.'.format(labels))
+            raise SyntaxError("K8sNode.get_by_labels() labels: [ {0} ] is invalid.".format(labels))
 
         node_list = list()
-        nodes = K8sNode(config=config, name='whatever').list(labels=labels)
+        nodes = K8sNode(config=config, name="whatever").list(labels=labels)
 
         for n in nodes:
             try:
@@ -259,9 +253,9 @@ class K8sNode(K8sObject):
         :return: a boolean.
         """
 
-        if 'kubernetes.io/created-by' in pod.annotations:
-            parent = json.loads(pod.annotations['kubernetes.io/created-by'])
-            if parent['reference']['kind'] == 'DaemonSet':
+        if "kubernetes.io/created-by" in pod.annotations:
+            parent = json.loads(pod.annotations["kubernetes.io/created-by"])
+            if parent["reference"]["kind"] == "DaemonSet":
                 return True
         return False
 
@@ -288,7 +282,7 @@ class K8sNode(K8sObject):
         :return: a boolean.
         """
 
-        if 'kubernetes.io/created-by' not in pod.annotations:
+        if "kubernetes.io/created-by" not in pod.annotations:
             return True
         return False
 
@@ -338,16 +332,16 @@ class K8sNode(K8sObject):
     @taints.setter
     def taints(self, t=None):
         if not is_valid_list(t, Taint):
-            raise SyntaxError('K8sNode: taints: [ {} ] is invalid.'.format(t))
+            raise SyntaxError("K8sNode: taints: [ {} ] is invalid.".format(t))
         self.model.spec.taints = t
 
     def taint(self, key=None, value=None, effect=None):
         if not (key and value and effect):
-            raise SyntaxError('K8sNode: taint: you must specify a key, a value and an effect.')
+            raise SyntaxError("K8sNode: taint: you must specify a key, a value and an effect.")
         if not is_valid_string(key) or not is_valid_string(value):
-            raise SyntaxError('K8sNode: taint: key: [ {} ] or value: [ {} ] is invalid.'.format(key, value))
+            raise SyntaxError("K8sNode: taint: key: [ {} ] or value: [ {} ] is invalid.".format(key, value))
         if effect not in Taint.VALID_TAINT_EFFECTS:
-            raise SyntaxError('K8sNode: taint: effect must be in {}'.format(Taint.VALID_TAINT_EFFECTS))
+            raise SyntaxError("K8sNode: taint: effect must be in {}".format(Taint.VALID_TAINT_EFFECTS))
 
         t = Taint()
         t.key = key
@@ -366,7 +360,7 @@ class K8sNode(K8sObject):
     def untaint(self, key=None, value=None):
         if key and value:
             if not is_valid_string(key) or not is_valid_string(value):
-                raise SyntaxError('K8sNode: taint: key: [ {} ] or value: [ {} ] is invalid.'.format(key, value))
+                raise SyntaxError("K8sNode: taint: key: [ {} ] or value: [ {} ] is invalid.".format(key, value))
 
         remaining_taints = []
         for t in self.taints:

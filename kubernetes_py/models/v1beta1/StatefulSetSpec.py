@@ -13,7 +13,6 @@ from kubernetes_py.utils import is_valid_list, is_valid_string
 
 
 class StatefulSetSpec(object):
-
     def __init__(self, model=None):
         super(StatefulSetSpec, self).__init__()
 
@@ -27,17 +26,17 @@ class StatefulSetSpec(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'replicas' in model:
-            self.replicas = model['replicas']
-        if 'selector' in model:
-            self.selector = LabelSelector(model['selector'])
-        if 'template' in model:
-            self.template = PodTemplateSpec(model['template'])
-        if 'volumeClaimTemplates' in model:
-            vcts = [PersistentVolumeClaim(x) for x in model['volumeClaimTemplates']]
+        if "replicas" in model:
+            self.replicas = model["replicas"]
+        if "selector" in model:
+            self.selector = LabelSelector(model["selector"])
+        if "template" in model:
+            self.template = PodTemplateSpec(model["template"])
+        if "volumeClaimTemplates" in model:
+            vcts = [PersistentVolumeClaim(x) for x in model["volumeClaimTemplates"]]
             self.volume_claim_templates = vcts
-        if 'serviceName' in model:
-            self.service_name = model['serviceName']
+        if "serviceName" in model:
+            self.service_name = model["serviceName"]
 
     # ------------------------------------------------------------------------------------- replicas
 
@@ -48,7 +47,7 @@ class StatefulSetSpec(object):
     @replicas.setter
     def replicas(self, r=None):
         if not isinstance(r, int):
-            raise SyntaxError('StatefulSetSpec: replicas: [ {} ] is invalid.'.format(r))
+            raise SyntaxError("StatefulSetSpec: replicas: [ {} ] is invalid.".format(r))
         self._replicas = r
 
     # ------------------------------------------------------------------------------------- selector
@@ -60,7 +59,7 @@ class StatefulSetSpec(object):
     @selector.setter
     def selector(self, s=None):
         if not isinstance(s, LabelSelector):
-            raise SyntaxError('StatefulSetSpec: selector: [ {} ] is invalid.'.format(s))
+            raise SyntaxError("StatefulSetSpec: selector: [ {} ] is invalid.".format(s))
         self._selector = s
 
     # ------------------------------------------------------------------------------------- template
@@ -72,7 +71,7 @@ class StatefulSetSpec(object):
     @template.setter
     def template(self, t=None):
         if not isinstance(t, PodTemplateSpec):
-            raise SyntaxError('StatefulSetSpec: template: [ {} ] is invalid.'.format(t))
+            raise SyntaxError("StatefulSetSpec: template: [ {} ] is invalid.".format(t))
         self._template = t
 
     # ------------------------------------------------------------------------------------- volumeClaimTemplates
@@ -84,7 +83,7 @@ class StatefulSetSpec(object):
     @volume_claim_templates.setter
     def volume_claim_templates(self, vcts=None):
         if not is_valid_list(vcts, PersistentVolumeClaim):
-            raise SyntaxError('StatefulSetSpec: volume_claim_templates: [ {} ] is invalid.'.format(vcts))
+            raise SyntaxError("StatefulSetSpec: volume_claim_templates: [ {} ] is invalid.".format(vcts))
         self._volume_claim_templates = vcts
 
     # ------------------------------------------------------------------------------------- serviceName
@@ -96,7 +95,7 @@ class StatefulSetSpec(object):
     @service_name.setter
     def service_name(self, name=None):
         if not is_valid_string(name):
-            raise SyntaxError('StatefulSetSpec: service_name: [ {} ] is invalid.'.format(name))
+            raise SyntaxError("StatefulSetSpec: service_name: [ {} ] is invalid.".format(name))
         self._service_name = name
 
     # ------------------------------------------------------------------------------------- serialize
@@ -104,13 +103,13 @@ class StatefulSetSpec(object):
     def serialize(self):
         data = {}
         if self.replicas is not None:
-            data['replicas'] = self.replicas
+            data["replicas"] = self.replicas
         if self.selector is not None:
-            data['selector'] = self.selector
+            data["selector"] = self.selector
         if self.template is not None:
-            data['template'] = self.template.serialize()
+            data["template"] = self.template.serialize()
         if self.volume_claim_templates is not None:
-            data['volumeClaimTemplates'] = [x.serialize() for x in self.volume_claim_templates]
+            data["volumeClaimTemplates"] = [x.serialize() for x in self.volume_claim_templates]
         if self.service_name is not None:
-            data['serviceName'] = self.service_name
+            data["serviceName"] = self.service_name
         return data

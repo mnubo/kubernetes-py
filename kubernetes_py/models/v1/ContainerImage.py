@@ -24,10 +24,10 @@ class ContainerImage(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'names' in model:
-            self.names = model['names']
-        if 'sizeBytes' in model:
-            self.size_bytes = model['sizeBytes']
+        if "names" in model:
+            self.names = model["names"]
+        if "sizeBytes" in model:
+            self.size_bytes = model["sizeBytes"]
 
     # ------------------------------------------------------------------------------------- names
 
@@ -38,7 +38,7 @@ class ContainerImage(object):
     @names.setter
     def names(self, v):
         if not isinstance(v, list):
-            raise SyntaxError('ContainerImage: names: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("ContainerImage: names: [ {0} ] is invalid.".format(v))
         self._names = v
 
     # ------------------------------------------------------------------------------------- size_bytes
@@ -50,7 +50,7 @@ class ContainerImage(object):
     @size_bytes.setter
     def size_bytes(self, v):
         if not isinstance(v, int):
-            raise SyntaxError('ContainerImage: size_bytes: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("ContainerImage: size_bytes: [ {0} ] is invalid.".format(v))
         self._size_bytes = v
 
     # ------------------------------------------------------------------------------------- serialize
@@ -58,7 +58,7 @@ class ContainerImage(object):
     def serialize(self):
         data = {}
         if self.names:
-            data['names'] = self.names
+            data["names"] = self.names
         if self.size_bytes:
-            data['sizeBytes'] = self.size_bytes
+            data["sizeBytes"] = self.size_bytes
         return data

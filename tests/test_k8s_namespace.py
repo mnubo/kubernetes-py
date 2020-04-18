@@ -19,7 +19,6 @@ from tests.BaseTest import BaseTest
 
 
 class K8sNamespaceTest(BaseTest):
-
     def setUp(self):
         _utils.cleanup_namespaces()
 
@@ -54,7 +53,7 @@ class K8sNamespaceTest(BaseTest):
         ns = _utils.create_namespace(name=name)
         self.assertIsNotNone(ns)
         self.assertIsInstance(ns, K8sNamespace)
-        self.assertEqual('Namespace', ns.obj_type)
+        self.assertEqual("Namespace", ns.obj_type)
         self.assertEqual(ns.name, name)
         self.assertIsInstance(ns.config, K8sConfig)
 
@@ -66,7 +65,7 @@ class K8sNamespaceTest(BaseTest):
         self.assertIsNotNone(ns)
         self.assertIsInstance(ns, K8sNamespace)
         self.assertEqual(ns.name, name)
-        self.assertEqual('Namespace', ns.obj_type)
+        self.assertEqual("Namespace", ns.obj_type)
         self.assertIsInstance(ns.config, K8sConfig)
         self.assertEqual(nspace, ns.config.namespace)
 
@@ -250,7 +249,7 @@ class K8sNamespaceTest(BaseTest):
     def test_get_labels(self):
         name = "yonamespace"
         ns = _utils.create_namespace(name=name)
-        labels = {'yokey': 'yovalue'}
+        labels = {"yokey": "yovalue"}
         ns.labels = labels
         self.assertEqual(labels, ns.labels)
 
@@ -272,14 +271,14 @@ class K8sNamespaceTest(BaseTest):
     def test_set_annotations_str_int(self):
         name = "yonamespace"
         ns = _utils.create_namespace(name=name)
-        labels = {'yokey': 1234}
+        labels = {"yokey": 1234}
         ns.annotations = labels
         self.assertEqual(ns.annotations, labels)
 
     def test_set_annotations(self):
         name = "yonamespace"
         ns = _utils.create_namespace(name=name)
-        anns = {'yokey': 'yovalue'}
+        anns = {"yokey": "yovalue"}
         ns.annotations = anns
         self.assertEqual(anns, ns.annotations)
 
@@ -301,14 +300,14 @@ class K8sNamespaceTest(BaseTest):
     def test_set_labels_invalid_dict(self):
         name = "yonamespace"
         ns = _utils.create_namespace(name=name)
-        labels = {'yokey': 1234}
+        labels = {"yokey": 1234}
         with self.assertRaises(SyntaxError):
             ns.labels = labels
 
     def test_set_labels(self):
         name = "yonamespace"
         ns = _utils.create_namespace(name=name)
-        labels = {'yokey': 'yovalue'}
+        labels = {"yokey": "yovalue"}
         ns.labels = labels
         self.assertEqual(labels, ns.labels)
 

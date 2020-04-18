@@ -26,12 +26,12 @@ class ReplicaSetSpec(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'replicas' in model:
-            self.replicas = model['replicas']
-        if 'selector' in model:
-            self.selector = LabelSelector(model['selector'])
-        if 'template' in model:
-            self.template = PodTemplateSpec(model['template'])
+        if "replicas" in model:
+            self.replicas = model["replicas"]
+        if "selector" in model:
+            self.selector = LabelSelector(model["selector"])
+        if "template" in model:
+            self.template = PodTemplateSpec(model["template"])
 
     # ------------------------------------------------------------------------------------- replicas
 
@@ -42,7 +42,7 @@ class ReplicaSetSpec(object):
     @replicas.setter
     def replicas(self, reps=None):
         if not isinstance(reps, int):
-            raise SyntaxError('ReplicaSetSpec: replicas: [ {} ] is invalid.'.format(reps))
+            raise SyntaxError("ReplicaSetSpec: replicas: [ {} ] is invalid.".format(reps))
         self._replicas = reps
 
     # ------------------------------------------------------------------------------------- selector
@@ -54,7 +54,7 @@ class ReplicaSetSpec(object):
     @selector.setter
     def selector(self, sel=None):
         if not isinstance(sel, LabelSelector):
-            raise SyntaxError('ReplicaSetSpec: selector: [ {} ] is invalid.'.format(sel))
+            raise SyntaxError("ReplicaSetSpec: selector: [ {} ] is invalid.".format(sel))
         self._selector = sel
 
     # ------------------------------------------------------------------------------------- template
@@ -66,7 +66,7 @@ class ReplicaSetSpec(object):
     @template.setter
     def template(self, t=None):
         if not isinstance(t, PodTemplateSpec):
-            raise SyntaxError('ReplicaSetSpec: template: [ {} ] is invalid.'.format(t))
+            raise SyntaxError("ReplicaSetSpec: template: [ {} ] is invalid.".format(t))
         self._template = t
 
     # ------------------------------------------------------------------------------------- serialize
@@ -74,9 +74,9 @@ class ReplicaSetSpec(object):
     def serialize(self):
         data = {}
         if self.replicas is not None:
-            data['replicas'] = self.replicas
+            data["replicas"] = self.replicas
         if self.selector is not None:
-            data['selector'] = self.selector.serialize()
+            data["selector"] = self.selector.serialize()
         if self.template is not None:
-            data['template'] = self.template.serialize()
+            data["template"] = self.template.serialize()
         return data

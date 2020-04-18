@@ -13,12 +13,11 @@ from kubernetes_py.models.v1beta1.StatefulSetStatus import StatefulSetStatus
 
 
 class StatefulSet(BaseModel):
-
     def __init__(self, model=None):
         super(StatefulSet, self).__init__()
 
-        self.kind = 'StatefulSet'
-        self.api_version = 'apps/v1beta1'
+        self.kind = "StatefulSet"
+        self.api_version = "apps/v1beta1"
 
         self.spec = StatefulSetSpec()
         self.status = StatefulSetStatus()
@@ -29,10 +28,10 @@ class StatefulSet(BaseModel):
     def _build_with_model(self, model=None):
         super(StatefulSet, self).build_with_model(model)
 
-        if 'spec' in model:
-            self.spec = StatefulSetSpec(model['spec'])
-        if 'status' in model:
-            self.status = StatefulSetStatus(model['status'])
+        if "spec" in model:
+            self.spec = StatefulSetSpec(model["spec"])
+        if "status" in model:
+            self.status = StatefulSetStatus(model["status"])
 
     # ------------------------------------------------------------------------------------- spec
 
@@ -43,7 +42,7 @@ class StatefulSet(BaseModel):
     @spec.setter
     def spec(self, spec=None):
         if not isinstance(spec, StatefulSetSpec):
-            raise SyntaxError('DaemonSet: spec: [ {} ] is invalid.'.format(spec))
+            raise SyntaxError("DaemonSet: spec: [ {} ] is invalid.".format(spec))
         self._spec = spec
 
     # ------------------------------------------------------------------------------------- status
@@ -55,7 +54,7 @@ class StatefulSet(BaseModel):
     @status.setter
     def status(self, status=None):
         if not isinstance(status, StatefulSetStatus):
-            raise SyntaxError('DaemonSet: status: [ {} ] is invalid.'.format(status))
+            raise SyntaxError("DaemonSet: status: [ {} ] is invalid.".format(status))
         self._status = status
 
     # ------------------------------------------------------------------------------------- serialize
@@ -64,7 +63,7 @@ class StatefulSet(BaseModel):
         data = super(StatefulSet, self).serialize()
 
         if self.spec is not None:
-            data['spec'] = self.spec.serialize()
+            data["spec"] = self.spec.serialize()
         if self.status is not None:
-            data['status'] = self.status.serialize()
+            data["status"] = self.status.serialize()
         return data

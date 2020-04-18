@@ -26,10 +26,10 @@ class RollingUpdateDeployment(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'maxUnavailable' in model:
-            self.max_unavailable = model['maxUnavailable']
-        if 'maxSurge' in model:
-            self.max_surge = model['maxSurge']
+        if "maxUnavailable" in model:
+            self.max_unavailable = model["maxUnavailable"]
+        if "maxSurge" in model:
+            self.max_surge = model["maxSurge"]
 
     # ------------------------------------------------------------------------------------- maxUnavailable
 
@@ -40,9 +40,9 @@ class RollingUpdateDeployment(object):
     @max_unavailable.setter
     def max_unavailable(self, mu=None):
         if not (isinstance(mu, int) or isinstance(mu, str)):
-            raise SyntaxError('RollingUpdateDeployment: max_unavailable: [ {} ] is invalid.'.format(mu))
+            raise SyntaxError("RollingUpdateDeployment: max_unavailable: [ {} ] is invalid.".format(mu))
         if isinstance(mu, str) and not self.percent_pattern.match(mu):
-            raise SyntaxError('RollingUpdateDeployment: max_unavailable: [ {} ] is invalid.'.format(mu))
+            raise SyntaxError("RollingUpdateDeployment: max_unavailable: [ {} ] is invalid.".format(mu))
         self._max_unavailable = mu
 
     # ------------------------------------------------------------------------------------- maxSurge
@@ -54,9 +54,9 @@ class RollingUpdateDeployment(object):
     @max_surge.setter
     def max_surge(self, ms=None):
         if not (isinstance(ms, int) or isinstance(ms, str)):
-            raise SyntaxError('RollingUpdateDeployment: max_surge: [ {} ] is invalid.'.format(ms))
+            raise SyntaxError("RollingUpdateDeployment: max_surge: [ {} ] is invalid.".format(ms))
         if isinstance(ms, str) and not self.percent_pattern.match(ms):
-            raise SyntaxError('RollingUpdateDeployment: max_unavailable: [ {} ] is invalid.'.format(ms))
+            raise SyntaxError("RollingUpdateDeployment: max_unavailable: [ {} ] is invalid.".format(ms))
         self._max_surge = ms
 
     # ------------------------------------------------------------------------------------- serialize
@@ -64,7 +64,7 @@ class RollingUpdateDeployment(object):
     def serialize(self):
         data = {}
         if self.max_unavailable is not None:
-            data['maxUnavailable'] = self.max_unavailable
+            data["maxUnavailable"] = self.max_unavailable
         if self.max_surge is not None:
-            data['maxSurge'] = self.max_surge
+            data["maxSurge"] = self.max_surge
         return data

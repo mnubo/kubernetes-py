@@ -22,20 +22,16 @@ class K8sPetSet(K8sObject):
     def __init__(self, config=None, name=None):
 
         if config and is_reachable(config):
-            temp = K8sObject(config=config, obj_type='Pod', name='temp')
+            temp = K8sObject(config=config, obj_type="Pod", name="temp")
             v = temp.server_version()
-            major_vernum = sanitize_version_number(v['major'])
-            minor_vernum = sanitize_version_number(v['minor'])
+            major_vernum = sanitize_version_number(v["major"])
+            minor_vernum = sanitize_version_number(v["minor"])
             if major_vernum <= 1 and minor_vernum < 4:
-                raise NotImplementedError('PetSets exist only on Kubernetes == 1.4.x.')
+                raise NotImplementedError("PetSets exist only on Kubernetes == 1.4.x.")
             if major_vernum >= 1 and minor_vernum >= 5:
-                raise NotImplementedError('PetSets were refactored into StatefulSets on Kubernetes >= 1.5.x.')
+                raise NotImplementedError("PetSets were refactored into StatefulSets on Kubernetes >= 1.5.x.")
 
-        super(K8sPetSet, self).__init__(
-            config=config,
-            name=name,
-            obj_type='PetSet'
-        )
+        super(K8sPetSet, self).__init__(config=config, name=name, obj_type="PetSet")
 
     # -------------------------------------------------------------------------------------  override
 

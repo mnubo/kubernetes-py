@@ -26,19 +26,15 @@ from kubernetes_py.utils import is_valid_list
 class K8sDeployment(K8sObject):
 
     SCALE_WAIT_TIMEOUT_SECONDS = 120
-    REVISION_ANNOTATION = 'deployment.kubernetes.io/revision'
+    REVISION_ANNOTATION = "deployment.kubernetes.io/revision"
 
     def __init__(self, config=None, name=None, image=None, replicas=0):
 
-        super(K8sDeployment, self).__init__(
-            config=config,
-            obj_type='Deployment',
-            name=name
-        )
+        super(K8sDeployment, self).__init__(config=config, obj_type="Deployment", name=name)
 
         self.desired_replicas = replicas
 
-        labels = {'name': name}
+        labels = {"name": name}
         sel = LabelSelector()
         sel.match_labels = labels
 
@@ -84,20 +80,14 @@ class K8sDeployment(K8sObject):
         # delete cascade on top level
         super(K8sDeployment, self).delete(cascade)
         if cascade:
-            rsets = K8sReplicaSet(
-                config=self.config,
-                name="yo"
-            ).list(pattern=self.name)
+            rsets = K8sReplicaSet(config=self.config, name="yo").list(pattern=self.name)
             # delete cascade on replicasets
             for rset in rsets:
                 try:
                     rset.delete(cascade=cascade)
                 except NotFoundException:
                     pass
-            pods = K8sPod(
-                config=self.config,
-                name="yo"
-            ).list(pattern=self.name)
+            pods = K8sPod(config=self.config, name="yo").list(pattern=self.name)
             # delete cascade on pods
             for pod in pods:
                 try:
@@ -116,9 +106,11 @@ class K8sDeployment(K8sObject):
             self._check_timeout(start_time)
 
     def _has_desired_replicas(self):
-        if self.updated_replicas == self.desired_replicas \
-                and self.current_replicas == self.desired_replicas \
-                and self.available_replicas == self.desired_replicas:
+        if (
+            self.updated_replicas == self.desired_replicas
+            and self.current_replicas == self.desired_replicas
+            and self.available_replicas == self.desired_replicas
+        ):
             return True
         return False
 
@@ -126,15 +118,14 @@ class K8sDeployment(K8sObject):
         elapsed_time = time.time() - start_time
         if elapsed_time >= self.SCALE_WAIT_TIMEOUT_SECONDS:  # timeout
             raise TimedOutException(
-                "Timed out scaling Deployment: [ {} ] to replica count: [ {} ]".format(
-                    self.name,
-                    self.desired_replicas))
+                "Timed out scaling Deployment: [ {} ] to replica count: [ {} ]".format(self.name, self.desired_replicas)
+            )
 
     # -------------------------------------------------------------------------------------  add
 
     def add_container(self, container=None):
         if not isinstance(container, K8sContainer):
-            raise SyntaxError('K8sDeployment.add_container() container: [ {0} ] is invalid.'.format(container))
+            raise SyntaxError("K8sDeployment.add_container() container: [ {0} ] is invalid.".format(container))
         containers = self.model.spec.template.spec.containers
         if container.model not in containers:
             containers.append(container.model)
@@ -147,7 +138,7 @@ class K8sDeployment(K8sObject):
 
     def add_volume(self, volume=None):
         if not isinstance(volume, K8sVolume):
-            raise SyntaxError('K8sDeployment.add_volume() volume: [ {0} ] is invalid.'.format(volume))
+            raise SyntaxError("K8sDeployment.add_volume() volume: [ {0} ] is invalid.".format(volume))
         volumes = self.model.spec.template.spec.volumes
         if volume.model not in volumes:
             volumes.append(volume.model)
@@ -244,8 +235,8 @@ class K8sDeployment(K8sObject):
 
     @property
     def revision(self):
-        if 'deployment.kubernetes.io/revision' in self.annotations:
-            return int(self.annotations['deployment.kubernetes.io/revision'])
+        if "deployment.kubernetes.io/revision" in self.annotations:
+            return int(self.annotations["deployment.kubernetes.io/revision"])
         return None
 
     @revision.setter
@@ -308,7 +299,7 @@ class K8sDeployment(K8sObject):
     @container_image.setter
     def container_image(self, tup=None):
         if not isinstance(tup, tuple):
-            raise SyntaxError('K8sDeployment.container_image() must be a tuple of the form (name, image)')
+            raise SyntaxError("K8sDeployment.container_image() must be a tuple of the form (name, image)")
         name, image = tup
         found = list(filter(lambda x: x.name == name, self.containers))
         if found:
@@ -331,7 +322,7 @@ class K8sDeployment(K8sObject):
     # -------------------------------------------------------------------------------------  get by name
 
     @staticmethod
-    def get_by_name(config=None, name=None, name_label='name'):
+    def get_by_name(config=None, name=None, name_label="name"):
         """
         Fetches a K8sDeployment by name.
         
@@ -342,19 +333,14 @@ class K8sDeployment(K8sObject):
         """
 
         if name is None:
-            raise SyntaxError(
-                'Deployment: name: [ {0} ] cannot be None.'.format(name))
+            raise SyntaxError("Deployment: name: [ {0} ] cannot be None.".format(name))
         if not isinstance(name, str):
-            raise SyntaxError(
-                'Deployment: name: [ {0} ] must be a string.'.format(name))
+            raise SyntaxError("Deployment: name: [ {0} ] must be a string.".format(name))
 
         if config is not None and not isinstance(config, K8sConfig):
-            raise SyntaxError(
-                'Deployment: config: [ {0} ] must be a K8sConfig'.format(config))
+            raise SyntaxError("Deployment: config: [ {0} ] must be a K8sConfig".format(config))
 
-        deps = K8sDeployment(config=config, name=name).list(labels={
-            name_label: name
-        })
+        deps = K8sDeployment(config=config, name=name).list(labels={name_label: name})
 
         return deps
 
@@ -392,16 +378,13 @@ class K8sDeployment(K8sObject):
         if annotations is not None:
             rollback.updated_annotations = annotations
 
-        url = '{base}/{name}/rollback'.format(base=self.base_url, name=self.name)
-        state = self.request(
-            method='POST',
-            url=url,
-            data=rollback.serialize())
+        url = "{base}/{name}/rollback".format(base=self.base_url, name=self.name)
+        state = self.request(method="POST", url=url, data=rollback.serialize())
 
-        if not state.get('success'):
-            status = state.get('status', '')
-            reason = state.get('data', dict()).get('message', None)
-            message = 'K8sDeployment: ROLLBACK failed : HTTP {0} : {1}'.format(status, reason)
+        if not state.get("success"):
+            status = state.get("status", "")
+            reason = state.get("data", dict()).get("message", None)
+            message = "K8sDeployment: ROLLBACK failed : HTTP {0} : {1}".format(status, reason)
             raise BadRequestException(message)
 
         time.sleep(0.2)
@@ -435,10 +418,7 @@ class K8sDeployment(K8sObject):
         :return: None
         """
 
-        rsets = K8sReplicaSet(
-            config=self.config,
-            name="yo"
-        ).list(pattern=self.name, reverse=True)
+        rsets = K8sReplicaSet(config=self.config, name="yo").list(pattern=self.name, reverse=True)
 
         to_purge = rsets[keep:]
         for rset in to_purge:

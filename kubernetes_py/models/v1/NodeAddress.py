@@ -24,10 +24,10 @@ class NodeAddress(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'type' in model:
-            self.type = model['type']
-        if 'address' in model:
-            self.address = model['address']
+        if "type" in model:
+            self.type = model["type"]
+        if "address" in model:
+            self.address = model["address"]
 
     # ------------------------------------------------------------------------------------- type
 
@@ -38,7 +38,7 @@ class NodeAddress(object):
     @type.setter
     def type(self, v):
         if not isinstance(v, str):
-            raise SyntaxError('NodeAddress: type: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("NodeAddress: type: [ {0} ] is invalid.".format(v))
         self._type = v
 
     # ------------------------------------------------------------------------------------- address
@@ -50,7 +50,7 @@ class NodeAddress(object):
     @address.setter
     def address(self, v):
         if not isinstance(v, str):
-            raise SyntaxError('NodeAddress: address: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("NodeAddress: address: [ {0} ] is invalid.".format(v))
         self._address = v
 
     # ------------------------------------------------------------------------------------- serialize
@@ -58,7 +58,7 @@ class NodeAddress(object):
     def serialize(self):
         data = {}
         if self.type:
-            data['type'] = self.type
+            data["type"] = self.type
         if self.address:
-            data['address'] = self.address
+            data["address"] = self.address
         return data

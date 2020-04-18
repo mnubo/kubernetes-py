@@ -30,8 +30,8 @@ class StatefulSetNginxTests(BaseTest):
     def test_stateful_nginx(self):
         svc = Service(headless_service())
         sset = StatefulSet(stateful_set())
-        k8s_svc = K8sService(name='headless')
-        k8s_sset = K8sStatefulSet(name='sset')
+        k8s_svc = K8sService(name="headless")
+        k8s_sset = K8sStatefulSet(name="sset")
         k8s_svc.model = svc
         k8s_sset.model = sset
         if _utils.is_reachable(k8s_svc.config):
@@ -43,82 +43,36 @@ def headless_service():
     return {
         "apiVersion": "v1",
         "kind": "Service",
-        "metadata": {
-            "name": "nginx",
-            "labels": {
-                "app": "nginx"
-            }
-        },
-        "spec": {
-            "ports": [
-                {
-                    "port": 80,
-                    "name": "web"
-                }
-            ],
-            "clusterIP": "None",
-            "selector": {
-                "app": "nginx"
-            }
-        }
+        "metadata": {"name": "nginx", "labels": {"app": "nginx"}},
+        "spec": {"ports": [{"port": 80, "name": "web"}], "clusterIP": "None", "selector": {"app": "nginx"}},
     }
 
 
 def stateful_set():
     return {
         "kind": "StatefulSet",
-        "metadata": {
-            "name": "web"
-        },
+        "metadata": {"name": "web"},
         "spec": {
             "replicas": 2,
             "serviceName": "nginx",
             "template": {
-                "metadata": {
-                    "labels": {
-                        "app": "nginx"
-                    }
-                },
+                "metadata": {"labels": {"app": "nginx"}},
                 "spec": {
                     "containers": [
                         {
                             "image": "gcr.io/google_containers/nginx-slim:0.8",
                             "name": "nginx",
-                            "ports": [
-                                {
-                                    "containerPort": 80,
-                                    "name": "web"
-                                }
-                            ],
-                            "volumeMounts": [
-                                {
-                                    "mountPath": "/usr/share/nginx/html",
-                                    "name": "www"
-                                }
-                            ]
+                            "ports": [{"containerPort": 80, "name": "web"}],
+                            "volumeMounts": [{"mountPath": "/usr/share/nginx/html", "name": "www"}],
                         }
                     ]
-                }
+                },
             },
             "volumeClaimTemplates": [
                 {
-                    "metadata": {
-                        "annotations": {
-                            "volume.alpha.kubernetes.io/storage-class": "anything"
-                        },
-                        "name": "www"
-                    },
-                    "spec": {
-                        "accessModes": [
-                            "ReadWriteOnce"
-                        ],
-                        "resources": {
-                            "requests": {
-                                "storage": "1Gi"
-                            }
-                        }
-                    }
+                    "metadata": {"annotations": {"volume.alpha.kubernetes.io/storage-class": "anything"}, "name": "www"},
+                    "spec": {"accessModes": ["ReadWriteOnce"], "resources": {"requests": {"storage": "1Gi"}}},
                 }
-            ]
-        }
+            ],
+        },
     }

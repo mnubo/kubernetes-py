@@ -76,3 +76,6 @@ target/
 
 # nosetests
 .noseids
+
+# VS Code
+.vscode

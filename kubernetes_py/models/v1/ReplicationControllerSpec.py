@@ -26,12 +26,12 @@ class ReplicationControllerSpec(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'replicas' in model:
-            self.replicas = model['replicas']
-        if 'selector' in model:
-            self.selector = model['selector']
-        if 'template' in model:
-            self.template = PodTemplateSpec(model['template'])
+        if "replicas" in model:
+            self.replicas = model["replicas"]
+        if "selector" in model:
+            self.selector = model["selector"]
+        if "template" in model:
+            self.template = PodTemplateSpec(model["template"])
 
     # ------------------------------------------------------------------------------------- template
 
@@ -42,7 +42,7 @@ class ReplicationControllerSpec(object):
     @replicas.setter
     def replicas(self, replicas=None):
         if not isinstance(replicas, int) or not replicas >= 0:
-            raise SyntaxError('ReplicationControllerSpec: replicas: [ {0} ] is invalid.'.format(replicas))
+            raise SyntaxError("ReplicationControllerSpec: replicas: [ {0} ] is invalid.".format(replicas))
         self._replicas = replicas
 
     # ------------------------------------------------------------------------------------- selector
@@ -54,7 +54,7 @@ class ReplicationControllerSpec(object):
     @selector.setter
     def selector(self, selector=None):
         if not is_valid_dict(selector):
-            raise SyntaxError('ReplicationControllerSpec: selector: [ {0} ] is invalid.'.format(selector))
+            raise SyntaxError("ReplicationControllerSpec: selector: [ {0} ] is invalid.".format(selector))
         self._selector = selector
 
     # ------------------------------------------------------------------------------------- template
@@ -66,7 +66,7 @@ class ReplicationControllerSpec(object):
     @template.setter
     def template(self, template=None):
         if not isinstance(template, PodTemplateSpec):
-            raise SyntaxError('ReplicationControllerSpec: template: [ {} ] is invalid.'.format(template))
+            raise SyntaxError("ReplicationControllerSpec: template: [ {} ] is invalid.".format(template))
         self._template = template
 
     # ------------------------------------------------------------------------------------- serialize
@@ -74,9 +74,9 @@ class ReplicationControllerSpec(object):
     def serialize(self):
         data = {}
         if self.replicas is not None:
-            data['replicas'] = self.replicas
+            data["replicas"] = self.replicas
         if self.selector is not None:
-            data['selector'] = self.selector
+            data["selector"] = self.selector
         if self.template is not None:
-            data['template'] = self.template.serialize()
+            data["template"] = self.template.serialize()
         return data

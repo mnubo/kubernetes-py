@@ -33,36 +33,36 @@ class PodStatus(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'conditions' in model:
+        if "conditions" in model:
             conditions = []
-            for c in model['conditions']:
+            for c in model["conditions"]:
                 condition = PodCondition(c)
                 conditions.append(condition)
             self.conditions = conditions
-        if 'containerStatuses' in model:
+        if "containerStatuses" in model:
             statuses = []
-            for s in model['containerStatuses']:
+            for s in model["containerStatuses"]:
                 status = ContainerStatus(s)
                 statuses.append(status)
             self.container_statuses = statuses
-        if 'phase' in model:
-            self.phase = model['phase']
-        if 'message' in model:
-            self.message = model['message']
-        if 'reason' in model:
-            self.reason = model['reason']
-        if 'hostIP' in model:
-            self.host_ip = model['hostIP']
-        if 'podIP' in model:
-            self.pod_ip = model['podIP']
-        if 'startTime' in model:
-            self.start_time = model['startTime']
+        if "phase" in model:
+            self.phase = model["phase"]
+        if "message" in model:
+            self.message = model["message"]
+        if "reason" in model:
+            self.reason = model["reason"]
+        if "hostIP" in model:
+            self.host_ip = model["hostIP"]
+        if "podIP" in model:
+            self.pod_ip = model["podIP"]
+        if "startTime" in model:
+            self.start_time = model["startTime"]
 
     # ------------------------------------------------------------------------------------- add
 
     def add_container_status(self, status=None):
         if not isinstance(status, ContainerStatus):
-            raise SyntaxError('PodStatus: status: [ {0} ] is invalid.'.format(status))
+            raise SyntaxError("PodStatus: status: [ {0} ] is invalid.".format(status))
         self._container_statuses.append(status)
 
     # ------------------------------------------------------------------------------------- conditions
@@ -74,7 +74,7 @@ class PodStatus(object):
     @conditions.setter
     def conditions(self, conditions=None):
         if not is_valid_list(conditions, PodCondition):
-            raise SyntaxError('PodStatus: conditions: [ {0} ] is invalid.'.format(conditions))
+            raise SyntaxError("PodStatus: conditions: [ {0} ] is invalid.".format(conditions))
         self._conditions = conditions
 
     # ------------------------------------------------------------------------------------- container status
@@ -86,7 +86,7 @@ class PodStatus(object):
     @container_statuses.setter
     def container_statuses(self, statuses=None):
         if not is_valid_list(statuses, ContainerStatus):
-            raise SyntaxError('PodStatus: container_statuses: [ {0} ] is invalid.'.format(statuses))
+            raise SyntaxError("PodStatus: container_statuses: [ {0} ] is invalid.".format(statuses))
         self._container_statuses = statuses
 
     # ------------------------------------------------------------------------------------- phase
@@ -98,7 +98,7 @@ class PodStatus(object):
     @phase.setter
     def phase(self, phase=None):
         if not is_valid_string(phase):
-            raise SyntaxError('PodStatus: container_statuses: [ {0} ] is invalid.'.format(phase))
+            raise SyntaxError("PodStatus: container_statuses: [ {0} ] is invalid.".format(phase))
         self._phase = phase
 
     # ------------------------------------------------------------------------------------- phase
@@ -110,7 +110,7 @@ class PodStatus(object):
     @message.setter
     def message(self, message=None):
         if not is_valid_string(message):
-            raise SyntaxError('PodStatus: message: [ {0} ] is invalid.'.format(message))
+            raise SyntaxError("PodStatus: message: [ {0} ] is invalid.".format(message))
         self._message = message
 
     # ------------------------------------------------------------------------------------- reason
@@ -122,7 +122,7 @@ class PodStatus(object):
     @reason.setter
     def reason(self, reason=None):
         if not is_valid_string(reason):
-            raise SyntaxError('PodStatus: reason: [ {0} ] is invalid.'.format(reason))
+            raise SyntaxError("PodStatus: reason: [ {0} ] is invalid.".format(reason))
         self._reason = reason
 
     # ------------------------------------------------------------------------------------- hostIP
@@ -134,7 +134,7 @@ class PodStatus(object):
     @host_ip.setter
     def host_ip(self, ip=None):
         if not is_valid_string(ip):
-            raise SyntaxError('PodStatus: host_ip: [ {0} ] is invalid.'.format(ip))
+            raise SyntaxError("PodStatus: host_ip: [ {0} ] is invalid.".format(ip))
         self._host_ip = ip
 
     # ------------------------------------------------------------------------------------- podIP
@@ -146,7 +146,7 @@ class PodStatus(object):
     @pod_ip.setter
     def pod_ip(self, ip=None):
         if not is_valid_string(ip):
-            raise SyntaxError('PodStatus: pod_ip: [ {0} ] is invalid.'.format(ip))
+            raise SyntaxError("PodStatus: pod_ip: [ {0} ] is invalid.".format(ip))
         self._pod_ip = ip
 
     # ------------------------------------------------------------------------------------- start time
@@ -158,7 +158,7 @@ class PodStatus(object):
     @start_time.setter
     def start_time(self, time=None):
         if not is_valid_string(time):
-            raise SyntaxError('PodStatus: start_time: [ {0} ] is invalid.'.format(time))
+            raise SyntaxError("PodStatus: start_time: [ {0} ] is invalid.".format(time))
         self._start_time = time
 
     # ------------------------------------------------------------------------------------- serialize
@@ -166,19 +166,19 @@ class PodStatus(object):
     def serialize(self):
         data = {}
         if self.phase is not None:
-            data['phase'] = self.phase
+            data["phase"] = self.phase
         if self.conditions:
-            data['conditions'] = [x.serialize() for x in self.conditions]
+            data["conditions"] = [x.serialize() for x in self.conditions]
         if self.message is not None:
-            data['message'] = self.message
+            data["message"] = self.message
         if self.reason is not None:
-            data['reason'] = self.reason
+            data["reason"] = self.reason
         if self.host_ip is not None:
-            data['hostIP'] = self.host_ip
+            data["hostIP"] = self.host_ip
         if self.pod_ip is not None:
-            data['podIP'] = self.pod_ip
+            data["podIP"] = self.pod_ip
         if self.start_time is not None:
-            data['startTime'] = self.start_time
+            data["startTime"] = self.start_time
         if self.container_statuses:
-            data['containerStatuses'] = [x.serialize() for x in self.container_statuses]
+            data["containerStatuses"] = [x.serialize() for x in self.container_statuses]
         return data
