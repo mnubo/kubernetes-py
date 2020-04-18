@@ -26,14 +26,14 @@ class SELinuxOptions(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'level' in model:
-            self.level = model['level']
-        if 'role' in model:
-            self.role = model['role']
-        if 'type' in model:
-            self.type = model['type']
-        if 'user' in model:
-            self.user = model['user']
+        if "level" in model:
+            self.level = model["level"]
+        if "role" in model:
+            self.role = model["role"]
+        if "type" in model:
+            self.type = model["type"]
+        if "user" in model:
+            self.user = model["user"]
 
     # ------------------------------------------------------------------------------------- level
 
@@ -44,7 +44,7 @@ class SELinuxOptions(object):
     @level.setter
     def level(self, l=None):
         if not is_valid_string(l):
-            raise SyntaxError('SELinuxOptions: level: [ {} ] is invalid.'.format(l))
+            raise SyntaxError("SELinuxOptions: level: [ {} ] is invalid.".format(l))
         self._level = l
 
     # ------------------------------------------------------------------------------------- role
@@ -56,7 +56,7 @@ class SELinuxOptions(object):
     @role.setter
     def role(self, r=None):
         if not is_valid_string(r):
-            raise SyntaxError('SELinuxOptions: role: [ {} ] is invalid.'.format(r))
+            raise SyntaxError("SELinuxOptions: role: [ {} ] is invalid.".format(r))
         self._role = r
 
     # ------------------------------------------------------------------------------------- type
@@ -68,7 +68,7 @@ class SELinuxOptions(object):
     @type.setter
     def type(self, t=None):
         if not is_valid_string(t):
-            raise SyntaxError('SELinuxOptions: type: [ {} ] is invalid.'.format(t))
+            raise SyntaxError("SELinuxOptions: type: [ {} ] is invalid.".format(t))
         self._level = t
 
     # ------------------------------------------------------------------------------------- user
@@ -80,7 +80,7 @@ class SELinuxOptions(object):
     @user.setter
     def user(self, u=None):
         if not is_valid_string(u):
-            raise SyntaxError('SELinuxOptions: user: [ {} ] is invalid.'.format(u))
+            raise SyntaxError("SELinuxOptions: user: [ {} ] is invalid.".format(u))
         self._user = u
 
     # ------------------------------------------------------------------------------------- serialize
@@ -88,11 +88,11 @@ class SELinuxOptions(object):
     def serialize(self):
         data = {}
         if self.level is not None:
-            data['level'] = self.level
+            data["level"] = self.level
         if self.role is not None:
-            data['role'] = self.role
+            data["role"] = self.role
         if self.type is not None:
-            data['type'] = self.type
+            data["type"] = self.type
         if self.user is not None:
-            data['user'] = self.user
+            data["user"] = self.user
         return data

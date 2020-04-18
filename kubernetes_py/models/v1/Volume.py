@@ -24,15 +24,15 @@ class Volume(object):
     """
 
     VOLUME_TYPES_TO_SOURCE_MAP = {
-        'awsElasticBlockStore': AWSElasticBlockStoreVolumeSource,
-        'emptyDir': EmptyDirVolumeSource,
-        'gcePersistentDisk': GCEPersistentDiskVolumeSource,
-        'gitRepo': GitRepoVolumeSource,
-        'hostPath': HostPathVolumeSource,
-        'nfs': NFSVolumeSource,
-        'secret': SecretVolumeSource,
-        'persistentVolumeClaim': PersistentVolumeClaimVolumeSource,
-        'configMap': ConfigMapVolumeSource
+        "awsElasticBlockStore": AWSElasticBlockStoreVolumeSource,
+        "emptyDir": EmptyDirVolumeSource,
+        "gcePersistentDisk": GCEPersistentDiskVolumeSource,
+        "gitRepo": GitRepoVolumeSource,
+        "hostPath": HostPathVolumeSource,
+        "nfs": NFSVolumeSource,
+        "secret": SecretVolumeSource,
+        "persistentVolumeClaim": PersistentVolumeClaimVolumeSource,
+        "configMap": ConfigMapVolumeSource,
     }
 
     def __init__(self, model=None):
@@ -75,26 +75,26 @@ class Volume(object):
         return NotImplemented
 
     def _build_with_model(self, model=None):
-        if 'awsElasticBlockStore' in model:
-            self.awsElasticBlockStore = AWSElasticBlockStoreVolumeSource(model['awsElasticBlockStore'])
-        if 'emptyDir' in model:
-            self.emptyDir = EmptyDirVolumeSource(model['emptyDir'])
-        if 'gcePersistentDisk' in model:
-            self.gcePersistentDisk = GCEPersistentDiskVolumeSource(model['gcePersistentDisk'])
-        if 'gitRepo' in model:
-            self.gitRepo = GitRepoVolumeSource(model['gitRepo'])
-        if 'hostPath' in model:
-            self.hostPath = HostPathVolumeSource(model['hostPath'])
-        if 'name' in model:
-            self.name = model['name']
-        if 'nfs' in model:
-            self.nfs = NFSVolumeSource(model['nfs'])
-        if 'secret' in model:
-            self.secret = SecretVolumeSource(model['secret'])
-        if 'persistentVolumeClaim' in model:
-            self.persistentVolumeClaim = PersistentVolumeClaimVolumeSource(model['persistentVolumeClaim'])
-        if 'configMap' in model:
-            self.configMap = ConfigMapVolumeSource(model['configMap'])
+        if "awsElasticBlockStore" in model:
+            self.awsElasticBlockStore = AWSElasticBlockStoreVolumeSource(model["awsElasticBlockStore"])
+        if "emptyDir" in model:
+            self.emptyDir = EmptyDirVolumeSource(model["emptyDir"])
+        if "gcePersistentDisk" in model:
+            self.gcePersistentDisk = GCEPersistentDiskVolumeSource(model["gcePersistentDisk"])
+        if "gitRepo" in model:
+            self.gitRepo = GitRepoVolumeSource(model["gitRepo"])
+        if "hostPath" in model:
+            self.hostPath = HostPathVolumeSource(model["hostPath"])
+        if "name" in model:
+            self.name = model["name"]
+        if "nfs" in model:
+            self.nfs = NFSVolumeSource(model["nfs"])
+        if "secret" in model:
+            self.secret = SecretVolumeSource(model["secret"])
+        if "persistentVolumeClaim" in model:
+            self.persistentVolumeClaim = PersistentVolumeClaimVolumeSource(model["persistentVolumeClaim"])
+        if "configMap" in model:
+            self.configMap = ConfigMapVolumeSource(model["configMap"])
 
     @staticmethod
     def vol_type_to_source(vol_type=None):
@@ -109,7 +109,7 @@ class Volume(object):
     @awsElasticBlockStore.setter
     def awsElasticBlockStore(self, ebs=None):
         if not isinstance(ebs, AWSElasticBlockStoreVolumeSource):
-            raise SyntaxError('Volume: aws_elastic_block_store: [ {0} ] is invalid.'.format(ebs))
+            raise SyntaxError("Volume: aws_elastic_block_store: [ {0} ] is invalid.".format(ebs))
         self._awsElasticBlockStore = ebs
 
     # ------------------------------------------------------------------------------------- configMap
@@ -121,7 +121,7 @@ class Volume(object):
     @configMap.setter
     def configMap(self, config_map=None):
         if not isinstance(config_map, ConfigMapVolumeSource):
-            raise SyntaxError('Volume: config_map: [ {0} ] is invalid.'.format(config_map))
+            raise SyntaxError("Volume: config_map: [ {0} ] is invalid.".format(config_map))
         self._config_map = config_map
 
     # ------------------------------------------------------------------------------------- emptyDir
@@ -133,7 +133,7 @@ class Volume(object):
     @emptyDir.setter
     def emptyDir(self, edir=None):
         if not isinstance(edir, EmptyDirVolumeSource):
-            raise SyntaxError('Volume: empty_dir: [ {0} ] is invalid.'.format(edir))
+            raise SyntaxError("Volume: empty_dir: [ {0} ] is invalid.".format(edir))
         self._emptyDir = edir
 
     # ------------------------------------------------------------------------------------- gce pd
@@ -145,7 +145,7 @@ class Volume(object):
     @gcePersistentDisk.setter
     def gcePersistentDisk(self, pd=None):
         if not isinstance(pd, GCEPersistentDiskVolumeSource):
-            raise SyntaxError('Volume: gce_persistent_disk: [ {0} ] is invalid.'.format(pd))
+            raise SyntaxError("Volume: gce_persistent_disk: [ {0} ] is invalid.".format(pd))
         self._gcePersistentDisk = pd
 
     # ------------------------------------------------------------------------------------- gitRepo
@@ -157,7 +157,7 @@ class Volume(object):
     @gitRepo.setter
     def gitRepo(self, repo=None):
         if not isinstance(repo, GitRepoVolumeSource):
-            raise SyntaxError('Volume: git_repo: [ {0} ] is invalid.'.format(repo))
+            raise SyntaxError("Volume: git_repo: [ {0} ] is invalid.".format(repo))
         self._gitRepo = repo
 
     # ------------------------------------------------------------------------------------- hostPath
@@ -169,7 +169,7 @@ class Volume(object):
     @hostPath.setter
     def hostPath(self, hp=None):
         if not isinstance(hp, HostPathVolumeSource):
-            raise SyntaxError('Volume: host_path: [ {0} ] is invalid.'.format(hp))
+            raise SyntaxError("Volume: host_path: [ {0} ] is invalid.".format(hp))
         self._hostPath = hp
 
     # ------------------------------------------------------------------------------------- name
@@ -181,7 +181,7 @@ class Volume(object):
     @name.setter
     def name(self, name=None):
         if not is_valid_string(name):
-            raise SyntaxError('Volume: name: [ {0} ] is invalid.'.format(name))
+            raise SyntaxError("Volume: name: [ {0} ] is invalid.".format(name))
         self._name = name
 
     # ------------------------------------------------------------------------------------- nfs
@@ -193,7 +193,7 @@ class Volume(object):
     @nfs.setter
     def nfs(self, nfs=None):
         if not isinstance(nfs, NFSVolumeSource):
-            raise SyntaxError('Volume: nfs: [ {0} ] is invalid.'.format(nfs))
+            raise SyntaxError("Volume: nfs: [ {0} ] is invalid.".format(nfs))
         self._nfs = nfs
 
     # ------------------------------------------------------------------------------------- secret
@@ -205,7 +205,7 @@ class Volume(object):
     @secret.setter
     def secret(self, secret=None):
         if not isinstance(secret, SecretVolumeSource):
-            raise SyntaxError('Volume: secret: [ {0} ] is invalid.'.format(secret))
+            raise SyntaxError("Volume: secret: [ {0} ] is invalid.".format(secret))
         self._secret = secret
 
     # ------------------------------------------------------------------------------------- persistentVolumeClaim
@@ -217,7 +217,7 @@ class Volume(object):
     @persistentVolumeClaim.setter
     def persistentVolumeClaim(self, pvc=None):
         if not isinstance(pvc, PersistentVolumeClaimVolumeSource):
-            raise SyntaxError('Volume: persistentVolumeClaim: [ {0} ] is invalid.'.format(pvc))
+            raise SyntaxError("Volume: persistentVolumeClaim: [ {0} ] is invalid.".format(pvc))
         self._persistentVolumeClaim = pvc
 
     # ------------------------------------------------------------------------------------- serialize
@@ -225,23 +225,23 @@ class Volume(object):
     def serialize(self):
         data = {}
         if self.awsElasticBlockStore is not None:
-            data['awsElasticBlockStore'] = self.awsElasticBlockStore.serialize()
+            data["awsElasticBlockStore"] = self.awsElasticBlockStore.serialize()
         if self.emptyDir is not None:
-            data['emptyDir'] = self.emptyDir.serialize()
+            data["emptyDir"] = self.emptyDir.serialize()
         if self.gcePersistentDisk is not None:
-            data['gcePersistentDisk'] = self.gcePersistentDisk.serialize()
+            data["gcePersistentDisk"] = self.gcePersistentDisk.serialize()
         if self.gitRepo is not None:
-            data['gitRepo'] = self.gitRepo.serialize()
+            data["gitRepo"] = self.gitRepo.serialize()
         if self.hostPath is not None:
-            data['hostPath'] = self.hostPath.serialize()
+            data["hostPath"] = self.hostPath.serialize()
         if self.name is not None:
-            data['name'] = self.name
+            data["name"] = self.name
         if self.nfs is not None:
-            data['nfs'] = self.nfs.serialize()
+            data["nfs"] = self.nfs.serialize()
         if self.secret is not None:
-            data['secret'] = self.secret.serialize()
+            data["secret"] = self.secret.serialize()
         if self.persistentVolumeClaim is not None:
-            data['persistentVolumeClaim'] = self.persistentVolumeClaim.serialize()
+            data["persistentVolumeClaim"] = self.persistentVolumeClaim.serialize()
         if self.configMap is not None:
-            data['configMap'] = self.configMap.serialize()
+            data["configMap"] = self.configMap.serialize()
         return data

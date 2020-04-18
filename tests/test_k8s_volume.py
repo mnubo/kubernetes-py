@@ -26,7 +26,6 @@ from kubernetes_py.models.v1.ConfigMapVolumeSource import ConfigMapVolumeSource
 
 
 class K8sVolumeTest(BaseTest):
-
     def setUp(self):
         _utils.cleanup_nodes()
         _utils.cleanup_rc()
@@ -64,7 +63,7 @@ class K8sVolumeTest(BaseTest):
 
     def test_init_empty_dir(self):
         name = "yoname"
-        type = 'emptyDir'
+        type = "emptyDir"
         vol = K8sVolume(name=name, type=type)
         self.assertIsNotNone(vol)
         self.assertIsInstance(vol, K8sVolume)
@@ -97,8 +96,8 @@ class K8sVolumeTest(BaseTest):
         name = "yoname"
         type = "emptyDir"
         vol = K8sVolume(name=name, type=type)
-        vol.medium = ''
-        self.assertEqual('', vol.medium)
+        vol.medium = ""
+        self.assertEqual("", vol.medium)
 
     def test_emptydir_set_medium_memory(self):
         name = "yoname"
@@ -112,11 +111,11 @@ class K8sVolumeTest(BaseTest):
 
     def test_init_host_path(self):
         name = "yoname"
-        type = 'hostPath'
+        type = "hostPath"
         vol = K8sVolume(name=name, type=type)
         self.assertIsNotNone(vol)
         self.assertIsInstance(vol, K8sVolume)
-        self.assertEqual('hostPath', vol.type)
+        self.assertEqual("hostPath", vol.type)
         self.assertIsInstance(vol.source, HostPathVolumeSource)
 
     def test_hostpath_set_path_invalid_type(self):
@@ -181,24 +180,21 @@ class K8sVolumeTest(BaseTest):
 
     def test_init_config_map(self):
         name = "yoname"
-        type = 'configMap'
+        type = "configMap"
         vol = K8sVolume(name=name, type=type)
         self.assertIsNotNone(vol)
         self.assertIsInstance(vol, K8sVolume)
-        self.assertEqual('configMap', vol.type)
+        self.assertEqual("configMap", vol.type)
         self.assertIsInstance(vol.source, ConfigMapVolumeSource)
 
     def test_configmap_set_items(self):
         name = "yoname"
         type = "configMap"
         items = list()
-        items.append({
-            "key": "testkey",
-            "path": "testpath"
-        })
+        items.append({"key": "testkey", "path": "testpath"})
         vol = K8sVolume(name=name, type=type)
         vol.configmap_items = items
-        serialized_items = vol.serialize().get('configMap').get('items')
+        serialized_items = vol.serialize().get("configMap").get("items")
         self.assertEqual(items, serialized_items)
 
     # --------------------------------------------------------------------------------- awsElasticBlockStore
@@ -470,7 +466,7 @@ class K8sVolumeTest(BaseTest):
         volume = _utils.create_volume(name=vol_name, type=vol_type)
 
         mount_name = vol_name
-        mount_path = '/test-emptydir'
+        mount_path = "/test-emptydir"
         mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
         container.add_volume_mount(mount)
 
@@ -498,7 +494,7 @@ class K8sVolumeTest(BaseTest):
         volume.path = host_path
 
         mount_name = vol_name
-        mount_path = '/test-hostpath'
+        mount_path = "/test-hostpath"
         mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
         container.add_volume_mount(mount)
 
@@ -531,7 +527,7 @@ class K8sVolumeTest(BaseTest):
         volume.secret_name = secret_name
 
         mount_name = vol_name
-        mount_path = '/test-secret'
+        mount_path = "/test-secret"
         mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
         container.add_volume_mount(mount)
 
@@ -560,7 +556,7 @@ class K8sVolumeTest(BaseTest):
         volume.volume_id = volume_id
 
         mount_name = vol_name
-        mount_path = '/test-aws'
+        mount_path = "/test-aws"
         mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
         container.add_volume_mount(mount)
 
@@ -591,7 +587,7 @@ class K8sVolumeTest(BaseTest):
         volume.pd_name = pd_name
 
         mount_name = vol_name
-        mount_path = '/test-gce'
+        mount_path = "/test-gce"
         mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
         container.add_volume_mount(mount)
 
@@ -624,7 +620,7 @@ class K8sVolumeTest(BaseTest):
         volume.nfs_path = nfs_path
 
         mount_name = vol_name
-        mount_path = '/test-nfs'
+        mount_path = "/test-nfs"
         mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
         container.add_volume_mount(mount)
 
@@ -657,7 +653,7 @@ class K8sVolumeTest(BaseTest):
         volume.git_revision = revision
 
         mount_name = vol_name
-        mount_path = '/test-git'
+        mount_path = "/test-git"
         mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
         container.add_volume_mount(mount)
 
@@ -690,7 +686,7 @@ class K8sVolumeTest(BaseTest):
         volume = _utils.create_volume(name=vol_name, type=vol_type)
 
         mount_name = vol_name
-        mount_path = '/test-emptydir'
+        mount_path = "/test-emptydir"
         mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
         container_nginx.add_volume_mount(mount)
         container_redis.add_volume_mount(mount)
@@ -725,7 +721,7 @@ class K8sVolumeTest(BaseTest):
         volume.path = hostpath
 
         mount_name = vol_name
-        mount_path = '/test-hostpath'
+        mount_path = "/test-hostpath"
         mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
         container_nginx.add_volume_mount(mount)
         container_redis.add_volume_mount(mount)
@@ -744,28 +740,25 @@ class K8sVolumeTest(BaseTest):
 
     def test_rc_hostpath_list(self):
         volumes = [
-            {'hostPath': {'path': '/root/.dockercfg'}, 'name': 'dockercred'},
-            {'hostPath': {'path': '/usr/bin/docker'}, 'name': 'dockerbin'},
-            {'hostPath': {'path': '/var/run/docker.sock'}, 'name': 'dockersock'},
-            {'hostPath': {'path': '/root/.docker'}, 'name': 'dockerconfig'}
+            {"hostPath": {"path": "/root/.dockercfg"}, "name": "dockercred"},
+            {"hostPath": {"path": "/usr/bin/docker"}, "name": "dockerbin"},
+            {"hostPath": {"path": "/var/run/docker.sock"}, "name": "dockersock"},
+            {"hostPath": {"path": "/root/.docker"}, "name": "dockerconfig"},
         ]
         rc = _utils.create_rc(name="admintool")
 
         for vol in volumes:
-            keys = list(filter(lambda x: x != 'name', vol.keys()))
-            v = K8sVolume(
-                name=vol['name'],
-                type=keys[0],
-            )
+            keys = list(filter(lambda x: x != "name", vol.keys()))
+            v = K8sVolume(name=vol["name"], type=keys[0],)
             dico = vol[keys[0]]
             if dico is not None:
-                v.path = dico['path']
+                v.path = dico["path"]
             rc.add_volume(v)
 
         self.assertEqual(len(volumes), len(rc.volumes))
         for i in range(0, len(volumes)):
-            self.assertEqual(volumes[i]['name'], rc.volumes[i].name)
-            self.assertEqual(volumes[i]['hostPath']['path'], rc.volumes[i].hostPath.path)
+            self.assertEqual(volumes[i]["name"], rc.volumes[i].name)
+            self.assertEqual(volumes[i]["hostPath"]["path"], rc.volumes[i].hostPath.path)
 
     # --------------------------------------------------------------------------------- api - rc - secret
 
@@ -790,7 +783,7 @@ class K8sVolumeTest(BaseTest):
         volume.secret_name = secret_name
 
         mount_name = vol_name
-        mount_path = '/test-secret'
+        mount_path = "/test-secret"
         mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
         container_nginx.add_volume_mount(mount)
         container_redis.add_volume_mount(mount)
@@ -833,7 +826,7 @@ class K8sVolumeTest(BaseTest):
         volume.volume_id = volume_id
 
         mount_name = vol_name
-        mount_path = '/test-aws'
+        mount_path = "/test-aws"
         mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
         container_nginx.add_volume_mount(mount)
         container_redis.add_volume_mount(mount)
@@ -878,7 +871,7 @@ class K8sVolumeTest(BaseTest):
         volume.read_only = True  # HTTP 422: GCE PD can only be mounted on multiple machines if it is read-only
 
         mount_name = vol_name
-        mount_path = '/test-gce'
+        mount_path = "/test-gce"
         mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
         container_nginx.add_volume_mount(mount)
         container_redis.add_volume_mount(mount)
@@ -918,7 +911,7 @@ class K8sVolumeTest(BaseTest):
         volume.nfs_path = path
 
         mount_name = vol_name
-        mount_path = '/test-nfs'
+        mount_path = "/test-nfs"
         mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
         container_nginx.add_volume_mount(mount)
         container_redis.add_volume_mount(mount)
@@ -958,7 +951,7 @@ class K8sVolumeTest(BaseTest):
         volume.git_revision = revision
 
         mount_name = vol_name
-        mount_path = '/test-git'
+        mount_path = "/test-git"
         mount = K8sVolumeMount(name=mount_name, mount_path=mount_path)
         container_nginx.add_volume_mount(mount)
         container_redis.add_volume_mount(mount)

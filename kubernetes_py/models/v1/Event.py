@@ -35,22 +35,22 @@ class Event(BaseModel):
     def _build_with_model(self, model=None):
         super(Event, self).build_with_model(model)
 
-        if 'count' in model:
-            self.count = model['count']
-        if 'firstTimestamp' in model:
-            self.first_timestamp = model['firstTimestamp']
-        if 'involvedObject' in model:
-            self.involved_object = ObjectReference(model['involvedObject'])
-        if 'lastTimestamp' in model:
-            self.last_timestamp = model['lastTimestamp']
-        if 'message' in model:
-            self.message = model['message']
-        if 'reason' in model:
-            self.reason = model['reason']
-        if 'source' in model:
-            self.source = EventSource(model['source'])
-        if 'type' in model:
-            self.type = model['type']
+        if "count" in model:
+            self.count = model["count"]
+        if "firstTimestamp" in model:
+            self.first_timestamp = model["firstTimestamp"]
+        if "involvedObject" in model:
+            self.involved_object = ObjectReference(model["involvedObject"])
+        if "lastTimestamp" in model:
+            self.last_timestamp = model["lastTimestamp"]
+        if "message" in model:
+            self.message = model["message"]
+        if "reason" in model:
+            self.reason = model["reason"]
+        if "source" in model:
+            self.source = EventSource(model["source"])
+        if "type" in model:
+            self.type = model["type"]
 
     # ------------------------------------------------------------------------------------- count
 
@@ -154,19 +154,19 @@ class Event(BaseModel):
         data = super(Event, self).serialize()
 
         if self.count is not None:
-            data['count'] = self.count
+            data["count"] = self.count
         if self.first_timestamp is not None:
-            data['firstTimestamp'] = self.first_timestamp
+            data["firstTimestamp"] = self.first_timestamp
         if self.involved_object is not None:
-            data['involvedObject'] = self.involved_object.serialize()
+            data["involvedObject"] = self.involved_object.serialize()
         if self.last_timestamp is not None:
-            data['lastTimestamp'] = self.last_timestamp
+            data["lastTimestamp"] = self.last_timestamp
         if self.message is not None:
-            data['message'] = self.message
+            data["message"] = self.message
         if self.reason is not None:
-            data['reason'] = self.reason
+            data["reason"] = self.reason
         if self.source is not None:
-            data['source'] = self.source.serialize()
+            data["source"] = self.source.serialize()
         if self.type is not None:
-            data['type'] = self.type
+            data["type"] = self.type
         return data

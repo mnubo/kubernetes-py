@@ -20,8 +20,8 @@ class Job(BaseModel):
     def __init__(self, model=None):
         super(Job, self).__init__()
 
-        self.kind = 'Job'
-        self.api_version = 'batch/v1'
+        self.kind = "Job"
+        self.api_version = "batch/v1"
 
         self.spec = JobSpec()
         self.status = JobStatus()
@@ -32,10 +32,10 @@ class Job(BaseModel):
     def _build_with_model(self, model=None):
         super(Job, self).build_with_model(model)
 
-        if 'spec' in model:
-            self.spec = JobSpec(model['spec'])
-        if 'status' in model:
-            self.status = JobStatus(model['status'])
+        if "spec" in model:
+            self.spec = JobSpec(model["spec"])
+        if "status" in model:
+            self.status = JobStatus(model["status"])
 
     # --------------------------------------------------------------------------------- spec
 
@@ -46,7 +46,7 @@ class Job(BaseModel):
     @spec.setter
     def spec(self, s=None):
         if not isinstance(s, JobSpec):
-            raise SyntaxError('Job: spec: [ {} ] is invalid.'.format(s))
+            raise SyntaxError("Job: spec: [ {} ] is invalid.".format(s))
         self._spec = s
 
     # --------------------------------------------------------------------------------- status
@@ -58,7 +58,7 @@ class Job(BaseModel):
     @status.setter
     def status(self, s=None):
         if not isinstance(s, JobStatus):
-            raise SyntaxError('Job: status: [ {} ] is invalid.'.format(s))
+            raise SyntaxError("Job: status: [ {} ] is invalid.".format(s))
         self._status = s
 
     # --------------------------------------------------------------------------------- serialize
@@ -67,7 +67,7 @@ class Job(BaseModel):
         data = super(Job, self).serialize()
 
         if self.spec is not None:
-            data['spec'] = self.spec.serialize()
+            data["spec"] = self.spec.serialize()
         if self.status is not None:
-            data['status'] = self.status.serialize()
+            data["status"] = self.status.serialize()
         return data

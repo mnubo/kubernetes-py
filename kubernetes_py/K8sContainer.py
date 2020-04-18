@@ -59,15 +59,15 @@ class K8sContainer(object):
         self.model.ports = ports
 
     def add_env(self, name=None, value=None):
-        e = {'name': name}
+        e = {"name": name}
 
         if isinstance(value, dict):
-            if 'valueFrom' in value and len(value) == 1:
-                e['valueFrom'] = value['valueFrom']
+            if "valueFrom" in value and len(value) == 1:
+                e["valueFrom"] = value["valueFrom"]
         elif isinstance(value, str):
-            e['value'] = value
+            e["value"] = value
         else:
-            raise SyntaxError('K8sContainer.add_env() value: [ {} ] is invalid.')
+            raise SyntaxError("K8sContainer.add_env() value: [ {} ] is invalid.")
 
         env_var = EnvVar(e)
         env = self.model.env
@@ -78,7 +78,7 @@ class K8sContainer(object):
 
     def add_volume_mount(self, mount=None):
         if not isinstance(mount, K8sVolumeMount):
-            raise SyntaxError('K8sContainer.add_volume_mount() mount: [ {} ] is invalid.'.format(mount))
+            raise SyntaxError("K8sContainer.add_volume_mount() mount: [ {} ] is invalid.".format(mount))
         mounts = self.model.volume_mounts
         if mount.model not in mounts:
             mounts.append(mount.model)
@@ -86,22 +86,22 @@ class K8sContainer(object):
 
     def add_liveness_probe(self, **kwargs):
         if not isinstance(kwargs, dict):
-            raise SyntaxError('K8sContainer: could not add liveness_probe: [ {} ]'.format(kwargs))
+            raise SyntaxError("K8sContainer: could not add liveness_probe: [ {} ]".format(kwargs))
         probe = Probe(kwargs)
         self.liveness_probe = probe
 
     def add_readiness_probe(self, **kwargs):
         if not isinstance(kwargs, dict):
-            raise SyntaxError('K8sContainer: could not add readiness_probe: [ {} ]'.format(kwargs))
+            raise SyntaxError("K8sContainer: could not add readiness_probe: [ {} ]".format(kwargs))
         probe = Probe(kwargs)
         self.readiness_probe = probe
 
     def add_capabilities(self, c=None):
-        cap = Capabilities({'add': c})
+        cap = Capabilities({"add": c})
         self.capabilities = cap
 
     def drop_capabilities(self, c=None):
-        cap = Capabilities({'drop': c})
+        cap = Capabilities({"drop": c})
         self.capabilities = cap
 
     # -------------------------------------------------------------------------------------  args

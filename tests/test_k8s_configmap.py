@@ -17,7 +17,6 @@ from tests.BaseTest import BaseTest
 
 
 class K8sConfigMapTests(BaseTest):
-
     def setUp(self):
         _utils.cleanup_configmap()
 
@@ -85,9 +84,7 @@ class K8sConfigMapTests(BaseTest):
     def test_data(self):
         cfg = _utils.create_config()
         k8s = K8sConfigMap(config=cfg, name="yo")
-        fake_data = {
-            "test_key": "test_value"
-        }
+        fake_data = {"test_key": "test_value"}
         k8s.data = fake_data
         parsed_data = k8s.data
         self.assertIsInstance(parsed_data, dict)
@@ -96,15 +93,11 @@ class K8sConfigMapTests(BaseTest):
     def test_data_wrong_keys(self):
         cfg = _utils.create_config()
         k8s = K8sConfigMap(config=cfg, name="yo")
-        fake_data = {
-            "@": "test_value"
-        }
+        fake_data = {"@": "test_value"}
         with self.assertRaises(SyntaxError):
             k8s.data = fake_data
 
-        fake_data = {
-            "abc@123": "test_value"
-        }
+        fake_data = {"abc@123": "test_value"}
 
         with self.assertRaises(SyntaxError):
             k8s.data = fake_data

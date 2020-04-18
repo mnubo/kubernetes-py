@@ -21,8 +21,8 @@ class Node(BaseModel):
     def __init__(self, model=None):
         super(Node, self).__init__()
 
-        self.kind = 'Node'
-        self.api_version = 'v1'
+        self.kind = "Node"
+        self.api_version = "v1"
 
         self.spec = NodeSpec()
         self.status = NodeStatus()
@@ -34,10 +34,10 @@ class Node(BaseModel):
     def _build_with_model(self, model=None):
         super(Node, self).build_with_model(model)
 
-        if 'spec' in model:
-            self.spec = NodeSpec(model['spec'])
-        if 'status' in model:
-            self.status = NodeStatus(model['status'])
+        if "spec" in model:
+            self.spec = NodeSpec(model["spec"])
+        if "status" in model:
+            self.status = NodeStatus(model["status"])
 
     # ------------------------------------------------------------------------------------- spec
 
@@ -48,7 +48,7 @@ class Node(BaseModel):
     @spec.setter
     def spec(self, spec=None):
         if not isinstance(spec, NodeSpec):
-            raise SyntaxError('Node: spec: [ {0} ] is invalid.'.format(spec))
+            raise SyntaxError("Node: spec: [ {0} ] is invalid.".format(spec))
         self._spec = spec
 
     # ------------------------------------------------------------------------------------- status
@@ -60,7 +60,7 @@ class Node(BaseModel):
     @status.setter
     def status(self, status=None):
         if not isinstance(status, NodeStatus):
-            raise SyntaxError('Node: status: [ {0} ] is invalid.'.format(status))
+            raise SyntaxError("Node: status: [ {0} ] is invalid.".format(status))
         self._status = status
 
     # ------------------------------------------------------------------------------------- serialize
@@ -68,7 +68,7 @@ class Node(BaseModel):
     def serialize(self):
         data = super(Node, self).serialize()
         if self.spec is not None:
-            data['spec'] = self.spec.serialize()
+            data["spec"] = self.spec.serialize()
         if self.status is not None:
-            data['status'] = self.status.serialize()
+            data["status"] = self.status.serialize()
         return data

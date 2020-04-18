@@ -32,22 +32,22 @@ class ContainerStatus(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'name' in model:
-            self.name = model['name']
-        if 'state' in model:
-            self.state = ContainerState(model['state'])
-        if 'lastState' in model:
-            self.last_state = ContainerState(model['state'])
-        if 'ready' in model:
-            self.ready = model['ready']
-        if 'restartCount' in model:
-            self.restart_count = model['restartCount']
-        if 'image' in model:
-            self.image = model['image']
-        if 'imageID' in model:
-            self.image_id = model['imageID']
-        if 'containerID' in model:
-            self.container_id = model['containerID']
+        if "name" in model:
+            self.name = model["name"]
+        if "state" in model:
+            self.state = ContainerState(model["state"])
+        if "lastState" in model:
+            self.last_state = ContainerState(model["state"])
+        if "ready" in model:
+            self.ready = model["ready"]
+        if "restartCount" in model:
+            self.restart_count = model["restartCount"]
+        if "image" in model:
+            self.image = model["image"]
+        if "imageID" in model:
+            self.image_id = model["imageID"]
+        if "containerID" in model:
+            self.container_id = model["containerID"]
 
     # ------------------------------------------------------------------------------------- name
 
@@ -58,7 +58,7 @@ class ContainerStatus(object):
     @name.setter
     def name(self, name=None):
         if not is_valid_string(name):
-            raise SyntaxError('ContainerStatus: name: [ {0} ] is invalid'.format(name))
+            raise SyntaxError("ContainerStatus: name: [ {0} ] is invalid".format(name))
         self._name = name
 
     # ------------------------------------------------------------------------------------- state
@@ -70,7 +70,7 @@ class ContainerStatus(object):
     @state.setter
     def state(self, state=None):
         if not isinstance(state, ContainerState):
-            raise SyntaxError('ContainerStatus: state: [ {0} ] is invalid'.format(state))
+            raise SyntaxError("ContainerStatus: state: [ {0} ] is invalid".format(state))
         self._state = state
 
     # ------------------------------------------------------------------------------------- lastState
@@ -82,7 +82,7 @@ class ContainerStatus(object):
     @last_state.setter
     def last_state(self, state=None):
         if not isinstance(state, ContainerState):
-            raise SyntaxError('ContainerStatus: last_state: [ {0} ] is invalid'.format(state))
+            raise SyntaxError("ContainerStatus: last_state: [ {0} ] is invalid".format(state))
         self._last_state = state
 
     # ------------------------------------------------------------------------------------- ready
@@ -94,7 +94,7 @@ class ContainerStatus(object):
     @ready.setter
     def ready(self, ready=None):
         if not isinstance(ready, bool):
-            raise SyntaxError('ContainerStatus: ready: [ {0} ] is invalid'.format(ready))
+            raise SyntaxError("ContainerStatus: ready: [ {0} ] is invalid".format(ready))
         self._ready = ready
 
     # ------------------------------------------------------------------------------------- restartCount
@@ -106,7 +106,7 @@ class ContainerStatus(object):
     @restart_count.setter
     def restart_count(self, count=None):
         if not isinstance(count, int):
-            raise SyntaxError('ContainerStatus: restart_count: [ {0} ] is invalid'.format(count))
+            raise SyntaxError("ContainerStatus: restart_count: [ {0} ] is invalid".format(count))
         self._restart_count = count
 
     # ------------------------------------------------------------------------------------- image
@@ -118,7 +118,7 @@ class ContainerStatus(object):
     @image.setter
     def image(self, image=None):
         if not is_valid_string(image):
-            raise SyntaxError('ContainerStatus: image: [ {0} ] is invalid'.format(image))
+            raise SyntaxError("ContainerStatus: image: [ {0} ] is invalid".format(image))
         self._image = image
 
     # ------------------------------------------------------------------------------------- imageID
@@ -130,7 +130,7 @@ class ContainerStatus(object):
     @image_id.setter
     def image_id(self, iid=None):
         if not is_valid_string(iid):
-            raise SyntaxError('ContainerStatus: image_id: [ {0} ] is invalid'.format(iid))
+            raise SyntaxError("ContainerStatus: image_id: [ {0} ] is invalid".format(iid))
         self._image_id = iid
 
     # ------------------------------------------------------------------------------------- containerID
@@ -142,7 +142,7 @@ class ContainerStatus(object):
     @container_id.setter
     def container_id(self, cid=None):
         if not is_valid_string(cid):
-            raise SyntaxError('ContainerStatus: container_id: [ {0} ] is invalid'.format(cid))
+            raise SyntaxError("ContainerStatus: container_id: [ {0} ] is invalid".format(cid))
         self._container_id = cid
 
     # ------------------------------------------------------------------------------------- serialize
@@ -150,19 +150,19 @@ class ContainerStatus(object):
     def serialize(self):
         data = {}
         if self.name is not None:
-            data['name'] = self.name
+            data["name"] = self.name
         if self.state is not None:
-            data['state'] = self.state.serialize()
+            data["state"] = self.state.serialize()
         if self.last_state is not None:
-            data['lastState'] = self.last_state.serialize()
+            data["lastState"] = self.last_state.serialize()
         if self.ready is not None:
-            data['ready'] = self.ready
+            data["ready"] = self.ready
         if self.restart_count is not None:
-            data['restartCount'] = self.restart_count
+            data["restartCount"] = self.restart_count
         if self.image is not None:
-            data['image'] = self.image
+            data["image"] = self.image
         if self.image_id is not None:
-            data['imageID'] = self.image_id
+            data["imageID"] = self.image_id
         if self.container_id is not None:
-            data['containerID'] = self.container_id
+            data["containerID"] = self.container_id
         return data

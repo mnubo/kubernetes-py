@@ -22,10 +22,10 @@ class PetSetStatus(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'observedGeneration' in model:
-            self.observed_generation = model['observedGeneration']
-        if 'replicas' in model:
-            self.replicas = model['replicas']
+        if "observedGeneration" in model:
+            self.observed_generation = model["observedGeneration"]
+        if "replicas" in model:
+            self.replicas = model["replicas"]
 
     # ------------------------------------------------------------------------------------- observedGeneration
 
@@ -36,7 +36,7 @@ class PetSetStatus(object):
     @observed_generation.setter
     def observed_generation(self, og=None):
         if not isinstance(og, int):
-            raise SyntaxError('PetSetStatus: observed_generation: [ {} ] is not None.'.format(og))
+            raise SyntaxError("PetSetStatus: observed_generation: [ {} ] is not None.".format(og))
         self._observed_generation = og
 
     # ------------------------------------------------------------------------------------- replicas
@@ -48,7 +48,7 @@ class PetSetStatus(object):
     @replicas.setter
     def replicas(self, r=None):
         if not isinstance(r, int):
-            raise SyntaxError('PetSetStatus: replicas: [ {} ] is not None.'.format(r))
+            raise SyntaxError("PetSetStatus: replicas: [ {} ] is not None.".format(r))
         self._replicas = r
 
     # ------------------------------------------------------------------------------------- serialize
@@ -56,7 +56,7 @@ class PetSetStatus(object):
     def serialize(self):
         data = {}
         if self.observed_generation is not None:
-            data['observedGeneration'] = self.observed_generation
+            data["observedGeneration"] = self.observed_generation
         if self.replicas is not None:
-            data['replicas'] = self.replicas
+            data["replicas"] = self.replicas
         return data

@@ -14,7 +14,7 @@ class EmptyDirVolumeSource(object):
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_emptydirvolumesource
     """
 
-    VALID_MEDIA = ['', 'Memory']
+    VALID_MEDIA = ["", "Memory"]
 
     def __init__(self, model=None):
         super(EmptyDirVolumeSource, self).__init__()
@@ -26,8 +26,8 @@ class EmptyDirVolumeSource(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'medium' in model:
-            self.medium = model['medium']
+        if "medium" in model:
+            self.medium = model["medium"]
 
     # ------------------------------------------------------------------------------------- medium
 
@@ -38,7 +38,7 @@ class EmptyDirVolumeSource(object):
     @medium.setter
     def medium(self, medium=None):
         if medium is None or medium not in EmptyDirVolumeSource.VALID_MEDIA:
-            raise SyntaxError('EmptyDirVolumeSource: medium: [ {0} ] is invalid.'.format(medium))
+            raise SyntaxError("EmptyDirVolumeSource: medium: [ {0} ] is invalid.".format(medium))
         self._medium = medium
 
     # ------------------------------------------------------------------------------------- medium
@@ -46,5 +46,5 @@ class EmptyDirVolumeSource(object):
     def serialize(self):
         data = {}
         if self.medium is not None:
-            data['medium'] = self.medium
+            data["medium"] = self.medium
         return data

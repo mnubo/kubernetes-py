@@ -24,9 +24,9 @@ class NodeSelector(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'nodeSelectorTerms' in model:
+        if "nodeSelectorTerms" in model:
             terms = []
-            for t in model['nodeSelectorTerms']:
+            for t in model["nodeSelectorTerms"]:
                 term = NodeSelectorTerm(t)
                 terms.append(term)
             self.node_selector_terms = terms
@@ -40,7 +40,7 @@ class NodeSelector(object):
     @node_selector_terms.setter
     def node_selector_terms(self, t=None):
         if not is_valid_list(t, NodeSelectorTerm):
-            raise SyntaxError('NodeSelector: node_selector_terms: [ {} ] is invalid.'.format(t))
+            raise SyntaxError("NodeSelector: node_selector_terms: [ {} ] is invalid.".format(t))
         self._node_selector_terms = t
 
     # ------------------------------------------------------------------------------------- serialize
@@ -52,5 +52,5 @@ class NodeSelector(object):
             for t in self.node_selector_terms:
                 term = t.serialize()
                 terms.append(term)
-            data['nodeSelectorTerms'] = terms
+            data["nodeSelectorTerms"] = terms
         return data

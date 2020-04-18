@@ -32,14 +32,14 @@ class ConfigMapVolumeSource(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'defaultMode' in model:
-            self.default_mode = model['defaultMode']
-        if 'items' in model:
-            self.items = model['items']
-        if 'name' in model:
-            self.name = model['name']
-        if 'optional' in model:
-            self.optional = model['optional']
+        if "defaultMode" in model:
+            self.default_mode = model["defaultMode"]
+        if "items" in model:
+            self.items = model["items"]
+        if "name" in model:
+            self.name = model["name"]
+        if "optional" in model:
+            self.optional = model["optional"]
 
     # ------------------------------------------------------------------------------------- default_mode
 
@@ -53,9 +53,9 @@ class ConfigMapVolumeSource(object):
             try:
                 mode = int(mode)
             except ValueError:
-                raise SyntaxError('ConfigMapVolumeSource: defaultMode: [ {0} ] is invalid.'.format(mode))
+                raise SyntaxError("ConfigMapVolumeSource: defaultMode: [ {0} ] is invalid.".format(mode))
         if not isinstance(mode, int):
-            raise SyntaxError('ConfigMapVolumeSource: defaultMode: [ {0} ] is invalid.'.format(mode))
+            raise SyntaxError("ConfigMapVolumeSource: defaultMode: [ {0} ] is invalid.".format(mode))
         self._default_mode = mode
 
     # ------------------------------------------------------------------------------------- items
@@ -67,7 +67,7 @@ class ConfigMapVolumeSource(object):
     @items.setter
     def items(self, items=None):
         if not isinstance(items, list):
-            raise SyntaxError('ConfigMapVolumeSource: items: [ {0} ] is invalid.'.format(items))
+            raise SyntaxError("ConfigMapVolumeSource: items: [ {0} ] is invalid.".format(items))
         modeled_items = list()
         for i in items:
             tmp_item = KeyToPath(model=i)
@@ -83,7 +83,7 @@ class ConfigMapVolumeSource(object):
     @name.setter
     def name(self, name=None):
         if not is_valid_string(name):
-            raise SyntaxError('ConfigMapVolumeSource: name: [ {0} ] is invalid.'.format(name))
+            raise SyntaxError("ConfigMapVolumeSource: name: [ {0} ] is invalid.".format(name))
         self._name = name
 
     # ------------------------------------------------------------------------------------- optional
@@ -95,7 +95,7 @@ class ConfigMapVolumeSource(object):
     @optional.setter
     def optional(self, v=None):
         if not isinstance(v, bool):
-            raise SyntaxError('ConfigMapVolumeSource: optional: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("ConfigMapVolumeSource: optional: [ {0} ] is invalid.".format(v))
         self._optional = v
 
     # ------------------------------------------------------------------------------------- serialize
@@ -104,15 +104,15 @@ class ConfigMapVolumeSource(object):
         data = {}
 
         if self.default_mode is not None:
-            data['defaultMode '] = self.default_mode
+            data["defaultMode "] = self.default_mode
         if self.items is not None:
             tmp_items = list()
             for i in self.items:
                 tmp_items.append(i.serialize())
-            data['items'] = tmp_items
+            data["items"] = tmp_items
         if self.name is not None:
-            data['name'] = self.name
+            data["name"] = self.name
         if self.optional is not None:
-            data['optional'] = self.optional
+            data["optional"] = self.optional
 
         return data

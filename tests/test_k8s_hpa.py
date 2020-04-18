@@ -19,7 +19,6 @@ from tests.BaseTest import BaseTest
 
 
 class K8sHorizontalPodAutoscalerTests(BaseTest):
-
     def setUp(self):
         _utils.cleanup_hpas()
         _utils.cleanup_services()

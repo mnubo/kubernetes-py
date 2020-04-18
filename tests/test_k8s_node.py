@@ -63,7 +63,7 @@ class K8sNodeTest(BaseTest):
         n = _utils.create_node(name=name)
         self.assertIsNotNone(n)
         self.assertIsInstance(n, K8sNode)
-        self.assertEqual('Node', n.obj_type)
+        self.assertEqual("Node", n.obj_type)
         self.assertEqual(n.name, name)
         self.assertIsInstance(n.config, K8sConfig)
 
@@ -75,7 +75,7 @@ class K8sNodeTest(BaseTest):
         self.assertIsNotNone(n)
         self.assertIsInstance(n, K8sNode)
         self.assertEqual(n.name, name)
-        self.assertEqual('Node', n.obj_type)
+        self.assertEqual("Node", n.obj_type)
         self.assertIsInstance(n.config, K8sConfig)
 
     # --------------------------------------------------------------------------------- struct
@@ -192,7 +192,7 @@ class K8sNodeTest(BaseTest):
         node = _utils.create_node(name=name)
 
         if _utils.is_reachable(node.config):
-            node_pattern = re.compile(r'yo-')
+            node_pattern = re.compile(r"yo-")
             _pre_list = node.list()
             for x in _pre_list:
                 self.assertIsInstance(x, K8sNode)
@@ -289,7 +289,7 @@ class K8sNodeTest(BaseTest):
                 for i in range(len(nodes)):
                     node = nodes[i]
                     labels = node.labels
-                    labels.update({'mnubo.com/selector': str(i)})
+                    labels.update({"mnubo.com/selector": str(i)})
                     node.labels = labels
                     node.update()
 
@@ -309,7 +309,7 @@ class K8sNodeTest(BaseTest):
                 for i in range(len(nodes)):
                     node = nodes[i]
                     labels = node.labels
-                    labels.update({'mnubo.com/selector': str(1)})
+                    labels.update({"mnubo.com/selector": str(1)})
                     node.labels = labels
                     node.update()
 

@@ -20,8 +20,8 @@ class Namespace(BaseModel):
     def __init__(self, model=None):
         super(Namespace, self).__init__()
 
-        self.kind = 'Namespace'
-        self.api_version = 'v1'
+        self.kind = "Namespace"
+        self.api_version = "v1"
         self.spec = NamespaceSpec()
         self.status = NamespaceStatus()
 
@@ -31,10 +31,10 @@ class Namespace(BaseModel):
     def _build_with_model(self, model=None):
         super(Namespace, self).build_with_model(model)
 
-        if 'spec' in model:
-            self.spec = NamespaceSpec(model['spec'])
-        if 'status' in model:
-            self.status = NamespaceStatus(model['status'])
+        if "spec" in model:
+            self.spec = NamespaceSpec(model["spec"])
+        if "status" in model:
+            self.status = NamespaceStatus(model["status"])
 
     # --------------------------------------------------------------------------------- spec
 
@@ -45,7 +45,7 @@ class Namespace(BaseModel):
     @spec.setter
     def spec(self, s=None):
         if not isinstance(s, NamespaceSpec):
-            raise SyntaxError('Namespace: spec: [ {} ] is invalid.'.format(s))
+            raise SyntaxError("Namespace: spec: [ {} ] is invalid.".format(s))
         self._spec = s
 
     # --------------------------------------------------------------------------------- status
@@ -57,7 +57,7 @@ class Namespace(BaseModel):
     @status.setter
     def status(self, s=None):
         if not isinstance(s, NamespaceStatus):
-            raise SyntaxError('Job: status: [ {} ] is invalid.'.format(s))
+            raise SyntaxError("Job: status: [ {} ] is invalid.".format(s))
         self._status = s
 
     # --------------------------------------------------------------------------------- serialize
@@ -65,7 +65,7 @@ class Namespace(BaseModel):
     def serialize(self):
         data = super(Namespace, self).serialize()
         if self.spec is not None:
-            data['spec'] = self.spec.serialize()
+            data["spec"] = self.spec.serialize()
         if self.status is not None:
-            data['status'] = self.status.serialize()
+            data["status"] = self.status.serialize()
         return data

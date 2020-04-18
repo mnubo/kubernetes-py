@@ -21,15 +21,15 @@ class CPUTargetUtilization(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'targetPercentage' in model:
-            self.target_percentage = model['targetPercentage']
+        if "targetPercentage" in model:
+            self.target_percentage = model["targetPercentage"]
 
     # ------------------------------------------------------------------------------------- targetPercentage
 
     @property
     def target_percentage(self):
         return self._target_percentage
-    
+
     @target_percentage.setter
     def target_percentage(self, t=None):
         if not isinstance(t, int):

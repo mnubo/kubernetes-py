@@ -27,15 +27,15 @@ class PodAffinity(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'preferredDuringSchedulingIgnoredDuringExecution' in model:
+        if "preferredDuringSchedulingIgnoredDuringExecution" in model:
             wpats = []
-            for x in model['preferredDuringSchedulingIgnoredDuringExecution']:
+            for x in model["preferredDuringSchedulingIgnoredDuringExecution"]:
                 wpat = WeightedPodAffinityTerm(x)
                 wpats.append(wpat)
             self.preferred_during_scheduling_ignored_during_execution = wpats
-        if 'requiredDuringSchedulingIgnoredDuringExecution' in model:
+        if "requiredDuringSchedulingIgnoredDuringExecution" in model:
             pats = []
-            for x in model['requiredDuringSchedulingIgnoredDuringExecution']:
+            for x in model["requiredDuringSchedulingIgnoredDuringExecution"]:
                 pat = PodAffinityTerm(x)
                 pats.append(pat)
             self.required_during_scheduling_ignored_during_execution = pats
@@ -50,7 +50,8 @@ class PodAffinity(object):
     def preferred_during_scheduling_ignored_during_execution(self, wpats=None):
         if not is_valid_list(wpats, WeightedPodAffinityTerm):
             raise SyntaxError(
-                'PodAffinity: preferred_during_scheduling_ignored_during_execution: [ {} ] is invald.'.format(wpats))
+                "PodAffinity: preferred_during_scheduling_ignored_during_execution: [ {} ] is invald.".format(wpats)
+            )
         self._preferred_during_scheduling_ignored_during_execution = wpats
 
     # ----------------------------------------------------------------- requiredDuringSchedulingIgnoredDuringExecution
@@ -65,7 +66,8 @@ class PodAffinity(object):
         # raise NotImplementedError('Not yet implemented in Kubernetes 1.6')
         if not is_valid_list(pats, PodAffinityTerm):
             raise SyntaxError(
-                'PodAffinity: required_during_scheduling_ignored_during_execution: [ {} ] is invald.'.format(pats))
+                "PodAffinity: required_during_scheduling_ignored_during_execution: [ {} ] is invald.".format(pats)
+            )
         self._required_during_scheduling_ignored_during_execution = pats
 
     # ------------------------------------------------------------------------------------- serialize
@@ -77,11 +79,11 @@ class PodAffinity(object):
             for x in self.preferred_during_scheduling_ignored_during_execution:
                 wpat = x.serialize()
                 wpats.append(wpat)
-            data['preferredDuringSchedulingIgnoredDuringExecution'] = wpats
+            data["preferredDuringSchedulingIgnoredDuringExecution"] = wpats
         if self.required_during_scheduling_ignored_during_execution:
             pats = []
             for x in self.required_during_scheduling_ignored_during_execution:
                 pat = x.serialize()
                 pats.append(pat)
-            data['requiredDuringSchedulingIgnoredDuringExecution'] = pats
+            data["requiredDuringSchedulingIgnoredDuringExecution"] = pats
         return data

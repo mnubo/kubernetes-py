@@ -70,7 +70,7 @@ class K8sContainerTest(BaseTest):
         c = K8sContainer(name=name, image=image)
         j = c.serialize()
         self.assertIsInstance(j, dict)
-        for i in ['image', 'imagePullPolicy', 'name']:
+        for i in ["image", "imagePullPolicy", "name"]:
             self.assertIn(i, j)
 
     # ------------------------------------------------------------------------------------- add volume mount
@@ -110,16 +110,16 @@ class K8sContainerTest(BaseTest):
         image = "redis"
         with self.assertRaises(SyntaxError):
             c = K8sContainer(name=name, image=image)
-            c.add_capabilities('NET_RAW')
+            c.add_capabilities("NET_RAW")
 
     def test_add_capabilities(self):
         name = "yomama"
         image = "redis"
         c = K8sContainer(name=name, image=image)
-        c.add_capabilities(['NET_RAW'])
+        c.add_capabilities(["NET_RAW"])
         self.assertIsInstance(c.capabilities, Capabilities)
         self.assertIsInstance(c.capabilities.add, list)
-        self.assertEqual(c.capabilities.add, ['NET_RAW'])
+        self.assertEqual(c.capabilities.add, ["NET_RAW"])
 
     # ------------------------------------------------------------------------------------- drop capabilities
 
@@ -128,16 +128,16 @@ class K8sContainerTest(BaseTest):
         image = "redis"
         with self.assertRaises(SyntaxError):
             c = K8sContainer(name=name, image=image)
-            c.drop_capabilities('NET_RAW')
+            c.drop_capabilities("NET_RAW")
 
     def test_drop_capabilities(self):
         name = "yomama"
         image = "redis"
         c = K8sContainer(name=name, image=image)
-        c.drop_capabilities(['NET_RAW'])
+        c.drop_capabilities(["NET_RAW"])
         self.assertIsInstance(c.capabilities, Capabilities)
         self.assertIsInstance(c.capabilities.drop, list)
-        self.assertEqual(c.capabilities.drop, ['NET_RAW'])
+        self.assertEqual(c.capabilities.drop, ["NET_RAW"])
 
     # ------------------------------------------------------------------------------------- add liveness probe
 
@@ -145,18 +145,12 @@ class K8sContainerTest(BaseTest):
         name = "redis"
         image = "redis:3.0.7"
         c = K8sContainer(name=name, image=image)
-        probe = {
-            'initialDelaySeconds': 15,
-            'tcpSocket': {
-                'port': '8086'
-            },
-            'timeoutSeconds': 1
-        }
+        probe = {"initialDelaySeconds": 15, "tcpSocket": {"port": "8086"}, "timeoutSeconds": 1}
         c.add_liveness_probe(**probe)
         self.assertIsInstance(c.liveness_probe, Probe)
-        self.assertEqual(c.liveness_probe.initial_delay_seconds, probe['initialDelaySeconds'])
-        self.assertEqual(c.liveness_probe.tcp_socket_action.port, str(probe['tcpSocket']['port']))
-        self.assertEqual(c.liveness_probe.timeout_seconds, probe['timeoutSeconds'])
+        self.assertEqual(c.liveness_probe.initial_delay_seconds, probe["initialDelaySeconds"])
+        self.assertEqual(c.liveness_probe.tcp_socket_action.port, str(probe["tcpSocket"]["port"]))
+        self.assertEqual(c.liveness_probe.timeout_seconds, probe["timeoutSeconds"])
         data = c.liveness_probe.serialize()
         self.assertEqual(probe, data)
 
@@ -166,17 +160,11 @@ class K8sContainerTest(BaseTest):
         name = "redis"
         image = "redis:3.0.7"
         c = K8sContainer(name=name, image=image)
-        probe = {
-            'httpGet': {
-                'path': '/admin/health',
-                'port': 8086,
-                'scheme': 'HTTP'
-            }
-        }
+        probe = {"httpGet": {"path": "/admin/health", "port": 8086, "scheme": "HTTP"}}
         c.add_readiness_probe(**probe)
         self.assertIsInstance(c.readiness_probe, Probe)
-        self.assertEqual(c.readiness_probe.http_get_action.path, probe['httpGet']['path'])
-        self.assertEqual(c.readiness_probe.http_get_action.port, probe['httpGet']['port'])
+        self.assertEqual(c.readiness_probe.http_get_action.path, probe["httpGet"]["path"])
+        self.assertEqual(c.readiness_probe.http_get_action.port, probe["httpGet"]["port"])
         data = c.readiness_probe.serialize()
         self.assertEqual(probe, data)
 

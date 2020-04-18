@@ -12,7 +12,6 @@ from tests import _utils
 
 
 class K8sEventTests(BaseTest):
-
     def setUp(self):
         pass
 

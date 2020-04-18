@@ -24,10 +24,10 @@ class WeightedPodAffinityTerm(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'podAffinityTerm' in model:
-            self.pod_affinity_term = PodAffinityTerm(model['podAffinityTerm'])
-        if 'weight' in model:
-            self.weight = model['weight']
+        if "podAffinityTerm" in model:
+            self.pod_affinity_term = PodAffinityTerm(model["podAffinityTerm"])
+        if "weight" in model:
+            self.weight = model["weight"]
 
     # ------------------------------------------------------------------------------------- podAffinityTerm
 
@@ -38,7 +38,7 @@ class WeightedPodAffinityTerm(object):
     @pod_affinity_term.setter
     def pod_affinity_term(self, t=None):
         if not isinstance(t, PodAffinityTerm):
-            raise SyntaxError('WeightedPodAffinityTerm: pod_affinity_term: [ {} ] is invalid.'.format(t))
+            raise SyntaxError("WeightedPodAffinityTerm: pod_affinity_term: [ {} ] is invalid.".format(t))
         self._pod_affinity_term = t
 
     # ------------------------------------------------------------------------------------- weight
@@ -50,9 +50,9 @@ class WeightedPodAffinityTerm(object):
     @weight.setter
     def weight(self, w=None):
         if not isinstance(w, int):
-            raise SyntaxError('WeightedPodAffinityTerm: weight: [ {} ] is invalid.'.format(w))
+            raise SyntaxError("WeightedPodAffinityTerm: weight: [ {} ] is invalid.".format(w))
         if not 1 <= w <= 100:
-            raise SyntaxError('WeightedPodAffinityTerm: weight: [ {} ] must be between 1 and 100.'.format(w))
+            raise SyntaxError("WeightedPodAffinityTerm: weight: [ {} ] must be between 1 and 100.".format(w))
         self._weight = w
 
     # ------------------------------------------------------------------------------------- serialize
@@ -60,7 +60,7 @@ class WeightedPodAffinityTerm(object):
     def serialize(self):
         data = {}
         if self.pod_affinity_term:
-            data['podAffinityTerm'] = self.pod_affinity_term.serialize()
+            data["podAffinityTerm"] = self.pod_affinity_term.serialize()
         if self.weight:
-            data['weight'] = self.weight
+            data["weight"] = self.weight
         return data

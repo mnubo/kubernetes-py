@@ -19,8 +19,8 @@ class PodSpec(object):
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_podspec
     """
 
-    VALID_DNS_POLICIES = ['ClusterFirst', 'ClusterFirstWithHostNet', 'Default', 'None']
-    VALID_RESTART_POLICIES = ['Always', 'OnFailure', 'Never']
+    VALID_DNS_POLICIES = ["ClusterFirst", "ClusterFirstWithHostNet", "Default", "None"]
+    VALID_RESTART_POLICIES = ["Always", "OnFailure", "Never"]
 
     def __init__(self, model=None):
         super(PodSpec, self).__init__()
@@ -29,7 +29,7 @@ class PodSpec(object):
         self._affinity = None
         self._containers = []
         self._automount_service_account_token = True
-        self._dns_policy = 'Default'
+        self._dns_policy = "Default"
         self._host_ipc = None
         self._host_network = None
         self._host_pid = None
@@ -37,7 +37,7 @@ class PodSpec(object):
         self._image_pull_secrets = None
         self._node_name = None
         self._node_selector = {}
-        self._restart_policy = 'Always'
+        self._restart_policy = "Always"
         self._security_context = PodSecurityContext()
         self._service_account = None  # deprecated
         self._service_account_name = None
@@ -51,53 +51,53 @@ class PodSpec(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'activeDeadlineSeconds' in model:
-            self.active_deadline_seconds = model['activeDeadlineSeconds']
-        if 'affinity' in model:
-            self.affinity = Affinity(model['affinity'])
-        if 'containers' in model:
+        if "activeDeadlineSeconds" in model:
+            self.active_deadline_seconds = model["activeDeadlineSeconds"]
+        if "affinity" in model:
+            self.affinity = Affinity(model["affinity"])
+        if "containers" in model:
             containers = []
-            for c in model['containers']:
+            for c in model["containers"]:
                 container = Container(c)
                 containers.append(container)
             self.containers = containers
-        if 'dnsPolicy' in model:
-            self.dns_policy = model['dnsPolicy']
-        if 'hostIPC' in model:
-            self.host_ipc = model['hostIPC']
-        if 'hostNetwork' in model:
-            self.host_network = model['hostNetwork']
-        if 'hostPID' in model:
-            self.host_pid = model['hostPID']
-        if 'hostname' in model:
-            self.hostname = model['hostname']
-        if 'imagePullSecrets' in model:
-            self.image_pull_secrets = model['imagePullSecrets']
-        if 'nodeName' in model:
-            self.node_name = model['nodeName']
-        if 'nodeSelector' in model:
-            self.node_selector = model['nodeSelector']
-        if 'restartPolicy' in model:
-            self.restart_policy = model['restartPolicy']
-        if 'securityContext' in model:
-            self.security_context = PodSecurityContext(model['securityContext'])
-        if 'serviceAccount' in model:
-            self.service_account = model['serviceAccount']
-        if 'serviceAccountName' in model:
-            self.service_account_name = model['serviceAccountName']
-        if 'subdomain' in model:
-            self.subdomain = model['subdomain']
-        if 'terminationGracePeriodSeconds' in model:
-            self.termination_grace_period_seconds = model['terminationGracePeriodSeconds']
-        if 'tolerations' in model:
+        if "dnsPolicy" in model:
+            self.dns_policy = model["dnsPolicy"]
+        if "hostIPC" in model:
+            self.host_ipc = model["hostIPC"]
+        if "hostNetwork" in model:
+            self.host_network = model["hostNetwork"]
+        if "hostPID" in model:
+            self.host_pid = model["hostPID"]
+        if "hostname" in model:
+            self.hostname = model["hostname"]
+        if "imagePullSecrets" in model:
+            self.image_pull_secrets = model["imagePullSecrets"]
+        if "nodeName" in model:
+            self.node_name = model["nodeName"]
+        if "nodeSelector" in model:
+            self.node_selector = model["nodeSelector"]
+        if "restartPolicy" in model:
+            self.restart_policy = model["restartPolicy"]
+        if "securityContext" in model:
+            self.security_context = PodSecurityContext(model["securityContext"])
+        if "serviceAccount" in model:
+            self.service_account = model["serviceAccount"]
+        if "serviceAccountName" in model:
+            self.service_account_name = model["serviceAccountName"]
+        if "subdomain" in model:
+            self.subdomain = model["subdomain"]
+        if "terminationGracePeriodSeconds" in model:
+            self.termination_grace_period_seconds = model["terminationGracePeriodSeconds"]
+        if "tolerations" in model:
             tolerations = []
-            for t in model['tolerations']:
+            for t in model["tolerations"]:
                 tol = Toleration(t)
                 tolerations.append(tol)
             self.tolerations = tolerations
-        if 'volumes' in model:
+        if "volumes" in model:
             volumes = []
-            for v in model['volumes']:
+            for v in model["volumes"]:
                 volume = Volume(v)
                 volumes.append(volume)
             self.volumes = volumes
@@ -106,18 +106,18 @@ class PodSpec(object):
 
     def add_container(self, container=None):
         if not isinstance(container, Container):
-            raise SyntaxError('PodSpec.add_container90: container: [ {0} ] is invalid.'.format(container.__class__.__name__))
+            raise SyntaxError("PodSpec.add_container90: container: [ {0} ] is invalid.".format(container.__class__.__name__))
         self._containers.append(container)
         return self
 
     def add_volume(self, volume=None):
         if not isinstance(volume, Volume):
-            raise SyntaxError('PodSpec.add_volume(): volume: [ {0} ] is invalid'.format(volume))
+            raise SyntaxError("PodSpec.add_volume(): volume: [ {0} ] is invalid".format(volume))
         self._volumes.append(volume)
 
     def add_image_pull_secrets(self, secrets=None):
         if not is_valid_list(secrets, dict):
-            raise SyntaxError('PodSpec.add_image_pull_secrets() secrets : [ {0} ] is invalid.'.format(secrets))
+            raise SyntaxError("PodSpec.add_image_pull_secrets() secrets : [ {0} ] is invalid.".format(secrets))
 
         s = self.image_pull_secrets
         if s is None:
@@ -142,7 +142,7 @@ class PodSpec(object):
     @active_deadline_seconds.setter
     def active_deadline_seconds(self, secs=None):
         if not isinstance(secs, int):
-            raise SyntaxError('PodSpec: active_deadline_seconds: [ {0} ] is invalid.'.format(secs))
+            raise SyntaxError("PodSpec: active_deadline_seconds: [ {0} ] is invalid.".format(secs))
         self._active_deadline_seconds = secs
 
     # ------------------------------------------------------------------------------------- affinity
@@ -154,7 +154,7 @@ class PodSpec(object):
     @affinity.setter
     def affinity(self, a=None):
         if not isinstance(a, Affinity):
-            raise SyntaxError('PodSpec: affinity: [ {} ] is invalid.'.format(a))
+            raise SyntaxError("PodSpec: affinity: [ {} ] is invalid.".format(a))
         self._affinity = a
 
     # ------------------------------------------------------------------------------------- automount service account token
@@ -166,7 +166,7 @@ class PodSpec(object):
     @automount_service_account_token.setter
     def automount_service_account_token(self, automount=None):
         if not isinstance(automount, bool):
-            raise SyntaxError('PodSpec: automount_service_account_token: [ {0} ] is invalid.'.format(automount))
+            raise SyntaxError("PodSpec: automount_service_account_token: [ {0} ] is invalid.".format(automount))
         self._automount_service_account_token = automount
 
     # ------------------------------------------------------------------------------------- containers
@@ -178,14 +178,14 @@ class PodSpec(object):
     @containers.setter
     def containers(self, containers=None):
         if not is_valid_list(containers, Container):
-            raise SyntaxError('PodSpec: containers: [ {0} ] is invalid.'.format(containers))
+            raise SyntaxError("PodSpec: containers: [ {0} ] is invalid.".format(containers))
         self._containers = containers
 
     def set_container_image(self, name=None, image=None):
         if not is_valid_string(name):
-            raise SyntaxError('PodSpec: name: [ {0} ] is invalid.')
+            raise SyntaxError("PodSpec: name: [ {0} ] is invalid.")
         if not is_valid_string(image):
-            raise SyntaxError('PodSpec: image: [ {0} ] is invalid.')
+            raise SyntaxError("PodSpec: image: [ {0} ] is invalid.")
         for c in self.containers:
             if c.name == name:
                 c.image(image=image)
@@ -201,7 +201,7 @@ class PodSpec(object):
     @dns_policy.setter
     def dns_policy(self, dns_policy=None):
         if dns_policy not in PodSpec.VALID_DNS_POLICIES:
-            raise SyntaxError('PodSpec: dns_policy: [ {0} ] is invalid.'.format(dns_policy))
+            raise SyntaxError("PodSpec: dns_policy: [ {0} ] is invalid.".format(dns_policy))
         self._dns_policy = dns_policy
 
     # ------------------------------------------------------------------------------------- hostIPC
@@ -213,7 +213,7 @@ class PodSpec(object):
     @host_ipc.setter
     def host_ipc(self, ipc=None):
         if not isinstance(ipc, bool):
-            raise SyntaxError('PodSpec: host_ipc: [ {0} ] is invalid.'.format(ipc))
+            raise SyntaxError("PodSpec: host_ipc: [ {0} ] is invalid.".format(ipc))
         self._host_ipc = ipc
 
     # ------------------------------------------------------------------------------------- hostPID
@@ -225,7 +225,7 @@ class PodSpec(object):
     @host_pid.setter
     def host_pid(self, pid=None):
         if not isinstance(pid, bool):
-            raise SyntaxError('PodSpec: host_pid: [ {0} ] is invalid.'.format(pid))
+            raise SyntaxError("PodSpec: host_pid: [ {0} ] is invalid.".format(pid))
         self._host_pid = pid
 
     # ------------------------------------------------------------------------------------- hostNetwork
@@ -237,7 +237,7 @@ class PodSpec(object):
     @host_network.setter
     def host_network(self, hn=None):
         if not isinstance(hn, bool):
-            raise SyntaxError('PodSpec: host_network: [ {0} ] is invalid.'.format(hn))
+            raise SyntaxError("PodSpec: host_network: [ {0} ] is invalid.".format(hn))
         self._host_network = hn
 
     # ------------------------------------------------------------------------------------- hostname
@@ -249,7 +249,7 @@ class PodSpec(object):
     @hostname.setter
     def hostname(self, hn=None):
         if not is_valid_string(hn):
-            raise SyntaxError('PodSpec: hostname: [ {0} ] is invalid.'.format(hn))
+            raise SyntaxError("PodSpec: hostname: [ {0} ] is invalid.".format(hn))
         self._hostname = hn
 
     # ------------------------------------------------------------------------------------- image pull secrets
@@ -261,7 +261,7 @@ class PodSpec(object):
     @image_pull_secrets.setter
     def image_pull_secrets(self, secrets=None):
         if not is_valid_list(secrets, dict):
-            raise SyntaxError('PodSpec: image_pull_secrets: [ {0} ] is invalid.'.format(secrets))
+            raise SyntaxError("PodSpec: image_pull_secrets: [ {0} ] is invalid.".format(secrets))
         self._image_pull_secrets = secrets
 
     # ------------------------------------------------------------------------------------- node selector
@@ -273,7 +273,7 @@ class PodSpec(object):
     @node_selector.setter
     def node_selector(self, selector=None):
         if not isinstance(selector, dict):
-            raise SyntaxError('PodSpec: node_selector: [ {0} ] is invalid.'.format(selector))
+            raise SyntaxError("PodSpec: node_selector: [ {0} ] is invalid.".format(selector))
         self._node_selector = selector
 
     # ------------------------------------------------------------------------------------- node name
@@ -285,7 +285,7 @@ class PodSpec(object):
     @node_name.setter
     def node_name(self, name=None):
         if not is_valid_string(name):
-            raise SyntaxError('PodSpec: node_name: [ {0} ] is invalid.'.format(name))
+            raise SyntaxError("PodSpec: node_name: [ {0} ] is invalid.".format(name))
         self._node_name = name
 
     # ------------------------------------------------------------------------------------- restart policy
@@ -297,7 +297,7 @@ class PodSpec(object):
     @restart_policy.setter
     def restart_policy(self, policy=None):
         if policy not in PodSpec.VALID_RESTART_POLICIES:
-            raise SyntaxError('PodSpec: policy: [ {0} ] is invalid.'.format(policy))
+            raise SyntaxError("PodSpec: policy: [ {0} ] is invalid.".format(policy))
         self._restart_policy = policy
 
     # ------------------------------------------------------------------------------------- security context
@@ -309,7 +309,7 @@ class PodSpec(object):
     @security_context.setter
     def security_context(self, context=None):
         if not isinstance(context, PodSecurityContext):
-            raise SyntaxError('PodSpec: pod_security_context: [ {0} ] is invalid.'.format(context))
+            raise SyntaxError("PodSpec: pod_security_context: [ {0} ] is invalid.".format(context))
         self._security_context = context
 
     # ------------------------------------------------------------------------------------- service account name
@@ -325,7 +325,7 @@ class PodSpec(object):
     @service_account.setter
     def service_account(self, san=None):
         if not is_valid_string(san):
-            raise SyntaxError('PodSpec: service_account: [ {0} ] is invalid.'.format(san))
+            raise SyntaxError("PodSpec: service_account: [ {0} ] is invalid.".format(san))
         self._service_account_name = san
         self._service_account = san
 
@@ -336,7 +336,7 @@ class PodSpec(object):
     @service_account_name.setter
     def service_account_name(self, san=None):
         if not is_valid_string(san):
-            raise SyntaxError('PodSpec: service_account_name: [ {0} ] is invalid.'.format(san))
+            raise SyntaxError("PodSpec: service_account_name: [ {0} ] is invalid.".format(san))
         self._service_account_name = san
         self._service_account = san
 
@@ -349,7 +349,7 @@ class PodSpec(object):
     @subdomain.setter
     def subdomain(self, subdomain=None):
         if not is_valid_string(subdomain):
-            raise SyntaxError('PodSpec: subdomain: [ {0} ] is invalid.'.format(subdomain))
+            raise SyntaxError("PodSpec: subdomain: [ {0} ] is invalid.".format(subdomain))
         self._subdomain = subdomain
 
     # ------------------------------------------------------------------------------------- termination grace period
@@ -363,7 +363,7 @@ class PodSpec(object):
         if isinstance(secs, str) and secs.isdigit():
             secs = int(secs)
         if not isinstance(secs, int) or not secs >= 0:
-            raise SyntaxError('PodSpec: termination_grace_period_seconds: [ {0} ] is invalid.'.format(secs))
+            raise SyntaxError("PodSpec: termination_grace_period_seconds: [ {0} ] is invalid.".format(secs))
         self._termination_grace_period_seconds = secs
 
     # ------------------------------------------------------------------------------------- tolerations
@@ -375,7 +375,7 @@ class PodSpec(object):
     @tolerations.setter
     def tolerations(self, t=None):
         if not is_valid_list(t, Toleration):
-            raise SyntaxError('PodSpec: tolerations: [ {} ] is invalid.'.format(t))
+            raise SyntaxError("PodSpec: tolerations: [ {} ] is invalid.".format(t))
         self._tolerations = t
 
     # ------------------------------------------------------------------------------------- volumes
@@ -387,7 +387,7 @@ class PodSpec(object):
     @volumes.setter
     def volumes(self, volumes=None):
         if not is_valid_list(volumes, Volume):
-            raise SyntaxError('PodSpec: volumes: [ {0} ] is invalid.'.format(volumes))
+            raise SyntaxError("PodSpec: volumes: [ {0} ] is invalid.".format(volumes))
         self._volumes = volumes
 
     # ------------------------------------------------------------------------------------- serialize
@@ -395,51 +395,51 @@ class PodSpec(object):
     def serialize(self):
         data = {}
         if self.active_deadline_seconds:
-            data['activeDeadlineSeconds'] = self.active_deadline_seconds
+            data["activeDeadlineSeconds"] = self.active_deadline_seconds
         if self.affinity:
-            data['affinity'] = self.affinity.serialize()
+            data["affinity"] = self.affinity.serialize()
         if not self.automount_service_account_token:
-            data['automountServiceAccountToken'] = self.automount_service_account_token
+            data["automountServiceAccountToken"] = self.automount_service_account_token
         if self.containers:
-            data['containers'] = []
+            data["containers"] = []
             for c in self.containers:
-                data['containers'].append(c.serialize())
+                data["containers"].append(c.serialize())
         if self.dns_policy:
-            data['dnsPolicy'] = self.dns_policy
+            data["dnsPolicy"] = self.dns_policy
         if self.host_ipc:
-            data['hostIPC'] = self.host_ipc
+            data["hostIPC"] = self.host_ipc
         if self.host_network is not None:
-            data['hostNetwork'] = self.host_network
+            data["hostNetwork"] = self.host_network
         if self.host_pid is not None:
-            data['hostPID'] = self.host_pid
+            data["hostPID"] = self.host_pid
         if self.hostname:
-            data['hostname'] = self.hostname
+            data["hostname"] = self.hostname
         if self.host_ipc is not None:
-            data['hostIPC'] = self.host_ipc
+            data["hostIPC"] = self.host_ipc
         if self.image_pull_secrets:
-            data['imagePullSecrets'] = self.image_pull_secrets
+            data["imagePullSecrets"] = self.image_pull_secrets
         if self.node_name:
-            data['nodeName'] = self.node_name
+            data["nodeName"] = self.node_name
         if self.node_selector:
-            data['nodeSelector'] = self.node_selector
+            data["nodeSelector"] = self.node_selector
         if self.restart_policy:
-            data['restartPolicy'] = self.restart_policy
+            data["restartPolicy"] = self.restart_policy
         if self.service_account:
-            data['serviceAccount'] = self.service_account
+            data["serviceAccount"] = self.service_account
         if self.service_account_name:
-            data['serviceAccountName'] = self.service_account_name
+            data["serviceAccountName"] = self.service_account_name
         if self.subdomain:
-            data['subdomain'] = self.subdomain
+            data["subdomain"] = self.subdomain
         if self.termination_grace_period_seconds:
-            data['terminationGracePeriodSeconds'] = self.termination_grace_period_seconds
+            data["terminationGracePeriodSeconds"] = self.termination_grace_period_seconds
         if self.tolerations:
             tolerations = []
             for t in self.tolerations:
                 tol = t.serialize()
                 tolerations.append(tol)
-            data['tolerations'] = tolerations
+            data["tolerations"] = tolerations
         if self.volumes:
-            data['volumes'] = []
+            data["volumes"] = []
             for v in self.volumes:
-                data['volumes'].append(v.serialize())
+                data["volumes"].append(v.serialize())
         return data

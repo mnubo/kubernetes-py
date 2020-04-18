@@ -25,16 +25,16 @@ class DeploymentStatus(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'observedGeneration' in model:
-            self.observed_generation = model['observedGeneration']
-        if 'replicas' in model:
-            self.replicas = model['replicas']
-        if 'updatedReplicas' in model:
-            self.updated_replicas = model['updatedReplicas']
-        if 'availableReplicas' in model:
-            self.available_replicas = model['availableReplicas']
-        if 'unavailableReplicas' in model:
-            self.unavailable_replicas = model['unavailableReplicas']
+        if "observedGeneration" in model:
+            self.observed_generation = model["observedGeneration"]
+        if "replicas" in model:
+            self.replicas = model["replicas"]
+        if "updatedReplicas" in model:
+            self.updated_replicas = model["updatedReplicas"]
+        if "availableReplicas" in model:
+            self.available_replicas = model["availableReplicas"]
+        if "unavailableReplicas" in model:
+            self.unavailable_replicas = model["unavailableReplicas"]
 
     # ------------------------------------------------------------------------------------- observedGeneration
 
@@ -45,7 +45,7 @@ class DeploymentStatus(object):
     @observed_generation.setter
     def observed_generation(self, og=None):
         if not isinstance(og, int):
-            raise SyntaxError('DeploymentStatus: observed_generation: [ {} ] is invalid.'.format(og))
+            raise SyntaxError("DeploymentStatus: observed_generation: [ {} ] is invalid.".format(og))
         self._observed_generation = og
 
     # ------------------------------------------------------------------------------------- replicas
@@ -57,7 +57,7 @@ class DeploymentStatus(object):
     @replicas.setter
     def replicas(self, reps=None):
         if not isinstance(reps, int):
-            raise SyntaxError('DeploymentStatus: replicas: [ {} ] is invalid.'.format(reps))
+            raise SyntaxError("DeploymentStatus: replicas: [ {} ] is invalid.".format(reps))
         self._replicas = reps
 
     # ------------------------------------------------------------------------------------- updatedReplicas
@@ -69,7 +69,7 @@ class DeploymentStatus(object):
     @updated_replicas.setter
     def updated_replicas(self, reps=None):
         if not isinstance(reps, int):
-            raise SyntaxError('DeploymentStatus: updated_replicas: [ {} ] is invalid.'.format(reps))
+            raise SyntaxError("DeploymentStatus: updated_replicas: [ {} ] is invalid.".format(reps))
         self._updated_replicas = reps
 
     # ------------------------------------------------------------------------------------- availableReplicas
@@ -81,7 +81,7 @@ class DeploymentStatus(object):
     @available_replicas.setter
     def available_replicas(self, reps=None):
         if not isinstance(reps, int):
-            raise SyntaxError('DeploymentStatus: available_replicas: [ {} ] is invalid.'.format(reps))
+            raise SyntaxError("DeploymentStatus: available_replicas: [ {} ] is invalid.".format(reps))
         self._available_replicas = reps
 
     # ------------------------------------------------------------------------------------- unavailableReplicas
@@ -93,7 +93,7 @@ class DeploymentStatus(object):
     @unavailable_replicas.setter
     def unavailable_replicas(self, reps=None):
         if not isinstance(reps, int):
-            raise SyntaxError('DeploymentStatus: unavailable_replicas: [ {} ] is invalid.'.format(reps))
+            raise SyntaxError("DeploymentStatus: unavailable_replicas: [ {} ] is invalid.".format(reps))
         self._unavailable_replicas = reps
 
     # ------------------------------------------------------------------------------------- serialize
@@ -101,13 +101,13 @@ class DeploymentStatus(object):
     def serialize(self):
         data = {}
         if self.observed_generation is not None:
-            data['observedGeneration'] = self.observed_generation
+            data["observedGeneration"] = self.observed_generation
         if self.replicas is not None:
-            data['replicas'] = self.replicas
+            data["replicas"] = self.replicas
         if self.updated_replicas is not None:
-            data['updatedReplicas'] = self.updated_replicas
+            data["updatedReplicas"] = self.updated_replicas
         if self.available_replicas is not None:
-            data['availableReplicas'] = self.available_replicas
+            data["availableReplicas"] = self.available_replicas
         if self.unavailable_replicas is not None:
-            data['unavailableReplicas'] = self.unavailable_replicas
+            data["unavailableReplicas"] = self.unavailable_replicas
         return data

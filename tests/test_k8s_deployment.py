@@ -20,7 +20,6 @@ from tests.BaseTest import BaseTest
 
 
 class K8sDeploymentTests(BaseTest):
-
     def setUp(self):
         _utils.cleanup_nodes()
         _utils.cleanup_deployments()
@@ -232,7 +231,7 @@ class K8sDeploymentTests(BaseTest):
             self.assertEqual(image1, dep.containers[0].image)
             dep.container_image = (name, image2)
             d = dep.update()
-            self.assertIn('deployment.kubernetes.io/revision', dep.annotations)
+            self.assertIn("deployment.kubernetes.io/revision", dep.annotations)
             self.assertNotEqual(image1, d.containers[0].image)
             self.assertEqual(image2, d.containers[0].image)
 
@@ -248,7 +247,7 @@ class K8sDeploymentTests(BaseTest):
         if _utils.is_reachable(dep.config):
             dep.create()
             labels = dep.labels
-            labels['newkey'] = 'newvalue'
+            labels["newkey"] = "newvalue"
             dep.labels = labels
             updated = dep.update()
             self.assertEqual(labels, updated.labels)
@@ -265,7 +264,7 @@ class K8sDeploymentTests(BaseTest):
         if _utils.is_reachable(dep.config):
             dep.create()
             labels = dep.pod_labels
-            labels['newkey'] = 'newvalue'
+            labels["newkey"] = "newvalue"
             dep.pod_labels = labels
             updated = dep.update()
             self.assertEqual(labels, updated.pod_labels)
@@ -287,13 +286,13 @@ class K8sDeploymentTests(BaseTest):
             self.assertEqual(image1, dep.containers[0].image)
             dep.container_image = (name, image2)
             dep.update()
-            self.assertIn('deployment.kubernetes.io/revision', dep.annotations)
-            rev_before = dep.get_annotation('deployment.kubernetes.io/revision')
+            self.assertIn("deployment.kubernetes.io/revision", dep.annotations)
+            rev_before = dep.get_annotation("deployment.kubernetes.io/revision")
             self.assertNotEqual(image1, dep.containers[0].image)
             self.assertEqual(image2, dep.containers[0].image)
             dep.rollback()
-            self.assertIn('deployment.kubernetes.io/revision', dep.annotations)
-            rev_after = dep.get_annotation('deployment.kubernetes.io/revision')
+            self.assertIn("deployment.kubernetes.io/revision", dep.annotations)
+            rev_after = dep.get_annotation("deployment.kubernetes.io/revision")
             self.assertNotEqual(rev_before, rev_after)
             self.assertGreater(rev_after, rev_before)
             self.assertEqual(image1, dep.containers[0].image)
@@ -429,7 +428,7 @@ class K8sDeploymentTests(BaseTest):
         cont.add_env(name=env_var_name, value=name)
         dep.add_container(container=cont)
         dep.desired_replicas = 1
-        
+
         if _utils.is_reachable(dep.config):
             dep.create()
             with self.assertRaises(AlreadyExistsException):

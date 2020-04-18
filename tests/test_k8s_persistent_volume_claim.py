@@ -18,7 +18,6 @@ from kubernetes_py.models.v1.ResourceRequirements import ResourceRequirements
 
 
 class K8sPersistentVolumeClaimTest(BaseTest):
-
     def setUp(self):
         K8sPod.POD_READY_TIMEOUT_SECONDS = 20
         _utils.cleanup_pods()
@@ -62,14 +61,14 @@ class K8sPersistentVolumeClaimTest(BaseTest):
         claim = _utils.create_pvc(name=name)
         with self.assertRaises(SyntaxError):
             claim.access_modes = object()
-        modes = ['yomama']
+        modes = ["yomama"]
         claim.access_modes = modes
         self.assertNotEqual(modes, claim.access_modes)
 
     def test_access_modes(self):
         name = "yopvc-{}".format(str(uuid.uuid4()))
         claim = _utils.create_pvc(name=name)
-        modes = ['ReadWriteMany']
+        modes = ["ReadWriteMany"]
         claim.access_modes = modes
         self.assertEqual(modes, claim.access_modes)
 
@@ -86,14 +85,14 @@ class K8sPersistentVolumeClaimTest(BaseTest):
         claim = _utils.create_pvc(name=name)
         with self.assertRaises(SyntaxError):
             claim.resources = object()
-        resources = {'cpu': '', 'memory': ''}
+        resources = {"cpu": "", "memory": ""}
         claim.resources = resources
         self.assertNotEqual(resources, claim.resources)
 
     def test_resources(self):
         name = "yopvc-{}".format(str(uuid.uuid4()))
         claim = _utils.create_pvc(name=name)
-        resources = {'requests': {'storage': '100Gi'}}
+        resources = {"requests": {"storage": "100Gi"}}
         claim.resources = resources
         self.assertIsInstance(claim.resources, ResourceRequirements)
         self.assertEqual(resources, claim.resources.serialize())
@@ -121,11 +120,11 @@ class K8sPersistentVolumeClaimTest(BaseTest):
 
         pvc = _utils.create_pvc(name=pvcname)
 
-        vol = _utils.create_volume(name=volname, type='persistentVolumeClaim')
+        vol = _utils.create_volume(name=volname, type="persistentVolumeClaim")
         vol.claim_name = pvcname
 
         container = _utils.create_container(name=contname, image="nginx:latest")
-        volmount = _utils.create_volume_mount(name=volname, mount_path='/test-persistent')
+        volmount = _utils.create_volume_mount(name=volname, mount_path="/test-persistent")
         container.add_volume_mount(volmount)
 
         pod = _utils.create_pod(name=podname)
@@ -156,11 +155,11 @@ class K8sPersistentVolumeClaimTest(BaseTest):
 
         pvc = _utils.create_pvc(name=pvcname)
 
-        vol = _utils.create_volume(name=volname, type='persistentVolumeClaim')
+        vol = _utils.create_volume(name=volname, type="persistentVolumeClaim")
         vol.claim_name = pvcname
 
         container = _utils.create_container(name=contname, image="nginx:latest")
-        volmount = _utils.create_volume_mount(name=volname, mount_path='/test-persistent')
+        volmount = _utils.create_volume_mount(name=volname, mount_path="/test-persistent")
         container.add_volume_mount(volmount)
 
         pod = _utils.create_pod(name=podname)
@@ -191,11 +190,11 @@ class K8sPersistentVolumeClaimTest(BaseTest):
 
         pvc = _utils.create_pvc(name=pvcname)
 
-        vol = _utils.create_volume(name=volname, type='persistentVolumeClaim')
+        vol = _utils.create_volume(name=volname, type="persistentVolumeClaim")
         vol.claim_name = pvcname
 
         container = _utils.create_container(name=contname, image="nginx:latest")
-        volmount = _utils.create_volume_mount(name=volname, mount_path='/test-persistent')
+        volmount = _utils.create_volume_mount(name=volname, mount_path="/test-persistent")
         container.add_volume_mount(volmount)
 
         pod = _utils.create_pod(name=podname)
@@ -216,9 +215,7 @@ class K8sPersistentVolumeClaimTest(BaseTest):
         cfg = _utils.create_config()
 
         if _utils.is_reachable(cfg):
-            pv = K8sPersistentVolume(
-                name="pv-mysql",
-                type="hostPath")
+            pv = K8sPersistentVolume(name="pv-mysql", type="hostPath")
             try:
                 pv.get()
             except NotFoundException:
@@ -227,19 +224,17 @@ class K8sPersistentVolumeClaimTest(BaseTest):
                 pv.reclaim_policy = "Delete"
                 pv.path = "/tmp/mysql/data"
                 pv.storage_class_name = "manual"
-                pv.add_label('type', 'local')
+                pv.add_label("type", "local")
                 print("** creating mysql persistent volume...")
                 pv.create()
 
-            pvc = K8sPersistentVolumeClaim(
-                config=cfg,
-                name="pvc-mysql")
+            pvc = K8sPersistentVolumeClaim(config=cfg, name="pvc-mysql")
             try:
                 pvc.get()
             except NotFoundException:
                 pvc.storage_class_name = "manual"
-                pvc.access_modes = ['ReadWriteOnce']
-                pvc.resources = {'requests': {'storage': '512Mi'}}
+                pvc.access_modes = ["ReadWriteOnce"]
+                pvc.resources = {"requests": {"storage": "512Mi"}}
                 print("** creating mysql persistent volume claim...")
                 pvc.create()
 

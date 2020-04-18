@@ -42,7 +42,7 @@ class K8sVolume(object):
     @type.setter
     def type(self, t=None):
         if t not in self.VALID_VOLUME_TYPES:
-            raise SyntaxError('K8sVolume: type: [ {} ] is invalid.'.format(t))
+            raise SyntaxError("K8sVolume: type: [ {} ] is invalid.".format(t))
         self._type = t
         setattr(self.model, t, Volume.vol_type_to_source(t))
 
@@ -60,13 +60,13 @@ class K8sVolume(object):
 
     @property
     def medium(self):
-        if not hasattr(self.source, 'medium'):
+        if not hasattr(self.source, "medium"):
             raise NotImplementedError()
         return self.source.medium
 
     @medium.setter
     def medium(self, m=None):
-        if not hasattr(self.source, 'medium'):
+        if not hasattr(self.source, "medium"):
             raise NotImplementedError()
         self.source.medium = m
 
@@ -74,13 +74,13 @@ class K8sVolume(object):
 
     @property
     def path(self):
-        if not hasattr(self.source, 'path'):
+        if not hasattr(self.source, "path"):
             raise NotImplementedError()
         return self.source.path
 
     @path.setter
     def path(self, p=None):
-        if not hasattr(self.source, 'path'):
+        if not hasattr(self.source, "path"):
             raise NotImplementedError()
         self.source.path = p
 
@@ -88,13 +88,13 @@ class K8sVolume(object):
 
     @property
     def secret_name(self):
-        if not hasattr(self.source, 'secret_name'):
+        if not hasattr(self.source, "secret_name"):
             raise NotImplementedError()
         return self.source.secret_name
 
     @secret_name.setter
     def secret_name(self, sn=None):
-        if not hasattr(self.source, 'secret_name'):
+        if not hasattr(self.source, "secret_name"):
             raise NotImplementedError()
         self.source.secret_name = sn
 
@@ -109,13 +109,13 @@ class K8sVolume(object):
 
     @property
     def volume_id(self):
-        if not hasattr(self.source, 'volume_id'):
+        if not hasattr(self.source, "volume_id"):
             raise NotImplementedError()
         return self.source.volume_id
 
     @volume_id.setter
     def volume_id(self, vid=None):
-        if not hasattr(self.source, 'volume_id'):
+        if not hasattr(self.source, "volume_id"):
             raise NotImplementedError()
         self.source.volume_id = vid
 
@@ -129,13 +129,13 @@ class K8sVolume(object):
 
     @property
     def pd_name(self):
-        if not hasattr(self.source, 'pd_name'):
+        if not hasattr(self.source, "pd_name"):
             raise NotImplementedError()
         return self.source.pd_name
 
     @pd_name.setter
     def pd_name(self, pd=None):
-        if not hasattr(self.source, 'pd_name'):
+        if not hasattr(self.source, "pd_name"):
             raise NotImplementedError()
         self.source.pd_name = pd
 
@@ -145,13 +145,13 @@ class K8sVolume(object):
 
     @property
     def read_only(self):
-        if not hasattr(self.source, 'read_only'):
+        if not hasattr(self.source, "read_only"):
             raise NotImplementedError()
         return self.source.read_only
 
     @read_only.setter
     def read_only(self, ro=None):
-        if not hasattr(self.source, 'read_only'):
+        if not hasattr(self.source, "read_only"):
             raise NotImplementedError()
         self.source.read_only = ro
 
@@ -159,13 +159,13 @@ class K8sVolume(object):
 
     @property
     def fs_type(self):
-        if not hasattr(self.source, 'fs_type'):
+        if not hasattr(self.source, "fs_type"):
             raise NotImplementedError()
         return self.source.fs_type
 
     @fs_type.setter
     def fs_type(self, t=None):
-        if not hasattr(self.source, 'fs_type'):
+        if not hasattr(self.source, "fs_type"):
             raise NotImplementedError()
         self.source.fs_type = t
 
@@ -173,13 +173,13 @@ class K8sVolume(object):
 
     @property
     def nfs_server(self):
-        if not hasattr(self.source, 'server'):
+        if not hasattr(self.source, "server"):
             raise NotImplementedError()
         return self.source.server
 
     @nfs_server.setter
     def nfs_server(self, s=None):
-        if not hasattr(self.source, 'server'):
+        if not hasattr(self.source, "server"):
             raise NotImplementedError()
         self.source.server = s
 
@@ -187,13 +187,13 @@ class K8sVolume(object):
 
     @property
     def nfs_path(self):
-        if not hasattr(self.source, 'path'):
+        if not hasattr(self.source, "path"):
             raise NotImplementedError()
         return self.source.path
 
     @nfs_path.setter
     def nfs_path(self, p=None):
-        if not hasattr(self.source, 'path'):
+        if not hasattr(self.source, "path"):
             raise NotImplementedError()
         self.source.path = p
 
@@ -201,13 +201,13 @@ class K8sVolume(object):
 
     @property
     def git_repository(self):
-        if not hasattr(self.source, 'repository'):
+        if not hasattr(self.source, "repository"):
             raise NotImplementedError()
         return self.source.repository
 
     @git_repository.setter
     def git_repository(self, repo=None):
-        if not hasattr(self.source, 'repository'):
+        if not hasattr(self.source, "repository"):
             raise NotImplementedError()
         self.source.repository = repo
 
@@ -215,13 +215,13 @@ class K8sVolume(object):
 
     @property
     def git_revision(self):
-        if not hasattr(self.source, 'revision'):
+        if not hasattr(self.source, "revision"):
             raise NotImplementedError()
         return self.source.revision
 
     @git_revision.setter
     def git_revision(self, rev=None):
-        if not hasattr(self.source, 'revision'):
+        if not hasattr(self.source, "revision"):
             raise NotImplementedError()
         self.source.revision = rev
 
@@ -229,13 +229,13 @@ class K8sVolume(object):
 
     @property
     def claim_name(self):
-        if not hasattr(self.source, 'claim_name'):
+        if not hasattr(self.source, "claim_name"):
             raise NotImplementedError()
         return self.source.claim_name
 
     @claim_name.setter
     def claim_name(self, name=None):
-        if not hasattr(self.source, 'claim_name'):
+        if not hasattr(self.source, "claim_name"):
             raise NotImplementedError()
         self.source.claim_name = name
 
@@ -243,13 +243,13 @@ class K8sVolume(object):
 
     @property
     def configmap_name(self):
-        if not hasattr(self.source, 'name'):
+        if not hasattr(self.source, "name"):
             raise NotImplementedError()
         return self.source.name
 
     @configmap_name.setter
     def configmap_name(self, name=None):
-        if not hasattr(self.source, 'name'):
+        if not hasattr(self.source, "name"):
             raise NotImplementedError()
         self.source.name = name
 
@@ -257,13 +257,13 @@ class K8sVolume(object):
 
     @property
     def configmap_items(self):
-        if not hasattr(self.source, 'items'):
+        if not hasattr(self.source, "items"):
             raise NotImplementedError()
         return self.source.items
 
     @configmap_items.setter
     def configmap_items(self, v=None):
-        if not hasattr(self.source, 'items'):
+        if not hasattr(self.source, "items"):
             raise NotImplementedError()
         self.source.items = v
 
@@ -271,13 +271,13 @@ class K8sVolume(object):
 
     @property
     def configmap_default_mode(self):
-        if not hasattr(self.source, 'default_mode'):
+        if not hasattr(self.source, "default_mode"):
             raise NotImplementedError()
         return self.source.default_mode
 
     @configmap_default_mode.setter
     def configmap_default_mode(self, v=None):
-        if not hasattr(self.source, 'default_mode'):
+        if not hasattr(self.source, "default_mode"):
             raise NotImplementedError()
         self.source.default_mode = v
 
@@ -285,13 +285,13 @@ class K8sVolume(object):
 
     @property
     def configmap_optional(self):
-        if not hasattr(self.source, 'optional'):
+        if not hasattr(self.source, "optional"):
             raise NotImplementedError()
         return self.source.optional
 
     @configmap_optional.setter
     def configmap_optional(self, v=None):
-        if not hasattr(self.source, 'optional'):
+        if not hasattr(self.source, "optional"):
             raise NotImplementedError()
         self.source.optional = v
 

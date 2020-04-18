@@ -31,16 +31,16 @@ class SecurityContext(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'capabilities' in model:
-            self.capabilities = Capabilities(model['capabilities'])
-        if 'privileged' in model:
-            self.privileged = model['privileged']
-        if 'readOnlyRootFilesystem' in model:
-            self.read_only_root_filesystem = model['readOnlyRootFilesystem']
-        if 'runAsNonRoot' in model:
-            self.run_as_non_root = model['runAsNonRoot']
-        if 'runAsUser' in model:
-            self.run_as_user = model['runAsUser']
+        if "capabilities" in model:
+            self.capabilities = Capabilities(model["capabilities"])
+        if "privileged" in model:
+            self.privileged = model["privileged"]
+        if "readOnlyRootFilesystem" in model:
+            self.read_only_root_filesystem = model["readOnlyRootFilesystem"]
+        if "runAsNonRoot" in model:
+            self.run_as_non_root = model["runAsNonRoot"]
+        if "runAsUser" in model:
+            self.run_as_user = model["runAsUser"]
 
     # ------------------------------------------------------------------------------------- capabilities
 
@@ -51,7 +51,7 @@ class SecurityContext(object):
     @capabilities.setter
     def capabilities(self, c=None):
         if not isinstance(c, Capabilities):
-            raise SyntaxError('SecurityContext: capabilities: [ {} ] is invalid.'.format(c))
+            raise SyntaxError("SecurityContext: capabilities: [ {} ] is invalid.".format(c))
         self._capabilities = c
 
     # ------------------------------------------------------------------------------------- privileged
@@ -63,7 +63,7 @@ class SecurityContext(object):
     @privileged.setter
     def privileged(self, p=None):
         if not isinstance(p, bool):
-            raise SyntaxError('SecurityContext: privileged: [ {} ] is invalid.'.format(p))
+            raise SyntaxError("SecurityContext: privileged: [ {} ] is invalid.".format(p))
         self._privileged = p
 
     # ------------------------------------------------------------------------------------- readOnlyRootFilesystem
@@ -75,7 +75,7 @@ class SecurityContext(object):
     @read_only_root_filesystem.setter
     def read_only_root_filesystem(self, r=None):
         if not isinstance(r, bool):
-            raise SyntaxError('SecurityContext: read_only_root_filesystem: [ {} ] is invalid.'.format(r))
+            raise SyntaxError("SecurityContext: read_only_root_filesystem: [ {} ] is invalid.".format(r))
         self._read_only_root_filesystem = r
 
     # ------------------------------------------------------------------------------------- runAsNonRoot
@@ -90,7 +90,7 @@ class SecurityContext(object):
     @run_as_non_root.setter
     def run_as_non_root(self, r=None):
         if not isinstance(r, bool):
-            raise SyntaxError('SecurityContext: run_as_non_root: [ {} ] is invalid.'.format(r))
+            raise SyntaxError("SecurityContext: run_as_non_root: [ {} ] is invalid.".format(r))
         self._run_as_non_root = r
 
     # ------------------------------------------------------------------------------------- runAsUser
@@ -105,7 +105,7 @@ class SecurityContext(object):
     @run_as_user.setter
     def run_as_user(self, r=None):
         if not isinstance(r, int):
-            raise SyntaxError('SecurityContext: run_as_user: [ {} ] is invalid.'.format(r))
+            raise SyntaxError("SecurityContext: run_as_user: [ {} ] is invalid.".format(r))
         self._run_as_user = r
 
     # ------------------------------------------------------------------------------------- seLinuxOptions
@@ -120,7 +120,7 @@ class SecurityContext(object):
     @se_linux_options.setter
     def se_linux_options(self, o=None):
         if not isinstance(o, SELinuxOptions):
-            raise SyntaxError('SecurityContext: se_linux_options: [ {} ] is invalid.'.format(o))
+            raise SyntaxError("SecurityContext: se_linux_options: [ {} ] is invalid.".format(o))
         self._se_linux_options = o
 
     # ------------------------------------------------------------------------------------- serialize
@@ -128,16 +128,15 @@ class SecurityContext(object):
     def serialize(self):
         data = {}
         if self.capabilities is not None:
-            data['capabilities'] = self.capabilities.serialize()
+            data["capabilities"] = self.capabilities.serialize()
         if self.privileged is not None:
-            data['privileged'] = self.privileged
+            data["privileged"] = self.privileged
         if self.read_only_root_filesystem is not None:
-            data['readOnlyRootFilesystem'] = self.read_only_root_filesystem
+            data["readOnlyRootFilesystem"] = self.read_only_root_filesystem
         if self.run_as_non_root is not None:
-            data['runAsNonRoot'] = self.run_as_non_root
+            data["runAsNonRoot"] = self.run_as_non_root
         if self.run_as_user is not None:
-            data['runAsUser'] = self.run_as_user
+            data["runAsUser"] = self.run_as_user
         if self.se_linux_options is not None:
-            data['seLinuxOptions'] = self.se_linux_options.serialize()
+            data["seLinuxOptions"] = self.se_linux_options.serialize()
         return data
-

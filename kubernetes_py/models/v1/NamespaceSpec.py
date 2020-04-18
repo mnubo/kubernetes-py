@@ -21,8 +21,8 @@ class NamespaceSpec(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'finalizers' in model:
-            self.finalizers = model['finalizers']
+        if "finalizers" in model:
+            self.finalizers = model["finalizers"]
 
     # --------------------------------------------------------------------------------- finalizers
 
@@ -33,7 +33,7 @@ class NamespaceSpec(object):
     @finalizers.setter
     def finalizers(self, f=None):
         if not isinstance(f, list):
-            raise SyntaxError('NamespaceSpec: finalizers: [ {} ] is invalid. Must be a list of strings.'.format(f))
+            raise SyntaxError("NamespaceSpec: finalizers: [ {} ] is invalid. Must be a list of strings.".format(f))
         self._finalizers = f
 
     # --------------------------------------------------------------------------------- serialize
@@ -41,5 +41,5 @@ class NamespaceSpec(object):
     def serialize(self):
         data = {}
         if self.finalizers is not None:
-            data['finalizers'] = self.finalizers
+            data["finalizers"] = self.finalizers
         return data

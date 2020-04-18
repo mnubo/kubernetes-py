@@ -16,11 +16,7 @@ class K8sStatefulSet(K8sObject):
     """
 
     def __init__(self, config=None, name=None):
-        super(K8sStatefulSet, self).__init__(
-            config=config,
-            name=name,
-            obj_type='StatefulSet'
-        )
+        super(K8sStatefulSet, self).__init__(config=config, name=name, obj_type="StatefulSet")
 
     # -------------------------------------------------------------------------------------  override
 

@@ -27,14 +27,14 @@ class VolumeMount(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model):
-        if 'mountPath' in model:
-            self.mount_path = model['mountPath']
-        if 'name' in model:
-            self.name = model['name']
-        if 'readOnly' in model:
-            self.read_only = model['readOnly']
-        if 'subPath' in model:
-            self.sub_path = model['subPath']
+        if "mountPath" in model:
+            self.mount_path = model["mountPath"]
+        if "name" in model:
+            self.name = model["name"]
+        if "readOnly" in model:
+            self.read_only = model["readOnly"]
+        if "subPath" in model:
+            self.sub_path = model["subPath"]
 
     # ------------------------------------------------------------------------------------- name
 
@@ -45,7 +45,7 @@ class VolumeMount(object):
     @name.setter
     def name(self, name=None):
         if not is_valid_string(name):
-            raise SyntaxError('VolumeMount: name: [ {0} ] is invalid'.format(name))
+            raise SyntaxError("VolumeMount: name: [ {0} ] is invalid".format(name))
         self._name = name
 
     # ------------------------------------------------------------------------------------- mount_path
@@ -57,7 +57,7 @@ class VolumeMount(object):
     @mount_path.setter
     def mount_path(self, path=None):
         if not is_valid_string(path):
-            raise SyntaxError('VolumeMount: mount_path: [ {0} ] is invalid.'.format(path))
+            raise SyntaxError("VolumeMount: mount_path: [ {0} ] is invalid.".format(path))
         self._mount_path = path
 
     # ------------------------------------------------------------------------------------- read_only
@@ -69,7 +69,7 @@ class VolumeMount(object):
     @read_only.setter
     def read_only(self, ro=False):
         if not isinstance(ro, bool):
-            raise SyntaxError('VolumeMount: read_only: [ {0} ] is invalid.'.format(ro))
+            raise SyntaxError("VolumeMount: read_only: [ {0} ] is invalid.".format(ro))
         self._read_only = ro
 
     # ------------------------------------------------------------------------------------- sub_path
@@ -83,7 +83,7 @@ class VolumeMount(object):
         if path is None:
             path = ""  # default; volume's root
         if not is_valid_string(path):
-            raise SyntaxError('VolumeMount: sub_path: [ {0} ] is invalid.'.format(path))
+            raise SyntaxError("VolumeMount: sub_path: [ {0} ] is invalid.".format(path))
         self._sub_path = path
 
     # ------------------------------------------------------------------------------------- serialize
@@ -91,11 +91,11 @@ class VolumeMount(object):
     def serialize(self):
         data = {}
         if self.name:
-            data['name'] = self.name
+            data["name"] = self.name
         if self.read_only:
-            data['readOnly'] = self.read_only
+            data["readOnly"] = self.read_only
         if self.mount_path:
-            data['mountPath'] = self.mount_path
+            data["mountPath"] = self.mount_path
         if self.sub_path:
-            data['subPath'] = self.sub_path
+            data["subPath"] = self.sub_path
         return data

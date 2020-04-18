@@ -14,7 +14,7 @@ class NodeSelectorRequirement(object):
     https://kubernetes.io/docs/api-reference/v1.6/#nodeselectorrequirement-v1-core
     """
 
-    VALID_OPERATORS = ['In', 'NotIn', 'Exists', 'DoesNotExist', 'Gt', 'Lt']
+    VALID_OPERATORS = ["In", "NotIn", "Exists", "DoesNotExist", "Gt", "Lt"]
 
     def __init__(self, model=None):
         super(NodeSelectorRequirement, self).__init__()
@@ -27,12 +27,12 @@ class NodeSelectorRequirement(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'key' in model:
-            self.key = model['key']
-        if 'operator' in model:
-            self.operator = model['operator']
-        if 'values' in model:
-            self.values = model['values']
+        if "key" in model:
+            self.key = model["key"]
+        if "operator" in model:
+            self.operator = model["operator"]
+        if "values" in model:
+            self.values = model["values"]
 
     # ------------------------------------------------------------------------------------- key
 
@@ -43,7 +43,7 @@ class NodeSelectorRequirement(object):
     @key.setter
     def key(self, k=None):
         if not is_valid_string(k):
-            raise SyntaxError('NodeSelectorRequirement: key: [ {} ] is invalid.'.format(k))
+            raise SyntaxError("NodeSelectorRequirement: key: [ {} ] is invalid.".format(k))
         self._key = k
 
     # ------------------------------------------------------------------------------------- operator
@@ -55,7 +55,7 @@ class NodeSelectorRequirement(object):
     @operator.setter
     def operator(self, o=None):
         if not is_valid_string(o) or o not in NodeSelectorRequirement.VALID_OPERATORS:
-            raise SyntaxError('NodeSelectorRequirement: operator: [ {} ] is invalid.'.format(o))
+            raise SyntaxError("NodeSelectorRequirement: operator: [ {} ] is invalid.".format(o))
         self._operator = o
 
     # ------------------------------------------------------------------------------------- values
@@ -67,21 +67,28 @@ class NodeSelectorRequirement(object):
     @values.setter
     def values(self, v=None):
         if not is_valid_list(convert(v), str):
+            raise SyntaxError("NodeSelectorRequirement: values: [ {} ] is invalid.".format(v))
+        if self.operator in ["In, NotIn"] and v == []:
             raise SyntaxError(
-                'NodeSelectorRequirement: values: [ {} ] is invalid.'.format(v))
-        if self.operator in ['In, NotIn'] and v == []:
+                'NodeSelectorRequirement: values: [ {} ] cannot be empty, if operator in [ "In", "NotIn" ]'.format(v)
+            )
+        if self.operator in ["Exists", "NotExists"] and v != []:
             raise SyntaxError(
-                'NodeSelectorRequirement: values: [ {} ] cannot be empty, if operator in [ "In", "NotIn" ]'.format(v))
-        if self.operator in ['Exists', 'NotExists'] and v != []:
-            raise SyntaxError(
-                'NodeSelectorRequirement: values: [ {} ] must be empty, if operator in [ "Exists", "NotExists" ]'.format(v))
-        if self.operator in ['Gt', 'Lt']:
+                'NodeSelectorRequirement: values: [ {} ] must be empty, if operator in [ "Exists", "NotExists" ]'.format(v)
+            )
+        if self.operator in ["Gt", "Lt"]:
             if len(v) != 1:
                 raise SyntaxError(
-                    'NodeSelectorRequirement: values: [ {} ] must be an array of length 1, if operator in [ "Gt", "Lt" ]'.format(v))
+                    'NodeSelectorRequirement: values: [ {} ] must be an array of length 1, if operator in [ "Gt", "Lt" ]'.format(
+                        v
+                    )
+                )
             if not isinstance(v[0], int):
                 raise SyntaxError(
-                    'NodeSelectorRequirement: values: [ {} ] must contain a single integer, if operator in [ "Gt", "Lt" ]'.format(v))
+                    'NodeSelectorRequirement: values: [ {} ] must contain a single integer, if operator in [ "Gt", "Lt" ]'.format(
+                        v
+                    )
+                )
         self._values = v
 
     # ------------------------------------------------------------------------------------- serialize
@@ -89,9 +96,9 @@ class NodeSelectorRequirement(object):
     def serialize(self):
         data = {}
         if self.key is not None:
-            data['key'] = self.key
+            data["key"] = self.key
         if self.operator is not None:
-            data['operator'] = self.operator
+            data["operator"] = self.operator
         if self.values is not None:
-            data['values'] = self.values
+            data["values"] = self.values
         return data

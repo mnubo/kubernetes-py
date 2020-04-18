@@ -11,7 +11,7 @@ from kubernetes_py.utils import is_valid_string
 
 class ServicePort(object):
 
-    VALID_PROTOCOLS = ['TCP', 'UDP']
+    VALID_PROTOCOLS = ["TCP", "UDP"]
 
     def __init__(self, name=None, model=None):
         super(ServicePort, self).__init__()
@@ -26,16 +26,16 @@ class ServicePort(object):
             self.name = name
 
         if model is not None:
-            if 'name' in model:
-                self.name = model['name']
-            if 'protocol' in model:
-                self.protocol = model['protocol']
-            if 'port' in model:
-                self.port = model['port']
-            if 'targetPort' in model:
-                self.target_port = model['targetPort']
-            if 'nodePort' in model:
-                self.node_port = model['nodePort']
+            if "name" in model:
+                self.name = model["name"]
+            if "protocol" in model:
+                self.protocol = model["protocol"]
+            if "port" in model:
+                self.port = model["port"]
+            if "targetPort" in model:
+                self.target_port = model["targetPort"]
+            if "nodePort" in model:
+                self.node_port = model["nodePort"]
 
     # ------------------------------------------------------------------------------------- name
 
@@ -46,7 +46,7 @@ class ServicePort(object):
     @name.setter
     def name(self, name=None):
         if not is_valid_string(name):
-            raise SyntaxError('ServicePort: name: [ {} ] is invalid.'.format(name))
+            raise SyntaxError("ServicePort: name: [ {} ] is invalid.".format(name))
         self._name = name
 
     # ------------------------------------------------------------------------------------- protocol
@@ -58,7 +58,7 @@ class ServicePort(object):
     @protocol.setter
     def protocol(self, protocol=None):
         if not is_valid_string(protocol) or protocol.upper() not in ServicePort.VALID_PROTOCOLS:
-            raise SyntaxError('ServicePort: protocol: [ {} ] is invalid.'.format(protocol))
+            raise SyntaxError("ServicePort: protocol: [ {} ] is invalid.".format(protocol))
         self._protocol = protocol.upper()
 
     # ------------------------------------------------------------------------------------- port
@@ -72,7 +72,7 @@ class ServicePort(object):
         if isinstance(port, str) and port.isdigit():
             port = int(port)
         if not isinstance(port, int):
-            raise SyntaxError('ServicePort: port: [ {} ] is invalid.'.format(port))
+            raise SyntaxError("ServicePort: port: [ {} ] is invalid.".format(port))
         self._port = port
 
     # ------------------------------------------------------------------------------------- targetPort
@@ -83,7 +83,7 @@ class ServicePort(object):
 
     @target_port.setter
     def target_port(self, port=None):
-        msg = 'ServicePort: target_port: [ {} ] is invalid.'.format(port)
+        msg = "ServicePort: target_port: [ {} ] is invalid.".format(port)
         try:
             p = int(port)
         except ValueError:
@@ -105,7 +105,7 @@ class ServicePort(object):
         if port is not None and isinstance(port, str) and port.isdigit():
             port = int(port)
         if port is not None and not isinstance(port, int):
-            raise SyntaxError('ServicePort: node_port: [ {} ] is invalid.'.format(port))
+            raise SyntaxError("ServicePort: node_port: [ {} ] is invalid.".format(port))
         self._node_port = port
 
     # ------------------------------------------------------------------------------------- serialize
@@ -113,13 +113,13 @@ class ServicePort(object):
     def serialize(self):
         data = {}
         if self.name is not None:
-            data['name'] = self.name
+            data["name"] = self.name
         if self.protocol is not None:
-            data['protocol'] = self.protocol
+            data["protocol"] = self.protocol
         if self.port is not None:
-            data['port'] = self.port
+            data["port"] = self.port
         if self.target_port is not None:
-            data['targetPort'] = self.target_port
+            data["targetPort"] = self.target_port
         if self.node_port is not None:
-            data['nodePort'] = self.node_port
+            data["nodePort"] = self.node_port
         return data

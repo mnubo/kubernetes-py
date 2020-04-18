@@ -21,8 +21,8 @@ class NamespaceStatus(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'phase' in model:
-            self.finalizers = model['phase']
+        if "phase" in model:
+            self.finalizers = model["phase"]
 
     # --------------------------------------------------------------------------------- finalizers
 
@@ -33,7 +33,7 @@ class NamespaceStatus(object):
     @phase.setter
     def phase(self, p=None):
         if not isinstance(p, str):
-            raise SyntaxError('NamespaceStatus: phase: [ {} ] is invalid. Must be a string.'.format(p))
+            raise SyntaxError("NamespaceStatus: phase: [ {} ] is invalid. Must be a string.".format(p))
         self._phase = p
 
     # --------------------------------------------------------------------------------- serialize
@@ -41,5 +41,5 @@ class NamespaceStatus(object):
     def serialize(self):
         data = {}
         if self.phase is not None:
-            data['phase'] = self.phase
+            data["phase"] = self.phase
         return data

@@ -21,9 +21,9 @@ class Pod(BaseModel):
     def __init__(self, model=None):
         super(Pod, self).__init__()
 
-        self.kind = 'Pod'
-        self.api_version = 'v1'
-        
+        self.kind = "Pod"
+        self.api_version = "v1"
+
         self.spec = PodSpec()
         self.status = PodStatus()
 
@@ -34,10 +34,10 @@ class Pod(BaseModel):
     def _build_with_model(self, model=None):
         super(Pod, self).build_with_model(model)
 
-        if 'spec' in model:
-            self.spec = PodSpec(model['spec'])
-        if 'status' in model:
-            self.status = PodStatus(model['status'])
+        if "spec" in model:
+            self.spec = PodSpec(model["spec"])
+        if "status" in model:
+            self.status = PodStatus(model["status"])
 
     # ------------------------------------------------------------------------------------- spec
 
@@ -48,8 +48,7 @@ class Pod(BaseModel):
     @spec.setter
     def spec(self, spec=None):
         if not isinstance(spec, PodSpec):
-            raise SyntaxError(
-                'Pod: spec: [ {0} ] is invalid.'.format(spec))
+            raise SyntaxError("Pod: spec: [ {0} ] is invalid.".format(spec))
         self._spec = spec
 
     # ------------------------------------------------------------------------------------- status
@@ -61,8 +60,7 @@ class Pod(BaseModel):
     @status.setter
     def status(self, status=None):
         if not isinstance(status, PodStatus):
-            raise SyntaxError(
-                'Pod: status: [ {0} ] is invalid.'.format(status))
+            raise SyntaxError("Pod: status: [ {0} ] is invalid.".format(status))
         self._status = status
 
     # ------------------------------------------------------------------------------------- serialize
@@ -70,7 +68,7 @@ class Pod(BaseModel):
     def serialize(self):
         data = super(Pod, self).serialize()
         if self.spec is not None:
-            data['spec'] = self.spec.serialize()
+            data["spec"] = self.spec.serialize()
         if self.status is not None:
-            data['status'] = self.status.serialize()
+            data["status"] = self.status.serialize()
         return data

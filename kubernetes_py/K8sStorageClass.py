@@ -13,11 +13,7 @@ from kubernetes_py.models.v1beta1.StorageClass import StorageClass
 class K8sStorageClass(K8sObject):
     def __init__(self, config=None, name=None):
 
-        super(K8sStorageClass, self).__init__(
-            config=config,
-            name=name,
-            obj_type='StorageClass'
-        )
+        super(K8sStorageClass, self).__init__(config=config, name=name, obj_type="StorageClass")
 
     # -------------------------------------------------------------------------------------  override
 

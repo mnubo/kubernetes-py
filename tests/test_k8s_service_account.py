@@ -16,7 +16,6 @@ from kubernetes_py.K8sServiceAccount import K8sServiceAccount
 
 
 class K8sServiceAccountTests(BaseTest):
-
     def setUp(self):
         _utils.cleanup_service_accounts()
         _utils.cleanup_secrets()
@@ -54,8 +53,8 @@ class K8sServiceAccountTests(BaseTest):
         self.assertIsNotNone(secret)
         self.assertIsInstance(secret, K8sServiceAccount)
         self.assertEqual(secret.name, name)
-        self.assertEqual('default', secret.config.namespace)
-        self.assertEqual('ServiceAccount', secret.obj_type)
+        self.assertEqual("default", secret.config.namespace)
+        self.assertEqual("ServiceAccount", secret.obj_type)
 
     def test_init_with_name_and_config(self):
         name = "yoname"
@@ -66,7 +65,7 @@ class K8sServiceAccountTests(BaseTest):
         self.assertIsInstance(secret, K8sServiceAccount)
         self.assertEqual(secret.name, name)
         self.assertEqual(secret.config.namespace, nspace)
-        self.assertEqual('ServiceAccount', secret.obj_type)
+        self.assertEqual("ServiceAccount", secret.obj_type)
 
     # --------------------------------------------------------------------------------- api - create
 

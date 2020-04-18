@@ -25,11 +25,11 @@ class LabelSelector(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'matchLabels' in model:
-            self.match_labels = model['matchLabels']
-        if 'matchExpressions' in model:
+        if "matchLabels" in model:
+            self.match_labels = model["matchLabels"]
+        if "matchExpressions" in model:
             exps = []
-            for me in model['matchExpressions']:
+            for me in model["matchExpressions"]:
                 exp = LabelSelectorRequirement(me)
                 exps.append(exp)
             self.match_expressions = exps
@@ -43,8 +43,7 @@ class LabelSelector(object):
     @match_labels.setter
     def match_labels(self, ml=None):
         if not is_valid_dict(ml):
-            raise SyntaxError(
-                'LabelSelector: match_labels: [ {} ] is invalid.'.format(ml))
+            raise SyntaxError("LabelSelector: match_labels: [ {} ] is invalid.".format(ml))
 
         self._match_labels = ml
 
@@ -57,8 +56,7 @@ class LabelSelector(object):
     @match_expressions.setter
     def match_expressions(self, me=None):
         if not is_valid_list(me, LabelSelectorRequirement):
-            raise SyntaxError(
-                'LabelSelector: match_expressions: [ {} ] is invalid.'.format(me))
+            raise SyntaxError("LabelSelector: match_expressions: [ {} ] is invalid.".format(me))
 
         self._match_expressions = me
 
@@ -67,8 +65,8 @@ class LabelSelector(object):
     def serialize(self):
         data = {}
         if self.match_labels is not None:
-            data['matchLabels'] = self.match_labels
+            data["matchLabels"] = self.match_labels
         if self.match_expressions is not None:
-            data['matchExpressions'] = [x.serialize() for x in self.match_expressions]
+            data["matchExpressions"] = [x.serialize() for x in self.match_expressions]
 
         return data

@@ -17,16 +17,12 @@ class K8sReplicaSet(K8sObject):
     http://kubernetes.io/docs/api-reference/extensions/v1beta1/definitions/#_v1beta1_replicaset
     """
 
-    REVISION_ANNOTATION = 'deployment.kubernetes.io/revision'
-    REVISION_HISTORY_ANNOTATION = 'deployment.kubernetes.io/revision-history'
+    REVISION_ANNOTATION = "deployment.kubernetes.io/revision"
+    REVISION_HISTORY_ANNOTATION = "deployment.kubernetes.io/revision-history"
 
     def __init__(self, config=None, name=None):
 
-        super(K8sReplicaSet, self).__init__(
-            config=config,
-            obj_type='ReplicaSet',
-            name=name
-        )
+        super(K8sReplicaSet, self).__init__(config=config, obj_type="ReplicaSet", name=name)
 
     # -------------------------------------------------------------------------------------  override
 
@@ -67,8 +63,7 @@ class K8sReplicaSet(K8sObject):
 
     @revision.setter
     def revision(self, r=None):
-        raise NotImplementedError(
-            'K8sReplicaSet: revision is read-only.')
+        raise NotImplementedError("K8sReplicaSet: revision is read-only.")
 
     # -------------------------------------------------------------------------------------  revision history
 
@@ -82,5 +77,4 @@ class K8sReplicaSet(K8sObject):
 
     @revision_history.setter
     def revision_history(self, r=None):
-        raise NotImplementedError(
-            'K8sReplicaSet: revision_history is read-only.')
+        raise NotImplementedError("K8sReplicaSet: revision_history is read-only.")

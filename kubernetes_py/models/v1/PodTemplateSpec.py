@@ -25,10 +25,10 @@ class PodTemplateSpec(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'metadata' in model:
-            self.metadata = ObjectMeta(model['metadata'])
-        if 'spec' in model:
-            self.spec = PodSpec(model['spec'])
+        if "metadata" in model:
+            self.metadata = ObjectMeta(model["metadata"])
+        if "spec" in model:
+            self.spec = PodSpec(model["spec"])
 
     # ------------------------------------------------------------------------------------- metadata
 
@@ -39,7 +39,7 @@ class PodTemplateSpec(object):
     @metadata.setter
     def metadata(self, metadata=None):
         if not isinstance(metadata, ObjectMeta):
-            raise SyntaxError('PodTemplateSpec: metadata: [ {0} ] is invalid'.format(metadata))
+            raise SyntaxError("PodTemplateSpec: metadata: [ {0} ] is invalid".format(metadata))
         self._metadata = metadata
 
     # ------------------------------------------------------------------------------------- spec
@@ -51,7 +51,7 @@ class PodTemplateSpec(object):
     @spec.setter
     def spec(self, spec=None):
         if not isinstance(spec, PodSpec):
-            raise SyntaxError('PodTemplateSpec: spec: [ {0} ] is invalid'.format(spec))
+            raise SyntaxError("PodTemplateSpec: spec: [ {0} ] is invalid".format(spec))
         self._spec = spec
 
     # ------------------------------------------------------------------------------------- serialize
@@ -59,7 +59,7 @@ class PodTemplateSpec(object):
     def serialize(self):
         data = {}
         if self.metadata is not None:
-            data['metadata'] = self.metadata.serialize()
+            data["metadata"] = self.metadata.serialize()
         if self.spec is not None:
-            data['spec'] = self.spec.serialize()
+            data["spec"] = self.spec.serialize()
         return data

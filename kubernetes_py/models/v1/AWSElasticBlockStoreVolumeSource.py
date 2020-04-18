@@ -29,14 +29,14 @@ class AWSElasticBlockStoreVolumeSource(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'fsType' in model:
-            self.fs_type = model['fsType']
-        if 'partition' in model:
-            self.partition = model['partition']
-        if 'readOnly' in model:
-            self.read_only = model['readOnly']
-        if 'volumeID' in model:
-            self.volume_id = model['volumeID']
+        if "fsType" in model:
+            self.fs_type = model["fsType"]
+        if "partition" in model:
+            self.partition = model["partition"]
+        if "readOnly" in model:
+            self.read_only = model["readOnly"]
+        if "volumeID" in model:
+            self.volume_id = model["volumeID"]
 
     # ------------------------------------------------------------------------------------- fs type
 
@@ -47,7 +47,7 @@ class AWSElasticBlockStoreVolumeSource(object):
     @fs_type.setter
     def fs_type(self, fs=None):
         if not is_valid_string(fs):
-            raise SyntaxError('AWSElasticBlockStoreVolumeSource: fs_type: [ {0} ] is invalid.'.format(fs))
+            raise SyntaxError("AWSElasticBlockStoreVolumeSource: fs_type: [ {0} ] is invalid.".format(fs))
         self._fs_type = fs
 
     # ------------------------------------------------------------------------------------- partition
@@ -59,7 +59,7 @@ class AWSElasticBlockStoreVolumeSource(object):
     @partition.setter
     def partition(self, partition=None):
         if not isinstance(partition, int):
-            raise SyntaxError('AWSElasticBlockStoreVolumeSource: partition: [ {0} ] is invalid.'.format(partition))
+            raise SyntaxError("AWSElasticBlockStoreVolumeSource: partition: [ {0} ] is invalid.".format(partition))
         self._partition = partition
 
     # ------------------------------------------------------------------------------------- read only
@@ -71,7 +71,7 @@ class AWSElasticBlockStoreVolumeSource(object):
     @read_only.setter
     def read_only(self, ro=None):
         if not isinstance(ro, bool):
-            raise SyntaxError('AWSElasticBlockStoreVolumeSource: read_only: [ {0} ] is invalid.'.format(ro))
+            raise SyntaxError("AWSElasticBlockStoreVolumeSource: read_only: [ {0} ] is invalid.".format(ro))
         self._read_only = ro
 
     # ------------------------------------------------------------------------------------- volume id
@@ -83,7 +83,7 @@ class AWSElasticBlockStoreVolumeSource(object):
     @volume_id.setter
     def volume_id(self, vid=None):
         if not is_valid_string(vid):
-            raise SyntaxError('AWSElasticBlockStoreVolumeSource: volume_id: [ {0} ] is invalid.'.format(vid))
+            raise SyntaxError("AWSElasticBlockStoreVolumeSource: volume_id: [ {0} ] is invalid.".format(vid))
         self._volume_id = vid
 
     # ------------------------------------------------------------------------------------- serialize
@@ -91,11 +91,11 @@ class AWSElasticBlockStoreVolumeSource(object):
     def serialize(self):
         data = {}
         if self.fs_type is not None:
-            data['fsType'] = self.fs_type
+            data["fsType"] = self.fs_type
         if self.partition is not None:
-            data['partition'] = self.partition
+            data["partition"] = self.partition
         if self.read_only is not None:
-            data['readOnly'] = self.read_only
+            data["readOnly"] = self.read_only
         if self.volume_id is not None:
-            data['volumeID'] = self.volume_id
+            data["volumeID"] = self.volume_id
         return data

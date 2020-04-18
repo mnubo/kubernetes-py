@@ -25,12 +25,12 @@ class ResourceFieldSelector(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'containerName' in model:
-            self.container_name = model['containerName']
-        if 'resource' in model:
-            self.resource = model['resource']
-        if 'divisor' in model:
-            self.divisor = model['divisor']
+        if "containerName" in model:
+            self.container_name = model["containerName"]
+        if "resource" in model:
+            self.resource = model["resource"]
+        if "divisor" in model:
+            self.divisor = model["divisor"]
 
     # ------------------------------------------------------------------------------------- containerName
 
@@ -41,7 +41,7 @@ class ResourceFieldSelector(object):
     @container_name.setter
     def container_name(self, name=None):
         if not is_valid_string(name):
-            raise SyntaxError('ResourceFieldSelector: container_name: [ {} ] is not None'.format(name))
+            raise SyntaxError("ResourceFieldSelector: container_name: [ {} ] is not None".format(name))
         self._container_name = name
 
     # ------------------------------------------------------------------------------------- resource
@@ -53,7 +53,7 @@ class ResourceFieldSelector(object):
     @resource.setter
     def resource(self, res=None):
         if not is_valid_string(res):
-            raise SyntaxError('ResourceFieldSelector: resource: [ {} ] is not None'.format(res))
+            raise SyntaxError("ResourceFieldSelector: resource: [ {} ] is not None".format(res))
         self._resource = res
 
     # ------------------------------------------------------------------------------------- divisor
@@ -65,7 +65,7 @@ class ResourceFieldSelector(object):
     @divisor.setter
     def divisor(self, div=None):
         if not is_valid_string(div):
-            raise SyntaxError('ResourceFieldSelector: divisor: [ {} ] is not None'.format(div))
+            raise SyntaxError("ResourceFieldSelector: divisor: [ {} ] is not None".format(div))
         self._divisor = div
 
     # ------------------------------------------------------------------------------------- serialize
@@ -73,9 +73,9 @@ class ResourceFieldSelector(object):
     def serialize(self):
         data = {}
         if self.container_name is not None:
-            data['containerName'] = self.container_name
+            data["containerName"] = self.container_name
         if self.resource is not None:
-            data['resource'] = self.resource
+            data["resource"] = self.resource
         if self.divisor is not None:
-            data['divisor'] = self.divisor
+            data["divisor"] = self.divisor
         return data

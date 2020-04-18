@@ -11,7 +11,6 @@ from kubernetes_py.utils import is_valid_string, is_valid_list, convert
 
 
 class PodAffinityTerm(object):
-
     def __init__(self, model=None):
         super(PodAffinityTerm, self).__init__()
 
@@ -23,12 +22,12 @@ class PodAffinityTerm(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'labelSelector' in model:
-            self.label_selector = LabelSelector(model['labelSelector'])
-        if 'namespaces' in model:
-            self.namespaces = model['namespaces']
-        if 'topologyKey' in model:
-            self.topology_key = model['topologyKey']
+        if "labelSelector" in model:
+            self.label_selector = LabelSelector(model["labelSelector"])
+        if "namespaces" in model:
+            self.namespaces = model["namespaces"]
+        if "topologyKey" in model:
+            self.topology_key = model["topologyKey"]
 
     # ------------------------------------------------------------------------------------- labelSelector
 
@@ -39,7 +38,7 @@ class PodAffinityTerm(object):
     @label_selector.setter
     def label_selector(self, s=None):
         if not isinstance(s, LabelSelector):
-            raise SyntaxError('PodAffinityTerm: label_selector: [ {} ] is invalid.'.format(s))
+            raise SyntaxError("PodAffinityTerm: label_selector: [ {} ] is invalid.".format(s))
         self._label_selector = s
 
     # ------------------------------------------------------------------------------------- namespaces
@@ -51,7 +50,7 @@ class PodAffinityTerm(object):
     @namespaces.setter
     def namespaces(self, n=None):
         if not is_valid_list(convert(n), str):
-            raise SyntaxError('PodAffinityTerm: namespaces: [ {} ] is invalid.'.format(n))
+            raise SyntaxError("PodAffinityTerm: namespaces: [ {} ] is invalid.".format(n))
         self._namespaces = n
 
     # ------------------------------------------------------------------------------------- topologyKey
@@ -63,7 +62,7 @@ class PodAffinityTerm(object):
     @topology_key.setter
     def topology_key(self, t=None):
         if not is_valid_string(t):
-            raise SyntaxError('PodAffinityTerm: topology_key: [ {} ] is invalid.'.format(t))
+            raise SyntaxError("PodAffinityTerm: topology_key: [ {} ] is invalid.".format(t))
         self._topology_key = t
 
     # ------------------------------------------------------------------------------------- serialize
@@ -71,9 +70,9 @@ class PodAffinityTerm(object):
     def serialize(self):
         data = {}
         if self.label_selector is not None:
-            data['labelSelector'] = self.label_selector.serialize()
+            data["labelSelector"] = self.label_selector.serialize()
         if self.namespaces:
-            data['namespaces'] = self.namespaces
+            data["namespaces"] = self.namespaces
         if self.topology_key is not None:
-            data['topologyKey'] = self.topology_key
+            data["topologyKey"] = self.topology_key
         return data

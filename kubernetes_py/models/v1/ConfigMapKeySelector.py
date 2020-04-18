@@ -24,10 +24,10 @@ class ConfigMapKeySelector(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'name' in model:
-            self.name = model['name']
-        if 'key' in model:
-            self.key = model['key']
+        if "name" in model:
+            self.name = model["name"]
+        if "key" in model:
+            self.key = model["key"]
 
     # ------------------------------------------------------------------------------------- name
 
@@ -38,7 +38,7 @@ class ConfigMapKeySelector(object):
     @name.setter
     def name(self, n=None):
         if not is_valid_string(n):
-            raise SyntaxError('ConfigMapKeySelector: name: [ {} ] is invalid.'.format(n))
+            raise SyntaxError("ConfigMapKeySelector: name: [ {} ] is invalid.".format(n))
         self._name = n
 
     # ------------------------------------------------------------------------------------- key
@@ -50,7 +50,7 @@ class ConfigMapKeySelector(object):
     @key.setter
     def key(self, k=None):
         if not is_valid_string(k):
-            raise SyntaxError('ConfigMapKeySelector: key: [ {} ] is invalid.'.format(k))
+            raise SyntaxError("ConfigMapKeySelector: key: [ {} ] is invalid.".format(k))
         self._key = k
 
     # ------------------------------------------------------------------------------------- serialize
@@ -58,7 +58,7 @@ class ConfigMapKeySelector(object):
     def serialize(self):
         data = {}
         if self.name is not None:
-            data['name'] = self.name
+            data["name"] = self.name
         if self.key is not None:
-            data['key'] = self.key
+            data["key"] = self.key
         return data

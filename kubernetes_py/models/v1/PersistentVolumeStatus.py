@@ -25,12 +25,12 @@ class PersistentVolumeStatus(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'phase' in model:
-            self.phase = model['phase']
-        if 'message' in model:
-            self.message = model['message']
-        if 'reason' in model:
-            self.reason = model['reason']
+        if "phase" in model:
+            self.phase = model["phase"]
+        if "message" in model:
+            self.message = model["message"]
+        if "reason" in model:
+            self.reason = model["reason"]
 
     # ------------------------------------------------------------------------------------- phase
 
@@ -41,7 +41,7 @@ class PersistentVolumeStatus(object):
     @phase.setter
     def phase(self, p=None):
         if not is_valid_string(p):
-            raise SyntaxError('PersistentVolumeStatus: phase: [ {} ] is invalid.'.format(p))
+            raise SyntaxError("PersistentVolumeStatus: phase: [ {} ] is invalid.".format(p))
         self._phase = p
 
     # ------------------------------------------------------------------------------------- message
@@ -53,7 +53,7 @@ class PersistentVolumeStatus(object):
     @message.setter
     def message(self, m=None):
         if not is_valid_string(m):
-            raise SyntaxError('PersistentVolumeStatus: message: [ {} ] is invalid.'.format(m))
+            raise SyntaxError("PersistentVolumeStatus: message: [ {} ] is invalid.".format(m))
         self._message = m
 
     # ------------------------------------------------------------------------------------- reason
@@ -65,7 +65,7 @@ class PersistentVolumeStatus(object):
     @reason.setter
     def reason(self, r=None):
         if not is_valid_string(r):
-            raise SyntaxError('PersistentVolumeStatus: reason: [ {} ] is invalid.'.format(r))
+            raise SyntaxError("PersistentVolumeStatus: reason: [ {} ] is invalid.".format(r))
         self._reason = r
 
     # ------------------------------------------------------------------------------------- serialize
@@ -73,9 +73,9 @@ class PersistentVolumeStatus(object):
     def serialize(self):
         data = {}
         if self.phase is not None:
-            data['phase'] = self.phase
+            data["phase"] = self.phase
         if self.message is not None:
-            data['message'] = self.message
+            data["message"] = self.message
         if self.reason is not None:
-            data['reason'] = self.reason
+            data["reason"] = self.reason
         return data

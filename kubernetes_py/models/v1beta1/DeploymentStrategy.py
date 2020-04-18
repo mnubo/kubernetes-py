@@ -25,10 +25,10 @@ class DeploymentStrategy(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'type' in model:
-            self.type = model['type']
-        if 'rollingUpdate' in model:
-            self.rolling_update = RollingUpdateDeployment(model['rollingUpdate'])
+        if "type" in model:
+            self.type = model["type"]
+        if "rollingUpdate" in model:
+            self.rolling_update = RollingUpdateDeployment(model["rollingUpdate"])
 
     # ------------------------------------------------------------------------------------- type
 
@@ -39,7 +39,7 @@ class DeploymentStrategy(object):
     @type.setter
     def type(self, t=None):
         if not is_valid_string(t):
-            raise SyntaxError('DeploymentStrategy: type: [ {} ] is invalid.'.format(t))
+            raise SyntaxError("DeploymentStrategy: type: [ {} ] is invalid.".format(t))
         self._type = t
 
     # ------------------------------------------------------------------------------------- rollingUpdate
@@ -51,7 +51,7 @@ class DeploymentStrategy(object):
     @rolling_update.setter
     def rolling_update(self, ru=None):
         if not isinstance(ru, RollingUpdateDeployment):
-            raise SyntaxError('DeploymentStrategy: rolling_update: [ {} ] is invalid.'.format(ru))
+            raise SyntaxError("DeploymentStrategy: rolling_update: [ {} ] is invalid.".format(ru))
         self._rolling_update = ru
 
     # ------------------------------------------------------------------------------------- serialize
@@ -59,7 +59,7 @@ class DeploymentStrategy(object):
     def serialize(self):
         data = {}
         if self.type is not None:
-            data['type'] = self.type
+            data["type"] = self.type
         if self.rolling_update is not None:
-            data['rollingUpdate'] = self.rolling_update.serialize()
+            data["rollingUpdate"] = self.rolling_update.serialize()
         return data

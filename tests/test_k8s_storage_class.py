@@ -13,7 +13,6 @@ from kubernetes_py.models.v1beta1.StorageClass import StorageClass
 
 
 class K8sStorageClassTests(BaseTest):
-
     def setUp(self):
         _utils.cleanup_storage_class()
 
@@ -24,17 +23,13 @@ class K8sStorageClassTests(BaseTest):
         json = {
             "kind": "StorageClass",
             "apiVersion": "storage.k8s.io/v1beta1",
-            "metadata": {
-                "name": "slow"
-            },
+            "metadata": {"name": "slow"},
             "provisioner": "kubernetes.io/gce-pd",
-            "parameters": {
-                "type": "pd-standard",
-            }
+            "parameters": {"type": "pd-standard",},
         }
 
         sc = StorageClass(json)
-        k8s_sc = _utils.create_storage_class(name='sc')
+        k8s_sc = _utils.create_storage_class(name="sc")
         k8s_sc.model = sc
 
         if _utils.is_reachable(k8s_sc.config):

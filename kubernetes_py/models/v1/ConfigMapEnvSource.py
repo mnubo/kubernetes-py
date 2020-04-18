@@ -29,10 +29,10 @@ class ConfigMapEnvSource(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'name' in model:
-            self.name = model['name']
-        if 'optional' in model:
-            self.optional = model['optional']
+        if "name" in model:
+            self.name = model["name"]
+        if "optional" in model:
+            self.optional = model["optional"]
 
     # ------------------------------------------------------------------------------------- name
 
@@ -43,7 +43,7 @@ class ConfigMapEnvSource(object):
     @name.setter
     def name(self, name=None):
         if not is_valid_string(name):
-            raise SyntaxError('ConfigMapVolumeSource: name: [ {0} ] is invalid.'.format(name))
+            raise SyntaxError("ConfigMapVolumeSource: name: [ {0} ] is invalid.".format(name))
         self._name = name
 
     # ------------------------------------------------------------------------------------- optional
@@ -55,7 +55,7 @@ class ConfigMapEnvSource(object):
     @optional.setter
     def optional(self, v=None):
         if not isinstance(v, bool):
-            raise SyntaxError('ConfigMapVolumeSource: optional: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("ConfigMapVolumeSource: optional: [ {0} ] is invalid.".format(v))
         self._optional = v
 
     # ------------------------------------------------------------------------------------- serialize
@@ -63,7 +63,7 @@ class ConfigMapEnvSource(object):
     def serialize(self):
         data = {}
         if self.name is not None:
-            data['name'] = self.name
+            data["name"] = self.name
         if self.optional is not None:
-            data['optional'] = self.optional
+            data["optional"] = self.optional
         return data

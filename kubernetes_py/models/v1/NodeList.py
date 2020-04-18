@@ -20,28 +20,28 @@ class NodeList(ListModel):
     def __init__(self, model=None):
         super(NodeList, self).__init__()
 
-        self.kind = 'NodeList'
-        self.api_version = 'v1'
+        self.kind = "NodeList"
+        self.api_version = "v1"
 
         if model is not None:
             m = filter_model(model)
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'kind' in model:
-            self.kind = model['kind']
-        if 'apiVersion' in model:
-            self.api_version = model['apiVersion']
-        if 'metadata' in model:
-            self.metadata = ListMeta(model['metadata'])
-        if 'items' in model:
-            if isinstance(model['items'], list):
+        if "kind" in model:
+            self.kind = model["kind"]
+        if "apiVersion" in model:
+            self.api_version = model["apiVersion"]
+        if "metadata" in model:
+            self.metadata = ListMeta(model["metadata"])
+        if "items" in model:
+            if isinstance(model["items"], list):
                 l = list()
-                for i in model['items']:
+                for i in model["items"]:
                     l.append(Node(model=i))
                 self.items = l
             else:
-                raise SyntaxError('NodeList: items: [ {0} ] is invalid.'.format(model['items']))
+                raise SyntaxError("NodeList: items: [ {0} ] is invalid.".format(model["items"]))
 
     # ------------------------------------------------------------------------------------- items
 
@@ -52,7 +52,7 @@ class NodeList(ListModel):
     @items.setter
     def items(self, i=None):
         if not is_valid_list(target=i, element_class=Node):
-            raise SyntaxError('NodeList: items: [ {0} ] is invalid.'.format(i))
+            raise SyntaxError("NodeList: items: [ {0} ] is invalid.".format(i))
         self._items = i
 
     # ------------------------------------------------------------------------------------- serialize

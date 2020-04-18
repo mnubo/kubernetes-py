@@ -21,8 +21,8 @@ class HorizontalPodAutoscaler(BaseModel):
     def __init__(self, model=None):
         super(HorizontalPodAutoscaler, self).__init__()
 
-        self.kind = 'HorizontalPodAutoscaler'
-        self.api_version = 'autoscaling/v1'
+        self.kind = "HorizontalPodAutoscaler"
+        self.api_version = "autoscaling/v1"
 
         self.metadata = ObjectMeta()
         self.spec = HorizontalPodAutoscalerSpec()
@@ -34,12 +34,12 @@ class HorizontalPodAutoscaler(BaseModel):
     def _build_with_model(self, model=None):
         super(HorizontalPodAutoscaler, self).build_with_model(model)
 
-        if 'metadata' in model:
-            self.metadata = ObjectMeta(model['metadata'])
-        if 'spec' in model:
-            self.spec = HorizontalPodAutoscalerSpec(model['spec'])
-        if 'status' in model:
-            self.status = HorizontalPodAutoscalerStatus(model['status'])
+        if "metadata" in model:
+            self.metadata = ObjectMeta(model["metadata"])
+        if "spec" in model:
+            self.spec = HorizontalPodAutoscalerSpec(model["spec"])
+        if "status" in model:
+            self.status = HorizontalPodAutoscalerStatus(model["status"])
 
     # ------------------------------------------------------------------------------------- spec
 
@@ -50,7 +50,7 @@ class HorizontalPodAutoscaler(BaseModel):
     @spec.setter
     def spec(self, s=None):
         if not isinstance(s, HorizontalPodAutoscalerSpec):
-            raise SyntaxError('HorizontalPodAutoscaler: spec: [ {} ] is invalid.'.format(s))
+            raise SyntaxError("HorizontalPodAutoscaler: spec: [ {} ] is invalid.".format(s))
         self._spec = s
 
     # ------------------------------------------------------------------------------------- status
@@ -62,7 +62,7 @@ class HorizontalPodAutoscaler(BaseModel):
     @status.setter
     def status(self, s=None):
         if not isinstance(s, HorizontalPodAutoscalerStatus):
-            raise SyntaxError('HorizontalPodAutoscaler: status: [ {} ] is invalid.'.format(s))
+            raise SyntaxError("HorizontalPodAutoscaler: status: [ {} ] is invalid.".format(s))
         self._status = s
 
     # ------------------------------------------------------------------------------------- serialize
@@ -71,7 +71,7 @@ class HorizontalPodAutoscaler(BaseModel):
         data = super(HorizontalPodAutoscaler, self).serialize()
 
         if self.spec is not None:
-            data['spec'] = self.spec.serialize()
+            data["spec"] = self.spec.serialize()
         if self.status is not None:
-            data['status'] = self.status.serialize()
+            data["status"] = self.status.serialize()
         return data

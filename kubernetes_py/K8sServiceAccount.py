@@ -15,11 +15,7 @@ from kubernetes_py.models.v1.ServiceAccount import ServiceAccount
 class K8sServiceAccount(K8sObject):
     def __init__(self, config=None, name=None):
 
-        super(K8sServiceAccount, self).__init__(
-            config=config,
-            name=name,
-            obj_type='ServiceAccount'
-        )
+        super(K8sServiceAccount, self).__init__(config=config, name=name, obj_type="ServiceAccount")
 
     # -------------------------------------------------------------------------------------  override
 
@@ -51,14 +47,11 @@ class K8sServiceAccount(K8sObject):
     # ------------------------------------------------------------------------------------- add
 
     def add_api_token(self):
-        return K8sSecret.create_service_account_api_token(
-            config=self.config,
-            name=self.name
-        )
+        return K8sSecret.create_service_account_api_token(config=self.config, name=self.name)
 
     def add_image_pull_secret(self, secret=None):
         if not isinstance(secret, K8sSecret):
-            raise SyntaxError('K8sServiceAccount.add_image_pull_secret() secret: [ {} ] is invalid.'.format(secret))
+            raise SyntaxError("K8sServiceAccount.add_image_pull_secret() secret: [ {} ] is invalid.".format(secret))
         ref = LocalObjectReference()
         ref.name = secret.name
         refs = self.image_pull_secrets_refs

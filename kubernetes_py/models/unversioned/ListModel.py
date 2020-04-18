@@ -20,12 +20,12 @@ class ListModel(object):
         self._items = None
 
     def build_with_model(self, model=None):
-        if 'apiVersion' in model:
-            self.api_version = model['apiVersion']
-        if 'kind' in model:
-            self.kind = model['kind']
-        if 'metadata' in model:
-            self.metadata = ListMeta(model=model['metadata'])
+        if "apiVersion" in model:
+            self.api_version = model["apiVersion"]
+        if "kind" in model:
+            self.kind = model["kind"]
+        if "metadata" in model:
+            self.metadata = ListMeta(model=model["metadata"])
 
     # ------------------------------------------------------------------------------------- apiVersion
 
@@ -36,7 +36,7 @@ class ListModel(object):
     @api_version.setter
     def api_version(self, v=None):
         if not is_valid_string(v):
-            raise SyntaxError('ListModel: api_version: [ {} ] is invalid.'.format(v))
+            raise SyntaxError("ListModel: api_version: [ {} ] is invalid.".format(v))
         self._api_version = v
 
     # ------------------------------------------------------------------------------------- kind
@@ -48,7 +48,7 @@ class ListModel(object):
     @kind.setter
     def kind(self, k=None):
         if not is_valid_string(k):
-            raise SyntaxError('ListModel: kind: [ {} ] is invalid.'.format(k))
+            raise SyntaxError("ListModel: kind: [ {} ] is invalid.".format(k))
         self._kind = k
 
     # ------------------------------------------------------------------------------------- metadata
@@ -60,7 +60,7 @@ class ListModel(object):
     @metadata.setter
     def metadata(self, meta=None):
         if not isinstance(meta, ListMeta):
-            raise SyntaxError('ListModel: metadata: [ {} ] is invalid.'.format(meta))
+            raise SyntaxError("ListModel: metadata: [ {} ] is invalid.".format(meta))
         self._metadata = meta
 
     # ------------------------------------------------------------------------------------- items
@@ -72,7 +72,7 @@ class ListModel(object):
     @items.setter
     def items(self, l=None):
         if not isinstance(l, list):
-            raise SyntaxError('ListModel: items: [ {} ] is invalid.'.format(l))
+            raise SyntaxError("ListModel: items: [ {} ] is invalid.".format(l))
         self._items = l
 
     # ------------------------------------------------------------------------------------- serialize
@@ -80,14 +80,14 @@ class ListModel(object):
     def serialize(self):
         data = {}
         if self.api_version is not None:
-            data['apiVersion'] = self.api_version
+            data["apiVersion"] = self.api_version
         if self.kind is not None:
-            data['kind'] = self.kind
+            data["kind"] = self.kind
         if self.metadata is not None:
-            data['metadata'] = self.metadata.serialize()
+            data["metadata"] = self.metadata.serialize()
         if self.items is not None:
             l = list()
             for i in self.items:
                 l.append(i.serialize())
-            data['items'] = l
+            data["items"] = l
         return data

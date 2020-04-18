@@ -11,7 +11,6 @@ from kubernetes_py.models.v1.PodTemplateSpec import PodTemplateSpec
 
 
 class DaemonSetSpec(object):
-
     def __init__(self, model=None):
         super(DaemonSetSpec, self).__init__()
 
@@ -22,10 +21,10 @@ class DaemonSetSpec(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'selector' in model:
-            self.selector = LabelSelector(model['selector'])
-        if 'template' in model:
-            self.template = PodTemplateSpec(model['template'])
+        if "selector" in model:
+            self.selector = LabelSelector(model["selector"])
+        if "template" in model:
+            self.template = PodTemplateSpec(model["template"])
 
     # ------------------------------------------------------------------------------------- selector
 
@@ -36,8 +35,7 @@ class DaemonSetSpec(object):
     @selector.setter
     def selector(self, s=None):
         if not isinstance(s, LabelSelector):
-            raise SyntaxError(
-                'DaemonSetSpec: selector: [ {} ] is invalid.'.format(s))
+            raise SyntaxError("DaemonSetSpec: selector: [ {} ] is invalid.".format(s))
         self._selector = s
 
     # ------------------------------------------------------------------------------------- template
@@ -49,8 +47,7 @@ class DaemonSetSpec(object):
     @template.setter
     def template(self, t=None):
         if not isinstance(t, PodTemplateSpec):
-            raise SyntaxError(
-                'DaemonSetSpec: template: [ {} ] is invalid.'.format(t))
+            raise SyntaxError("DaemonSetSpec: template: [ {} ] is invalid.".format(t))
         self._template = t
 
     # ------------------------------------------------------------------------------------- serialize
@@ -58,7 +55,7 @@ class DaemonSetSpec(object):
     def serialize(self):
         data = {}
         if self.selector is not None:
-            data['selector'] = self.selector.serialize()
+            data["selector"] = self.selector.serialize()
         if self.template is not None:
-            data['template'] = self.template.serialize()
+            data["template"] = self.template.serialize()
         return data

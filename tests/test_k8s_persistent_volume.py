@@ -46,11 +46,11 @@ class K8sPersistentVolumeTest(BaseTest):
 
     def test_init_host_path(self):
         name = "yoname"
-        _type = 'hostPath'
+        _type = "hostPath"
         vol = _utils.create_pv(name=name, type=_type)
         self.assertIsNotNone(vol)
         self.assertIsInstance(vol, K8sPersistentVolume)
-        self.assertEqual('hostPath', vol.type)
+        self.assertEqual("hostPath", vol.type)
         self.assertIsInstance(vol.source, HostPathVolumeSource)
 
     def test_hostpath_set_path_invalid_type(self):
@@ -172,7 +172,7 @@ class K8sPersistentVolumeTest(BaseTest):
         name = "yoname"
         _type = "gcePersistentDisk"
         pd_name = "mnubo-disk1"
-        fs_type = 'xfs'
+        fs_type = "xfs"
         vol = _utils.create_pv(name=name, type=_type)
         vol.pd_name = pd_name
         vol.fs_type = fs_type
@@ -256,7 +256,7 @@ class K8sPersistentVolumeTest(BaseTest):
         name = "yoname"
         _type = "awsElasticBlockStore"
         volume_id = "vol-0e3056a2"
-        fs_type = 'xfs'
+        fs_type = "xfs"
         vol = _utils.create_pv(name=name, type=_type)
         vol.volume_id = volume_id
         vol.fs_type = fs_type
@@ -332,7 +332,7 @@ class K8sPersistentVolumeTest(BaseTest):
         name = "yoname"
         _type = "gcePersistentDisk"
         pd_name = "mnubo-disk1"
-        fs_type = 'xfs'
+        fs_type = "xfs"
         vol = _utils.create_pv(name=name, type=_type)
         vol.pd_name = pd_name
         vol.fs_type = fs_type

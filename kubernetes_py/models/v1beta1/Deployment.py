@@ -20,8 +20,8 @@ class Deployment(BaseModel):
     def __init__(self, model=None):
         super(Deployment, self).__init__()
 
-        self.kind = 'Deployment'
-        self.api_version = 'extensions/v1beta1'
+        self.kind = "Deployment"
+        self.api_version = "extensions/v1beta1"
 
         self.spec = DeploymentSpec()
         self.status = DeploymentStatus()
@@ -32,10 +32,10 @@ class Deployment(BaseModel):
     def _build_with_model(self, model=None):
         super(Deployment, self).build_with_model(model)
 
-        if 'spec' in model:
-            self.spec = DeploymentSpec(model['spec'])
-        if 'status' in model:
-            self.status = DeploymentStatus(model['status'])
+        if "spec" in model:
+            self.spec = DeploymentSpec(model["spec"])
+        if "status" in model:
+            self.status = DeploymentStatus(model["status"])
 
     # ------------------------------------------------------------------------------------- spec
 
@@ -46,7 +46,7 @@ class Deployment(BaseModel):
     @spec.setter
     def spec(self, spec=None):
         if not isinstance(spec, DeploymentSpec):
-            raise SyntaxError('Deployment: spec: [ {} ] is invalid.'.format(spec))
+            raise SyntaxError("Deployment: spec: [ {} ] is invalid.".format(spec))
         self._spec = spec
 
     # ------------------------------------------------------------------------------------- status
@@ -58,7 +58,7 @@ class Deployment(BaseModel):
     @status.setter
     def status(self, status=None):
         if not isinstance(status, DeploymentStatus):
-            raise SyntaxError('Deployment: status: [ {} ] is invalid.'.format(status))
+            raise SyntaxError("Deployment: status: [ {} ] is invalid.".format(status))
         self._status = status
 
     # ------------------------------------------------------------------------------------- serialize
@@ -66,7 +66,7 @@ class Deployment(BaseModel):
     def serialize(self):
         data = super(Deployment, self).serialize()
         if self.spec is not None:
-            data['spec'] = self.spec.serialize()
+            data["spec"] = self.spec.serialize()
         if self.status is not None:
-            data['status'] = self.status.serialize()
+            data["status"] = self.status.serialize()
         return data

@@ -23,8 +23,8 @@ class ExecAction(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'command' in model:
-            self.command = model['command']
+        if "command" in model:
+            self.command = model["command"]
 
     # ------------------------------------------------------------------------------------- command
 
@@ -35,7 +35,7 @@ class ExecAction(object):
     @command.setter
     def command(self, command=None):
         if not is_valid_list(command, str):
-            raise SyntaxError('ExecAction: command: [ {0} ] is invalid.'.format(command))
+            raise SyntaxError("ExecAction: command: [ {0} ] is invalid.".format(command))
         self._command = command
 
     # ------------------------------------------------------------------------------------- serialize
@@ -43,5 +43,5 @@ class ExecAction(object):
     def serialize(self):
         data = {}
         if self.command is not None:
-            data['command'] = self.command
+            data["command"] = self.command
         return data

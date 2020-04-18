@@ -30,20 +30,20 @@ class PetSetSpec(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'replicas' in model:
-            self.replicas = model['replicas']
-        if 'selector' in model:
-            self.selector = LabelSelector(model['selector'])
-        if 'template' in model:
-            self.template = PodTemplateSpec(model['template'])
-        if 'volumeClaimTemplates' in model:
+        if "replicas" in model:
+            self.replicas = model["replicas"]
+        if "selector" in model:
+            self.selector = LabelSelector(model["selector"])
+        if "template" in model:
+            self.template = PodTemplateSpec(model["template"])
+        if "volumeClaimTemplates" in model:
             claims = []
-            for x in model['volumeClaimTemplates']:
+            for x in model["volumeClaimTemplates"]:
                 claim = PersistentVolumeClaim(x)
                 claims.append(claim)
             self.volume_claim_templates = claims
-        if 'serviceName' in model:
-            self.service_name = model['serviceName']
+        if "serviceName" in model:
+            self.service_name = model["serviceName"]
 
     # ------------------------------------------------------------------------------------- replicas
 
@@ -54,7 +54,7 @@ class PetSetSpec(object):
     @replicas.setter
     def replicas(self, r=None):
         if not isinstance(r, int):
-            raise SyntaxError('PetSetSpec: replicas: [ {} ] is invalid.'.format(r))
+            raise SyntaxError("PetSetSpec: replicas: [ {} ] is invalid.".format(r))
         self._replicas = r
 
     # ------------------------------------------------------------------------------------- selector
@@ -66,7 +66,7 @@ class PetSetSpec(object):
     @selector.setter
     def selector(self, s=None):
         if not isinstance(s, LabelSelector):
-            raise SyntaxError('PetSetSpec: selector: [ {} ] is invalid.'.format(s))
+            raise SyntaxError("PetSetSpec: selector: [ {} ] is invalid.".format(s))
         self._selector = s
 
     # ------------------------------------------------------------------------------------- template
@@ -78,7 +78,7 @@ class PetSetSpec(object):
     @template.setter
     def template(self, t=None):
         if not isinstance(t, PodTemplateSpec):
-            raise SyntaxError('PetSetSpec: template: [ {} ] is invalid.'.format(t))
+            raise SyntaxError("PetSetSpec: template: [ {} ] is invalid.".format(t))
         self._template = t
 
     # ------------------------------------------------------------------------------------- volumeClaimTemplates
@@ -90,7 +90,7 @@ class PetSetSpec(object):
     @volume_claim_templates.setter
     def volume_claim_templates(self, t=None):
         if not is_valid_list(t, PersistentVolumeClaim):
-            raise SyntaxError('PetSetSpec: volume_claim_templates: [ {} ] is invalid.'.format(t))
+            raise SyntaxError("PetSetSpec: volume_claim_templates: [ {} ] is invalid.".format(t))
         self._volume_claim_templates = t
 
     # ------------------------------------------------------------------------------------- serviceName
@@ -102,7 +102,7 @@ class PetSetSpec(object):
     @service_name.setter
     def service_name(self, sn=None):
         if not is_valid_string(sn):
-            raise SyntaxError('PetSetSpec: service_name: [ {} ] is invalid.'.format(sn))
+            raise SyntaxError("PetSetSpec: service_name: [ {} ] is invalid.".format(sn))
         self._service_name = sn
 
     # ------------------------------------------------------------------------------------- serialize
@@ -110,13 +110,13 @@ class PetSetSpec(object):
     def serialize(self):
         data = {}
         if self.replicas is not None:
-            data['replicas'] = self.replicas
+            data["replicas"] = self.replicas
         if self.selector is not None:
-            data['selector'] = self.selector.serialize()
+            data["selector"] = self.selector.serialize()
         if self.template is not None:
-            data['template'] = self.template.serialize()
+            data["template"] = self.template.serialize()
         if self.volume_claim_templates is not None:
-            data['volumeClaimTemplates'] = [x.serialize() for x in self.volume_claim_templates]
+            data["volumeClaimTemplates"] = [x.serialize() for x in self.volume_claim_templates]
         if self.service_name is not None:
-            data['serviceName'] = self.service_name
+            data["serviceName"] = self.service_name
         return data

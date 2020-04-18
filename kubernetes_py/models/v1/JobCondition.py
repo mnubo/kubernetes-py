@@ -28,18 +28,18 @@ class JobCondition(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'type' in model:
-            self.type = model['type']
-        if 'status' in model:
-            self.status = model['status']
-        if 'lastProbeTime' in model:
-            self.last_probe_time = model['lastProbeTime']
-        if 'lastTransitionTime' in model:
-            self.last_transition_time = model['lastTransitionTime']
-        if 'reason' in model:
-            self.reason = model['reason']
-        if 'message' in model:
-            self.message = model['message']
+        if "type" in model:
+            self.type = model["type"]
+        if "status" in model:
+            self.status = model["status"]
+        if "lastProbeTime" in model:
+            self.last_probe_time = model["lastProbeTime"]
+        if "lastTransitionTime" in model:
+            self.last_transition_time = model["lastTransitionTime"]
+        if "reason" in model:
+            self.reason = model["reason"]
+        if "message" in model:
+            self.message = model["message"]
 
     # --------------------------------------------------------------------------------- type
 
@@ -50,7 +50,7 @@ class JobCondition(object):
     @type.setter
     def type(self, t=None):
         if not is_valid_string(t):
-            raise SyntaxError('JobCondition: type: [ {} ] is invalid.'.format(t))
+            raise SyntaxError("JobCondition: type: [ {} ] is invalid.".format(t))
         self._type = t
 
     # --------------------------------------------------------------------------------- status
@@ -62,7 +62,7 @@ class JobCondition(object):
     @status.setter
     def status(self, s=None):
         if not is_valid_string(s):
-            raise SyntaxError('JobCondition: status: [ {} ] is invalid.'.format(s))
+            raise SyntaxError("JobCondition: status: [ {} ] is invalid.".format(s))
         self._status = s
 
     # --------------------------------------------------------------------------------- lastProbeTime
@@ -74,7 +74,7 @@ class JobCondition(object):
     @last_probe_time.setter
     def last_probe_time(self, t=None):
         if not is_valid_string(t):
-            raise SyntaxError('JobCondition: last_probe_time: [ {} ] is invalid.'.format(t))
+            raise SyntaxError("JobCondition: last_probe_time: [ {} ] is invalid.".format(t))
         self._last_probe_time = t
 
     # --------------------------------------------------------------------------------- lastTransitionTime
@@ -86,7 +86,7 @@ class JobCondition(object):
     @last_transition_time.setter
     def last_transition_time(self, t=None):
         if not is_valid_string(t):
-            raise SyntaxError('JobCondition: last_transition_time: [ {} ] is invalid.'.format(t))
+            raise SyntaxError("JobCondition: last_transition_time: [ {} ] is invalid.".format(t))
         self._last_transition_time = t
 
     # --------------------------------------------------------------------------------- reason
@@ -98,7 +98,7 @@ class JobCondition(object):
     @reason.setter
     def reason(self, r=None):
         if not is_valid_string(r):
-            raise SyntaxError('JobCondition: reason: [ {} ] is invalid.'.format(r))
+            raise SyntaxError("JobCondition: reason: [ {} ] is invalid.".format(r))
         self._reason = r
 
     # --------------------------------------------------------------------------------- message
@@ -110,7 +110,7 @@ class JobCondition(object):
     @message.setter
     def message(self, m=None):
         if not is_valid_string(m):
-            raise SyntaxError('JobCondition: message: [ {} ] is invalid.'.format(m))
+            raise SyntaxError("JobCondition: message: [ {} ] is invalid.".format(m))
         self._message = m
 
     # --------------------------------------------------------------------------------- serialize
@@ -118,15 +118,15 @@ class JobCondition(object):
     def serialize(self):
         data = {}
         if self.type is not None:
-            data['type'] = self.type
+            data["type"] = self.type
         if self.status is not None:
-            data['status'] = self.status
+            data["status"] = self.status
         if self.last_probe_time is not None:
-            data['lastProbeTime'] = self.last_probe_time
+            data["lastProbeTime"] = self.last_probe_time
         if self.last_transition_time is not None:
-            data['lastTransitionTime'] = self.last_transition_time
+            data["lastTransitionTime"] = self.last_transition_time
         if self.reason is not None:
-            data['reason'] = self.reason
+            data["reason"] = self.reason
         if self.message is not None:
-            data['message'] = self.message
+            data["message"] = self.message
         return data

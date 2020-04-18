@@ -24,8 +24,8 @@ class NodeDaemonEndpoints(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'kubeletEndpoint' in model:
-            self.kubelet_endpoint = DaemonEndpoint(model=model['kubeletEndpoint'])
+        if "kubeletEndpoint" in model:
+            self.kubelet_endpoint = DaemonEndpoint(model=model["kubeletEndpoint"])
 
     # ------------------------------------------------------------------------------------- type
 
@@ -36,7 +36,7 @@ class NodeDaemonEndpoints(object):
     @kubelet_endpoint.setter
     def kubelet_endpoint(self, v):
         if not isinstance(v, DaemonEndpoint):
-            raise SyntaxError('NodeDaemonEndpoints: kubelet_endpoint: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("NodeDaemonEndpoints: kubelet_endpoint: [ {0} ] is invalid.".format(v))
         self._kubelet_endpoint = v
 
     # ------------------------------------------------------------------------------------- serialize
@@ -44,5 +44,5 @@ class NodeDaemonEndpoints(object):
     def serialize(self):
         data = {}
         if self.kubelet_endpoint:
-            data['kubeletEndpoint'] = self.kubelet_endpoint.serialize()
+            data["kubeletEndpoint"] = self.kubelet_endpoint.serialize()
         return data

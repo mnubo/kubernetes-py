@@ -23,8 +23,8 @@ class DeleteOptions(object):
         # TODO(froch): add support for the below.
         # self._preconditions = None
 
-        self._kind = 'DeleteOptions'
-        self._api_version = 'v1'
+        self._kind = "DeleteOptions"
+        self._api_version = "v1"
         self._grace_period_seconds = 0
         self._orphan_dependents = False
 
@@ -37,7 +37,7 @@ class DeleteOptions(object):
     @kind.setter
     def kind(self, k=0):
         if not is_valid_string(k):
-            raise SyntaxError('DeleteOptions: kind: [ {0} ] is invalid.'.format(k))
+            raise SyntaxError("DeleteOptions: kind: [ {0} ] is invalid.".format(k))
         self._kind = k
 
     # -------------------------------------------------------------------------------------  apiVersion
@@ -49,7 +49,7 @@ class DeleteOptions(object):
     @api_version.setter
     def api_version(self, v=0):
         if not is_valid_string(v):
-            raise SyntaxError('DeleteOptions: api_version: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("DeleteOptions: api_version: [ {0} ] is invalid.".format(v))
         self._kind = v
 
     # -------------------------------------------------------------------------------------  grace period seconds
@@ -61,7 +61,7 @@ class DeleteOptions(object):
     @grace_period_seconds.setter
     def grace_period_seconds(self, secs=0):
         if not isinstance(secs, int):
-            raise SyntaxError('DeleteOptions: grace_period_seconds: [ {0} ] is invalid.'.format(secs))
+            raise SyntaxError("DeleteOptions: grace_period_seconds: [ {0} ] is invalid.".format(secs))
         self._grace_period_seconds = secs
 
     # -------------------------------------------------------------------------------------  orphanDependents
@@ -73,7 +73,7 @@ class DeleteOptions(object):
     @orphan_dependents.setter
     def orphan_dependents(self, orphan=False):
         if not isinstance(orphan, bool):
-            raise SyntaxError('DeleteOptions: orphan_dependents: [ {0} ] is invalid.'.format(orphan))
+            raise SyntaxError("DeleteOptions: orphan_dependents: [ {0} ] is invalid.".format(orphan))
         self._orphan_dependents = orphan
 
     # -------------------------------------------------------------------------------------  serialize
@@ -81,13 +81,13 @@ class DeleteOptions(object):
     def serialize(self):
         data = {}
         if self.kind is not None:
-            data['kind'] = self.kind
+            data["kind"] = self.kind
         if self.api_version is not None:
-            data['apiVersion'] = self.api_version
+            data["apiVersion"] = self.api_version
         if self.grace_period_seconds is not None:
-            data['gracePeriodSeconds'] = self.grace_period_seconds
+            data["gracePeriodSeconds"] = self.grace_period_seconds
         if self.orphan_dependents is not None:
-            data['orphanDependents'] = self.orphan_dependents
+            data["orphanDependents"] = self.orphan_dependents
         return data
 
     def as_json(self):

@@ -33,8 +33,8 @@ class Secret(BaseModel):
     def __init__(self, model=None):
         super(Secret, self).__init__()
 
-        self.kind = 'Secret'
-        self.api_version = 'v1'
+        self.kind = "Secret"
+        self.api_version = "v1"
 
         self._data = {}
         self._string_data = None
@@ -46,15 +46,15 @@ class Secret(BaseModel):
     def _build_with_model(self, model=None):
         super(Secret, self).build_with_model(model)
 
-        if 'data' in model:
+        if "data" in model:
             d = {}
-            for k, v in model['data'].items():
+            for k, v in model["data"].items():
                 d[k] = base64.b64decode(v)
             self.data = d
-        if 'stringData' in model:
-            self.string_data = model['stringData']
-        if 'type' in model:
-            self.type = model['type']
+        if "stringData" in model:
+            self.string_data = model["stringData"]
+        if "type" in model:
+            self.type = model["type"]
 
     # ------------------------------------------------------------------------------------- add
 
@@ -83,7 +83,7 @@ class Secret(BaseModel):
     @kind.setter
     def kind(self, k=None):
         if not is_valid_string(k):
-            raise SyntaxError('Secret: kind: [ {0} ] is invalid.'.format(k))
+            raise SyntaxError("Secret: kind: [ {0} ] is invalid.".format(k))
         self._kind = k
 
     # ------------------------------------------------------------------------------------- apiVersion
@@ -95,7 +95,7 @@ class Secret(BaseModel):
     @api_version.setter
     def api_version(self, v=None):
         if not is_valid_string(v):
-            raise SyntaxError('Secret: api_version: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("Secret: api_version: [ {0} ] is invalid.".format(v))
         self._api_version = v
 
     # ------------------------------------------------------------------------------------- labels
@@ -107,7 +107,7 @@ class Secret(BaseModel):
     @labels.setter
     def labels(self, labels=None):
         if not is_valid_dict(labels):
-            raise SyntaxError('Secret: labels: [ {0} ] is invalid.'.format(labels))
+            raise SyntaxError("Secret: labels: [ {0} ] is invalid.".format(labels))
         self.metadata.labels = labels
 
     # ------------------------------------------------------------------------------------- metadata
@@ -119,7 +119,7 @@ class Secret(BaseModel):
     @metadata.setter
     def metadata(self, md=None):
         if not isinstance(md, ObjectMeta):
-            raise SyntaxError('Secret: metadata: [ {0} ] is invalid.'.format(md))
+            raise SyntaxError("Secret: metadata: [ {0} ] is invalid.".format(md))
         self._metadata = md
 
     # ------------------------------------------------------------------------------------- data
@@ -137,7 +137,7 @@ class Secret(BaseModel):
 
     @data.setter
     def data(self, data=None):
-        msg = 'Secret: data: [ {0} ] is invalid.'.format(data)
+        msg = "Secret: data: [ {0} ] is invalid.".format(data)
 
         if isinstance(data, string_types):
             try:
@@ -153,9 +153,9 @@ class Secret(BaseModel):
                 raise SyntaxError(msg)
             if not isinstance(v, bytes):
                 try:
-                    v = bytearray(v, 'UTF-8')
+                    v = bytearray(v, "UTF-8")
                 except:
-                    raise SyntaxError('Could not convert [ {0} ] to bytes.'.format(v))
+                    raise SyntaxError("Could not convert [ {0} ] to bytes.".format(v))
             self._data[k] = base64.b64encode(v)
 
     # ------------------------------------------------------------------------------------- stringData
@@ -167,7 +167,7 @@ class Secret(BaseModel):
     @string_data.setter
     def string_data(self, data=None):
         if not is_valid_dict(data):
-            raise SyntaxError('Secret: string_data: [ {0} ] is invalid.'.format(data))
+            raise SyntaxError("Secret: string_data: [ {0} ] is invalid.".format(data))
         self._string_data = data
 
     # ------------------------------------------------------------------------------------- type
@@ -179,56 +179,52 @@ class Secret(BaseModel):
     @type.setter
     def type(self, t=None):
         if not is_valid_string(t):
-            raise SyntaxError('Secret: type: [ {0} ] is invalid.'.format(t))
+            raise SyntaxError("Secret: type: [ {0} ] is invalid.".format(t))
         self._type = t
 
     # ------------------------------------------------------------------------------------- dockercfg json
 
     @property
     def dockerconfigjson(self):
-        if '.dockerconfigjson' in self.data:
-            return self.data['.dockerconfigjson']
+        if ".dockerconfigjson" in self.data:
+            return self.data[".dockerconfigjson"]
         return None
 
     @dockerconfigjson.setter
     def dockerconfigjson(self, secret=None):
         if not is_valid_dict(secret):
-            raise SyntaxError('Secret: .dockerconfigjson: [ {} ] is invalid.'.format(secret))
+            raise SyntaxError("Secret: .dockerconfigjson: [ {} ] is invalid.".format(secret))
         self.type = self.K8s_TYPE_DOCKER_CONFIG
         s = json.dumps(secret)
-        utf = s.encode('utf-8')
-        self.data = {'.dockerconfigjson': utf}
+        utf = s.encode("utf-8")
+        self.data = {".dockerconfigjson": utf}
 
     # ------------------------------------------------------------------------------------- service account token
 
-    def set_service_account_token(self, account_name=None, account_uid=None,
-                                  token=None, kubecfg_data=None, cacert=None):
+    def set_service_account_token(self, account_name=None, account_uid=None, token=None, kubecfg_data=None, cacert=None):
 
         for x in [account_name, account_uid, token]:
             if not is_valid_string(x):
-                raise SyntaxError('Secret.set_service_account() account_name: [ {} ] is invalid.'.format(x))
+                raise SyntaxError("Secret.set_service_account() account_name: [ {} ] is invalid.".format(x))
         if not is_valid_string(account_uid):
-            raise SyntaxError('Secret.set_service_account() account_uid: [ {} ] is invalid.'.format(account_uid))
+            raise SyntaxError("Secret.set_service_account() account_uid: [ {} ] is invalid.".format(account_uid))
         if not is_valid_string(token):
-            raise SyntaxError('Secret.set_service_account() token: [ {} ] is invalid.'.format(token))
+            raise SyntaxError("Secret.set_service_account() token: [ {} ] is invalid.".format(token))
 
-        anns = {
-            self.K8s_ANNOTATION_SERVICE_ACCOUNT_NAME: account_name,
-            self.K8s_ANNOTATION_SERVICE_ACCOUNT_UID: account_uid
-        }
+        anns = {self.K8s_ANNOTATION_SERVICE_ACCOUNT_NAME: account_name, self.K8s_ANNOTATION_SERVICE_ACCOUNT_UID: account_uid}
 
         self.type = self.K8s_TYPE_SERVICE_ACCOUNT
         self.metadata.annotations = anns
-        self.data = {'token': token}
+        self.data = {"token": token}
 
         if is_valid_string(kubecfg_data):
             d = self.data
-            d.update({'kubernetes_py.kubeconfig': kubecfg_data})
+            d.update({"kubernetes_py.kubeconfig": kubecfg_data})
             self.data = d
 
         if is_valid_string(cacert):
             d = self.data
-            d.update({'ca.crt': cacert})
+            d.update({"ca.crt": cacert})
             self.data = d
 
         return self
@@ -242,13 +238,13 @@ class Secret(BaseModel):
             d = {}
             for k, v in self.data.items():
                 if is_valid_string(v):
-                    v = bytearray(source=v, encoding='UTF-8')
+                    v = bytearray(source=v, encoding="UTF-8")
                 d[k] = base64.b64encode(v)
                 if isinstance(d[k], bytes):
                     d[k] = d[k].decode()
-            data['data'] = d
+            data["data"] = d
         if self.string_data is not None:
-            data['stringData'] = self.string_data
+            data["stringData"] = self.string_data
         if self.type is not None:
-            data['type'] = self.type
+            data["type"] = self.type
         return data

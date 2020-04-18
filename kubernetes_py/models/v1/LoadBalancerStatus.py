@@ -23,9 +23,9 @@ class LoadBalancerStatus(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'ingress' in model:
+        if "ingress" in model:
             statuses = []
-            for i in model['ingress']:
+            for i in model["ingress"]:
                 status = LoadBalancerIngress(i)
                 statuses.append(status)
             self.ingress = statuses
@@ -39,7 +39,7 @@ class LoadBalancerStatus(object):
     @ingress.setter
     def ingress(self, ingress=None):
         if not is_valid_list(ingress, LoadBalancerIngress):
-            raise SyntaxError('LoadBalancerStatus: ingress: [ {0} ] is invalid.'.format(ingress))
+            raise SyntaxError("LoadBalancerStatus: ingress: [ {0} ] is invalid.".format(ingress))
         self._ingress = ingress
 
     # ------------------------------------------------------------------------------------- serialize
@@ -47,5 +47,5 @@ class LoadBalancerStatus(object):
     def serialize(self):
         data = {}
         if self.ingress is not None:
-            data['ingress'] = [x.serialize() for x in self.ingress]
+            data["ingress"] = [x.serialize() for x in self.ingress]
         return data

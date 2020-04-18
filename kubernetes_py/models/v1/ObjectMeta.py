@@ -39,40 +39,40 @@ class ObjectMeta(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'name' in model:
-            self.name = model['name']
-        if 'generateName' in model:
-            self.generate_name = model['generateName']
-        if 'namespace' in model:
-            self.namespace = model['namespace']
-        if 'selfLink' in model:
-            self.self_link = model['selfLink']
-        if 'uid' in model:
-            self.uid = model['uid']
-        if 'resourceVersion' in model:
-            self.resource_version = model['resourceVersion']
-        if 'generation' in model:
-            self.generation = model['generation']
-        if 'creationTimestamp' in model:
-            self.creation_timestamp = model['creationTimestamp']
-        if 'deletionTimestamp' in model:
-            self.deletion_timestamp = model['deletionTimestamp']
-        if 'deletionGracePeriodSeconds' in model:
-            self.deletion_grace_period_seconds = model['deletionGracePeriodSeconds']
-        if 'labels' in model:
-            self.labels = model['labels']
-        if 'annotations' in model:
-            self.annotations = model['annotations']
-        if 'ownerReferences' in model:
+        if "name" in model:
+            self.name = model["name"]
+        if "generateName" in model:
+            self.generate_name = model["generateName"]
+        if "namespace" in model:
+            self.namespace = model["namespace"]
+        if "selfLink" in model:
+            self.self_link = model["selfLink"]
+        if "uid" in model:
+            self.uid = model["uid"]
+        if "resourceVersion" in model:
+            self.resource_version = model["resourceVersion"]
+        if "generation" in model:
+            self.generation = model["generation"]
+        if "creationTimestamp" in model:
+            self.creation_timestamp = model["creationTimestamp"]
+        if "deletionTimestamp" in model:
+            self.deletion_timestamp = model["deletionTimestamp"]
+        if "deletionGracePeriodSeconds" in model:
+            self.deletion_grace_period_seconds = model["deletionGracePeriodSeconds"]
+        if "labels" in model:
+            self.labels = model["labels"]
+        if "annotations" in model:
+            self.annotations = model["annotations"]
+        if "ownerReferences" in model:
             refs = []
-            for o in model['ownerReferences']:
+            for o in model["ownerReferences"]:
                 ref = OwnerReference(o)
                 refs.append(ref)
             self.owner_references = refs
-        if 'finalizers' in model:
-            self.finalizers = model['finalizers']
-        if 'clusterName' in model:
-            self.cluster_name = model['clusterName']
+        if "finalizers" in model:
+            self.finalizers = model["finalizers"]
+        if "clusterName" in model:
+            self.cluster_name = model["clusterName"]
 
     # ------------------------------------------------------------------------------------- name
 
@@ -82,7 +82,7 @@ class ObjectMeta(object):
         # self._namespace = None
         self._self_link = None
         self._uid = None
-        if kind != 'Service':
+        if kind != "Service":
             self._resource_version = None
         self._generation = None
         self._creation_timestamp = None
@@ -103,7 +103,7 @@ class ObjectMeta(object):
     @name.setter
     def name(self, name=None):
         if not is_valid_string(name):
-            raise SyntaxError('ObjectMeta: name: [ {0} ] is invalid.'.format(name))
+            raise SyntaxError("ObjectMeta: name: [ {0} ] is invalid.".format(name))
         self._name = name
 
     # ------------------------------------------------------------------------------------- generate name
@@ -115,7 +115,7 @@ class ObjectMeta(object):
     @generate_name.setter
     def generate_name(self, name=None):
         if not is_valid_string(name):
-            raise SyntaxError('ObjectMeta: generate_name: [ {0} ] is invalid.'.format(name))
+            raise SyntaxError("ObjectMeta: generate_name: [ {0} ] is invalid.".format(name))
         self._generate_name = name
 
     # ------------------------------------------------------------------------------------- namespace
@@ -127,7 +127,7 @@ class ObjectMeta(object):
     @namespace.setter
     def namespace(self, namespace=None):
         if not is_valid_string(namespace):
-            raise SyntaxError('ObjectMeta: namespace: [ {0} ] is invalid.'.format(namespace))
+            raise SyntaxError("ObjectMeta: namespace: [ {0} ] is invalid.".format(namespace))
         self._namespace = namespace
 
     # ------------------------------------------------------------------------------------- selfLink
@@ -139,7 +139,7 @@ class ObjectMeta(object):
     @self_link.setter
     def self_link(self, link=None):
         if not is_valid_string(link):
-            raise SyntaxError('ObjectMeta: self_link: [ {0} ] is invalid.'.format(link))
+            raise SyntaxError("ObjectMeta: self_link: [ {0} ] is invalid.".format(link))
         self._self_link = link
 
     # ------------------------------------------------------------------------------------- uid
@@ -152,7 +152,7 @@ class ObjectMeta(object):
     def uid(self, uid=None):
         if uid is not None:
             if not is_valid_string(uid):
-                raise SyntaxError('ObjectMeta: uid: [ {0} ] is invalid.'.format(uid))
+                raise SyntaxError("ObjectMeta: uid: [ {0} ] is invalid.".format(uid))
         self._uid = uid
 
     # ------------------------------------------------------------------------------------- resourceVersion
@@ -165,7 +165,7 @@ class ObjectMeta(object):
     def resource_version(self, v=None):
         if v is not None:
             if not isinstance(v, str):
-                raise SyntaxError('ObjectMeta: resource_version: [ {0} ] is invalid.'.format(v))
+                raise SyntaxError("ObjectMeta: resource_version: [ {0} ] is invalid.".format(v))
         self._resource_version = v
 
     # ------------------------------------------------------------------------------------- generation
@@ -177,7 +177,7 @@ class ObjectMeta(object):
     @generation.setter
     def generation(self, gen=None):
         if not isinstance(gen, int):
-            raise SyntaxError('ObjectMeta: generation: [ {0} ] is invalid.'.format(gen))
+            raise SyntaxError("ObjectMeta: generation: [ {0} ] is invalid.".format(gen))
         self._generation = gen
 
     # ------------------------------------------------------------------------------------- creationTimestamp
@@ -189,7 +189,7 @@ class ObjectMeta(object):
     @creation_timestamp.setter
     def creation_timestamp(self, time=None):
         if not is_valid_string(time):
-            raise SyntaxError('ObjectMeta: creation_timestamp: [ {0} ] is invalid.'.format(time))
+            raise SyntaxError("ObjectMeta: creation_timestamp: [ {0} ] is invalid.".format(time))
         self._creation_timestamp = time
 
     # ------------------------------------------------------------------------------------- deletionTimestamp
@@ -201,7 +201,7 @@ class ObjectMeta(object):
     @deletion_timestamp.setter
     def deletion_timestamp(self, time=None):
         if not is_valid_string(time):
-            raise SyntaxError('ObjectMeta: deletion_timestamp: [ {0} ] is invalid.'.format(time))
+            raise SyntaxError("ObjectMeta: deletion_timestamp: [ {0} ] is invalid.".format(time))
         self._deletion_timestamp = time
 
     # ------------------------------------------------------------------------------------- deletionGracePeriodSeconds
@@ -213,7 +213,7 @@ class ObjectMeta(object):
     @deletion_grace_period_seconds.setter
     def deletion_grace_period_seconds(self, secs=None):
         if not isinstance(secs, int):
-            raise SyntaxError('ObjectMeta: deletion_grace_period_seconds: [ {0} ] is invalid.'.format(secs))
+            raise SyntaxError("ObjectMeta: deletion_grace_period_seconds: [ {0} ] is invalid.".format(secs))
         self._deletion_grace_period_seconds = secs
 
     # ------------------------------------------------------------------------------------- labels
@@ -225,7 +225,7 @@ class ObjectMeta(object):
     @labels.setter
     def labels(self, labels=None):
         if not is_valid_dict(labels, type=str):
-            raise SyntaxError('ObjectMeta: labels: [ {0} ] is invalid.'.format(labels))
+            raise SyntaxError("ObjectMeta: labels: [ {0} ] is invalid.".format(labels))
         self._labels = labels
 
     # ------------------------------------------------------------------------------------- annotations
@@ -237,7 +237,7 @@ class ObjectMeta(object):
     @annotations.setter
     def annotations(self, anns=None):
         if not is_valid_dict(anns, str):
-            raise SyntaxError('ObjectMeta: annotations: [ {0} ] is invalid.'.format(anns))
+            raise SyntaxError("ObjectMeta: annotations: [ {0} ] is invalid.".format(anns))
         self._annotations = anns
 
     # ------------------------------------------------------------------------------------- ownerReferences
@@ -249,7 +249,7 @@ class ObjectMeta(object):
     @owner_references.setter
     def owner_references(self, refs=None):
         if not is_valid_list(refs, OwnerReference):
-            raise SyntaxError('ObjectMeta: owner_references: [ {0} ] is invalid.'.format(refs))
+            raise SyntaxError("ObjectMeta: owner_references: [ {0} ] is invalid.".format(refs))
         self._owner_references = refs
 
     # ------------------------------------------------------------------------------------- finalizers
@@ -261,7 +261,7 @@ class ObjectMeta(object):
     @finalizers.setter
     def finalizers(self, f=None):
         if not is_valid_list(f, str):
-            raise SyntaxError('ObjectMeta: finalizers: [ {0} ] is invalid.'.format(f))
+            raise SyntaxError("ObjectMeta: finalizers: [ {0} ] is invalid.".format(f))
         self._finalizers = f
 
     # ------------------------------------------------------------------------------------- clusterName
@@ -273,7 +273,7 @@ class ObjectMeta(object):
     @cluster_name.setter
     def cluster_name(self, name=None):
         if not is_valid_string(name):
-            raise SyntaxError('ObjectMeta: cluster_name: [ {0} ] is invalid.'.format(name))
+            raise SyntaxError("ObjectMeta: cluster_name: [ {0} ] is invalid.".format(name))
         self._cluster_name = name
 
     # ------------------------------------------------------------------------------------- serialize
@@ -281,33 +281,33 @@ class ObjectMeta(object):
     def serialize(self):
         data = {}
         if self.name:
-            data['name'] = self.name
+            data["name"] = self.name
         if self.generate_name:
-            data['generateName'] = self.generate_name
+            data["generateName"] = self.generate_name
         if self.namespace:
-            data['namespace'] = self.namespace
+            data["namespace"] = self.namespace
         if self.self_link:
-            data['selfLink'] = self.self_link
+            data["selfLink"] = self.self_link
         if self.uid:
-            data['uid'] = self.uid
+            data["uid"] = self.uid
         if self.resource_version:
-            data['resourceVersion'] = self.resource_version
+            data["resourceVersion"] = self.resource_version
         if self.generation:
-            data['generation'] = self.generation
+            data["generation"] = self.generation
         if self.creation_timestamp:
-            data['creationTimestamp'] = self.creation_timestamp
+            data["creationTimestamp"] = self.creation_timestamp
         if self.deletion_timestamp:
-            data['deletionTimestamp'] = self.deletion_timestamp
+            data["deletionTimestamp"] = self.deletion_timestamp
         if self.deletion_grace_period_seconds:
-            data['deletionGracePeriodSeconds'] = self.deletion_grace_period_seconds
+            data["deletionGracePeriodSeconds"] = self.deletion_grace_period_seconds
         if self.labels:
-            data['labels'] = self.labels
+            data["labels"] = self.labels
         if self.annotations:
-            data['annotations'] = self.annotations
+            data["annotations"] = self.annotations
         if self.owner_references:
-            data['ownerReferences'] = self.owner_references
+            data["ownerReferences"] = self.owner_references
         if self.finalizers:
-            data['finalizers'] = self.finalizers
+            data["finalizers"] = self.finalizers
         if self.cluster_name:
-            data['clusterName'] = self.cluster_name
+            data["clusterName"] = self.cluster_name
         return data

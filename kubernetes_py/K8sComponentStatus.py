@@ -12,11 +12,7 @@ from kubernetes_py.models.v1.ComponentStatus import ComponentStatus
 
 class K8sComponentStatus(K8sObject):
     def __init__(self, config=None, name=None):
-        super(K8sComponentStatus, self).__init__(
-            config=config,
-            name=name,
-            obj_type='ComponentStatus'
-        )
+        super(K8sComponentStatus, self).__init__(config=config, name=name, obj_type="ComponentStatus")
 
     # -------------------------------------------------------------------------------------  override
 

@@ -8,7 +8,6 @@
 
 
 class DaemonSetStatus(object):
-
     def __init__(self, model=None):
         super(DaemonSetStatus, self).__init__()
 
@@ -20,12 +19,12 @@ class DaemonSetStatus(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'currentNumberScheduled' in model:
-            self.current_number_scheduled = model['currentNumberScheduled']
-        if 'numberMisscheduled' in model:
-            self.number_misscheduled = model['numberMisscheduled']
-        if 'desiredNumberScheduled' in model:
-            self.desired_number_scheduled = model['desiredNumberScheduled']
+        if "currentNumberScheduled" in model:
+            self.current_number_scheduled = model["currentNumberScheduled"]
+        if "numberMisscheduled" in model:
+            self.number_misscheduled = model["numberMisscheduled"]
+        if "desiredNumberScheduled" in model:
+            self.desired_number_scheduled = model["desiredNumberScheduled"]
 
     # ------------------------------------------------------------------------------------- currentNumberScheduled
 
@@ -36,7 +35,7 @@ class DaemonSetStatus(object):
     @current_number_scheduled.setter
     def current_number_scheduled(self, n=None):
         if not isinstance(n, int):
-            raise SyntaxError('DaemonSetStatus: current_number_scheduled: [ {} ] is invalid.'.format(n))
+            raise SyntaxError("DaemonSetStatus: current_number_scheduled: [ {} ] is invalid.".format(n))
         self._current_number_scheduled = n
 
     # ------------------------------------------------------------------------------------- numberMisscheduled
@@ -48,7 +47,7 @@ class DaemonSetStatus(object):
     @number_misscheduled.setter
     def number_misscheduled(self, n=None):
         if not isinstance(n, int):
-            raise SyntaxError('DaemonSetStatus: number_misscheduled: [ {} ] is invalid.'.format(n))
+            raise SyntaxError("DaemonSetStatus: number_misscheduled: [ {} ] is invalid.".format(n))
         self._number_misscheduled = n
 
     # ------------------------------------------------------------------------------------- desiredNumberScheduled
@@ -60,7 +59,7 @@ class DaemonSetStatus(object):
     @desired_number_scheduled.setter
     def desired_number_scheduled(self, n=None):
         if not isinstance(n, int):
-            raise SyntaxError('DaemonSetStatus: desired_number_scheduled: [ {} ] is invalid.'.format(n))
+            raise SyntaxError("DaemonSetStatus: desired_number_scheduled: [ {} ] is invalid.".format(n))
         self._desired_number_scheduled = n
 
     # ------------------------------------------------------------------------------------- serialize
@@ -68,9 +67,9 @@ class DaemonSetStatus(object):
     def serialize(self):
         data = {}
         if self.current_number_scheduled is not None:
-            data['currentNumberScheduled'] = self.current_number_scheduled
+            data["currentNumberScheduled"] = self.current_number_scheduled
         if self.number_misscheduled is not None:
-            data['numberMisscheduled'] = self.number_misscheduled
+            data["numberMisscheduled"] = self.number_misscheduled
         if self.desired_number_scheduled is not None:
-            data['desiredNumberScheduled'] = self.desired_number_scheduled
+            data["desiredNumberScheduled"] = self.desired_number_scheduled
         return data

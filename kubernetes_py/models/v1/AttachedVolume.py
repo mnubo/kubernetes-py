@@ -24,10 +24,10 @@ class AttachedVolume(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'name' in model:
-            self.name = model['name']
-        if 'devicePath' in model:
-            self.device_path = model['devicePath']
+        if "name" in model:
+            self.name = model["name"]
+        if "devicePath" in model:
+            self.device_path = model["devicePath"]
 
     # ------------------------------------------------------------------------------------- name
 
@@ -38,7 +38,7 @@ class AttachedVolume(object):
     @name.setter
     def name(self, v):
         if not isinstance(v, str):
-            raise SyntaxError('AttachedVolume: name: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("AttachedVolume: name: [ {0} ] is invalid.".format(v))
         self._name = v
 
     # ------------------------------------------------------------------------------------- device_path
@@ -50,7 +50,7 @@ class AttachedVolume(object):
     @device_path.setter
     def device_path(self, v):
         if not isinstance(v, str):
-            raise SyntaxError('AttachedVolume: device_path: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("AttachedVolume: device_path: [ {0} ] is invalid.".format(v))
         self._device_path = v
 
     # ------------------------------------------------------------------------------------- serialize
@@ -58,7 +58,7 @@ class AttachedVolume(object):
     def serialize(self):
         data = {}
         if self.name:
-            data['name'] = self.name
+            data["name"] = self.name
         if self.device_path:
-            data['devicePath'] = self.device_path
+            data["devicePath"] = self.device_path
         return data

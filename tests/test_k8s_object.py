@@ -9,10 +9,7 @@
 import uuid
 
 from kubernetes_py import K8sObject, K8sConfig
-from kubernetes_py.K8sExceptions import (
-    UnprocessableEntityException, NotFoundException,
-    InvalidObjectException
-)
+from kubernetes_py.K8sExceptions import UnprocessableEntityException, NotFoundException, InvalidObjectException
 from tests import _utils
 from tests.BaseTest import BaseTest
 
@@ -140,11 +137,11 @@ class K8sObjectTest(BaseTest):
                 secret = r[0]
                 self.assertIsInstance(secret, dict)
                 self.assertEqual(3, len(secret))
-                for i in ['data', 'metadata', 'type']:
+                for i in ["data", "metadata", "type"]:
                     self.assertIn(i, secret)
-                self.assertIsInstance(secret['data'], dict)
-                self.assertIsInstance(secret['metadata'], dict)
-                self.assertIsInstance(secret['type'], str)
+                self.assertIsInstance(secret["data"], dict)
+                self.assertIsInstance(secret["metadata"], dict)
+                self.assertIsInstance(secret["type"], str)
 
     def test_object_service_list_from_scratch(self):
         config = K8sConfig(kubeconfig=_utils.kubeconfig_fallback)
@@ -158,32 +155,32 @@ class K8sObjectTest(BaseTest):
             service = r[0]
             self.assertIsInstance(service, dict)
             self.assertEqual(3, len(service))
-            for i in ['metadata', 'spec', 'status']:
+            for i in ["metadata", "spec", "status"]:
                 self.assertIn(i, service)
                 self.assertIsInstance(service[i], dict)
-            for i in ['creationTimestamp', 'labels', 'name', 'namespace', 'resourceVersion', 'selfLink', 'uid']:
-                self.assertIn(i, service['metadata'])
-            for i in ['creationTimestamp', 'name', 'namespace', 'resourceVersion', 'selfLink', 'uid']:
-                self.assertIsInstance(service['metadata'][i], str)
-            self.assertIsInstance(service['metadata']['labels'], dict)
-            self.assertEqual(2, len(service['metadata']['labels']))
-            for i in ['component', 'provider']:
-                self.assertIn(i, service['metadata']['labels'])
-                self.assertIsInstance(service['metadata']['labels'][i], str)
-            for i in ['clusterIP', 'ports', 'sessionAffinity', 'type']:
-                self.assertIn(i, service['spec'])
-            for i in ['clusterIP', 'sessionAffinity', 'type']:
-                self.assertIsInstance(service['spec'][i], str)
-            self.assertIsInstance(service['spec']['ports'], list)
-            self.assertEqual(1, len(service['spec']['ports']))
-            port = service['spec']['ports'][0]
+            for i in ["creationTimestamp", "labels", "name", "namespace", "resourceVersion", "selfLink", "uid"]:
+                self.assertIn(i, service["metadata"])
+            for i in ["creationTimestamp", "name", "namespace", "resourceVersion", "selfLink", "uid"]:
+                self.assertIsInstance(service["metadata"][i], str)
+            self.assertIsInstance(service["metadata"]["labels"], dict)
+            self.assertEqual(2, len(service["metadata"]["labels"]))
+            for i in ["component", "provider"]:
+                self.assertIn(i, service["metadata"]["labels"])
+                self.assertIsInstance(service["metadata"]["labels"][i], str)
+            for i in ["clusterIP", "ports", "sessionAffinity", "type"]:
+                self.assertIn(i, service["spec"])
+            for i in ["clusterIP", "sessionAffinity", "type"]:
+                self.assertIsInstance(service["spec"][i], str)
+            self.assertIsInstance(service["spec"]["ports"], list)
+            self.assertEqual(1, len(service["spec"]["ports"]))
+            port = service["spec"]["ports"][0]
             self.assertIsInstance(port, dict)
             self.assertEqual(4, len(port))
-            for i in ['name', 'port', 'protocol', 'targetPort']:
+            for i in ["name", "port", "protocol", "targetPort"]:
                 self.assertIn(i, port)
-            for i in ['name', 'protocol']:
+            for i in ["name", "protocol"]:
                 self.assertIsInstance(port[i], str)
-            for i in ['port', 'targetPort']:
+            for i in ["port", "targetPort"]:
                 self.assertIsInstance(port[i], int)
 
     # ------------------------------------------------------------------------------------- api - get model
@@ -259,7 +256,7 @@ class K8sObjectTest(BaseTest):
             ot = "Pod"
             name = "yomama-{}".format(str(uuid.uuid4()))
             obj = _utils.create_object(config=config, name=name, obj_type=ot)
-            data = {'yokey': 'yovalue'}
+            data = {"yokey": "yovalue"}
             r = obj.get_with_params(data)
             self.assertIsNotNone(r)
             self.assertEqual(0, len(r))
@@ -376,7 +373,7 @@ class K8sObjectTest(BaseTest):
         if config is not None and _utils.is_reachable(config):
             obj = _utils.create_object(config=config, name=name, obj_type=ot)
             v = obj.server_version()
-            self.assertIn('gitCommit', v)
-            self.assertIn('gitVersion', v)
-            self.assertIn('major', v)
-            self.assertIn('minor', v)
+            self.assertIn("gitCommit", v)
+            self.assertIn("gitVersion", v)
+            self.assertIn("major", v)
+            self.assertIn("minor", v)

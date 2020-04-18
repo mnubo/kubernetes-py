@@ -20,8 +20,8 @@ class ReplicationController(BaseModel):
     def __init__(self, model=None):
         super(ReplicationController, self).__init__()
 
-        self.kind = 'ReplicationController'
-        self.api_version = 'v1'
+        self.kind = "ReplicationController"
+        self.api_version = "v1"
         self.spec = ReplicationControllerSpec()
         self.status = ReplicationControllerStatus()
 
@@ -31,10 +31,10 @@ class ReplicationController(BaseModel):
     def _build_with_model(self, model=None):
         super(ReplicationController, self).build_with_model(model)
 
-        if 'spec' in model:
-            self.spec = ReplicationControllerSpec(model['spec'])
-        if 'status' in model:
-            self.status = ReplicationControllerStatus(model['status'])
+        if "spec" in model:
+            self.spec = ReplicationControllerSpec(model["spec"])
+        if "status" in model:
+            self.status = ReplicationControllerStatus(model["status"])
 
     # ------------------------------------------------------------------------------------- spec
 
@@ -45,7 +45,7 @@ class ReplicationController(BaseModel):
     @spec.setter
     def spec(self, spec=None):
         if not isinstance(spec, ReplicationControllerSpec):
-            raise SyntaxError('ReplicationController: spec: [ {0} ] is invalid.'.format(spec))
+            raise SyntaxError("ReplicationController: spec: [ {0} ] is invalid.".format(spec))
         self._spec = spec
 
     # ------------------------------------------------------------------------------------- status
@@ -57,7 +57,7 @@ class ReplicationController(BaseModel):
     @status.setter
     def status(self, status=None):
         if not isinstance(status, ReplicationControllerStatus):
-            raise SyntaxError('ReplicationController: status: [ {0} ] is invalid.'.format(status))
+            raise SyntaxError("ReplicationController: status: [ {0} ] is invalid.".format(status))
         self._status = status
 
     # ------------------------------------------------------------------------------------- serialize
@@ -66,7 +66,7 @@ class ReplicationController(BaseModel):
         data = super(ReplicationController, self).serialize()
 
         if self.spec is not None:
-            data['spec'] = self.spec.serialize()
+            data["spec"] = self.spec.serialize()
         if self.status is not None:
-            data['status'] = self.status.serialize()
+            data["status"] = self.status.serialize()
         return data

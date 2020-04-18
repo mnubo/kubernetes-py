@@ -18,10 +18,11 @@ from kubernetes_py.K8sExceptions import NotFoundException
 from kubernetes_py.utils.HttpRequest import HttpRequest
 
 RE_VALID_IP = re.compile(
-    r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')
+    r"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
+)
 
 # if some string starts with a number, extract it in first group
-RE_EXTRACT_VERSION_NUMBER = re.compile('^(\d+)')
+RE_EXTRACT_VERSION_NUMBER = re.compile("^(\d+)")
 
 
 def is_valid_string(target=None):
@@ -83,11 +84,11 @@ def is_valid_ip(ip=None):
 
 def is_reachable(cfg=None):
     try:
-        trimmed = re.sub(r'https?://', '', cfg.api_host)
+        trimmed = re.sub(r"https?://", "", cfg.api_host)
         sock = socket.socket()
         sock.settimeout(0.5)
         if ":" in trimmed:
-            host, port = trimmed.split(':')
+            host, port = trimmed.split(":")
             address = (host, int(port)) if port is not None else (host, 80)
         else:
             host = trimmed
@@ -99,15 +100,15 @@ def is_reachable(cfg=None):
         try:
             req = HttpRequest(
                 host=cfg.api_host,
-                method='GET',
+                method="GET",
                 auth=cfg.auth,
                 cert=cfg.cert,
                 ca_cert=cfg.ca_cert,
                 ca_cert_data=cfg.ca_cert_data,
-                token=cfg.token
+                token=cfg.token,
             )
             r = req.send()
-            return r['success']
+            return r["success"]
 
         except Exception as err:
             return False

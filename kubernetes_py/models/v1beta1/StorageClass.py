@@ -20,8 +20,8 @@ class StorageClass(BaseModel):
     def __init__(self, model=None):
         super(StorageClass, self).__init__()
 
-        self._kind = 'StorageClass'
-        self._api_version = 'storage.k8s.io/v1beta1'
+        self._kind = "StorageClass"
+        self._api_version = "storage.k8s.io/v1beta1"
 
         self._metadata = ObjectMeta()
         self._provisioner = None
@@ -33,10 +33,10 @@ class StorageClass(BaseModel):
     def _build_with_model(self, model=None):
         super(StorageClass, self).build_with_model(model)
 
-        if 'provisioner' in model:
-            self.provisioner = model['provisioner']
-        if 'parameters' in model:
-            self.parameters = model['parameters']
+        if "provisioner" in model:
+            self.provisioner = model["provisioner"]
+        if "parameters" in model:
+            self.parameters = model["parameters"]
 
     # ------------------------------------------------------------------------------------- kind
 
@@ -47,7 +47,7 @@ class StorageClass(BaseModel):
     @kind.setter
     def kind(self, k=None):
         if not is_valid_string(k):
-            raise SyntaxError('StorageClass: kind: [ {} ] is invalid.'.format(k))
+            raise SyntaxError("StorageClass: kind: [ {} ] is invalid.".format(k))
         self._kind = k
 
     # ------------------------------------------------------------------------------------- apiVersion
@@ -59,7 +59,7 @@ class StorageClass(BaseModel):
     @api_version.setter
     def api_version(self, v=None):
         if not is_valid_string(v):
-            raise SyntaxError('StorageClass: api_version: [ {} ] is invalid.'.format(v))
+            raise SyntaxError("StorageClass: api_version: [ {} ] is invalid.".format(v))
         self._api_version = v
 
     # ------------------------------------------------------------------------------------- metadata
@@ -71,7 +71,7 @@ class StorageClass(BaseModel):
     @metadata.setter
     def metadata(self, meta=None):
         if not isinstance(meta, ObjectMeta):
-            raise SyntaxError('StorageClass: metadata: [ {} ] is invalid.'.format(meta))
+            raise SyntaxError("StorageClass: metadata: [ {} ] is invalid.".format(meta))
         self._metadata = meta
 
     # ------------------------------------------------------------------------------------- provisioner
@@ -83,7 +83,7 @@ class StorageClass(BaseModel):
     @provisioner.setter
     def provisioner(self, p=None):
         if not is_valid_string(p):
-            raise SyntaxError('StorageClass: provisioner: [ {} ] is invalid.'.format(p))
+            raise SyntaxError("StorageClass: provisioner: [ {} ] is invalid.".format(p))
         self._provisioner = p
 
     # ------------------------------------------------------------------------------------- parameters
@@ -95,7 +95,7 @@ class StorageClass(BaseModel):
     @parameters.setter
     def parameters(self, p=None):
         if not is_valid_dict(p):
-            raise SyntaxError('StorageClass: parameters: [ {} ] is invalid.'.format(p))
+            raise SyntaxError("StorageClass: parameters: [ {} ] is invalid.".format(p))
         self._parameters = p
 
     # ------------------------------------------------------------------------------------- serialize
@@ -104,7 +104,7 @@ class StorageClass(BaseModel):
         data = super(StorageClass, self).serialize()
 
         if self.provisioner is not None:
-            data['provisioner'] = self.provisioner
+            data["provisioner"] = self.provisioner
         if self.parameters is not None:
-            data['parameters'] = self.parameters
+            data["parameters"] = self.parameters
         return data

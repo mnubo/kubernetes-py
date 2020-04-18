@@ -23,8 +23,8 @@ class DaemonEndpoint(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'Port' in model:
-            self.port = model['Port']
+        if "Port" in model:
+            self.port = model["Port"]
 
     # ------------------------------------------------------------------------------------- port
 
@@ -35,7 +35,7 @@ class DaemonEndpoint(object):
     @port.setter
     def port(self, v):
         if not isinstance(v, int):
-            raise SyntaxError('DaemonEndpoints: port: [ {0} ] is invalid.'.format(v))
+            raise SyntaxError("DaemonEndpoints: port: [ {0} ] is invalid.".format(v))
         self._port = v
 
     # ------------------------------------------------------------------------------------- serialize
@@ -43,5 +43,5 @@ class DaemonEndpoint(object):
     def serialize(self):
         data = {}
         if self.port:
-            data['Port'] = self.port
+            data["Port"] = self.port
         return data

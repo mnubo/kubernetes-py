@@ -21,8 +21,8 @@ class RollbackConfig(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'revision' in model:
-            self.revision = model['revision']
+        if "revision" in model:
+            self.revision = model["revision"]
 
     # ------------------------------------------------------------------------------------- revision
 
@@ -33,7 +33,7 @@ class RollbackConfig(object):
     @revision.setter
     def revision(self, rev=None):
         if not isinstance(rev, int):
-            raise SyntaxError('RollbackConfig: revision: [ {} ] is invalid.'.format(rev))
+            raise SyntaxError("RollbackConfig: revision: [ {} ] is invalid.".format(rev))
         self._revision = rev
 
     # ------------------------------------------------------------------------------------- serialize
@@ -41,5 +41,5 @@ class RollbackConfig(object):
     def serialize(self):
         data = {}
         if self.revision is not None:
-            data['revision'] = self.revision
+            data["revision"] = self.revision
         return data

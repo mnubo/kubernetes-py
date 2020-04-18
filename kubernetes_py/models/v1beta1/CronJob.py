@@ -31,10 +31,10 @@ class CronJob(BaseModel):
     def _build_with_model(self, model=None):
         super(CronJob, self).build_with_model(model)
 
-        if 'spec' in model:
-            self.spec = CronJobSpec(model['spec'])
-        if 'status' in model:
-            self.status = CronJobStatus(model['status'])
+        if "spec" in model:
+            self.spec = CronJobSpec(model["spec"])
+        if "status" in model:
+            self.status = CronJobStatus(model["status"])
 
     # ------------------------------------------------------------------------------------- spec
 
@@ -45,7 +45,7 @@ class CronJob(BaseModel):
     @spec.setter
     def spec(self, spec=None):
         if not isinstance(spec, CronJobSpec):
-            raise SyntaxError('CronJob: spec: [ {} ] is invalid.'.format(spec))
+            raise SyntaxError("CronJob: spec: [ {} ] is invalid.".format(spec))
         self._spec = spec
 
     # ------------------------------------------------------------------------------------- status
@@ -57,7 +57,7 @@ class CronJob(BaseModel):
     @status.setter
     def status(self, status=None):
         if not isinstance(status, CronJobStatus):
-            raise SyntaxError('CronJob: status: [ {} ] is invalid.'.format(status))
+            raise SyntaxError("CronJob: status: [ {} ] is invalid.".format(status))
         self._status = status
 
     # ------------------------------------------------------------------------------------- serialize
@@ -66,7 +66,7 @@ class CronJob(BaseModel):
         data = super(CronJob, self).serialize()
 
         if self.spec is not None:
-            data['spec'] = self.spec.serialize()
+            data["spec"] = self.spec.serialize()
         if self.status is not None:
-            data['status'] = self.status.serialize()
+            data["status"] = self.status.serialize()
         return data

@@ -41,7 +41,7 @@ from kubernetes_py.K8sVolumeMount import K8sVolumeMount
 from kubernetes_py.K8sConfigMap import K8sConfigMap
 
 
-kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
+kubeconfig_fallback = "{0}/.kube/config".format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
 
 
 # --------------------------------------------------------------------------------- reachability
@@ -49,11 +49,11 @@ kubeconfig_fallback = '{0}/.kube/config'.format(os.path.abspath(os.path.dirname(
 
 def is_reachable(cfg=None):
     try:
-        trimmed = re.sub(r'https?://', '', cfg.api_host)
+        trimmed = re.sub(r"https?://", "", cfg.api_host)
         sock = socket.socket()
         sock.settimeout(0.5)
         if ":" in trimmed:
-            host, port = trimmed.split(':')
+            host, port = trimmed.split(":")
             address = (host, int(port)) if port is not None else (host, 80)
         else:
             host = trimmed
@@ -62,15 +62,15 @@ def is_reachable(cfg=None):
         sock.close()
         req = HttpRequest(
             host=cfg.api_host,
-            method='GET',
+            method="GET",
             auth=cfg.auth,
             cert=cfg.cert,
             ca_cert=cfg.ca_cert,
             ca_cert_data=cfg.ca_cert_data,
-            token=cfg.token
+            token=cfg.token,
         )
         r = req.send()
-        return r['success']
+        return r["success"]
 
     except socket.timeout:
         return False
@@ -80,17 +80,17 @@ def is_reachable(cfg=None):
         return False
 
 
-def assert_server_version(api_host=None, major=None, minor=None, type='exact'):
+def assert_server_version(api_host=None, major=None, minor=None, type="exact"):
     try:
         if not api_host:
             return False
         if is_reachable(api_host):
             cfg = K8sConfig(api_host=api_host)
-            obj = K8sObject(config=cfg, obj_type='Pod', name='temp')
+            obj = K8sObject(config=cfg, obj_type="Pod", name="temp")
             v = obj.server_version()
-            if type == 'exact':
-                if int(v['major']) != major or int(v['minor']) != minor:
-                    msg = 'Desired: [ {}.{} ]. Observed: [ {}.{} ].'.format(major, minor, v['major'], v['minor'])
+            if type == "exact":
+                if int(v["major"]) != major or int(v["minor"]) != minor:
+                    msg = "Desired: [ {}.{} ]. Observed: [ {}.{} ].".format(major, minor, v["major"], v["minor"])
                     raise VersionMismatchException(msg)
             return True
         return False
@@ -101,20 +101,21 @@ def assert_server_version(api_host=None, major=None, minor=None, type='exact'):
 
 # --------------------------------------------------------------------------------- detecting api server
 
+
 def _is_api_server(service=None):
     if not isinstance(service, dict):
         return False
-    if 'metadata' not in service:
+    if "metadata" not in service:
         return False
-    if 'labels' not in service['metadata']:
+    if "labels" not in service["metadata"]:
         return False
-    if 'component' not in service['metadata']['labels']:
+    if "component" not in service["metadata"]["labels"]:
         return False
-    if 'provider' not in service['metadata']['labels']:
+    if "provider" not in service["metadata"]["labels"]:
         return False
-    if 'apiserver' != service['metadata']['labels']['component']:
+    if "apiserver" != service["metadata"]["labels"]["component"]:
         return False
-    if 'kubernetes_py' != service['metadata']['labels']['provider']:
+    if "kubernetes_py" != service["metadata"]["labels"]["provider"]:
         return False
     return True
 
@@ -123,10 +124,7 @@ def _is_api_server(service=None):
 def create_component_status(config=None, name=None):
     if config is None:
         config = create_config()
-    obj = K8sComponentStatus(
-        config=config,
-        name=name
-    )
+    obj = K8sComponentStatus(config=config, name=name)
     return obj
 
 
@@ -145,233 +143,162 @@ def create_config():
 def create_deployment(config=None, name=None):
     if config is None:
         config = create_config()
-    obj = K8sDeployment(
-        config=config,
-        name=name
-    )
+    obj = K8sDeployment(config=config, name=name)
     return obj
 
 
 def create_object(config=None, name=None, obj_type=None):
     if config is None:
         config = create_config()
-    obj = K8sObject(
-        config=config,
-        name=name,
-        obj_type=obj_type
-    )
+    obj = K8sObject(config=config, name=name, obj_type=obj_type)
     return obj
 
 
 def create_namespace(config=None, name=None):
     if config is None:
         config = create_config()
-    obj = K8sNamespace(
-        config=config,
-        name=name
-    )
+    obj = K8sNamespace(config=config, name=name)
     return obj
 
 
 def create_node(config=None, name=None):
     if config is None:
         config = create_config()
-    obj = K8sNode(
-        config=config,
-        name=name
-    )
+    obj = K8sNode(config=config, name=name)
     return obj
 
 
 def create_pod(config=None, name=None):
     if config is None:
         config = create_config()
-    obj = K8sPod(
-        config=config,
-        name=name
-    )
+    obj = K8sPod(config=config, name=name)
     return obj
 
 
 def create_rc(config=None, name=None, replicas=0):
     if config is None:
         config = create_config()
-    obj = K8sReplicationController(
-        config=config,
-        name=name,
-        replicas=replicas
-    )
+    obj = K8sReplicationController(config=config, name=name, replicas=replicas)
     return obj
 
 
 def create_rs(config=None, name=None):
     if config is None:
         config = create_config()
-    obj = K8sReplicaSet(
-        config=config,
-        name=name,
-    )
+    obj = K8sReplicaSet(config=config, name=name,)
     return obj
 
 
 def create_secret(config=None, name=None):
     if config is None:
         config = create_config()
-    obj = K8sSecret(
-        config=config,
-        name=name
-    )
+    obj = K8sSecret(config=config, name=name)
     return obj
 
 
 def create_service(config=None, name=None):
     if config is None:
         config = create_config()
-    obj = K8sService(
-        config=config,
-        name=name
-    )
+    obj = K8sService(config=config, name=name)
     return obj
 
 
 def create_volume(name=None, type=None):
-    obj = K8sVolume(
-        name=name,
-        type=type,
-    )
+    obj = K8sVolume(name=name, type=type,)
     return obj
 
 
 def create_volume_mount(name=None, mount_path=None):
-    obj = K8sVolumeMount(
-        name=name,
-        mount_path=mount_path,
-    )
+    obj = K8sVolumeMount(name=name, mount_path=mount_path,)
     return obj
 
 
 def create_pv(config=None, name=None, type=None):
     if config is None:
         config = create_config()
-    obj = K8sPersistentVolume(
-        config=config,
-        name=name,
-        type=type,
-    )
+    obj = K8sPersistentVolume(config=config, name=name, type=type,)
     return obj
 
 
 def create_pvc(config=None, name=None):
     if config is None:
         config = create_config()
-    obj = K8sPersistentVolumeClaim(
-        config=config,
-        name=name
-    )
+    obj = K8sPersistentVolumeClaim(config=config, name=name)
     return obj
 
 
 def create_job(config=None, name=None):
     if config is None:
         config = create_config()
-    obj = K8sJob(
-        config=config,
-        name=name
-    )
+    obj = K8sJob(config=config, name=name)
     return obj
 
 
 def create_cronjob(config=None, name=None):
     if config is None:
         config = create_config()
-    obj = K8sCronJob(
-        config=config,
-        name=name
-    )
+    obj = K8sCronJob(config=config, name=name)
     return obj
 
 
 def create_daemonset(config=None, name=None):
     if config is None:
         config = create_config()
-    obj = K8sDaemonSet(
-        config=config,
-        name=name
-    )
+    obj = K8sDaemonSet(config=config, name=name)
     return obj
 
 
 def create_petset(config=None, name=None):
     if config is None:
         config = create_config()
-    obj = K8sPetSet(
-        config=config,
-        name=name
-    )
+    obj = K8sPetSet(config=config, name=name)
     return obj
 
 
 def create_service_account(config=None, name=None):
     if config is None:
         config = create_config()
-    obj = K8sServiceAccount(
-        config=config,
-        name=name
-    )
+    obj = K8sServiceAccount(config=config, name=name)
     return obj
 
 
 def create_stateful_set(config=None, name=None):
     if config is None:
         config = create_config()
-    obj = K8sStatefulSet(
-        config=config,
-        name=name
-    )
+    obj = K8sStatefulSet(config=config, name=name)
     return obj
 
 
 def create_storage_class(config=None, name=None):
     if config is None:
         config = create_config()
-    obj = K8sStorageClass(
-        config=config,
-        name=name
-    )
+    obj = K8sStorageClass(config=config, name=name)
     return obj
 
 
 def create_hpa(config=None, name=None):
     if config is None:
         config = create_config()
-    obj = K8sHorizontalPodAutoscaler(
-        config=config,
-        name=name
-    )
+    obj = K8sHorizontalPodAutoscaler(config=config, name=name)
     return obj
 
 
 def create_event(config=None, name=None):
     if config is None:
         config = create_config()
-    obj = K8sEvent(
-        config=config,
-        name=name
-    )
+    obj = K8sEvent(config=config, name=name)
     return obj
 
 
 def create_configmap(config=None, name=None):
     if config is None:
         config = create_config()
-    obj = K8sConfigMap(
-        config=config,
-        name=name
-    )
+    obj = K8sConfigMap(config=config, name=name)
     return obj
 
 
 # --------------------------------------------------------------------------------- delete
+
 
 def cleanup_objects():
     config = K8sConfig(kubeconfig=kubeconfig_fallback)
@@ -395,7 +322,7 @@ def cleanup_namespaces():
         while len(_list) > 3:
             for ns in _list:
                 try:
-                    if ns.name not in ['kube-system', 'default', 'kube-public']:
+                    if ns.name not in ["kube-system", "default", "kube-public"]:
                         ns.delete(cascade=True)
                 except NotFoundException:
                     continue
@@ -444,11 +371,11 @@ def cleanup_secrets():
             while len(_list) > 0:
                 for s in _list:
                     try:
-                        if s.type != 'kubernetes.io/service-account-token':
+                        if s.type != "kubernetes.io/service-account-token":
                             s.delete(cascade=True)
-                        if s.type == 'kubernetes.io/service-account-token' and not re.search(r'default', s.name):
+                        if s.type == "kubernetes.io/service-account-token" and not re.search(r"default", s.name):
                             s.delete(cascade=True)
-                        if len(_list) == 1 and re.search(r'default', s.name):
+                        if len(_list) == 1 and re.search(r"default", s.name):
                             raise StopIteration
                     except NotFoundException:
                         continue
@@ -569,7 +496,7 @@ def cleanup_petsets():
         while len(_list) > 0:
             for p in _list:
                 try:
-                    petset = K8sPetSet(config=ref.config, name=p['metadata']['name']).get()
+                    petset = K8sPetSet(config=ref.config, name=p["metadata"]["name"]).get()
                     petset.delete(cascade=True)
                 except NotFoundException:
                     continue
@@ -583,7 +510,7 @@ def cleanup_stateful_sets():
         while len(_list) > 0:
             for p in _list:
                 try:
-                    sset = K8sStatefulSet(config=ref.config, name=p['metadata']['name']).get()
+                    sset = K8sStatefulSet(config=ref.config, name=p["metadata"]["name"]).get()
                     sset.delete(cascade=True)
                 except NotFoundException:
                     continue
@@ -599,9 +526,9 @@ def cleanup_service_accounts():
                 for p in _list:
                     try:
                         name = p.name
-                        if name != 'default':
+                        if name != "default":
                             p.delete(cascade=True)
-                        if len(_list) == 1 and name == 'default':
+                        if len(_list) == 1 and name == "default":
                             raise StopIteration
                     except NotFoundException:
                         continue

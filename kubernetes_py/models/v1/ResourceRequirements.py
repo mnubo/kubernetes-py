@@ -14,7 +14,7 @@ class ResourceRequirements(object):
     http://kubernetes.io/docs/api-reference/v1/definitions/#_v1_resourcerequirements
     """
 
-    VALID_RESOURCES = ['cpu', 'memory', 'storage', 'ephemeral-storage']
+    VALID_RESOURCES = ["cpu", "memory", "storage", "ephemeral-storage"]
 
     def __init__(self, model=None):
         super(ResourceRequirements, self).__init__()
@@ -27,13 +27,13 @@ class ResourceRequirements(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model):
-        if 'requests' in model:
-            self.requests = model['requests']
-        if 'limits' in model:
-            self.limits = model['limits']
+        if "requests" in model:
+            self.requests = model["requests"]
+        if "limits" in model:
+            self.limits = model["limits"]
 
     def _filter(self, data=None):
-        msg = 'ResourceRequirements: data: [ {0} ] is invalid.'.format(data)
+        msg = "ResourceRequirements: data: [ {0} ] is invalid.".format(data)
         if not isinstance(data, dict):
             raise SyntaxError(msg)
         for x in data:
@@ -66,7 +66,7 @@ class ResourceRequirements(object):
     def serialize(self):
         data = {}
         if self.limits:
-            data['limits'] = self.limits
+            data["limits"] = self.limits
         if self.requests:
-            data['requests'] = self.requests
+            data["requests"] = self.requests
         return data

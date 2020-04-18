@@ -30,14 +30,14 @@ class PodSecurityContext(object):
             self._build_with_model(m)
 
     def _build_with_model(self, model=None):
-        if 'fsGroup' in model:
-            self.fs_group = model['fsGroup']
-        if 'runAsNonRoot' in model:
-            self.run_as_non_root = model['runAsNonRoot']
-        if 'runAsUser' in model:
-            self.run_as_user = model['runAsUser']
-        if 'supplementalGroups' in model:
-            self.supplemental_groups = model['supplementalGroups']
+        if "fsGroup" in model:
+            self.fs_group = model["fsGroup"]
+        if "runAsNonRoot" in model:
+            self.run_as_non_root = model["runAsNonRoot"]
+        if "runAsUser" in model:
+            self.run_as_user = model["runAsUser"]
+        if "supplementalGroups" in model:
+            self.supplemental_groups = model["supplementalGroups"]
 
     # ------------------------------------------------------------------------------------- fs group
 
@@ -48,7 +48,7 @@ class PodSecurityContext(object):
     @fs_group.setter
     def fs_group(self, gid=None):
         if not isinstance(gid, int):
-            raise SyntaxError('PodSecurityContext: fs_group: [ {0} ] is invalid.'.format(gid))
+            raise SyntaxError("PodSecurityContext: fs_group: [ {0} ] is invalid.".format(gid))
         self._fs_group = gid
 
     # ------------------------------------------------------------------------------------- run as non root
@@ -60,7 +60,7 @@ class PodSecurityContext(object):
     @run_as_non_root.setter
     def run_as_non_root(self, b=None):
         if not isinstance(b, bool):
-            raise SyntaxError('PodSecurityContext: run_as_non_root: [ {0} ] is invalid.'.format(b))
+            raise SyntaxError("PodSecurityContext: run_as_non_root: [ {0} ] is invalid.".format(b))
         self._run_as_non_root = b
 
     # ------------------------------------------------------------------------------------- run as user
@@ -72,7 +72,7 @@ class PodSecurityContext(object):
     @run_as_user.setter
     def run_as_user(self, uid=None):
         if not isinstance(uid, int):
-            raise SyntaxError('PodSecurityContext: run_as_user: [ {0} ] is invalid.'.format(uid))
+            raise SyntaxError("PodSecurityContext: run_as_user: [ {0} ] is invalid.".format(uid))
         self._run_as_user = uid
 
     # ------------------------------------------------------------------------------------- supplemental groups
@@ -84,7 +84,7 @@ class PodSecurityContext(object):
     @supplemental_groups.setter
     def supplemental_groups(self, gids=None):
         if not is_valid_list(gids, int):
-            raise SyntaxError('PodSecurityContext: supplemental_groups: [ {0} ] is invalid.'.format(gids))
+            raise SyntaxError("PodSecurityContext: supplemental_groups: [ {0} ] is invalid.".format(gids))
         self._supplemental_groups = gids
 
     # ------------------------------------------------------------------------------------- serialize
@@ -92,11 +92,11 @@ class PodSecurityContext(object):
     def serialize(self):
         data = {}
         if self.fs_group is not None:
-            data['fsGroup'] = self.fs_group
+            data["fsGroup"] = self.fs_group
         if self.run_as_non_root is not None:
-            data['runAsNonRoot'] = self.run_as_non_root
+            data["runAsNonRoot"] = self.run_as_non_root
         if self.run_as_user is not None:
-            data['runAsUser'] = self.run_as_user
+            data["runAsUser"] = self.run_as_user
         if self.supplemental_groups is not None:
-            data['supplementalGroups'] = self.supplemental_groups
+            data["supplementalGroups"] = self.supplemental_groups
         return data

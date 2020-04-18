@@ -24,9 +24,9 @@ class NodeSelectorTerm(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'matchExpressions' in model:
+        if "matchExpressions" in model:
             exps = []
-            for e in model['matchExpressions']:
+            for e in model["matchExpressions"]:
                 exp = NodeSelectorRequirement(e)
                 exps.append(exp)
             self.match_expressions = exps
@@ -40,7 +40,7 @@ class NodeSelectorTerm(object):
     @match_expressions.setter
     def match_expressions(self, e=None):
         if not is_valid_list(e, NodeSelectorRequirement):
-            raise SyntaxError('NodeSelectorTerm: match_expressions: [ {} ] is invalid.'.format(e))
+            raise SyntaxError("NodeSelectorTerm: match_expressions: [ {} ] is invalid.".format(e))
         self._match_expressions = e
 
     # ------------------------------------------------------------------------------------- serialize
@@ -52,5 +52,5 @@ class NodeSelectorTerm(object):
             for r in self.match_expressions:
                 req = r.serialize()
                 reqs.append(req)
-            data['matchExpressions'] = reqs
+            data["matchExpressions"] = reqs
         return data

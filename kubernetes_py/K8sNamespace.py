@@ -12,11 +12,7 @@ from kubernetes_py.models.v1.Namespace import Namespace
 
 class K8sNamespace(K8sObject):
     def __init__(self, config=None, name=None):
-        super(K8sNamespace, self).__init__(
-            config=config,
-            name=name,
-            obj_type='Namespace'
-        )
+        super(K8sNamespace, self).__init__(config=config, name=name, obj_type="Namespace")
 
     # -------------------------------------------------------------------------------------  override
 

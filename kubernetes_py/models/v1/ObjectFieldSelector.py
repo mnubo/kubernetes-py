@@ -24,10 +24,10 @@ class ObjectFieldSelector(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'apiVersion' in model:
-            self.api_version = model['apiVersion']
-        if 'fieldPath' in model:
-            self.field_path = model['fieldPath']
+        if "apiVersion" in model:
+            self.api_version = model["apiVersion"]
+        if "fieldPath" in model:
+            self.field_path = model["fieldPath"]
 
     # ------------------------------------------------------------------------------------- apiVersion
 
@@ -38,7 +38,7 @@ class ObjectFieldSelector(object):
     @api_version.setter
     def api_version(self, v=None):
         if not is_valid_string(v):
-            raise SyntaxError('ObjectFieldSelector: api_version: [ {} ] is invalid.'.format(v))
+            raise SyntaxError("ObjectFieldSelector: api_version: [ {} ] is invalid.".format(v))
         self._api_version = v
 
     # ------------------------------------------------------------------------------------- fieldPath
@@ -50,7 +50,7 @@ class ObjectFieldSelector(object):
     @field_path.setter
     def field_path(self, fp=None):
         if not is_valid_string(fp):
-            raise SyntaxError('ObjectFieldSelector: field_path: [ {} ] is invalid.'.format(fp))
+            raise SyntaxError("ObjectFieldSelector: field_path: [ {} ] is invalid.".format(fp))
         self._field_path = fp
 
     # ------------------------------------------------------------------------------------- serialize
@@ -58,7 +58,7 @@ class ObjectFieldSelector(object):
     def serialize(self):
         data = {}
         if self.api_version is not None:
-            data['apiVersion'] = self.api_version
+            data["apiVersion"] = self.api_version
         if self.field_path is not None:
-            data['fieldPath'] = self.field_path
+            data["fieldPath"] = self.field_path
         return data

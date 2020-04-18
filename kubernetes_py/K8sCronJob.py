@@ -23,19 +23,15 @@ class K8sCronJob(K8sObject):
 
     def __init__(self, config=None, name=None):
 
-        temp = K8sObject(config=config, obj_type='Pod', name='temp')
-        _type = 'CronJob'
+        temp = K8sObject(config=config, obj_type="Pod", name="temp")
+        _type = "CronJob"
 
         if config and is_reachable(config):
             v = temp.server_version()
-            if sanitize_version_number(v['major']) == 1 and sanitize_version_number(v['minor']) == 4:
-                _type = 'ScheduledJob'
+            if sanitize_version_number(v["major"]) == 1 and sanitize_version_number(v["minor"]) == 4:
+                _type = "ScheduledJob"
 
-        super(K8sCronJob, self).__init__(
-            config=config,
-            obj_type=_type,
-            name=name
-        )
+        super(K8sCronJob, self).__init__(config=config, obj_type=_type, name=name)
 
         if config is not None and config.pull_secret is not None:
             self.add_image_pull_secrets(config.pull_secret)
@@ -73,8 +69,7 @@ class K8sCronJob(K8sObject):
 
     def add_container(self, container=None):
         if not isinstance(container, K8sContainer):
-            raise SyntaxError(
-                'K8sCronJob.add_container() container: [ {0} ] is invalid.'.format(container))
+            raise SyntaxError("K8sCronJob.add_container() container: [ {0} ] is invalid.".format(container))
 
         containers = self.model.spec.job_template.spec.template.spec.containers
         if containers is None:
@@ -98,8 +93,7 @@ class K8sCronJob(K8sObject):
 
     def add_volume(self, volume=None):
         if not isinstance(volume, K8sVolume):
-            raise SyntaxError(
-                'K8sCronJob.add_volume() volume: [ {0} ] is invalid.'.format(volume))
+            raise SyntaxError("K8sCronJob.add_volume() volume: [ {0} ] is invalid.".format(volume))
 
         volumes = self.model.spec.job_template.spec.template.spec.volumes
         if volume.model not in volumes:
@@ -200,8 +194,7 @@ class K8sCronJob(K8sObject):
     @containers.setter
     def containers(self, containers=None):
         if not is_valid_list(containers, K8sContainer):
-            raise SyntaxError(
-                'K8sCronJob: containers: [ {} ] is invalid.'.format(containers))
+            raise SyntaxError("K8sCronJob: containers: [ {} ] is invalid.".format(containers))
 
         models = []
         for obj in containers:
@@ -220,8 +213,7 @@ class K8sCronJob(K8sObject):
     @container_image.setter
     def container_image(self, tup=None):
         if not isinstance(tup, tuple):
-            raise SyntaxError(
-                'K8sCronJob.container_image() must be a tuple of the form (name, image)')
+            raise SyntaxError("K8sCronJob.container_image() must be a tuple of the form (name, image)")
 
         name, image = tup
         found = list(filter(lambda x: x.name == name, self.containers))
@@ -241,8 +233,10 @@ class K8sCronJob(K8sObject):
     def dns_policy(self, policy=None):
         if policy not in self.model.spec.job_template.spec.template.spec.VALID_DNS_POLICIES:
             raise SyntaxError(
-                'K8sJob: dns_policy: [ {} ] is invalid, expected [ {} ].'.format(
-                    policy, self.model.spec.job_template.spec.template.spec.VALID_DNS_POLICIES))
+                "K8sJob: dns_policy: [ {} ] is invalid, expected [ {} ].".format(
+                    policy, self.model.spec.job_template.spec.template.spec.VALID_DNS_POLICIES
+                )
+            )
 
         self.model.spec.job_template.spec.template.spec.dns_policy = policy
 
@@ -264,8 +258,7 @@ class K8sCronJob(K8sObject):
 
     @last_schedule_time.setter
     def last_schedule_time(self, t=None):
-        raise NotImplementedError(
-            'K8sCronJob: last_schedule_time is read-only.')
+        raise NotImplementedError("K8sCronJob: last_schedule_time is read-only.")
 
     # -------------------------------------------------------------------------------------  active
 
@@ -275,8 +268,7 @@ class K8sCronJob(K8sObject):
 
     @active.setter
     def active(self, a=None):
-        raise NotImplementedError(
-            "K8sCronJob: active is read-only.")
+        raise NotImplementedError("K8sCronJob: active is read-only.")
 
     # -------------------------------------------------------------------------------------  pod
 
@@ -290,8 +282,7 @@ class K8sCronJob(K8sObject):
 
     @pod.setter
     def pod(self, p=None):
-        raise NotImplementedError(
-            'K8sCronjob: pod is read-only.')
+        raise NotImplementedError("K8sCronjob: pod is read-only.")
 
     # -------------------------------------------------------------------------------------  pod labels
 
@@ -302,7 +293,6 @@ class K8sCronJob(K8sObject):
     @pod_labels.setter
     def pod_labels(self, labels=None):
         self.model.spec.job_template.spec.template.metadata.labels = labels
-
 
     # -------------------------------------------------------------------------------------  image pull secrets
 
@@ -336,7 +326,8 @@ class K8sCronJob(K8sObject):
         if len(self.active):
             raise CronJobAlreadyRunningException(
                 "K8sCronJob.run() failed: CronJob: [ {} ] "
-                "has [ {} ] active Jobs currently.".format(self.name, len(self.active)))
+                "has [ {} ] active Jobs currently.".format(self.name, len(self.active))
+            )
 
         self.suspend = True
         self.update()
@@ -348,7 +339,7 @@ class K8sCronJob(K8sObject):
         try:
             pod.create()
             start_time = time.time()
-            while pod.phase not in ['Succeeded', 'Failed']:
+            while pod.phase not in ["Succeeded", "Failed"]:
                 pod.get()
                 time.sleep(2)
                 self._check_timeout(start_time)
@@ -366,5 +357,4 @@ class K8sCronJob(K8sObject):
             return
         elapsed_time = time.time() - start_time
         if elapsed_time >= self.POD_RUN_WAIT_TIMEOUT_SECONDS:  # timeout
-            raise TimedOutException(
-                "Timed out running one-off CronJob: [ {} ]".format(self.name))
+            raise TimedOutException("Timed out running one-off CronJob: [ {} ]".format(self.name))

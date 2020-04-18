@@ -12,13 +12,8 @@ from dateutil.parser import parse
 
 
 class K8sEvent(K8sObject):
-
     def __init__(self, config=None, name=None):
-        super(K8sEvent, self).__init__(
-            config=config,
-            name=name,
-            obj_type='Event'
-        )
+        super(K8sEvent, self).__init__(config=config, name=name, obj_type="Event")
 
     def create(self):
         raise NotImplementedError("K8sEvent: cannot create events this way.")

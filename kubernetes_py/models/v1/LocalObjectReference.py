@@ -10,7 +10,6 @@ from kubernetes_py.utils import is_valid_string
 
 
 class LocalObjectReference(object):
-
     def __init__(self, model=None):
         super(LocalObjectReference, self).__init__()
 
@@ -20,8 +19,8 @@ class LocalObjectReference(object):
             self._build_with_model(model)
 
     def _build_with_model(self, model=None):
-        if 'name' in model:
-            self.name = model['name']
+        if "name" in model:
+            self.name = model["name"]
 
     # ------------------------------------------------------------------------------------- name
 
@@ -32,7 +31,7 @@ class LocalObjectReference(object):
     @name.setter
     def name(self, n=None):
         if not is_valid_string(n):
-            raise SyntaxError('LocalObjectReference: name: [ {} ] is invalid.'.format(n))
+            raise SyntaxError("LocalObjectReference: name: [ {} ] is invalid.".format(n))
         self._name = n
 
     # ------------------------------------------------------------------------------------- serialize
@@ -40,5 +39,5 @@ class LocalObjectReference(object):
     def serialize(self):
         data = {}
         if self.name is not None:
-            data['name'] = self.name
+            data["name"] = self.name
         return data
