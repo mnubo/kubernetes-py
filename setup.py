@@ -5,14 +5,6 @@ try:
 except ImportError:
     from distutils.core import setup
 
-# See https://github.com/pybuilder/pybuilder/issues/56
-del os.link
-
-# install_reqs = parse_requirements(os.path.abspath(__file__).replace('setup.py', 'requirements.txt'),
-#                                   session=PipSession())
-# reqs = [str(ir.req) for ir in install_reqs]
-
-
 def version():
     with open(os.path.abspath(__file__).replace('setup.py', 'version.meta'), 'r') as v:
         return v.read().replace('\n', '')
