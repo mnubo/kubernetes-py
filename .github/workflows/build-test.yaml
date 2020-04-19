@@ -50,7 +50,8 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: github.repository == 'mnubo/kubernetes-py' && github.event_name == 'push' && github.ref == 'master'
+    # if: github.repository == 'mnubo/kubernetes-py' && github.event_name == 'push' && github.ref == 'master'
+    if: github.event_name == 'push' && github.ref == 'master'
     steps:
     - uses: actions/checkout@v2
     - run: |
@@ -66,6 +67,7 @@ jobs:
         pipenv install --dev --system --ignore-pipfile
     - name: Prepare release
       run: |
+        env
         remote_repo="https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
         git config http.sslVerify false
         git config user.name "GitHub Actions CI/CD"
