@@ -33,9 +33,10 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Create KinD cluster
+      run: |
+        kind/manage-cluster.sh -c
     - name: Test with nose
-      env:
-        TRAVIS_SKIP_SERVER_VERSION: 1
       run: |
         nosetests --with-coverage --cover-package=kubernetes_py --cover-xml-file=coverage-${{ matrix.python-version }}.xml --with-xunit --xunit-file=nosetests-${{ matrix.python-version }}.xml
         if [ -n "${COVERALLS_REPO_TOKEN}" ]; then
@@ -47,6 +48,9 @@ jobs:
       with:
         name: nosetest-results-${{ matrix.python-version }}
         path: nosetests-${{ matrix.python-version }}.xml
+    - name: Delete KinD cluster
+      run: |
+        kind/manage-cluster.sh -d
   release:
     needs: build
     runs-on: ubuntu-latest
