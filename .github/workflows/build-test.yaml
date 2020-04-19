@@ -10,6 +10,7 @@ jobs:
         python-version: [3.6, 3.7, 3.8]
     steps:
     - uses: actions/checkout@v2
+    - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
       with:
@@ -22,6 +23,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install pipenv==2018.11.26
         pipenv install --dev --system --ignore-pipfile
+        pipenv install --system
     - name: Code formatting with black
       run: |
         black -l 127 --check --diff .
@@ -51,6 +53,7 @@ jobs:
     if: github.repository == 'mnubo/kubernetes-py' && github.event_name == 'push' && github.ref == 'master'
     steps:
       - uses: actions/checkout@v2
+      - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
