@@ -1,4 +1,4 @@
-name: Python build and tests
+name: Python CI
 
 on: [push, pull_request]
 
@@ -64,7 +64,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install pipenv==2018.11.26
         pipenv install --dev --system --ignore-pipfile
-    - name: Prepare release
+    - name: Create and publish release
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.pypi_password }}
       run: |
         remote_repo="https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
         git config http.sslVerify false
@@ -74,3 +77,6 @@ jobs:
         next_version=$(python -m version_query -i .)
         git tag -a -m "chore(release): Releasing version ${next_version}" "${next_version}" "${GITHUB_SHA}"
         git push writeorigin "${next_version}"
+        python setup.py sdist bdist_wheel
+        twine upload dist/*
+     
