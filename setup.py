@@ -1,11 +1,11 @@
-from version_query import predict_version_str
+import version_query
 
 try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
 
-my_version = predict_version_str()
+my_version = version_query.query_version_str()
 
 setup(
     name="kubernetes-py",

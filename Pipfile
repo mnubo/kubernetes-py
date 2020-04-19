@@ -11,6 +11,9 @@ version-query = "*"
 flake8 = "*"
 black = "*"
 coveralls = "*"
+setuptools = "*"
+wheel = "*"
+twine = "*"
 
 [packages]
 kubernetes-py = {editable = true,path = "."}
