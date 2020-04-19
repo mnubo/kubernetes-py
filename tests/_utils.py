@@ -41,7 +41,7 @@ from kubernetes_py.K8sVolumeMount import K8sVolumeMount
 from kubernetes_py.K8sConfigMap import K8sConfigMap
 
 
-kubeconfig_fallback = "{0}/.kube/config".format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
+kubeconfig_fallback = "{0}/../kind/kubeconfig.yaml".format(os.path.abspath(os.path.dirname(os.path.realpath(__file__))))
 
 
 # --------------------------------------------------------------------------------- reachability
