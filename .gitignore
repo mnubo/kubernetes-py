@@ -79,3 +79,6 @@ target/
 
 # VS Code
 .vscode
+
+# Kind kubeconfig file
+kind/kubeconfig.yaml

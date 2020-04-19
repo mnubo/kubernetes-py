@@ -182,9 +182,11 @@ class K8sConfig(object):
         self.clusters = dotconf.get("clusters")
         self.contexts = dotconf.get("contexts")
         self.current_context = dotconf.get("current-context")
-        self.current_context_dict = [
-            context.get("context") for context in self.contexts if context.get("name") == self.current_context
-        ][0]
+
+        if self.contexts:
+            self.current_context_dict = [
+                context.get("context") for context in self.contexts if context.get("name") == self.current_context
+            ][0]
         self.preferences = dotconf.get("preferences", "")
         self.users = dotconf.get("users")
         self.version = dotconf.get("apiVersion")

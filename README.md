@@ -6,49 +6,23 @@
 [![Build Status](https://github.com/mnubo/kubernetes-py/workflows/Python%20CI/badge.svg?branch=master&event=push)](https://github.com/mnubo/kubernetes-py/)
 [![Coverage Status](https://coveralls.io/repos/github/mnubo/kubernetes-py/badge.svg?branch=master)](https://coveralls.io/github/mnubo/kubernetes-py?branch=master)
 
+- - -
+***WARNING***
+
+The package has been renamed to kubernetes_py in version 1.10.7.1. Please update your code accordingly. This was based on a request backed by several users.
+- - - 
+
+## Quick Links
+- [Installation](#Installation)
+- [Usage](#Usage)
+- [Development](#Development)
+
+## Description
 Kubernetes API bindings in Python.
 
-```
-**************************************** WARNING **************************************** 
-
-The package has been renamed to kubernetes_py in version 1.10.7.1. Please update your 
-code accordingly. This was based on a request backed by several users.
-
-*****************************************************************************************
-```
-
-Run on our own on-prem and AWS Kubernetes clusters at `1.10.5`
-
-Also unit tested on :
-* Minikube at `1.10.7`
-* Google GKE clusters at `1.6.4`
-
-Currently supported Kubernetes objects:
-
-* ~/.kube/config
-* ComponentStatus
-* Container
-* CronJob
-* DaemonSet
-* Deployment
-* HorizontalPodAutoscalers
-* Job
-* Namespace
-* Node
-* PersistentVolume
-* PersistentVolumeClaim
-* PetSet
-* Pod
-* ReplicaSet
-* ReplicationController
-* Secret
-* Service
-* ServiceAccount
-* StatefulSet
-* StorageClass
-* Volume
-* VolumeMount
-
+Tested on:
+- Kind with Kubernetes version:
+  - `1.14.10`
 
 ## Installation
 
@@ -60,7 +34,6 @@ pip install kubernetes-py
 ## Usage
 
 Find some code snippets below to help understand how to use this module.
-
 
 ### Configuration
 
@@ -478,29 +451,39 @@ Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
     pod.create()
 
 
-## Unit tests
+## Development
+
+### Setup
+
+1. Create the virtual environment for your IDE to use.
+```
+pipenv install --dev --ignore-pipfile
+```
+
+2. Configure your IDE to use the virtual environment Pipenv created as the project interpreter.
+
+### Unit testing
 
 The unit tests that require making remote API calls check if there is a reachable API server; if no such endpoint
-is found, the test is skipped. 
+is found, the test is skipped. To help with testing against the API server, We are now using KinD (Kubernetes in Docker).
 
-It is recommended to begin testing things out against `minikube`. However, be aware
-that minikube does not support the entire feature set of a full Kubernetes install.
+1. Get into the Python virtual environment:
+```
+pipenv shell
+```
 
+2. Please start your local cluster with:
+```
+kind/manage-cluster.sh -c
+export KUBECONFIG=$(pwd)/kind/kubeconfig.yaml
+```
+
+
+3. Then you can run the unit tests with the following command:
 ```
 $ nosetests --with-coverage --cover-package=kubernetes_py
 ```
-
-Please note that when using minikube, and Kubernetes in general, the default hosts are as below:
-
-* `kubernetes`
-* `kubernetes.default`
-* `kubernetes.default.svc`
-* `kubernetes.default.svc.cluster.local`
-
-For certificate validation to succeed, you should edit your `~/.kube/config` to address one of the hosts, eg.:
-
-    - cluster:
-        certificate-authority: /Users/kubernetes/.minikube/ca.crt
-        server: https://kubernetes:8443
-
-Finally, add an entry to your `/etc/hosts` file for the host alias you choose.
+4. When you are done and want to cleanup your local cluster, you can run:
+```
+kind/manage-cluster.sh -d
+```
