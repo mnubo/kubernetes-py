@@ -315,14 +315,12 @@ Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
     pvc.create()
     
     vol = K8sVolume(
-        config=cfg_cert,
         name="my-volume",
         type="persistentVolumeClaim"
     )
     vol.claim_name = pvc.name
     
     mount = K8sVolumeMount(
-        config=cfg_cert,
         name=vol.name,
         mount_path="/path/on/container"
     )
@@ -466,7 +464,6 @@ Pod creation will timeout waiting for readiness if not on GCE; unschedulable.
     from kubernetes_py import K8sVolume
     
     volume = K8sVolume(
-        config=cfg_cert,
         name='aws-volume',
         type='awsElasticBlockStore',
         mount_path='/path/inside/container'
